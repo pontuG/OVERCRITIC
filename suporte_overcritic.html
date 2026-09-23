@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERCRITIC - Suporte & Sugestões</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Supabase SDK e Conexão -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+    <style>
+        :root {
+            --bg-color: #07090f;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #9d4edd;
+            --card-bg: rgba(13, 17, 27, 0.75);
+            --glass-border: rgba(0, 240, 255, 0.16);
+            --text-main: #f0f4fc;
+            --text-muted: #8b9bb4;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --status-open: #f59e0b;
+            --status-review: #3b82f6;
+            --status-resolved: #10b981;
+        }
+
+        body.light-mode {
+            --bg-color: #d2d6df;
+            --accent-cyan: #c51b29;
+            --accent-purple: #800f1c;
+            --card-bg: rgba(220, 224, 232, 0.88);
+            --glass-border: rgba(0, 0, 0, 0.16);
+            --text-main: #0e121a;
+            --text-muted: #4a5568;
+            --status-open: #d97706;
+            --status-review: #2563eb;
+            --status-resolved: #059669;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(157, 78, 221, 0.05) 0%, transparent 40%);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-mode {
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(197, 27, 41, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(128, 15, 28, 0.05) 0%, transparent 40%);
+        }
+
+        /* ═══════════════════════════════════
+           SIDEBAR (NAVEGAÇÃO GLOBAL)
+        ═══════════════════════════════════ */
+        .sidebar {
+            width: 80px;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        body.light-mode .sidebar {
+            background: #d8dde6;
+            border-right: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        .brand-icon {
+            margin-bottom: 35px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .brand-icon:hover { transform: scale(1.1); }
+        .brand-icon img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            object-fit: cover;
+        }
+        .brand-icon span {
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            font-weight: 800;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 1.35rem;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .nav-item:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .nav-item.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+        body.light-mode .nav-item.active {
+            background: rgba(197, 27, 41, 0.12);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(197, 27, 41, 0.2);
+        }
+
+        .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 65px;
+            background: rgba(10, 15, 25, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            transform: translateX(-10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        body.light-mode .nav-item::after {
+            background: #fff;
+            color: #0e121a;
+            border-color: rgba(0, 0, 0, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        .nav-item:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .sidebar-user {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-align: center;
+            padding: 4px 6px;
+            border-radius: 6px;
+            border: 1px dashed var(--glass-border);
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ═══════════════════════════════════
+           CONTEÚDO PRINCIPAL
+        ═══════════════════════════════════ */
+        .main-content {
+            margin-left: 80px;
+            flex: 1;
+            padding: 35px 40px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 1300px;
+            margin-right: auto;
+            width: calc(100% - 80px);
+        }
+
+        /* HERO HEADER */
+        .support-hero {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px 35px;
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+        body.light-mode .support-hero {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        .support-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+        }
+
+        .hero-left {
+            max-width: 750px;
+        }
+        .hero-tag {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+        body.light-mode .hero-tag {
+            background: rgba(197, 27, 41, 0.1);
+            border-color: rgba(197, 27, 41, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+        .hero-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .hero-stats-row {
+            display: flex;
+            gap: 14px;
+        }
+        .hero-stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            padding: 12px 18px;
+            border-radius: 14px;
+            text-align: center;
+            min-width: 105px;
+        }
+        body.light-mode .hero-stat-card {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+        .stat-card-num {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: var(--accent-cyan);
+        }
+        .stat-card-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* ═══════════════════════════════════
+           ABAS DE NAVEGAÇÃO INTERNA
+        ═══════════════════════════════════ */
+        .tabs-container {
+            display: flex;
+            gap: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .tabs-container::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 11px 20px;
+            border-radius: 12px;
+            font-family: var(--font-family);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(157, 78, 221, 0.18));
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+        body.light-mode .tab-btn {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+        body.light-mode .tab-btn.active {
+            background: rgba(197, 27, 41, 0.12);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(197, 27, 41, 0.18);
+        }
+
+        .tab-badge {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--accent-cyan);
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 8px;
+            font-weight: 800;
+        }
+        body.light-mode .tab-badge {
+            background: rgba(197, 27, 41, 0.18);
+            color: var(--accent-cyan);
+        }
+
+        /* ═══════════════════════════════════
+           SEÇÃO 1: FORMULÁRIO DE ENVIO
+        ═══════════════════════════════════ */
+        .form-grid-layout {
+            display: grid;
+            grid-template-columns: 2fr 1.1fr;
+            gap: 24px;
+        }
+
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px;
+            backdrop-filter: blur(12px);
+        }
+        body.light-mode .form-card {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+        }
+
+        .card-header-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .card-header-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        body.light-mode .form-group input,
+        body.light-mode .form-group select,
+        body.light-mode .form-group textarea {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.18);
+            color: #0e121a;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn-submit-ticket {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: #000;
+            font-family: var(--font-family);
+            font-weight: 800;
+            font-size: 0.95rem;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+        }
+        .btn-submit-ticket:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.5);
+        }
+        body.light-mode .btn-submit-ticket {
+            color: #fff;
+        }
+
+        /* CARD DE INFORMAÇÕES LATERAIS */
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: fit-content;
+        }
+        body.light-mode .info-card {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+        }
+        .info-step-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+        .step-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        body.light-mode .step-badge {
+            background: rgba(197, 27, 41, 0.12);
+            color: var(--accent-cyan);
+        }
+        .step-content h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .step-content p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ═══════════════════════════════════
+           LISTAGEM DE CHAMADOS & PAINEL ADMIN
+        ═══════════════════════════════════ */
+        .tickets-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ticket-item {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 20px 24px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .ticket-item:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+        body.light-mode .ticket-item {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+        }
+
+        .ticket-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .ticket-meta-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ticket-badge-type {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+        }
+        .badge-type-suggestion {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34d399;
+        }
+        .badge-type-bug {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+        .badge-type-support {
+            background: rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+        }
+
+        .ticket-badge-priority {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+        .priority-alta, .priority-urgente {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+        .priority-media {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+        .priority-baixa {
+            background: rgba(107, 114, 128, 0.15);
+            color: #9ca3af;
+            border: 1px solid rgba(107, 114, 128, 0.35);
+        }
+
+        .ticket-status-pill {
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-open {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+        .status-review {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        .status-resolved {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .ticket-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        .ticket-message {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+        }
+        body.light-mode .ticket-message {
+            background: #eaedf4;
+            color: #2d3748;
+        }
+
+        .ticket-admin-reply {
+            background: rgba(0, 240, 255, 0.06);
+            border-left: 3px solid var(--accent-cyan);
+            border-radius: 0 12px 12px 0;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        body.light-mode .ticket-admin-reply {
+            background: rgba(197, 27, 41, 0.06);
+            border-left-color: var(--accent-cyan);
+        }
+        .admin-reply-header {
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .admin-reply-text {
+            font-size: 0.88rem;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .ticket-footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--glass-border);
+            padding-top: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .admin-actions-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .btn-action-small {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-action-small:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        .btn-action-danger:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* TOAST NOTIFICAÇÃO */
+        .toast-notify {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(10, 15, 25, 0.95);
+            border: 1px solid var(--accent-cyan);
+            color: var(--text-main);
+            padding: 14px 22px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2000;
+        }
+        .toast-notify.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ═══════════════════════════════════
+           RESPONSIVIDADE (MOBILE & TABLETS)
+        ═══════════════════════════════════ */
+        @media (max-width: 900px) {
+            .form-grid-layout {
+                grid-template-columns: 1fr;
+            }
+            .hero-stats-row {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: 65px;
+                bottom: 0;
+                top: auto;
+                left: 0;
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 0 10px;
+                border-right: none;
+                border-top: 1px solid var(--glass-border);
+            }
+            .brand-icon, .sidebar-user, .sidebar-bottom { display: none; }
+            .nav-links {
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+                gap: 0;
+            }
+            .nav-item {
+                width: 44px;
+                height: 44px;
+                font-size: 1.25rem;
+            }
+            .nav-item::after { display: none !important; }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px 16px 85px;
+                gap: 18px;
+            }
+
+            .support-hero {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 22px 18px;
+                gap: 16px;
+            }
+            .hero-title {
+                font-size: 1.6rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        if (localStorage.getItem('overcritic_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- ══════ SIDEBAR (NAVEGAÇÃO GLOBAL) ══════ -->
+    <aside class="sidebar">
+        <a href="conta_login.html" class="brand-icon" title="Minha Conta / Perfil">
+            <img src="assets/overcritic_icon.png" alt="Overcritic Logo">
+            <span>HQ</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item" data-tooltip="Início">🏠</a>
+            <a href="adicionar_jogos.html" class="nav-item" data-tooltip="Críticas de Jogos">🎮</a>
+            <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
+            <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
+            <a href="descobrir_titulos.html" class="nav-item" data-tooltip="Descobrir Títulos">🍿</a>
+            <a href="adicionar_platinas.html" class="nav-item" data-tooltip="Platinas & Troféus">🏆</a>
+            <a href="suporte_overcritic.html" class="nav-item active" data-tooltip="Suporte & Sugestões">💡</a>
+            <a href="conta_login.html" class="nav-item" data-tooltip="Minha Conta / Perfil">👤</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button id="themeToggleBtn" class="nav-item" data-tooltip="Modo Claro/Escuro" style="margin-bottom: 8px;">🌓</button>
+            <button id="loginBtn" class="nav-item" data-tooltip="Fazer Login / Criar Conta">🔑</button>
+            <button id="logoutBtn" class="nav-item" data-tooltip="Sair da Conta" style="display: none;">🚪</button>
+            <div class="sidebar-user" id="currentUser" style="cursor: pointer;" title="Acessar Perfil" onclick="window.location.href='conta_login.html?tab=perfil'">VISITANTE</div>
+        </div>
+    </aside>
+
+    <!-- ══════ CONTEÚDO PRINCIPAL ══════ -->
+    <main class="main-content">
+
+        <!-- CABEÇALHO HERO -->
+        <header class="support-hero">
+            <div class="hero-left">
+                <div class="hero-tag">💡 CANAL DIRETO COM O ADMIN</div>
+                <h1 class="hero-title">Suporte & Sugestões</h1>
+                <p class="hero-desc">
+                    Tem uma ideia para melhorar o Overcritic, encontrou um bug ou precisa de ajuda técnica? Envie sua mensagem diretamente para o Administrador do sistema.
+                </p>
+            </div>
+            <div class="hero-stats-row">
+                <div class="hero-stat-card">
+                    <div class="stat-card-num" id="statTotalTickets">0</div>
+                    <div class="stat-card-label">Mensagens</div>
+                </div>
+                <div class="hero-stat-card">
+                    <div class="stat-card-num" id="statOpenTickets" style="color: var(--status-open);">0</div>
+                    <div class="stat-card-label">Pendentes</div>
+                </div>
+                <div class="hero-stat-card">
+                    <div class="stat-card-num" id="statResolvedTickets" style="color: var(--status-resolved);">0</div>
+                    <div class="stat-card-label">Resolvidos</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ABAS DE NAVEGAÇÃO INTERNA -->
+        <div class="tabs-container">
+            <button class="tab-btn active" id="tabNewTicket" onclick="alternarAba('novo')">
+                ✍️ Enviar Nova Mensagem
+            </button>
+            <button class="tab-btn" id="tabMyTickets" onclick="alternarAba('meus')">
+                📨 Minhas Mensagens Enviadas <span class="tab-badge" id="myTicketsBadge">0</span>
+            </button>
+            <button class="tab-btn" id="tabAdminPanel" onclick="alternarAba('admin')">
+                👑 Painel do Administrador (Admin) <span class="tab-badge" id="adminTicketsBadge">0</span>
+            </button>
+        </div>
+
+        <!-- ABA 1: FORMULÁRIO DE ENVIO -->
+        <section id="sectionNewTicket" class="form-grid-layout">
+            <div class="form-card">
+                <div class="card-header-line">
+                    <div class="card-header-title">
+                        <span>📝 Formulário de Mensagem Direta</span>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Destinatário: <strong style="color: var(--accent-cyan);">Admin (pontuG)</strong></span>
+                </div>
+
+                <form id="supportForm" onsubmit="enviarChamado(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticketType">Tipo de Solicitação *</label>
+                            <select id="ticketType" required>
+                                <option value="Sugestão de Melhoria">💡 Sugestão de Melhoria</option>
+                                <option value="Reportar Bug">🐛 Reportar Bug / Falha</option>
+                                <option value="Dúvida & Suporte">❓ Dúvida & Suporte Técnico</option>
+                                <option value="Parceria / Outros">🤝 Parceria / Outros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticketPriority">Nível de Importância *</label>
+                            <select id="ticketPriority" required>
+                                <option value="Baixa">🟢 Baixa (Ideia futura)</option>
+                                <option value="Média" selected>🟡 Média (Melhoria geral)</option>
+                                <option value="Alta">🟠 Alta (Impacto na experiência)</option>
+                                <option value="Urgente">🔥 Urgente (Erro que impede o uso)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticketSection">Página ou Área Relacionada</label>
+                            <select id="ticketSection">
+                                <option value="Geral da Plataforma">🌐 Geral da Plataforma</option>
+                                <option value="Críticas de Jogos">🎮 Críticas de Jogos (adicionar_jogos)</option>
+                                <option value="Descobrir Jogos">🪐 Descobrir Jogos (descobrir_jogos)</option>
+                                <option value="Filmes & Séries">🎬 Filmes & Séries (adicionar_midias)</option>
+                                <option value="Descobrir Títulos">🍿 Descobrir Títulos (descobrir_titulos)</option>
+                                <option value="Platinas & Troféus">🏆 Platinas & Troféus (adicionar_platinas)</option>
+                                <option value="Design & Visual">🎨 Design / Cores / Modo Claro & Escuro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticketAuthor">Seu Nome / Usuário</label>
+                            <input type="text" id="ticketAuthor" readonly placeholder="Carregando usuário...">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ticketSubject">Assunto / Título Resumido *</label>
+                        <input type="text" id="ticketSubject" placeholder="Ex: Adicionar filtro por ano de lançamento no Descobrir Jogos" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ticketMessage">Mensagem / Detalhes da Sugestão ou Problema *</label>
+                        <textarea id="ticketMessage" rows="6" placeholder="Descreva com o máximo de detalhes o que você gostaria de ver implementado ou como reproduzir o erro que encontrou..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit-ticket">
+                        🚀 ENVIAR MENSAGEM PARA O ADMIN
+                    </button>
+                </form>
+            </div>
+
+            <!-- INFORMAÇÕES LATERAIS -->
+            <div class="info-card">
+                <div class="card-header-title">
+                    <span>⚡ Como Funciona?</span>
+                </div>
+                <div class="info-step-item">
+                    <div class="step-badge">1</div>
+                    <div class="step-content">
+                        <h4>Envio Instantâneo</h4>
+                        <p>Sua mensagem é gravada e direcionada diretamente para a caixa de entrada do Admin (pontuG).</p>
+                    </div>
+                </div>
+                <div class="info-step-item">
+                    <div class="step-badge">2</div>
+                    <div class="step-content">
+                        <h4>Análise e Priorização</h4>
+                        <p>O Administrador avalia as ideias mais pedidas para incluí-las nas próximas atualizações do Overcritic.</p>
+                    </div>
+                </div>
+                <div class="info-step-item">
+                    <div class="step-badge">3</div>
+                    <div class="step-content">
+                        <h4>Acompanhe o Status</h4>
+                        <p>Você pode conferir a resposta do Admin na aba <strong>Minhas Mensagens Enviadas</strong> a qualquer momento.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: MINHAS MENSAGENS -->
+        <section id="sectionMyTickets" style="display: none;">
+            <div class="form-card">
+                <div class="card-header-line">
+                    <div class="card-header-title">
+                        <span>📨 Suas Mensagens Enviadas</span>
+                    </div>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);" id="myTicketsCountDesc">0 chamados</span>
+                </div>
+                <div class="tickets-container" id="myTicketsList">
+                    <!-- Renderizado dinamicamente via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: PAINEL DO ADMINISTRADOR -->
+        <section id="sectionAdminPanel" style="display: none;">
+            <div class="form-card">
+                <div class="card-header-line">
+                    <div class="card-header-title">
+                        <span>👑 Caixa de Entrada do Administrador</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="adminFilterStatus" onchange="renderizarChamadosAdmin()" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-main);">
+                            <option value="todos">Todos os Status</option>
+                            <option value="Aberto">Apenas Abertos</option>
+                            <option value="Em Análise">Apenas Em Análise</option>
+                            <option value="Resolvido">Apenas Resolvidos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tickets-container" id="adminTicketsList">
+                    <!-- Renderizado dinamicamente via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- TOAST NOTIFICAÇÃO -->
+    <div id="toastNotify" class="toast-notify">
+        <span id="toastIcon">💡</span>
+        <span id="toastMsg">Mensagem enviada com sucesso!</span>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════
+           BANCO DE DADOS LOCAL DE CHAMADOS
+        ═══════════════════════════════════ */
+        const STORAGE_TICKETS_KEY = 'overcritic_suporte_tickets';
+
+        function obterChamadosSalvos() {
+            const data = localStorage.getItem(STORAGE_TICKETS_KEY);
+            if (!data) {
+                // Chamados de demonstração caso esteja vazio
+                const demo = [
+                    {
+                        id: 1718000001,
+                        tipo: "Sugestão de Melhoria",
+                        assunto: "Adicionar modo tela cheia para capas no Descobrir Jogos",
+                        mensagem: "Acho que seria incrível podermos clicar na capa e abrir em um visualizador maior com a sinopse do jogo.",
+                        prioridade: "Média",
+                        secao: "Descobrir Jogos",
+                        autor: "pontuG",
+                        data: "22/09/2026 21:15",
+                        status: "Resolvido",
+                        respostaAdmin: "Excelente ideia! Já implementamos capas em alta definição com botões de lojas e avaliação rápida."
+                    },
+                    {
+                        id: 1718000002,
+                        tipo: "Sugestão de Melhoria",
+                        assunto: "Integração com lojas de consoles (PlayStation e Xbox)",
+                        mensagem: "Seria muito útil termos links para ver preços nas lojas da PlayStation e da Microsoft, além da Steam.",
+                        prioridade: "Alta",
+                        secao: "Descobrir Jogos",
+                        autor: "PlayerOne",
+                        data: "22/09/2026 22:40",
+                        status: "Resolvido",
+                        respostaAdmin: "Funcionalidade finalizada! Agora todos os jogos contam com o botão 'Onde Jogar' com busca oficial na PS Store, Xbox Store e Nintendo eShop."
+                    }
+                ];
+                localStorage.setItem(STORAGE_TICKETS_KEY, JSON.stringify(demo));
+                return demo;
+            }
+            return JSON.parse(data) || [];
+        }
+
+        function salvarChamados(lista) {
+            localStorage.setItem(STORAGE_TICKETS_KEY, JSON.stringify(lista));
+            atualizarEstatisticas();
+        }
+
+        /* ═══════════════════════════════════
+           INICIALIZAÇÃO E AUTENTICAÇÃO
+        ═══════════════════════════════════ */
+        let abaAtiva = 'novo';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            verificarTemaELogin();
+            atualizarEstatisticas();
+            renderizarMinhasMensagens();
+            renderizarChamadosAdmin();
+            sincronizarChamadosSupabase();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'admin') {
+                alternarAba('admin');
+            }
+        });
+
+        function atualizarUIUsuario() {
+            const user = localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || 'Visitante';
+            const userEl = document.getElementById('currentUser');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const authorInput = document.getElementById('ticketAuthor');
+            const tabAdmin = document.getElementById('tabAdminPanel');
+
+            const isAdmin = (typeof window.isAdminUser === 'function' && window.isAdminUser()) || localStorage.getItem('overcritic_is_admin') === 'true';
+
+            if (userEl) userEl.textContent = user.toUpperCase() + (isAdmin ? ' 👑' : '');
+            if (authorInput) authorInput.value = user;
+            if (loginBtn) loginBtn.style.display = (user && user !== 'VISITANTE') ? 'none' : 'flex';
+            if (logoutBtn) logoutBtn.style.display = (user && user !== 'VISITANTE') ? 'flex' : 'none';
+
+            if (tabAdmin) {
+                tabAdmin.style.display = isAdmin ? 'inline-flex' : 'none';
+            }
+        }
+
+        function verificarTemaELogin() {
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', () => {
+                    const isLight = document.body.classList.toggle('light-mode');
+                    localStorage.setItem('overcritic_theme', isLight ? 'light' : 'dark');
+                });
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    window.location.href = 'conta_login.html?tab=login';
+                });
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    if (confirm('Deseja realmente sair da sua conta?')) {
+                        if (window.sbClient) {
+                            try { await window.sbClient.auth.signOut(); } catch(e) {}
+                        }
+                        localStorage.setItem('overcritic_currentUser', 'Visitante');
+                        localStorage.removeItem('overcritic_user');
+                        localStorage.removeItem('overcritic_user_email');
+                        localStorage.removeItem('overcritic_user_id');
+                        localStorage.removeItem('overcritic_is_admin');
+                        atualizarUIUsuario();
+                        renderizarMinhasMensagens();
+                    }
+                });
+            }
+
+            atualizarUIUsuario();
+        }
+
+        /* ═══════════════════════════════════
+           TROCA DE ABAS
+        ═══════════════════════════════════ */
+        function alternarAba(aba) {
+            abaAtiva = aba;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            const secNovo = document.getElementById('sectionNewTicket');
+            const secMeus = document.getElementById('sectionMyTickets');
+            const secAdmin = document.getElementById('sectionAdminPanel');
+
+            if (aba === 'novo') {
+                document.getElementById('tabNewTicket')?.classList.add('active');
+                secNovo.style.display = 'grid';
+                secMeus.style.display = 'none';
+                secAdmin.style.display = 'none';
+            } else if (aba === 'meus') {
+                document.getElementById('tabMyTickets')?.classList.add('active');
+                secNovo.style.display = 'none';
+                secMeus.style.display = 'block';
+                secAdmin.style.display = 'none';
+                renderizarMinhasMensagens();
+            } else if (aba === 'admin') {
+                const isAdmin = (typeof window.isAdminUser === 'function' && window.isAdminUser()) || localStorage.getItem('overcritic_is_admin') === 'true';
+                if (!isAdmin) {
+                    mostrarToast('Acesso restrito ao Administrador do Overcritic.', '🔒');
+                    alternarAba('novo');
+                    return;
+                }
+                document.getElementById('tabAdminPanel')?.classList.add('active');
+                secNovo.style.display = 'none';
+                secMeus.style.display = 'none';
+                secAdmin.style.display = 'block';
+                renderizarChamadosAdmin();
+            }
+        }
+
+        /* ═══════════════════════════════════
+           ENVIO DE CHAMADO
+        ═══════════════════════════════════ */
+        function enviarChamado(e) {
+            e.preventDefault();
+
+            const tipo = document.getElementById('ticketType').value;
+            const prioridade = document.getElementById('ticketPriority').value;
+            const secao = document.getElementById('ticketSection').value;
+            const autor = document.getElementById('ticketAuthor').value || 'Anônimo';
+            const assunto = document.getElementById('ticketSubject').value.trim();
+            const mensagem = document.getElementById('ticketMessage').value.trim();
+
+            if (!assunto || !mensagem) {
+                mostrarToast('Por favor, preencha o assunto e a mensagem.', '⚠️');
+                return;
+            }
+
+            const agora = new Date();
+            const dataFmt = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            const novoChamado = {
+                id: Date.now(),
+                tipo,
+                prioridade,
+                secao,
+                autor,
+                assunto,
+                mensagem,
+                data: dataFmt,
+                status: 'Aberto',
+                respostaAdmin: ''
+            };
+
+            const chamados = obterChamadosSalvos();
+            chamados.unshift(novoChamado);
+            salvarChamados(chamados);
+
+            // Sincroniza com a tabela suporte_tickets no Supabase
+            if (window.sbClient) {
+                const uid = localStorage.getItem('overcritic_user_id') || null;
+                window.sbClient.from('suporte_tickets').upsert({
+                    id: novoChamado.id,
+                    user_id: uid,
+                    tipo: novoChamado.tipo,
+                    prioridade: novoChamado.prioridade,
+                    secao: novoChamado.secao,
+                    autor: novoChamado.autor,
+                    assunto: novoChamado.assunto,
+                    mensagem: novoChamado.mensagem,
+                    status: novoChamado.status,
+                    data: novoChamado.data,
+                    resposta_admin: ''
+                }).then(({ error }) => {
+                    if (error) console.info('ℹ️ [Supabase Tickets]', error.message);
+                });
+            }
+
+            document.getElementById('supportForm').reset();
+            atualizarUIUsuario();
+
+            mostrarToast('Mensagem enviada com sucesso ao Admin!', '🚀');
+            alternarAba('meus');
+        }
+
+        async function sincronizarChamadosSupabase() {
+            if (!window.sbClient) return;
+            try {
+                const { data, error } = await window.sbClient
+                    .from('suporte_tickets')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (!error && data && data.length > 0) {
+                    const formatados = data.map(row => ({
+                        id: Number(row.id),
+                        userId: row.user_id,
+                        tipo: row.tipo,
+                        prioridade: row.prioridade,
+                        secao: row.secao,
+                        autor: row.autor,
+                        assunto: row.assunto,
+                        mensagem: row.mensagem,
+                        status: row.status,
+                        data: row.data,
+                        respostaAdmin: row.resposta_admin || ''
+                    }));
+                    salvarChamados(formatados);
+                    renderizarMinhasMensagens();
+                    renderizarChamadosAdmin();
+                    atualizarEstatisticas();
+                }
+            } catch (e) {}
+        }
+
+        /* ═══════════════════════════════════
+           RENDERIZAÇÃO DE MENSAGENS
+        ═══════════════════════════════════ */
+        function renderizarMinhasMensagens() {
+            const list = document.getElementById('myTicketsList');
+            const desc = document.getElementById('myTicketsCountDesc');
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || 'pontuG').toLowerCase();
+
+            const todos = obterChamadosSalvos();
+            const meus = todos.filter(t => (t.autor || '').toLowerCase() === currentUser || currentUser === 'pontug');
+
+            if (desc) desc.textContent = `${meus.length} mensagem(ns) encontrada(s)`;
+
+            if (!meus || meus.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 45px 20px; color: var(--text-muted);">
+                        <div style="font-size: 2.5rem; margin-bottom: 8px;">📭</div>
+                        <h4 style="color: var(--text-main); margin-bottom: 6px;">Nenhuma mensagem enviada ainda</h4>
+                        <p style="font-size: 0.88rem;">Você ainda não enviou sugestões ou chamados com este usuário.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = meus.map(t => criarCardChamadoHTML(t, false)).join('');
+        }
+
+        function renderizarChamadosAdmin() {
+            const list = document.getElementById('adminTicketsList');
+            const filtroStatus = document.getElementById('adminFilterStatus')?.value || 'todos';
+
+            const todos = obterChamadosSalvos();
+            const filtrados = filtroStatus === 'todos' ? todos : todos.filter(t => t.status === filtroStatus);
+
+            if (!filtrados || filtrados.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 45px 20px; color: var(--text-muted);">
+                        <div style="font-size: 2.5rem; margin-bottom: 8px;">✨</div>
+                        <h4 style="color: var(--text-main); margin-bottom: 6px;">Nenhum chamado pendente</h4>
+                        <p style="font-size: 0.88rem;">Todas as solicitações nesta categoria foram atendidas.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filtrados.map(t => criarCardChamadoHTML(t, true)).join('');
+        }
+
+        function criarCardChamadoHTML(t, isAdmin) {
+            let badgeClass = 'badge-type-suggestion';
+            if (t.tipo === 'Reportar Bug') badgeClass = 'badge-type-bug';
+            if (t.tipo.includes('Suporte')) badgeClass = 'badge-type-support';
+
+            let prioridadeClass = 'priority-media';
+            if (t.prioridade === 'Baixa') prioridadeClass = 'priority-baixa';
+            if (t.prioridade === 'Alta' || t.prioridade === 'Urgente') prioridadeClass = 'priority-alta';
+
+            let statusClass = 'status-open';
+            let statusIcon = '⏳';
+            if (t.status === 'Em Análise') { statusClass = 'status-review'; statusIcon = '🔍'; }
+            if (t.status === 'Resolvido') { statusClass = 'status-resolved'; statusIcon = '✅'; }
+
+            return `
+                <div class="ticket-item">
+                    <div class="ticket-top">
+                        <div class="ticket-meta-left">
+                            <span class="ticket-badge-type ${badgeClass}">${t.tipo}</span>
+                            <span class="ticket-badge-priority ${prioridadeClass}">${t.prioridade}</span>
+                            <span style="font-size: 0.76rem; color: var(--text-muted);">📍 ${t.secao || 'Geral'}</span>
+                        </div>
+                        <div class="ticket-status-pill ${statusClass}">
+                            <span>${statusIcon}</span> ${t.status}
+                        </div>
+                    </div>
+
+                    <div class="ticket-title">${t.assunto}</div>
+                    <div class="ticket-message">${t.mensagem}</div>
+
+                    ${t.respostaAdmin ? `
+                        <div class="ticket-admin-reply">
+                            <div class="admin-reply-header">
+                                <span>👑 RESPOSTA DO ADMIN (pontuG):</span>
+                            </div>
+                            <div class="admin-reply-text">${t.respostaAdmin}</div>
+                        </div>
+                    ` : ''}
+
+                    <div class="ticket-footer-row">
+                        <div>
+                            <span>👤 Enviado por: <strong>${t.autor}</strong></span> • 
+                            <span>📅 ${t.data}</span>
+                        </div>
+
+                        ${isAdmin ? `
+                            <div class="admin-actions-bar">
+                                <button class="btn-action-small" onclick="adminMudarStatus(${t.id}, 'Em Análise')">🔍 Em Análise</button>
+                                <button class="btn-action-small" onclick="adminMudarStatus(${t.id}, 'Resolvido')">✅ Resolver</button>
+                                <button class="btn-action-small" onclick="adminResponder(${t.id})">💬 Responder</button>
+                                <button class="btn-action-small btn-action-danger" onclick="adminExcluir(${t.id})">🗑️</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ═══════════════════════════════════
+           AÇÕES DO ADMINISTRADOR
+        ═══════════════════════════════════ */
+        function adminResponder(id) {
+            const chamados = obterChamadosSalvos();
+            const ticket = chamados.find(t => t.id === id);
+            if (!ticket) return;
+
+            const resposta = prompt('Digite a resposta do Administrador para este chamado:', ticket.respostaAdmin || '');
+            if (resposta !== null) {
+                ticket.respostaAdmin = resposta.trim();
+                if (resposta.trim() && ticket.status === 'Aberto') {
+                    ticket.status = 'Em Análise';
+                }
+                salvarChamados(chamados);
+                renderizarChamadosAdmin();
+                renderizarMinhasMensagens();
+
+                if (window.sbClient) {
+                    window.sbClient.from('suporte_tickets')
+                        .update({ resposta_admin: ticket.respostaAdmin, status: ticket.status })
+                        .eq('id', ticket.id)
+                        .then(({ error }) => {
+                            if (error) console.warn('Erro ao atualizar chamado no Supabase:', error);
+                        });
+                }
+
+                mostrarToast('Resposta do Admin gravada!', '👑');
+            }
+        }
+
+        function adminMudarStatus(id, novoStatus) {
+            const chamados = obterChamadosSalvos();
+            const ticket = chamados.find(t => t.id === id);
+            if (!ticket) return;
+
+            ticket.status = novoStatus;
+            salvarChamados(chamados);
+            renderizarChamadosAdmin();
+            renderizarMinhasMensagens();
+
+            if (window.sbClient) {
+                window.sbClient.from('suporte_tickets')
+                    .update({ status: novoStatus })
+                    .eq('id', ticket.id)
+                    .then(({ error }) => {
+                        if (error) console.warn('Erro ao atualizar status no Supabase:', error);
+                    });
+            }
+
+            mostrarToast(`Status alterado para "${novoStatus}"!`, '✅');
+        }
+
+        function adminExcluir(id) {
+            if (!confirm('Deseja realmente excluir este chamado?')) return;
+
+            let chamados = obterChamadosSalvos();
+            chamados = chamados.filter(t => t.id !== id);
+            salvarChamados(chamados);
+            renderizarChamadosAdmin();
+            renderizarMinhasMensagens();
+
+            if (window.sbClient) {
+                window.sbClient.from('suporte_tickets')
+                    .delete()
+                    .eq('id', id)
+                    .then(({ error }) => {
+                        if (error) console.warn('Erro ao excluir no Supabase:', error);
+                    });
+            }
+
+            mostrarToast('Chamado removido.', '🗑️');
+        }
+
+        /* ═══════════════════════════════════
+           ESTATÍSTICAS & CONTADORES
+        ═══════════════════════════════════ */
+        function atualizarEstatisticas() {
+            const chamados = obterChamadosSalvos();
+            const total = chamados.length;
+            const abertos = chamados.filter(t => t.status === 'Aberto' || t.status === 'Em Análise').length;
+            const resolvidos = chamados.filter(t => t.status === 'Resolvido').length;
+
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || 'pontuG').toLowerCase();
+            const meus = chamados.filter(t => (t.autor || '').toLowerCase() === currentUser || currentUser === 'pontug').length;
+
+            const elTotal = document.getElementById('statTotalTickets');
+            const elOpen = document.getElementById('statOpenTickets');
+            const elRes = document.getElementById('statResolvedTickets');
+            const elMyBadge = document.getElementById('myTicketsBadge');
+            const elAdminBadge = document.getElementById('adminTicketsBadge');
+
+            if (elTotal) elTotal.textContent = total;
+            if (elOpen) elOpen.textContent = abertos;
+            if (elRes) elRes.textContent = resolvidos;
+            if (elMyBadge) elMyBadge.textContent = meus;
+            if (elAdminBadge) elAdminBadge.textContent = abertos;
+        }
+
+        /* TOAST HELPER */
+        function mostrarToast(mensagem, icone = '💡') {
+            const toast = document.getElementById('toastNotify');
+            const msgEl = document.getElementById('toastMsg');
+            const iconEl = document.getElementById('toastIcon');
+
+            if (msgEl) msgEl.textContent = mensagem;
+            if (iconEl) iconEl.textContent = icone;
+
+            if (toast) {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3500);
+            }
+        }
+    </script>
+</body>
+</html>

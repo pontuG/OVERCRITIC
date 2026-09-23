@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERCRITIC - Críticas & Platinas</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Conexão com Supabase e Backend C# -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="js/apiClient.js"></script>
+    <style>
+        :root {
+            --bg-color: #07090f;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #9d4edd;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8f9fa;
+            --text-muted: #adb5bd;
+            --sidebar-width: 80px;
+            --sidebar-bg: rgba(10, 14, 23, 0.4);
+            --card-shadow: rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        /* --- LIGHT MODE VARIABLES (Cinza Titânio Fosco & Vermelho Sangue) --- */
+        body.light-mode {
+            --bg-color: #d2d7e0;
+            --accent-cyan: #c51b29; 
+            --accent-purple: #800f1c;
+            --glass-bg: rgba(224, 228, 236, 0.88);
+            --glass-border: rgba(0, 0, 0, 0.12);
+            --text-main: #0e121a;
+            --text-muted: #525f73;
+            --sidebar-bg: rgba(214, 219, 228, 0.92);
+            --card-shadow: rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: rgba(197, 27, 41, 0.2);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            background: radial-gradient(circle at 15% 50%, rgba(157, 78, 221, 0.15), transparent 40%),
+                        radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.15), transparent 40%),
+                        var(--bg-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* Adjust radial gradient for light mode */
+        body.light-mode {
+            background: radial-gradient(circle at 15% 50%, rgba(128, 15, 28, 0.06), transparent 40%),
+                        radial-gradient(circle at 85% 30%, rgba(217, 4, 41, 0.06), transparent 40%),
+                        var(--bg-color);
+        }
+
+        #bgParticlesCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Sidebar - Glassmorphism */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .brand-icon {
+            text-decoration: none;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .brand-icon:hover {
+            transform: scale(1.1);
+        }
+        .brand-icon img {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        .brand-icon:hover img {
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 10px rgba(157, 78, 221, 0.6);
+            border-color: var(--accent-cyan);
+        }
+        .brand-icon span { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--accent-cyan); }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        body.light-mode .nav-item:hover, body.light-mode .nav-item.active {
+            background: rgba(217, 4, 41, 0.12);
+            box-shadow: 0 0 10px rgba(217, 4, 41, 0.2);
+            color: var(--accent-cyan);
+        }
+
+        .nav-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .theme-toggle-container {
+            margin-top: auto;
+            margin-bottom: 15px;
+        }
+
+        .sys-time {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-purple);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 40px 60px;
+            flex: 1;
+            box-sizing: border-box;
+            max-width: 1600px;
+        }
+
+        .header-section {
+            margin-bottom: 40px;
+        }
+
+        .greeting {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(90deg, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+            margin-top: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Bento Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: minmax(180px, auto) minmax(180px, auto) minmax(150px, auto);
+            gap: 24px;
+        }
+
+        .bento-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 32px var(--card-shadow);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .bento-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 15px 40px var(--card-hover-shadow), 0 0 20px rgba(0, 240, 255, 0.1);
+            z-index: 10;
+        }
+
+        body.light-mode .bento-card:hover {
+            border-color: rgba(217, 4, 41, 0.35);
+            box-shadow: 0 15px 40px var(--card-hover-shadow), 0 0 15px rgba(217, 4, 41, 0.15);
+        }
+
+        /* Specific Cards & Showcase */
+        .bento-col-showcase {
+            grid-column: span 2;
+            grid-row: span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card-showcase {
+            flex: 1;
+            min-height: 270px;
+            padding: 28px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, var(--glass-bg) 60%);
+        }
+
+        .card-games {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.06) 0%, var(--glass-bg) 70%);
+        }
+        .card-games:hover {
+            border-color: rgba(0, 240, 255, 0.45);
+            box-shadow: 0 16px 40px var(--card-hover-shadow), 0 0 25px rgba(0, 240, 255, 0.18);
+        }
+
+        .card-movies-main {
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.08) 0%, var(--glass-bg) 70%);
+        }
+        .card-movies-main:hover {
+            border-color: rgba(157, 78, 221, 0.45);
+            box-shadow: 0 16px 40px var(--card-hover-shadow), 0 0 25px rgba(157, 78, 221, 0.2);
+        }
+
+        body.light-mode .card-games:hover {
+            border-color: rgba(197, 27, 41, 0.45);
+            box-shadow: 0 16px 40px var(--card-hover-shadow), 0 0 20px rgba(197, 27, 41, 0.18);
+        }
+        body.light-mode .card-movies-main:hover {
+            border-color: rgba(128, 15, 28, 0.45);
+            box-shadow: 0 16px 40px var(--card-hover-shadow), 0 0 20px rgba(128, 15, 28, 0.18);
+        }
+
+        /* Showcase Content */
+        .showcase-content {
+            position: relative;
+            z-index: 5;
+            max-width: 58%;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .showcase-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.28);
+            width: fit-content;
+            margin-bottom: 8px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 10px rgba(0, 240, 255, 0.1);
+        }
+        .showcase-badge.badge-cinema {
+            background: rgba(157, 78, 221, 0.15);
+            color: #c77dff;
+            border-color: rgba(157, 78, 221, 0.35);
+            box-shadow: 0 2px 10px rgba(157, 78, 221, 0.12);
+        }
+        body.light-mode .showcase-badge {
+            background: rgba(197, 27, 41, 0.1);
+            color: var(--accent-cyan);
+            border-color: rgba(197, 27, 41, 0.28);
+        }
+        body.light-mode .showcase-badge.badge-cinema {
+            background: rgba(128, 15, 28, 0.1);
+            color: var(--accent-purple);
+            border-color: rgba(128, 15, 28, 0.28);
+        }
+
+        .card-showcase .card-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            color: var(--text-main);
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .card-showcase .card-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        .showcase-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-top: 14px;
+            padding: 6px 14px;
+            border-radius: 10px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            width: fit-content;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .showcase-action .action-arrow {
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+            display: inline-block;
+        }
+        .card-showcase:hover .showcase-action {
+            background: rgba(0, 240, 255, 0.16);
+            border-color: rgba(0, 240, 255, 0.45);
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2);
+        }
+        .card-showcase:hover .showcase-action .action-arrow {
+            transform: translateX(4px);
+        }
+        .showcase-action.action-cinema {
+            color: #c77dff;
+            background: rgba(157, 78, 221, 0.1);
+            border-color: rgba(157, 78, 221, 0.25);
+        }
+        .card-movies-main:hover .showcase-action.action-cinema {
+            background: rgba(157, 78, 221, 0.2);
+            border-color: rgba(157, 78, 221, 0.5);
+            box-shadow: 0 4px 15px rgba(157, 78, 221, 0.25);
+        }
+        body.light-mode .showcase-action {
+            color: var(--accent-cyan);
+            background: rgba(197, 27, 41, 0.08);
+            border-color: rgba(197, 27, 41, 0.2);
+        }
+        body.light-mode .card-showcase:hover .showcase-action {
+            background: rgba(197, 27, 41, 0.16);
+            border-color: rgba(197, 27, 41, 0.4);
+            box-shadow: 0 4px 15px rgba(197, 27, 41, 0.15);
+        }
+        body.light-mode .showcase-action.action-cinema {
+            color: var(--accent-purple);
+            background: rgba(128, 15, 28, 0.08);
+            border-color: rgba(128, 15, 28, 0.2);
+        }
+        body.light-mode .card-movies-main:hover .showcase-action.action-cinema {
+            background: rgba(128, 15, 28, 0.16);
+            border-color: rgba(128, 15, 28, 0.4);
+            box-shadow: 0 4px 15px rgba(128, 15, 28, 0.15);
+        }
+
+        /* Covers Fan Showcase (Capas em Realce Meio Transparente) */
+        .showcase-covers-wrapper {
+            position: absolute;
+            right: -10px;
+            top: 0;
+            bottom: 0;
+            width: 55%;
+            pointer-events: none;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.45) 20%, rgba(0, 0, 0, 1) 60%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.45) 20%, rgba(0, 0, 0, 1) 60%);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cover-item {
+            position: absolute;
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+            opacity: 0.38;
+            filter: saturate(0.9);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        body.light-mode .cover-item {
+            border-color: rgba(0, 0, 0, 0.14);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            opacity: 0.34;
+        }
+        .card-showcase:hover .cover-item {
+            opacity: 0.76;
+            filter: saturate(1.2);
+            border-color: rgba(255, 255, 255, 0.38);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7);
+        }
+        body.light-mode .card-showcase:hover .cover-item {
+            opacity: 0.72;
+            border-color: rgba(0, 0, 0, 0.25);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+
+        /* Games Covers Fan */
+        .covers-games .cover-g-1 {
+            width: 145px;
+            height: 82px;
+            right: 18px;
+            top: 18px;
+            transform: rotate(7deg);
+            z-index: 2;
+        }
+        .covers-games .cover-g-2 {
+            width: 160px;
+            height: 90px;
+            right: 90px;
+            top: 60px;
+            transform: rotate(-5deg);
+            z-index: 4;
+        }
+        .covers-games .cover-g-3 {
+            width: 150px;
+            height: 84px;
+            right: 25px;
+            bottom: 20px;
+            transform: rotate(5deg);
+            z-index: 3;
+        }
+        .covers-games .cover-g-4 {
+            width: 140px;
+            height: 78px;
+            right: 145px;
+            bottom: 35px;
+            transform: rotate(-9deg);
+            z-index: 1;
+        }
+        .card-games:hover .cover-g-1 {
+            transform: rotate(4deg) translate(5px, -5px) scale(1.04);
+        }
+        .card-games:hover .cover-g-2 {
+            transform: rotate(-2deg) translate(-5px, -2px) scale(1.06);
+        }
+        .card-games:hover .cover-g-3 {
+            transform: rotate(3deg) translate(6px, 5px) scale(1.05);
+        }
+        .card-games:hover .cover-g-4 {
+            transform: rotate(-7deg) translate(-8px, 4px) scale(1.04);
+        }
+
+        /* Movies Covers Fan */
+        .covers-movies .cover-m-1 {
+            width: 88px;
+            height: 130px;
+            right: 20px;
+            top: 20px;
+            transform: rotate(8deg);
+            z-index: 2;
+        }
+        .covers-movies .cover-m-2 {
+            width: 96px;
+            height: 142px;
+            right: 82px;
+            top: 38px;
+            transform: rotate(-4deg);
+            z-index: 4;
+        }
+        .covers-movies .cover-m-3 {
+            width: 88px;
+            height: 130px;
+            right: 150px;
+            top: 50px;
+            transform: rotate(6deg);
+            z-index: 1;
+        }
+        .covers-movies .cover-m-4 {
+            width: 84px;
+            height: 124px;
+            right: 42px;
+            bottom: 12px;
+            transform: rotate(-8deg);
+            z-index: 3;
+        }
+        .card-movies-main:hover .cover-m-1 {
+            transform: rotate(5deg) translate(4px, -4px) scale(1.04);
+        }
+        .card-movies-main:hover .cover-m-2 {
+            transform: rotate(-1deg) scale(1.06);
+        }
+        .card-movies-main:hover .cover-m-3 {
+            transform: rotate(4deg) translate(-6px, 3px) scale(1.04);
+        }
+        .card-movies-main:hover .cover-m-4 {
+            transform: rotate(-6deg) translate(4px, 5px) scale(1.04);
+        }
+
+        .card-plats { grid-column: span 1; grid-row: span 1; }
+        .card-discover { grid-column: span 1; grid-row: span 1; position: relative; overflow: hidden; }
+        .card-discover .card-bg-icon {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 110px;
+            opacity: 0.05;
+            transform: rotate(-10deg);
+            transition: all 0.5s ease;
+        }
+        body.light-mode .card-discover .card-bg-icon { opacity: 0.1; }
+        .card-discover:hover .card-bg-icon { transform: rotate(0deg) scale(1.1); opacity: 0.1; color: var(--accent-cyan); }
+        .card-stats { grid-column: span 1; grid-row: span 1; }
+        .card-notes { grid-column: span 1; grid-row: span 1; }
+        .card-challenges { grid-column: span 1; grid-row: span 1; }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2;
+        }
+        
+        .card-games .card-title { font-size: 2rem; }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            z-index: 2;
+        }
+
+        /* Stats internal */
+        .stat-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+        .stat-item:hover {
+            background: rgba(0, 240, 255, 0.08);
+            border-color: rgba(0, 240, 255, 0.4);
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.12);
+        }
+        body.light-mode .stat-item {
+            background: #d8dde6;
+            border-color: rgba(0, 0, 0, 0.08);
+            color: var(--text-main);
+        }
+        body.light-mode .stat-item:hover {
+            background: #cbd2dc;
+            border-color: var(--accent-blood);
+            box-shadow: 0 4px 15px rgba(197, 27, 41, 0.15);
+            transform: translateX(4px);
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-val-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-item .val {
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--accent-cyan);
+            display: inline-block;
+            transition: transform 0.25s ease, color 0.25s ease;
+        }
+        body.light-mode .stat-item .val {
+            color: var(--accent-blood);
+        }
+        .stat-arrow {
+            font-size: 1.1rem;
+            line-height: 1;
+            color: var(--text-muted);
+            opacity: 0.4;
+            transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+        }
+        .stat-item:hover .stat-arrow {
+            opacity: 1;
+            transform: translateX(3px);
+            color: var(--accent-cyan);
+        }
+        body.light-mode .stat-item:hover .stat-arrow {
+            color: var(--accent-blood);
+        }
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+            animation: pulseDot 2s infinite;
+        }
+        body.light-mode .live-dot {
+            background: var(--accent-blood);
+            box-shadow: 0 0 8px var(--accent-blood);
+        }
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.8); }
+        }
+
+        /* Notes Internal */
+        .quick-note-area {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.9rem;
+            padding: 15px;
+            box-sizing: border-box;
+            resize: none;
+            outline: none;
+            margin-top: 15px;
+            transition: border-color 0.3s;
+        }
+        body.light-mode .quick-note-area {
+            background: #eaedf4;
+            border-color: rgba(0,0,0,0.14);
+            color: var(--text-main);
+        }
+        .quick-note-area:focus { border-color: var(--accent-purple); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto;
+            }
+            .bento-col-showcase {
+                grid-column: span 2;
+                grid-row: auto;
+            }
+            .card-discover {
+                grid-column: span 2;
+            }
+            .card-plats, .card-challenges, .card-stats, .card-notes {
+                grid-column: span 1;
+            }
+        }
+        @media (max-width: 768px) {
+            /* Barra de navegação inferior no mobile */
+            .sidebar {
+                width: 100% !important;
+                height: 60px !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                flex-direction: row !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                padding: 0 10px !important;
+                border-right: none !important;
+                border-top: 1px solid var(--glass-border) !important;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
+                z-index: 1000 !important;
+            }
+            .brand-icon, .sys-time {
+                display: none !important;
+            }
+            .nav-links {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                width: 100% !important;
+                gap: 0 !important;
+            }
+            .nav-item {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 1.25rem !important;
+                border-radius: 10px !important;
+            }
+            .theme-toggle-container {
+                margin: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+            .nav-item:hover::after {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                margin-bottom: 75px !important;
+                padding: 16px 14px !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+            }
+            .header-section {
+                margin-bottom: 20px !important;
+            }
+            .greeting {
+                font-size: 1.6rem !important;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr !important;
+                gap: 14px !important;
+            }
+            .bento-col-showcase {
+                grid-column: span 1 !important;
+                grid-row: auto !important;
+                gap: 14px !important;
+            }
+            .bento-card {
+                grid-column: span 1 !important;
+                grid-row: span 1 !important;
+                padding: 20px 16px !important;
+                min-height: auto !important;
+            }
+            .card-showcase {
+                min-height: 220px !important;
+                padding: 20px 18px !important;
+            }
+            .showcase-content {
+                max-width: 75% !important;
+            }
+            .showcase-covers-wrapper {
+                width: 60% !important;
+                opacity: 0.45 !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 12px 10px !important;
+            }
+            .greeting {
+                font-size: 1.35rem !important;
+            }
+            .subtitle {
+                font-size: 0.82rem !important;
+            }
+            .bento-card {
+                padding: 16px 14px !important;
+            }
+        }
+        
+        /* Sleek Intro overlay */
+        #cleanIntro {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-color);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease, visibility 1s;
+        }
+        .intro-brand {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: 10px;
+            color: var(--text-main);
+            text-shadow: 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-purple);
+            animation: glowText 2s ease forwards;
+        }
+        @keyframes glowText {
+            0% { opacity: 0; filter: blur(10px); transform: scale(0.9); }
+            50% { opacity: 1; filter: blur(0px); transform: scale(1); }
+            100% { opacity: 1; }
+        }
+        .intro-hidden { opacity: 0 !important; visibility: hidden !important; }
+
+        /* Estilos do Atalho de Perfil & Login no Header */
+        .header-auth-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-profile-header-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 7px 16px 7px 8px;
+            border-radius: 14px;
+            background: rgba(13, 17, 27, 0.85);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(12px);
+        }
+        body.light-mode .user-profile-header-pill {
+            background: rgba(235, 239, 245, 0.95);
+            border-color: rgba(197, 27, 41, 0.35);
+            box-shadow: 0 4px 15px rgba(197, 27, 41, 0.1);
+        }
+        .user-profile-header-pill:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.35);
+        }
+        .header-avatar-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+            border: 1px solid var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .header-user-meta {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        .header-user-name {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.3px;
+        }
+        .header-user-status {
+            font-size: 0.7rem;
+            color: #10b981;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .header-login-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+        .header-login-btn:hover {
+            background: var(--accent-cyan);
+            color: #07090f;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+            transform: translateY(-2px);
+        }
+        .header-btn-logout-mini {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+        }
+        .header-btn-logout-mini:hover {
+            background: #ef4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Notificação Toast */
+        #overcriticToast {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: rgba(13, 17, 27, 0.95);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+            border-radius: 14px;
+            padding: 14px 20px;
+            color: #fff;
+            font-size: 0.92rem;
+            font-weight: 600;
+            z-index: 10000;
+            display: none;
+            backdrop-filter: blur(12px);
+            animation: slideInRight 0.4s ease;
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="overcriticToast"></div>
+    <script>
+        if (localStorage.getItem('overcritic_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- CLEAN INTRO -->
+    <div id="cleanIntro">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+            <img src="assets/overcritic_icon.png" alt="OVERCRITIC" style="width:120px; height:120px; border-radius:24px; box-shadow:0 0 35px rgba(0,240,255,0.5); border:1px solid rgba(0,240,255,0.4); animation: glowText 2s ease forwards;">
+            <div class="intro-brand">OVERCRITIC</div>
+        </div>
+    </div>
+
+    <!-- BACKGROUND -->
+    <canvas id="bgParticlesCanvas"></canvas>
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <a href="conta_login.html" class="brand-icon" title="Minha Conta / Perfil">
+            <img src="assets/overcritic_icon.png" alt="Overcritic Logo">
+            <span>HQ</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item active" data-tooltip="Início">🏠</a>
+            <a href="adicionar_jogos.html" class="nav-item" data-tooltip="Críticas de Jogos">🎮</a>
+            <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
+            <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
+            <a href="descobrir_titulos.html" class="nav-item" data-tooltip="Descobrir Títulos">🍿</a>
+            <a href="adicionar_platinas.html" class="nav-item" data-tooltip="Platinas & Troféus">🏆</a>
+            <a href="suporte_overcritic.html" class="nav-item" data-tooltip="Suporte & Sugestões">💡</a>
+            <a href="conta_login.html" class="nav-item" data-tooltip="Minha Conta / Perfil">👤</a>
+        </nav>
+        
+        <!-- THEME TOGGLE -->
+        <div class="theme-toggle-container">
+            <button id="themeToggleBtn" class="nav-item" data-tooltip="Modo Claro/Escuro">🌓</button>
+        </div>
+
+        <div class="sys-time" id="liveClock">00:00</div>
+    </aside>
+
+    <!-- MAIN DASHBOARD -->
+    <main class="main-content">
+        <header class="header-section" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div>
+                <h1 class="greeting" id="dashboardGreeting">Olá, Jogador! 👋</h1>
+                <div class="subtitle">Seu QG de críticas e conquistas</div>
+            </div>
+            <div id="authHeaderAction">
+                <a href="conta_login.html" id="btnAuthHeader" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:12px; background:rgba(0,240,255,0.08); border:1px solid var(--accent-cyan); color:var(--accent-cyan); text-decoration:none; font-weight:700; font-size:0.88rem; transition:all 0.25s ease; box-shadow:0 0 15px rgba(0,240,255,0.15);">
+                    <span>👤</span> <span id="authHeaderLabel">Entrar / Criar Conta</span>
+                </a>
+            </div>
+        </header>
+
+        <section class="bento-grid">
+            <!-- LEFT SHOWCASE COLUMN (JOGOS & FILMES) -->
+            <div class="bento-col-showcase">
+                <!-- GAMES CARD -->
+                <a href="adicionar_jogos.html" class="bento-card card-showcase card-games" title="Cadastrar e Avaliar Jogos">
+                    <div class="showcase-content">
+                        <div>
+                            <div class="showcase-badge"><span class="badge-icon">🎮</span> BIBLIOTECA GAMER</div>
+                            <div class="card-title">Críticas de Jogos</div>
+                            <div class="card-desc">Avalie seus jogos, defina notas, escreva análises técnicas e organize sua biblioteca pessoal. Acompanhe tudo em um só lugar.</div>
+                        </div>
+                        <div class="showcase-action">
+                            <span>Acessar Cadastro & Análises</span>
+                            <span class="action-arrow">→</span>
+                        </div>
+                    </div>
+                    <div class="showcase-covers-wrapper covers-games" aria-hidden="true">
+                        <div class="cover-item cover-g-1" style="background-image: url('https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg');" title="Elden Ring"></div>
+                        <div class="cover-item cover-g-2" style="background-image: url('https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg');" title="Baldur's Gate 3"></div>
+                        <div class="cover-item cover-g-3" style="background-image: url('https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg');" title="Cyberpunk 2077"></div>
+                        <div class="cover-item cover-g-4" style="background-image: url('https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg');" title="Black Myth: Wukong"></div>
+                    </div>
+                </a>
+
+                <!-- MOVIES & SERIES CARD (Substitui o Audio Spectrum) -->
+                <a href="adicionar_midias.html" class="bento-card card-showcase card-movies-main" title="Cadastrar e Avaliar Filmes & Séries">
+                    <div class="showcase-content">
+                        <div>
+                            <div class="showcase-badge badge-cinema"><span class="badge-icon">🎬</span> CINEMA & SÉRIES</div>
+                            <div class="card-title">Filmes & Séries</div>
+                            <div class="card-desc">Espaço dedicado para registrar críticas, reviews detalhadas e status das suas obras, filmes e animes favoritos.</div>
+                        </div>
+                        <div class="showcase-action action-cinema">
+                            <span>Acessar Cadastro & Análises</span>
+                            <span class="action-arrow">→</span>
+                        </div>
+                    </div>
+                    <div class="showcase-covers-wrapper covers-movies" aria-hidden="true">
+                        <div class="cover-item cover-m-1" style="background-image: url('https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg');" title="Interestelar"></div>
+                        <div class="cover-item cover-m-2" style="background-image: url('https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg');" title="Duna: Parte 2"></div>
+                        <div class="cover-item cover-m-3" style="background-image: url('https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg');" title="Breaking Bad"></div>
+                        <div class="cover-item cover-m-4" style="background-image: url('https://image.tmdb.org/t/p/w500/8C5LL4k9aIagGhyJkK80e980L1n.jpg');" title="Attack on Titan"></div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- DISCOVER GAMES -->
+            <a href="descobrir_jogos.html" class="bento-card card-discover" title="Descobrir Novos Jogos">
+                <span class="card-bg-icon">🪐</span>
+                <div class="card-title">🪐 Descobrir Jogos</div>
+                <div class="card-desc">Explore sucessos da Steam, lançamentos mundiais e super promoções.</div>
+            </a>
+
+            <!-- DISCOVER TITLES -->
+            <a href="descobrir_titulos.html" class="bento-card card-discover" title="Descobrir Filmes, Séries & Animes" style="background: linear-gradient(135deg, rgba(157, 78, 221, 0.08) 0%, var(--glass-bg) 70%);">
+                <span class="card-bg-icon">🍿</span>
+                <div class="card-title">🍿 Descobrir Títulos</div>
+                <div class="card-desc">Lançamentos do cinema, tendências de streamings e obras aclamadas.</div>
+            </a>
+
+            <!-- PLATINUMS -->
+            <a href="adicionar_platinas.html" class="bento-card card-plats">
+                <div class="card-title">🏆 Platinas</div>
+                <div class="card-desc">Gerencie troféus conquistados e acompanhe seu progresso de 100% em cada título.</div>
+            </a>
+
+            <!-- SUPPORT & SUGGESTIONS -->
+            <a href="suporte_overcritic.html" class="bento-card card-challenges">
+                <div class="card-title">💡 Suporte & Sugestões</div>
+                <div class="card-desc">Canal direto com o Administrador: envie ideias de melhorias, reporte bugs ou tire dúvidas do sistema.</div>
+            </a>
+
+            <!-- STATS -->
+            <div class="bento-card card-stats">
+                <div class="card-title" style="font-size: 1rem; justify-content: space-between;">
+                    <span>📊 Resumo Rápido</span>
+                    <span class="live-dot" title="Sincronizado em tempo real"></span>
+                </div>
+                <div class="stat-list">
+                    <a href="adicionar_jogos.html" class="stat-item" title="Ir para Críticas de Jogos">
+                        <span class="stat-label">🎮 Jogos</span>
+                        <div class="stat-val-wrapper">
+                            <span class="val" id="statJogos">0</span>
+                            <span class="stat-arrow">›</span>
+                        </div>
+                    </a>
+                    <a href="adicionar_midias.html" class="stat-item" title="Ir para Filmes e Séries">
+                        <span class="stat-label">🎬 Mídias</span>
+                        <div class="stat-val-wrapper">
+                            <span class="val" id="statMidias">0</span>
+                            <span class="stat-arrow">›</span>
+                        </div>
+                    </a>
+                    <a href="adicionar_platinas.html" class="stat-item" title="Ir para Platinas e Troféus">
+                        <span class="stat-label">🏆 Platinas</span>
+                        <div class="stat-val-wrapper">
+                            <span class="val" id="statPlatinas">0</span>
+                            <span class="stat-arrow">›</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- NOTES -->
+            <div class="bento-card card-notes">
+                <div class="card-title" style="font-size: 1rem;">📝 Notas</div>
+                <textarea id="quickNotes" class="quick-note-area" placeholder="Lembretes de metas..."></textarea>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- THEME TOGGLE LOGIC ---
+        const themeBtn = document.getElementById('themeToggleBtn');
+        
+        // Verifica o tema salvo
+        if (localStorage.getItem('overcritic_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                localStorage.setItem('overcritic_theme', 'light');
+            } else {
+                localStorage.setItem('overcritic_theme', 'dark');
+            }
+        });
+
+
+        // Intro Logic
+        window.addEventListener('DOMContentLoaded', () => {
+            const intro = document.getElementById('cleanIntro');
+            if (!intro) return;
+
+            const perfEntries = performance.getEntriesByType("navigation");
+            const isReload = perfEntries.length > 0 && perfEntries[0].type === "reload";
+            const hasSeenIntro = sessionStorage.getItem('overcritic_intro_seen');
+
+            if (!hasSeenIntro || isReload) {
+                sessionStorage.setItem('overcritic_intro_seen', 'true');
+                setTimeout(() => {
+                    intro.classList.add('intro-hidden');
+                    setTimeout(() => { intro.style.display = 'none'; }, 1000);
+                }, 2000);
+            } else {
+                intro.style.display = 'none';
+            }
+
+            carregarEstatisticas();
+            carregarAnotacoes();
+        });
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').textContent = 
+                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Counter Animation
+        function animarNumero(id, targetVal) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const currentVal = parseInt(el.textContent, 10) || 0;
+            if (currentVal === targetVal) return;
+
+            el.style.transform = 'scale(1.25)';
+            setTimeout(() => { el.style.transform = 'scale(1)'; }, 250);
+
+            const duration = 400;
+            const startTime = performance.now();
+
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - (1 - progress) * (1 - progress);
+                const displayVal = Math.round(currentVal + (targetVal - currentVal) * easeProgress);
+                el.textContent = displayVal;
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    el.textContent = targetVal;
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        // Stats loader & real-time sync
+        function carregarEstatisticas() {
+            // 1. Jogos
+            let countJogos = 0;
+            try {
+                const rawJogos = localStorage.getItem('overcritic_reviews') 
+                              || localStorage.getItem('overcritic_jogos') 
+                              || localStorage.getItem('overclock_jogos');
+                if (rawJogos) {
+                    const parsed = JSON.parse(rawJogos);
+                    if (Array.isArray(parsed)) countJogos = parsed.length;
+                }
+            } catch (e) {
+                console.error('Erro ao ler estatísticas de jogos:', e);
+            }
+
+            // 2. Mídias (Filmes / Séries)
+            let countMidias = 0;
+            try {
+                const rawMidias = localStorage.getItem('OVERCRITIC_MIDIAS') 
+                               || localStorage.getItem('overcritic_midias') 
+                               || localStorage.getItem('overclock_midias');
+                if (rawMidias) {
+                    const parsed = JSON.parse(rawMidias);
+                    if (Array.isArray(parsed)) countMidias = parsed.length;
+                } else {
+                    // Seed padrão de adicionar_midias.html possui 4 itens
+                    countMidias = 4;
+                }
+            } catch (e) {
+                console.error('Erro ao ler estatísticas de mídias:', e);
+            }
+
+            // 3. Platinas
+            let countPlatinas = 0;
+            try {
+                const chaves = ['overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'overcritic_minhas_platinas'];
+                let listaPlatinas = null;
+                for (const k of chaves) {
+                    const raw = localStorage.getItem(k);
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                listaPlatinas = parsed;
+                                break;
+                            }
+                        } catch (err) {}
+                    }
+                }
+
+                if (listaPlatinas && listaPlatinas.length > 0) {
+                    countPlatinas = listaPlatinas.length;
+                } else {
+                    // Seed inicial (2 platinas padrão no feed)
+                    countPlatinas = 2;
+                }
+            } catch (e) {
+                console.error('Erro ao ler estatísticas de platinas:', e);
+                countPlatinas = 2;
+            }
+
+            animarNumero('statJogos', countJogos);
+            animarNumero('statMidias', countMidias);
+            animarNumero('statPlatinas', countPlatinas);
+        }
+
+        async function sincronizarEstatisticasSupabase() {
+            if (!window.sbClient) return;
+            try {
+                const { count, error } = await window.sbClient
+                    .from('reviews_jogos')
+                    .select('*', { count: 'exact', head: true });
+                if (!error && typeof count === 'number' && count > 0) {
+                    animarNumero('statJogos', count);
+                }
+            } catch (e) {}
+        }
+
+        // Sincronização em tempo real (mudança de abas, retorno pelo histórico ou alteração de storage)
+        window.addEventListener('pageshow', () => { carregarEstatisticas(); sincronizarEstatisticasSupabase(); });
+        window.addEventListener('focus', () => { carregarEstatisticas(); sincronizarEstatisticasSupabase(); });
+        window.addEventListener('storage', carregarEstatisticas);
+        setInterval(carregarEstatisticas, 2500);
+        setInterval(sincronizarEstatisticasSupabase, 10000);
+
+        // Notes
+        const notesArea = document.getElementById('quickNotes');
+        function carregarAnotacoes() {
+            const savedNotes = localStorage.getItem('overcritic_quick_notes');
+            if (savedNotes) notesArea.value = savedNotes;
+        }
+        if(notesArea) {
+            notesArea.addEventListener('input', () => {
+                localStorage.setItem('overcritic_quick_notes', notesArea.value);
+            });
+        }
+
+        // Floating Orbs Background (Replaces dense particles)
+        const bgCanvas = document.getElementById('bgParticlesCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let orbsArray = [];
+
+        function resizeBgCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            initOrbs();
+        }
+        window.addEventListener('resize', resizeBgCanvas);
+
+        class Orb {
+            constructor() {
+                this.x = Math.random() * bgCanvas.width;
+                this.y = Math.random() * bgCanvas.height;
+                this.size = Math.random() * 4 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > bgCanvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > bgCanvas.height) this.speedY *= -1;
+            }
+            draw() {
+                // Lê a variável CSS para a cor da orb dependendo do tema!
+                const isLight = document.body.classList.contains('light-mode');
+                // Em light mode usaremos partículas sutis vermelho sangue
+                const rgb = isLight ? '217, 4, 41' : '0, 240, 255'; 
+                bgCtx.fillStyle = `rgba(${rgb}, ${this.opacity})`;
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+        }
+
+        function initOrbs() {
+            orbsArray = [];
+            const numberOfOrbs = Math.floor((bgCanvas.width * bgCanvas.height) / 25000);
+            for (let i = 0; i < numberOfOrbs; i++) {
+                orbsArray.push(new Orb());
+            }
+        }
+
+        function animateOrbs() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            for (let i = 0; i < orbsArray.length; i++) {
+                orbsArray[i].update();
+                orbsArray[i].draw();
+            }
+            requestAnimationFrame(animateOrbs);
+        }
+
+        resizeBgCanvas();
+        animateOrbs();
+
+        // Sincronização Dinâmica de Capas (Jogos e Filmes)
+        function atualizarCapasDinamicas() {
+            try {
+                // 1. Capas de Jogos
+                const rawJogos = localStorage.getItem('overcritic_reviews') 
+                              || localStorage.getItem('overcritic_jogos')
+                              || localStorage.getItem('overclock_jogos');
+                if (rawJogos) {
+                    const jogos = JSON.parse(rawJogos);
+                    if (Array.isArray(jogos)) {
+                        const gameCovers = jogos
+                            .map(j => j.capa || j.banner || j.img || j.imagem || j.coverUrl)
+                            .filter(Boolean);
+                        if (gameCovers.length > 0) {
+                            const coverEls = document.querySelectorAll('.covers-games .cover-item');
+                            coverEls.forEach((el, idx) => {
+                                if (gameCovers[idx]) {
+                                    el.style.backgroundImage = `url('${gameCovers[idx]}')`;
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Erro ao sincronizar capas de jogos:', e);
+            }
+
+            try {
+                // 2. Capas de Filmes & Séries
+                const rawMidias = localStorage.getItem('OVERCRITIC_MIDIAS') 
+                               || localStorage.getItem('overcritic_midias')
+                               || localStorage.getItem('overclock_midias');
+                if (rawMidias) {
+                    const midias = JSON.parse(rawMidias);
+                    if (Array.isArray(midias)) {
+                        const movieCovers = midias
+                            .map(m => m.coverUrl || m.poster || m.img || m.capa || m.imagem)
+                            .filter(Boolean);
+                        if (movieCovers.length > 0) {
+                            const coverEls = document.querySelectorAll('.covers-movies .cover-item');
+                            coverEls.forEach((el, idx) => {
+                                if (movieCovers[idx]) {
+                                    el.style.backgroundImage = `url('${movieCovers[idx]}')`;
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Erro ao sincronizar capas de filmes:', e);
+            }
+        }
+
+        // ══════════════════════════════════════
+        // AUTENTICAÇÃO, PERFIL & SESSÃO NO HUB
+        // ══════════════════════════════════════
+        function exibirToast(msg, duracao = 5000) {
+            const toast = document.getElementById('overcriticToast');
+            if (!toast) return;
+            toast.innerHTML = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, duracao);
+        }
+
+        async function realizarLogoutRapido() {
+            if (confirm('Deseja realmente sair da sua conta?')) {
+                if (window.sbClient) {
+                    try { await window.sbClient.auth.signOut(); } catch(e) {}
+                }
+                localStorage.setItem('overcritic_currentUser', 'Visitante');
+                localStorage.removeItem('overcritic_user');
+                localStorage.removeItem('overcritic_user_email');
+                atualizarEstadoAuthHeader();
+                exibirToast('🚪 Você saiu da sua conta.');
+            }
+        }
+
+        // Sincronização de Sessão e Usuário no Header
+        async function atualizarEstadoAuthHeader() {
+            const greeting = document.getElementById('dashboardGreeting');
+            const authContainer = document.getElementById('authHeaderAction');
+            if (!authContainer) return;
+
+            let currentUser = localStorage.getItem('overcritic_currentUser');
+            let isSupabaseLogged = false;
+
+            if (window.sbClient) {
+                try {
+                    const { data: { session } } = await window.sbClient.auth.getSession();
+                    if (session && session.user) {
+                        isSupabaseLogged = true;
+                        currentUser = session.user.user_metadata?.username || session.user.email.split('@')[0];
+                        localStorage.setItem('overcritic_currentUser', currentUser);
+                        localStorage.setItem('overcritic_user', currentUser);
+                        localStorage.setItem('overcritic_user_email', session.user.email);
+                    }
+                } catch(e) {}
+            }
+
+            const estaLogado = currentUser && currentUser.toLowerCase() !== 'visitante';
+
+            if (estaLogado) {
+                if (greeting) {
+                    greeting.innerHTML = `Olá, <span style="color:var(--accent-cyan); text-shadow:0 0 15px rgba(0,240,255,0.4);">${currentUser}</span>! 👋`;
+                }
+                authContainer.innerHTML = `
+                    <div class="header-auth-container">
+                        <a href="conta_login.html?tab=perfil" class="user-profile-header-pill" title="Acessar Meu Perfil Gamer">
+                            <div class="header-avatar-circle">🎮</div>
+                            <div class="header-user-meta">
+                                <span class="header-user-name">${currentUser}</span>
+                                <span class="header-user-status">🟢 Online • Ver Perfil</span>
+                            </div>
+                        </a>
+                        <button type="button" onclick="realizarLogoutRapido()" class="header-btn-logout-mini" title="Desconectar da Conta">🚪</button>
+                    </div>
+                `;
+            } else {
+                if (greeting) {
+                    greeting.innerText = 'Olá, Jogador! 👋';
+                }
+                authContainer.innerHTML = `
+                    <a href="conta_login.html?tab=login" class="header-login-btn" title="Entrar ou Criar Conta">
+                        <span>👤</span> <span>Entrar / Criar Conta</span>
+                    </a>
+                `;
+            }
+        }
+
+        // Detecção de Autenticação ao entrar no site (seja por link de e-mail ou sessão ativa)
+        if (window.sbClient) {
+            window.sbClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    const name = session.user.user_metadata?.username || session.user.email.split('@')[0];
+                    localStorage.setItem('overcritic_currentUser', name);
+                    localStorage.setItem('overcritic_user', name);
+                    localStorage.setItem('overcritic_user_email', session.user.email);
+                    atualizarEstadoAuthHeader();
+
+                    // Se acabou de validar o e-mail através do link da confirmação
+                    if (window.location.hash.includes('access_token') || window.location.hash.includes('type=signup')) {
+                        exibirToast(`🎉 <b>Conta autenticada com sucesso!</b> Bem-vindo(a) ao OVERCRITIC, <b>${name}</b>!`);
+                        window.history.replaceState(null, '', window.location.pathname);
+                    }
+                } else if (event === 'SIGNED_OUT') {
+                    atualizarEstadoAuthHeader();
+                }
+            });
+        }
+
+        // Verifica erros de confirmação de e-mail no hash (ex: link expirado)
+        if (window.location.hash.includes('error_description')) {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const erroMsg = params.get('error_description') || 'Link de autenticação expirado ou inválido.';
+            setTimeout(() => {
+                exibirToast(`⚠️ <b>Atenção:</b> ${erroMsg}`);
+            }, 1000);
+        }
+
+        atualizarCapasDinamicas();
+        atualizarEstadoAuthHeader();
+        window.addEventListener('pageshow', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); });
+        window.addEventListener('storage', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); });
+        
+    </script>
+</body>
+</html>

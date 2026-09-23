@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERCRITIC - Minha Conta & Perfil</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Supabase SDK e Conexão -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="js/apiClient.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #07090f;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #9d4edd;
+            --card-bg: rgba(13, 17, 27, 0.75);
+            --glass-border: rgba(0, 240, 255, 0.16);
+            --text-main: #f0f4fc;
+            --text-muted: #8b9bb4;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body.light-mode {
+            --bg-color: #d2d6df;
+            --accent-cyan: #c51b29;
+            --accent-purple: #800f1c;
+            --card-bg: rgba(220, 224, 232, 0.88);
+            --glass-border: rgba(0, 0, 0, 0.16);
+            --text-main: #0e121a;
+            --text-muted: #4a5568;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(157, 78, 221, 0.08) 0%, transparent 40%);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* SIDEBAR GLOBAL */
+        .sidebar {
+            width: 80px;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+        body.light-mode .sidebar {
+            background: rgba(214, 219, 228, 0.95);
+        }
+
+        .brand-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            margin-bottom: 25px;
+            gap: 4px;
+        }
+        .brand-icon img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .brand-icon:hover img {
+            transform: scale(1.08);
+        }
+        .brand-icon span {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .nav-item {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 1.25rem;
+            transition: all 0.25s ease;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 65px;
+            background: rgba(7, 9, 15, 0.95);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--accent-cyan);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .nav-item:hover::after {
+            opacity: 1;
+        }
+
+        .theme-toggle-container {
+            margin-top: auto;
+            margin-bottom: 20px;
+        }
+        .theme-toggle-container button {
+            cursor: pointer;
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-wrapper {
+            margin-left: 80px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .auth-container {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            width: 100%;
+            max-width: 520px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 240, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .auth-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+        .auth-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .auth-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* TABS */
+        .auth-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .tab-btn.active {
+            background: var(--accent-cyan);
+            color: #07090f;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        body.light-mode .form-input {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+        .form-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-cyan), #00b4d8);
+            border: none;
+            border-radius: 12px;
+            color: #07090f;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.35);
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 240, 255, 0.5);
+            filter: brightness(1.1);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ALERTAS & FEEDBACK */
+        .auth-alert {
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+            display: none;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+        .auth-alert.error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        .auth-alert.success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+        .auth-alert.warning {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fcd34d;
+        }
+
+        /* PERFIL DO USUÁRIO LOGADO */
+        .profile-view {
+            display: none;
+            text-align: center;
+        }
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(0,240,255,0.2), rgba(157,78,221,0.2));
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 20px auto;
+        }
+        .profile-name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .profile-email {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .profile-badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10b981;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .stats-cards-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .stat-mini-card {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px 10px;
+        }
+        body.light-mode .stat-mini-card {
+            background: rgba(255, 255, 255, 0.6);
+        }
+        .stat-mini-number {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+        }
+        .stat-mini-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-home {
+            flex: 1;
+            padding: 14px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+        .btn-home:hover {
+            background: var(--accent-cyan);
+            color: #07090f;
+            transform: translateY(-2px);
+        }
+        .btn-logout {
+            flex: 1;
+            padding: 14px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .btn-logout:hover {
+            background: #ef4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .sidebar { display: none; }
+            .main-wrapper { margin-left: 0; padding: 20px 15px; }
+            .auth-container { padding: 30px 20px; }
+            .stats-cards-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        if (localStorage.getItem('overcritic_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="index.html" class="brand-icon" title="Overcritic Hub">
+            <img src="assets/overcritic_icon.png" alt="Overcritic">
+            <span>HQ</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item" data-tooltip="Início">🏠</a>
+            <a href="adicionar_jogos.html" class="nav-item" data-tooltip="Críticas de Jogos">🎮</a>
+            <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
+            <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
+            <a href="descobrir_titulos.html" class="nav-item" data-tooltip="Descobrir Títulos">🍿</a>
+            <a href="adicionar_platinas.html" class="nav-item" data-tooltip="Platinas & Troféus">🏆</a>
+            <a href="suporte_overcritic.html" class="nav-item" data-tooltip="Suporte & Sugestões">💡</a>
+            <a href="conta_login.html" class="nav-item active" data-tooltip="Minha Conta / Perfil">👤</a>
+        </nav>
+        <div class="theme-toggle-container">
+            <button id="themeToggleBtn" class="nav-item" data-tooltip="Alternar Tema">🌓</button>
+        </div>
+    </aside>
+
+    <div class="main-wrapper">
+        <div class="auth-container">
+            
+            <!-- CABEÇALHO DINÂMICO -->
+            <div class="auth-header">
+                <span class="auth-badge" id="authSectionBadge">ACESSO AO SISTEMA</span>
+                <h1 class="auth-title" id="authSectionTitle">Minha Conta & Perfil</h1>
+                <p class="auth-subtitle" id="authSectionSubtitle">Acesse com seu e-mail e senha para salvar suas críticas na nuvem.</p>
+            </div>
+
+            <!-- TABS DE NAVEGAÇÃO SUPERIORES -->
+            <div class="auth-tabs" id="authTabsContainer">
+                <button class="tab-btn" id="tabProfile" onclick="alternarTab('profile')">👤 MEU PERFIL</button>
+                <button class="tab-btn active" id="tabLogin" onclick="alternarTab('login')">🔑 ENTRAR</button>
+                <button class="tab-btn" id="tabRegister" onclick="alternarTab('register')">✨ CRIAR CONTA</button>
+            </div>
+
+            <!-- ALERTA DE STATUS / FEEDBACK -->
+            <div id="authAlert" class="auth-alert"></div>
+
+            <!-- ══════ ABA 1: MEU PERFIL ══════ -->
+            <div id="profileTabContent" style="display: none;">
+                <!-- Perfil Autenticado -->
+                <div id="profileActiveView" class="profile-view" style="display: none;">
+                    <div class="profile-avatar-large" id="profAvatar">🎮</div>
+                    <h2 class="profile-name" id="profName">Jogador</h2>
+                    <div class="profile-email" id="profEmail">jogador@email.com</div>
+                    <div class="profile-badge-status" id="profStatusBadge">
+                        <span>🛡️</span> E-mail Autenticado no Supabase
+                    </div>
+
+                    <div class="stats-cards-row">
+                        <div class="stat-mini-card">
+                            <div class="stat-mini-number" id="profJogosCount">0</div>
+                            <div class="stat-mini-label">Jogos</div>
+                        </div>
+                        <div class="stat-mini-card">
+                            <div class="stat-mini-number" id="profMidiasCount">0</div>
+                            <div class="stat-mini-label">Mídias</div>
+                        </div>
+                        <div class="stat-mini-card">
+                            <div class="stat-mini-number" id="profPlatinasCount">0</div>
+                            <div class="stat-mini-label">Platinas</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions" style="margin-bottom: 14px;">
+                        <a href="index.html" class="btn-home">🏠 Ir para o Hub</a>
+                        <a href="suporte_overcritic.html?tab=admin" id="btnAdminAccess" class="btn-home" style="display: none; border-color: #ffd700; color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.25); text-decoration: none;">👑 Painel Admin</a>
+                        <button type="button" class="btn-logout" onclick="realizarLogout()">🚪 Desconectar</button>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                        <a href="adicionar_jogos.html" style="font-size: 0.8rem; color: var(--accent-cyan); text-decoration: none; padding: 6px 12px; background: rgba(0,240,255,0.06); border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">🎮 Minhas Críticas</a>
+                        <a href="adicionar_midias.html" style="font-size: 0.8rem; color: var(--accent-purple); text-decoration: none; padding: 6px 12px; background: rgba(157,78,221,0.06); border-radius: 8px; border: 1px solid rgba(157,78,221,0.2);">🎬 Minhas Mídias</a>
+                        <a href="adicionar_platinas.html" style="font-size: 0.8rem; color: #f59e0b; text-decoration: none; padding: 6px 12px; background: rgba(245,158,11,0.06); border-radius: 8px; border: 1px solid rgba(245,158,11,0.2);">🏆 Minhas Platinas</a>
+                    </div>
+                </div>
+
+                <!-- Perfil Visitante (Não Autenticado) -->
+                <div id="profileGuestView" style="display: none; text-align: center; padding: 15px 0;">
+                    <div style="font-size: 3rem; margin-bottom: 12px; opacity: 0.85;">🔒</div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 8px; color: var(--text-main);">Você ainda não fez login</h3>
+                    <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; max-width: 380px; margin-left: auto; margin-right: auto;">
+                        Entre na sua conta para acompanhar seu perfil gamer, estatísticas pessoais e manter suas críticas sincronizadas na nuvem com segurança.
+                    </p>
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button type="button" class="btn-submit" style="margin-top: 0; width: auto; padding: 12px 24px;" onclick="alternarTab('login')">FAZER LOGIN</button>
+                        <button type="button" class="btn-home" style="width: auto; padding: 12px 24px;" onclick="alternarTab('register')">CRIAR CONTA</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════ ABA 2: ENTRAR (LOGIN) ══════ -->
+            <div id="loginTabContent">
+                <!-- Se já estiver autenticado -->
+                <div id="loginAlreadyActiveView" style="display: none; text-align: center; padding: 15px 0;">
+                    <div style="font-size: 2.8rem; margin-bottom: 10px;">✅</div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--text-main);">Você já está conectado!</h3>
+                    <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px;">
+                        Conectado atualmente como <b id="lblCurrentLoggedName" style="color: var(--accent-cyan);">Jogador</b>.
+                    </p>
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button type="button" class="btn-home" onclick="alternarTab('profile')">👤 Ver Meu Perfil</button>
+                        <button type="button" class="btn-logout" onclick="realizarLogout()">🚪 Trocar de Conta</button>
+                    </div>
+                </div>
+
+                <!-- Formulário de Login -->
+                <form id="formLogin" onsubmit="realizarLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">E-MAIL CADASTRADO</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="seu@email.com" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SUA SENHA</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" id="btnLoginSubmit" class="btn-submit">ENTRAR NO OVERCRITIC</button>
+
+                    <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted);">
+                        Ainda não tem conta? 
+                        <a href="javascript:void(0)" onclick="alternarTab('register')" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">Cadastre-se grátis</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ══════ ABA 3: CRIAR CONTA (CADASTRO) ══════ -->
+            <div id="registerTabContent" style="display: none;">
+                <form id="formRegister" onsubmit="realizarCadastro(event)">
+                    <div class="form-group">
+                        <label class="form-label">NOME DE JOGADOR / USUÁRIO</label>
+                        <input type="text" id="regUsername" class="form-input" placeholder="Ex: pontuG" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">E-MAIL VÁLIDO (RECEBERÁ CONFIRMAÇÃO)</label>
+                        <input type="email" id="regEmail" class="form-input" placeholder="seu@email.com" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SENHA (MÍNIMO 6 CARACTERES)</label>
+                        <input type="password" id="regPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CONFIRME SUA SENHA</label>
+                        <input type="password" id="regConfirmPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+                    </div>
+                    <button type="submit" id="btnRegSubmit" class="btn-submit">CRIAR CONTA & ENVIAR CONFIRMAÇÃO</button>
+
+                    <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted);">
+                        Já tem uma conta cadastrada? 
+                        <a href="javascript:void(0)" onclick="alternarTab('login')" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">Entrar agora</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Tema Claro / Escuro
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-mode');
+                localStorage.setItem('overcritic_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+            });
+        }
+
+        let usuarioAtualSessao = null;
+
+        // Alternância entre as 3 Abas
+        function alternarTab(modo) {
+            esconderAlerta();
+            const tabProfile = document.getElementById('tabProfile');
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+
+            const contentProfile = document.getElementById('profileTabContent');
+            const contentLogin = document.getElementById('loginTabContent');
+            const contentRegister = document.getElementById('registerTabContent');
+
+            const title = document.getElementById('authSectionTitle');
+            const subtitle = document.getElementById('authSectionSubtitle');
+            const badge = document.getElementById('authSectionBadge');
+
+            // Reset classes
+            [tabProfile, tabLogin, tabRegister].forEach(b => b.classList.remove('active'));
+            [contentProfile, contentLogin, contentRegister].forEach(c => c.style.display = 'none');
+
+            if (modo === 'profile') {
+                tabProfile.classList.add('active');
+                contentProfile.style.display = 'block';
+                badge.innerText = 'CENTRAL DO USUÁRIO';
+                title.innerText = 'Meu Perfil Gamer';
+                subtitle.innerText = 'Acompanhe seu status, estatísticas e críticas sincronizadas.';
+                renderizarVisualPerfil();
+            } else if (modo === 'login') {
+                tabLogin.classList.add('active');
+                contentLogin.style.display = 'block';
+                badge.innerText = 'ACESSO AO SISTEMA';
+                title.innerText = 'Entrar na Conta';
+                subtitle.innerText = 'Acesse com seu e-mail e senha para salvar suas críticas na nuvem.';
+                renderizarVisualLogin();
+            } else {
+                tabRegister.classList.add('active');
+                contentRegister.style.display = 'block';
+                badge.innerText = 'NOVA CONTA';
+                title.innerText = 'Criar Nova Conta';
+                subtitle.innerText = 'Enviaremos um link de confirmação para o seu e-mail por segurança.';
+            }
+        }
+
+        function renderizarVisualPerfil() {
+            const activeView = document.getElementById('profileActiveView');
+            const guestView = document.getElementById('profileGuestView');
+            const localUser = localStorage.getItem('overcritic_currentUser');
+
+            if (usuarioAtualSessao || (localUser && localUser.toLowerCase() !== 'visitante')) {
+                activeView.style.display = 'block';
+                guestView.style.display = 'none';
+
+                const name = usuarioAtualSessao?.user_metadata?.username || localUser || 'Jogador';
+                const email = usuarioAtualSessao?.email || localStorage.getItem('overcritic_user_email') || 'Conectado localmente';
+
+                document.getElementById('profName').innerText = name;
+                document.getElementById('profEmail').innerText = email;
+
+                // Identifica se é o Administrador
+                const isAdmin = (window.isAdminUser && window.isAdminUser(usuarioAtualSessao)) ||
+                                (localStorage.getItem('overcritic_is_admin') === 'true');
+
+                const statusBadge = document.getElementById('profStatusBadge');
+                const btnAdmin = document.getElementById('btnAdminAccess');
+
+                if (statusBadge) {
+                    if (isAdmin) {
+                        statusBadge.style.background = 'rgba(255, 215, 0, 0.15)';
+                        statusBadge.style.border = '1px solid rgba(255, 215, 0, 0.5)';
+                        statusBadge.style.color = '#ffd700';
+                        statusBadge.innerHTML = '<span>👑</span> ADMINISTRADOR & MODERADOR DO OVERCRITIC';
+                    } else {
+                        statusBadge.style.background = '';
+                        statusBadge.style.border = '';
+                        statusBadge.style.color = '';
+                        statusBadge.innerHTML = '<span>🛡️</span> E-mail Autenticado no Supabase';
+                    }
+                }
+
+                if (btnAdmin) {
+                    btnAdmin.style.display = isAdmin ? 'inline-flex' : 'none';
+                }
+
+                carregarEstatisticasPerfil();
+            } else {
+                activeView.style.display = 'none';
+                guestView.style.display = 'block';
+            }
+        }
+
+        function renderizarVisualLogin() {
+            const activeCard = document.getElementById('loginAlreadyActiveView');
+            const form = document.getElementById('formLogin');
+            const localUser = localStorage.getItem('overcritic_currentUser');
+
+            if (usuarioAtualSessao || (localUser && localUser.toLowerCase() !== 'visitante')) {
+                activeCard.style.display = 'block';
+                form.style.display = 'none';
+                const name = usuarioAtualSessao?.user_metadata?.username || localUser || 'Jogador';
+                document.getElementById('lblCurrentLoggedName').innerText = name;
+            } else {
+                activeCard.style.display = 'none';
+                form.style.display = 'block';
+            }
+        }
+
+        function mostrarAlerta(msg, tipo = 'error') {
+            const el = document.getElementById('authAlert');
+            el.className = `auth-alert ${tipo}`;
+            el.innerHTML = msg;
+            el.style.display = 'block';
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function esconderAlerta() {
+            const el = document.getElementById('authAlert');
+            el.style.display = 'none';
+        }
+
+        // ══════════════════════════════════════
+        // AUTENTICAÇÃO COM O SUPABASE AUTH
+        // ══════════════════════════════════════
+
+        async function checarSessaoAtiva() {
+            // Verifica parâmetro de URL (ex: conta_login.html?tab=perfil)
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+
+            if (!window.sbClient) {
+                console.warn('Supabase Client não inicializado.');
+                if (tabParam === 'perfil' || tabParam === 'profile') alternarTab('profile');
+                else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
+                else alternarTab('login');
+                return;
+            }
+
+            try {
+                const { data: { session }, error } = await window.sbClient.auth.getSession();
+                if (session && session.user) {
+                    usuarioAtualSessao = session.user;
+                    const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
+                    localStorage.setItem('overcritic_currentUser', username);
+                    localStorage.setItem('overcritic_user', username);
+                    localStorage.setItem('overcritic_user_email', session.user.email);
+                    localStorage.setItem('overcritic_user_id', session.user.id);
+
+                    const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
+                    localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
+
+                    if (tabParam === 'login') alternarTab('login');
+                    else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
+                    else alternarTab('profile'); // Padrão quando logado: ir direto ao Perfil!
+                } else {
+                    usuarioAtualSessao = null;
+                    if (tabParam === 'perfil' || tabParam === 'profile') alternarTab('profile');
+                    else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
+                    else alternarTab('login'); // Padrão quando deslogado: ir ao Login!
+                }
+            } catch (err) {
+                console.error('Erro ao verificar sessão:', err);
+                alternarTab('login');
+            }
+        }
+
+        async function carregarEstatisticasPerfil() {
+            try {
+                const jogos = JSON.parse(localStorage.getItem('overcritic_reviews') || '[]');
+                const midias = JSON.parse(localStorage.getItem('OVERCRITIC_MIDIAS') || '[]');
+                const platinas = JSON.parse(localStorage.getItem('overcritic_platinas_feed') || '[]');
+
+                document.getElementById('profJogosCount').innerText = jogos.length;
+                document.getElementById('profMidiasCount').innerText = midias.length;
+                document.getElementById('profPlatinasCount').innerText = platinas.length;
+            } catch (e) {}
+        }
+
+        // CADASTRO
+        async function realizarCadastro(e) {
+            e.preventDefault();
+            esconderAlerta();
+
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPassword').value;
+            const confirmPass = document.getElementById('regConfirmPassword').value;
+            const btn = document.getElementById('btnRegSubmit');
+
+            if (pass !== confirmPass) {
+                mostrarAlerta('⚠️ As senhas digitadas não coincidem. Verifique e tente novamente.', 'error');
+                return;
+            }
+
+            if (!window.sbClient) {
+                mostrarAlerta('❌ Erro: Conexão com o Supabase não encontrada.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'CRIANDO CONTA...';
+
+            try {
+                // Configura redirect URL para o Site URL configurado no Supabase
+                const redirectUrl = window.location.origin.includes('github.io')
+                    ? 'https://pontug.github.io/OVERCRITIC/'
+                    : `${window.location.origin}/`;
+
+                const { data, error } = await window.sbClient.auth.signUp({
+                    email: email,
+                    password: pass,
+                    options: {
+                        data: {
+                            username: username
+                        },
+                        emailRedirectTo: redirectUrl
+                    }
+                });
+
+                if (error) {
+                    mostrarAlerta(`❌ <b>Falha no cadastro:</b> ${error.message}`, 'error');
+                } else if (data && data.session) {
+                    // Confirmação de e-mail desativada no Supabase: entra imediatamente!
+                    usuarioAtualSessao = data.user;
+                    localStorage.setItem('overcritic_currentUser', username);
+                    localStorage.setItem('overcritic_user', username);
+                    localStorage.setItem('overcritic_user_email', email);
+                    mostrarAlerta(`🎉 <b>Conta criada com sucesso, ${username}!</b> Conectando ao seu perfil...`, 'success');
+                    setTimeout(() => {
+                        alternarTab('profile');
+                    }, 1000);
+                } else {
+                    document.getElementById('formRegister').reset();
+                    mostrarAlerta(`
+                        <div style="font-size: 1.1rem; margin-bottom: 8px;">📩 <b>Quase lá, ${username}!</b></div>
+                        Enviamos um e-mail de confirmação para <b>${email}</b>.<br>
+                        Abra sua caixa de entrada e clique no link de ativação.<br><br>
+                        <div style="font-size: 0.8rem; background: rgba(0,240,255,0.08); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">
+                            💡 <b>Dica:</b> Se o link no e-mail disser "expirado", o antivírus do seu e-mail pode ter confirmado o link automaticamente. Tente fazer o login direto na aba <b>ENTRAR</b>!
+                        </div>
+                    `, 'success');
+                }
+            } catch (err) {
+                mostrarAlerta(`Erro inesperado: ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'CRIAR CONTA & ENVIAR CONFIRMAÇÃO';
+            }
+        }
+
+        // LOGIN
+        async function realizarLogin(e) {
+            e.preventDefault();
+            esconderAlerta();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('btnLoginSubmit');
+
+            if (!window.sbClient) {
+                mostrarAlerta('❌ Erro: Conexão com o Supabase não encontrada.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'CONECTANDO...';
+
+            try {
+                const { data, error } = await window.sbClient.auth.signInWithPassword({
+                    email: email,
+                    password: pass
+                });
+
+                if (error) {
+                    if (error.message.toLowerCase().includes('email not confirmed')) {
+                        mostrarAlerta(`
+                            ⚠️ <b>E-mail ainda não confirmado!</b><br>
+                            Você precisa clicar no link de confirmação enviado para <b>${email}</b> antes de poder entrar no sistema.
+                        `, 'warning');
+                    } else {
+                        mostrarAlerta(`❌ <b>Erro ao entrar:</b> E-mail ou senha incorretos (${error.message}).`, 'error');
+                    }
+                } else if (data && data.user) {
+                    usuarioAtualSessao = data.user;
+                    const username = data.user.user_metadata?.username || email.split('@')[0];
+                    localStorage.setItem('overcritic_currentUser', username);
+                    localStorage.setItem('overcritic_user', username);
+                    localStorage.setItem('overcritic_user_email', email);
+                    localStorage.setItem('overcritic_user_id', data.user.id);
+
+                    const isAdmin = window.isAdminUser ? window.isAdminUser(data.user) : false;
+                    localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
+
+                    mostrarAlerta(`🎉 <b>Bem-vindo de volta, ${username}!</b> Sessão conectada com sucesso!`, 'success');
+                    setTimeout(() => {
+                        alternarTab('profile');
+                    }, 900);
+                }
+            } catch (err) {
+                mostrarAlerta(`Erro inesperado: ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'ENTRAR NO OVERCRITIC';
+            }
+        }
+
+        // LOGOUT
+        async function realizarLogout() {
+            if (window.sbClient) {
+                try {
+                    await window.sbClient.auth.signOut();
+                } catch(e) {}
+            }
+            usuarioAtualSessao = null;
+            localStorage.setItem('overcritic_currentUser', 'Visitante');
+            localStorage.removeItem('overcritic_user');
+            localStorage.removeItem('overcritic_user_email');
+            localStorage.removeItem('overcritic_user_id');
+            localStorage.removeItem('overcritic_is_admin');
+            mostrarAlerta('Você se desconectou com sucesso.', 'warning');
+            setTimeout(() => {
+                alternarTab('login');
+            }, 600);
+        }
+
+        // INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            checarSessaoAtiva();
+
+            // Escuta mudanças de autenticação (ex: tokens no hash da URL retornando do e-mail)
+            if (window.sbClient) {
+                window.sbClient.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN' && session) {
+                        usuarioAtualSessao = session.user;
+                        const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
+                        localStorage.setItem('overcritic_currentUser', username);
+                        localStorage.setItem('overcritic_user', username);
+                        localStorage.setItem('overcritic_user_email', session.user.email);
+                        localStorage.setItem('overcritic_user_id', session.user.id);
+
+                        const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
+                        localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
+
+                        mostrarAlerta(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${username}!`, 'success');
+                        alternarTab('profile');
+                    } else if (event === 'SIGNED_OUT') {
+                        usuarioAtualSessao = null;
+                        localStorage.removeItem('overcritic_user_id');
+                        localStorage.removeItem('overcritic_is_admin');
+                        renderizarVisualPerfil();
+                        renderizarVisualLogin();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

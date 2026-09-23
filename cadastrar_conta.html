@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERCRITIC - Cadastrar Conta</title>
+    <script>window.location.replace('conta_login.html');</script>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --accent-color: #00e5ff;
+            --accent-glow: rgba(0, 229, 255, 0.7);
+            --accent-glow-subtle: rgba(0, 229, 255, 0.4);
+            --accent-bg-hover: rgba(0, 229, 255, 0.05);
+            --card-bg: rgba(13, 17, 23, 0.85);
+            --text-secondary: #8b949e;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--accent-color); 
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #bgParticlesCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .register-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--accent-color);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 20px var(--accent-glow-subtle);
+            text-align: center;
+            z-index: 10;
+            box-sizing: border-box;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-text {
+            font-size: 2em;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--text-secondary);
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-glow-subtle);
+        }
+
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label {
+            color: var(--accent-color);
+        }
+
+        .btn-submit {
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-color);
+            color: #000;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+            text-shadow: 0 0 5px var(--accent-glow-subtle);
+        }
+
+        .glitch-effect {
+            position: relative;
+        }
+
+        /* Linhas de grade para dar um toque mais 'sistema' */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ═══════════════════════════════════
+           RESPONSIVIDADE (MOBILE)
+        ═══════════════════════════════════ */
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 24px 16px !important;
+                width: 95% !important;
+            }
+            .logo-text {
+                font-size: 1.5em !important;
+                letter-spacing: 2px !important;
+                margin-bottom: 20px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-overlay"></div>
+    <canvas id="bgParticlesCanvas"></canvas>
+
+    <div class="register-container">
+        <div style="text-align: center; margin-bottom: 12px;">
+            <img src="assets/overcritic_icon.png" alt="Overcritic" style="width: 72px; height: 72px; border-radius: 16px; box-shadow: 0 0 25px rgba(0, 229, 255, 0.4); border: 1px solid rgba(0, 229, 255, 0.3);">
+        </div>
+        <div class="logo-text glitch-effect">OVERCRITIC</div>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <input type="text" id="username" placeholder=" " required autocomplete="off">
+                <label for="username">> NOME DE USUÁRIO</label>
+            </div>
+            
+            <div class="form-group">
+                <input type="email" id="email" placeholder=" " required autocomplete="off">
+                <label for="email">> E-MAIL</label>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="password" placeholder=" " required>
+                <label for="password">> SENHA</label>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="confirm_password" placeholder=" " required>
+                <label for="confirm_password">> CONFIRMAR SENHA</label>
+            </div>
+
+            <button type="submit" class="btn-submit">INICIAR SISTEMA</button>
+        </form>
+
+        <a href="index.html" class="back-link">[ RETORNAR AO HUB MENU ]</a>
+    </div>
+
+    <script>
+        // Fundo de partículas (Reaproveitado do index)
+        const bgCanvas = document.getElementById('bgParticlesCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let particlesArray = [];
+
+        function resizeBgCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            initParticles();
+        }
+        window.addEventListener('resize', resizeBgCanvas);
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * bgCanvas.width;
+                this.y = Math.random() * bgCanvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.speedY = (Math.random() - 0.5) * 0.8;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > bgCanvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > bgCanvas.height) this.speedY *= -1;
+            }
+            draw() {
+                bgCtx.fillStyle = '#00e5ff';
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            const numberOfParticles = Math.floor((bgCanvas.width * bgCanvas.height) / 15000);
+            for (let i = 0; i < numberOfParticles; i++) particlesArray.push(new Particle());
+        }
+
+        function animateParticles() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        resizeBgCanvas();
+        animateParticles();
+
+        // Tratamento simples do formulário
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const pass = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirm_password').value;
+            const username = document.getElementById('username').value;
+
+            if (pass !== confirmPass) {
+                alert('Erro: As senhas não conferem!');
+                return;
+            }
+
+            // Simulando um cadastro concluído com sucesso e voltando para o index
+            alert(`Bem-vindo(a) ao sistema, ${username}! Cadastro realizado com sucesso.`);
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERCRITIC - Descubra Novos Jogos</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #07090f;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #9d4edd;
+            --card-bg: rgba(13, 17, 27, 0.7);
+            --glass-border: rgba(0, 240, 255, 0.15);
+            --text-main: #f0f4fc;
+            --text-muted: #8b9bb4;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body.light-mode {
+            --bg-color: #d2d6df;
+            --accent-cyan: #c51b29;
+            --accent-purple: #800f1c;
+            --card-bg: rgba(220, 224, 232, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.16);
+            --text-main: #0e121a;
+            --text-muted: #4a5568;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(157, 78, 221, 0.04) 0%, transparent 40%);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-mode {
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(197, 27, 41, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(128, 15, 28, 0.04) 0%, transparent 40%);
+        }
+
+        /* ═══════════════════════════════════
+           SIDEBAR / NAVEGAÇÃO GLOBAL
+        ═══════════════════════════════════ */
+        .sidebar {
+            width: 80px;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .sidebar {
+            background: #d8dde6;
+            border-right: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        .brand-icon {
+            margin-bottom: 35px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .brand-icon:hover { transform: scale(1.1); }
+        .brand-icon img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            object-fit: cover;
+        }
+        body.light-mode .brand-icon img {
+            box-shadow: 0 0 15px rgba(197, 27, 41, 0.3);
+            border: 1px solid rgba(197, 27, 41, 0.3);
+        }
+        .brand-icon span {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+        body.light-mode .nav-item:hover, body.light-mode .nav-item.active {
+            background: rgba(197, 27, 41, 0.12);
+            box-shadow: 0 0 10px rgba(197, 27, 41, 0.2);
+            color: var(--accent-cyan);
+        }
+
+        .nav-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 65px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            z-index: 1000;
+        }
+        body.light-mode .nav-item:hover::after {
+            background: #ffffff;
+            color: #0e121a;
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .sidebar-user {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-align: center;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ═══════════════════════════════════
+           MAIN CONTENT
+        ═══════════════════════════════════ */
+        .main-content {
+            margin-left: 80px;
+            padding: 35px 40px;
+            max-width: 1560px;
+            width: calc(100% - 80px);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* HERO HEADER */
+        .discovery-hero {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px 36px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        body.light-mode .discovery-hero {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero-left {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+        body.light-mode .hero-tag {
+            background: rgba(197, 27, 41, 0.1);
+            border-color: rgba(197, 27, 41, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            max-width: 720px;
+            line-height: 1.6;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .currency-selector-wrapper {
+            position: relative;
+            min-width: 155px;
+        }
+        .currency-select {
+            width: 100%;
+            padding: 12px 34px 12px 38px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.88rem;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b9bb4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        .currency-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        body.light-mode .currency-select {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.18);
+            color: #0e121a;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        .currency-icon-fixed {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            min-width: 260px;
+            max-width: 360px;
+        }
+        .search-box-wrapper input {
+            width: 100%;
+            padding: 12px 18px 12px 42px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .search-box-wrapper input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        body.light-mode .search-box-wrapper input {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.18);
+            color: #0e121a;
+        }
+        .search-icon-fixed {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* ═══════════════════════════════════
+           BARRA DE ABAS (CATEGORIAS)
+        ═══════════════════════════════════ */
+        .categories-bar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(12px);
+        }
+        body.light-mode .categories-bar-card {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+        }
+
+        .category-tabs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            max-width: 100%;
+        }
+        .category-tabs::-webkit-scrollbar { display: none; }
+
+        .cat-tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-family: var(--font-family);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cat-tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .cat-tab-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+        body.light-mode .cat-tab-btn {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.12);
+            color: var(--text-muted);
+        }
+        body.light-mode .cat-tab-btn:hover {
+            background: #f0f3f8;
+            color: var(--text-main);
+        }
+        body.light-mode .cat-tab-btn.active {
+            background: rgba(197, 27, 41, 0.12);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(197, 27, 41, 0.2);
+        }
+
+        .results-badge {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            white-space: nowrap;
+        }
+        body.light-mode .results-badge {
+            background: #eaedf4;
+            color: #0e121a;
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+
+        /* ═══════════════════════════════════
+           GRADE DE JOGOS
+        ═══════════════════════════════════ */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 22px;
+            min-height: 400px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        .game-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+        body.light-mode .game-card {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+        body.light-mode .game-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), 0 0 15px rgba(197, 27, 41, 0.2);
+        }
+
+        .game-card-media {
+            position: relative;
+            width: 100%;
+            height: 155px;
+            background: #000;
+            overflow: hidden;
+        }
+        .game-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .game-card:hover .game-card-img {
+            transform: scale(1.06);
+        }
+
+        .badge-deal {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #00f0ff, #7000ff);
+            color: #000;
+            font-size: 0.72rem;
+            font-weight: 900;
+            padding: 4px 9px;
+            border-radius: 7px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            letter-spacing: 0.5px;
+        }
+        body.light-mode .badge-deal {
+            background: linear-gradient(135deg, #c51b29, #800f1c);
+            color: #fff;
+        }
+
+        .badge-score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            color: #ffd166;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 4px 9px;
+            border-radius: 7px;
+            border: 1px solid rgba(255, 209, 102, 0.35);
+        }
+
+        .game-card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .game-card-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 2.7em;
+            margin: 0;
+        }
+
+        .game-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        .game-card-genre {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid var(--glass-border);
+            max-width: 170px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        body.light-mode .game-card-genre {
+            background: #cbd2de;
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        .game-card-price {
+            font-weight: 800;
+            color: var(--accent-cyan);
+            font-size: 0.86rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* ═══════════════════════════════════
+           PLATFORM BADGES NOS CARDS
+        ═══════════════════════════════════ */
+        .game-card-platforms {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin: 2px 0 4px;
+        }
+        .plat-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            transition: transform 0.2s ease;
+        }
+        .plat-badge:hover {
+            transform: translateY(-1px);
+        }
+        .plat-badge-pc {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: #00f0ff;
+        }
+        .plat-badge-ps {
+            background: rgba(0, 112, 209, 0.12);
+            border: 1px solid rgba(0, 112, 209, 0.45);
+            color: #4da3ff;
+        }
+        .plat-badge-xbox {
+            background: rgba(16, 124, 65, 0.12);
+            border: 1px solid rgba(16, 124, 65, 0.45);
+            color: #22c55e;
+        }
+        .plat-badge-switch {
+            background: rgba(230, 0, 18, 0.12);
+            border: 1px solid rgba(230, 0, 18, 0.45);
+            color: #f87171;
+        }
+
+        body.light-mode .plat-badge-pc {
+            background: rgba(0, 160, 200, 0.12);
+            border-color: rgba(0, 140, 180, 0.4);
+            color: #006880;
+        }
+        body.light-mode .plat-badge-ps {
+            background: rgba(0, 100, 200, 0.12);
+            border-color: rgba(0, 90, 180, 0.4);
+            color: #0052a3;
+        }
+        body.light-mode .plat-badge-xbox {
+            background: rgba(16, 124, 65, 0.12);
+            border-color: rgba(16, 124, 65, 0.4);
+            color: #0a6630;
+        }
+        body.light-mode .plat-badge-switch {
+            background: rgba(200, 16, 30, 0.12);
+            border-color: rgba(197, 27, 41, 0.35);
+            color: #a3111f;
+        }
+
+        .game-card-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .btn-action-eval {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(157, 78, 221, 0.18));
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-action-eval:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            transform: scale(1.02);
+        }
+        body.light-mode .btn-action-eval:hover {
+            color: #fff;
+        }
+
+        .btn-action-store {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-family: var(--font-family);
+        }
+        .btn-action-store:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        }
+        body.light-mode .btn-action-store {
+            background: #cbd2de;
+            border-color: rgba(0, 0, 0, 0.12);
+            color: var(--text-main);
+        }
+
+        /* ═══════════════════════════════════
+           BARRA DE FILTRO POR PLATAFORMA
+        ═══════════════════════════════════ */
+        .platforms-bar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 10px 16px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(12px);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .platforms-bar-card::-webkit-scrollbar { display: none; }
+        body.light-mode .platforms-bar-card {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+        }
+
+        .plat-bar-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .plat-chips-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .plat-chip-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-family: var(--font-family);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .plat-chip-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .plat-chip-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.16), rgba(157, 78, 221, 0.16));
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+        }
+        body.light-mode .plat-chip-btn {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.12);
+            color: var(--text-muted);
+        }
+        body.light-mode .plat-chip-btn:hover {
+            background: #f0f3f8;
+            color: var(--text-main);
+        }
+        body.light-mode .plat-chip-btn.active {
+            background: rgba(197, 27, 41, 0.12);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(197, 27, 41, 0.18);
+        }
+
+        /* ═══════════════════════════════════
+           MODAL ONDE JOGAR / LOJAS OFICIAIS
+        ═══════════════════════════════════ */
+        .modal-backdrop-store {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+            animation: fadeInModal 0.25s ease;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-dialog-store {
+            background: #0b0f19;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.18);
+            border-radius: 22px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            position: relative;
+            animation: slideUpModal 0.25s ease;
+        }
+        @keyframes slideUpModal {
+            from { transform: translateY(20px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        body.light-mode .modal-dialog-store {
+            background: #e1e5ee;
+            border-color: rgba(0, 0, 0, 0.18);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 25px rgba(197, 27, 41, 0.15);
+        }
+
+        .btn-close-store-modal {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        .btn-close-store-modal:hover {
+            color: #fff;
+            background: #c51b29;
+            border-color: #c51b29;
+        }
+
+        .store-modal-header {
+            display: flex;
+            gap: 16px;
+            padding: 22px 22px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            align-items: center;
+        }
+        .store-modal-cover {
+            width: 110px;
+            height: 62px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .store-modal-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .store-modal-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+        }
+        .store-modal-title {
+            font-size: 1.12rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .store-modal-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .store-modal-price {
+            font-weight: 800;
+            color: var(--accent-cyan);
+            font-size: 0.92rem;
+        }
+
+        .store-modal-body {
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .store-options-title {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .store-links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .store-link-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+        .store-link-row:hover {
+            transform: translateX(4px);
+            filter: brightness(1.15);
+        }
+
+        .store-link-steam {
+            background: linear-gradient(135deg, rgba(23, 36, 51, 0.95), rgba(34, 58, 79, 0.95));
+            border-color: rgba(102, 192, 244, 0.35);
+            color: #79c5ff;
+        }
+        .store-link-ps {
+            background: linear-gradient(135deg, rgba(0, 55, 130, 0.9), rgba(0, 92, 184, 0.9));
+            border-color: rgba(77, 163, 255, 0.45);
+            color: #99cbff;
+        }
+        .store-link-xbox {
+            background: linear-gradient(135deg, rgba(14, 94, 50, 0.9), rgba(20, 133, 70, 0.9));
+            border-color: rgba(52, 211, 153, 0.45);
+            color: #86efac;
+        }
+        .store-link-switch {
+            background: linear-gradient(135deg, rgba(179, 14, 27, 0.9), rgba(220, 38, 54, 0.9));
+            border-color: rgba(248, 113, 113, 0.45);
+            color: #fca5a5;
+        }
+
+        .btn-modal-eval {
+            margin-top: 6px;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(157, 78, 221, 0.18));
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-modal-eval:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+        body.light-mode .btn-modal-eval:hover {
+            color: #fff;
+        }
+
+        /* PAGINAÇÃO / FOOTER */
+        .discovery-footer {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0 40px;
+        }
+        .btn-load-more {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: #000;
+            font-family: var(--font-family);
+            font-weight: 800;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 32px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            letter-spacing: 1px;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.25);
+        }
+        .btn-load-more:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 30px rgba(0, 240, 255, 0.5);
+        }
+        body.light-mode .btn-load-more {
+            color: #fff;
+        }
+
+        /* SKELETON LOADER */
+        .skeleton-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            overflow: hidden;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .skeleton-media {
+            width: 100%;
+            height: 155px;
+            background: rgba(255, 255, 255, 0.05);
+            animation: skeletonPulse 1.5s infinite ease-in-out;
+        }
+        .skeleton-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+        .skeleton-line {
+            height: 14px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            animation: skeletonPulse 1.5s infinite ease-in-out;
+        }
+        @keyframes skeletonPulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+
+        /* ═══════════════════════════════════
+           RESPONSIVIDADE (MOBILE & TABLETS)
+        ═══════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100% !important;
+                height: 60px !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                flex-direction: row !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                padding: 0 10px !important;
+                border-right: none !important;
+                border-top: 1px solid var(--glass-border) !important;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
+                z-index: 1000 !important;
+            }
+            .brand-icon, .sidebar-user {
+                display: none !important;
+            }
+            .nav-links {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                width: 100% !important;
+                gap: 0 !important;
+            }
+            .nav-item {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 1.25rem !important;
+                border-radius: 10px !important;
+            }
+            .sidebar-bottom {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 6px !important;
+                margin-top: 0 !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                margin-bottom: 75px !important;
+                padding: 16px 12px !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+            }
+
+            .discovery-hero {
+                padding: 20px 16px !important;
+                border-radius: 18px !important;
+                gap: 14px !important;
+            }
+            .hero-title {
+                font-size: 1.6rem !important;
+            }
+            .hero-desc {
+                font-size: 0.85rem !important;
+            }
+            .hero-actions {
+                width: 100% !important;
+            }
+            .search-box-wrapper {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 100% !important;
+            }
+
+            .categories-bar-card {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                padding: 10px 12px !important;
+            }
+            .results-badge {
+                align-self: flex-start !important;
+            }
+
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+                gap: 10px !important;
+            }
+            .game-card-media {
+                height: 105px !important;
+            }
+            .game-card-body {
+                padding: 10px 8px !important;
+                gap: 6px !important;
+            }
+            .game-card-title {
+                font-size: 0.84rem !important;
+                height: 2.4em !important;
+            }
+            .game-card-meta {
+                font-size: 0.72rem !important;
+            }
+            .game-card-actions {
+                flex-direction: column !important;
+                gap: 6px !important;
+            }
+            .btn-action-eval, .btn-action-store {
+                padding: 7px 6px !important;
+                font-size: 0.72rem !important;
+                width: 100% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            .hero-title {
+                font-size: 1.35rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        if (localStorage.getItem('overcritic_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- ══════ SIDEBAR (NAVEGAÇÃO GLOBAL) ══════ -->
+    <aside class="sidebar">
+        <a href="conta_login.html" class="brand-icon" title="Minha Conta / Perfil">
+            <img src="assets/overcritic_icon.png" alt="Overcritic Logo">
+            <span>HQ</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item" data-tooltip="Início">🏠</a>
+            <a href="adicionar_jogos.html" class="nav-item" data-tooltip="Críticas de Jogos">🎮</a>
+            <a href="descobrir_jogos.html" class="nav-item active" data-tooltip="Descobrir Jogos">🪐</a>
+            <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
+            <a href="descobrir_titulos.html" class="nav-item" data-tooltip="Descobrir Títulos">🍿</a>
+            <a href="adicionar_platinas.html" class="nav-item" data-tooltip="Platinas & Troféus">🏆</a>
+            <a href="suporte_overcritic.html" class="nav-item" data-tooltip="Suporte & Sugestões">💡</a>
+            <a href="conta_login.html" class="nav-item" data-tooltip="Minha Conta / Perfil">👤</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button id="themeToggleBtn" class="nav-item" data-tooltip="Modo Claro/Escuro" style="margin-bottom: 8px;">🌓</button>
+            <button id="loginBtn" class="nav-item" data-tooltip="Fazer Login / Criar Conta">🔑</button>
+            <button id="logoutBtn" class="nav-item" data-tooltip="Sair da Conta" style="display: none;">🚪</button>
+            <div class="sidebar-user" id="currentUser" style="cursor: pointer;" title="Acessar Perfil" onclick="window.location.href='conta_login.html?tab=perfil'">VISITANTE</div>
+        </div>
+    </aside>
+
+    <!-- ══════ CONTEÚDO PRINCIPAL ══════ -->
+    <main class="main-content">
+
+        <!-- CABEÇALHO HERO -->
+        <header class="discovery-hero">
+            <div class="hero-left">
+                <div class="hero-tag">🪐 HUB DE DESCOBERTA GAMER</div>
+                <h1 class="hero-title">Descubra Novos Jogos</h1>
+                <p class="hero-desc">
+                    Explore os maiores sucessos da Steam, grandes lançamentos mundiais, obras-primas aclamadas pela crítica e os melhores descontos para se divertir e avaliar.
+                </p>
+            </div>
+            <div class="hero-actions">
+                <div class="currency-selector-wrapper">
+                    <span class="currency-icon-fixed">💱</span>
+                    <select id="currencySelect" class="currency-select" onchange="mudarMoeda(this.value)" title="Escolha a moeda de exibição">
+                        <option value="BRL">🇧🇷 BRL (R$)</option>
+                        <option value="USD">🇺🇸 USD ($)</option>
+                        <option value="EUR">🇪🇺 EUR (€)</option>
+                        <option value="GBP">🇬🇧 GBP (£)</option>
+                    </select>
+                </div>
+                <div class="search-box-wrapper">
+                    <span class="search-icon-fixed">🔍</span>
+                    <input type="text" id="gameSearchInput" placeholder="Filtrar por nome, gênero..." oninput="filtrarJogosNaTela()">
+                </div>
+            </div>
+        </header>
+
+        <!-- BARRA DE CATEGORIAS -->
+        <div class="categories-bar-card">
+            <div class="category-tabs">
+                <button class="cat-tab-btn active" id="tabTrending" onclick="mudarCategoria('trending')">
+                    🔥 Mais Jogados & Em Alta
+                </button>
+                <button class="cat-tab-btn" id="tabReleases" onclick="mudarCategoria('releases')">
+                    🚀 Lançamentos Recentes
+                </button>
+                <button class="cat-tab-btn" id="tabMetacritic" onclick="mudarCategoria('metacritic')">
+                    ⭐ Aclamados (Top Crítica)
+                </button>
+                <button class="cat-tab-btn" id="tabFree" onclick="mudarCategoria('free')">
+                    🎮 Grandes Jogos Gratuitos
+                </button>
+                <button class="cat-tab-btn" id="tabDeals" onclick="mudarCategoria('deals')">
+                    🏷️ Super Promoções Steam
+                </button>
+            </div>
+            <div class="results-badge" id="resultsCountBadge">
+                Carregando catálogo...
+            </div>
+        </div>
+
+        <!-- BARRA DE FILTRO POR PLATAFORMA -->
+        <div class="platforms-bar-card">
+            <span class="plat-bar-title">🎮 Plataformas:</span>
+            <div class="plat-chips-group">
+                <button class="plat-chip-btn active" id="platChipAll" data-plat="all" onclick="filtrarPlataforma('all')">🌐 Todas</button>
+                <button class="plat-chip-btn" id="platChipPC" data-plat="PC" onclick="filtrarPlataforma('PC')">💻 PC / Steam</button>
+                <button class="plat-chip-btn" id="platChipPS" data-plat="PS" onclick="filtrarPlataforma('PS')">🎮 PlayStation</button>
+                <button class="plat-chip-btn" id="platChipXbox" data-plat="XBOX" onclick="filtrarPlataforma('XBOX')">🟢 Xbox</button>
+                <button class="plat-chip-btn" id="platChipSwitch" data-plat="SWITCH" onclick="filtrarPlataforma('SWITCH')">🔴 Switch</button>
+            </div>
+        </div>
+
+        <!-- GRADE DE CARDS DE JOGOS -->
+        <div id="gamesGrid" class="games-grid">
+            <!-- Renderizado dinamicamente via JS -->
+        </div>
+
+        <!-- FOOTER COM BOTÃO DE CARREGAR MAIS -->
+        <div class="discovery-footer">
+            <button id="btnLoadMore" class="btn-load-more" onclick="carregarMaisJogos()">
+                ➕ Carregar Mais Jogos
+            </button>
+        </div>
+
+    </main>
+
+    <!-- ══════ MODAL ONDE JOGAR / LOJAS OFICIAIS ══════ -->
+    <div id="storeModal" class="modal-backdrop-store" style="display: none;" onclick="fecharModalLojas(event)">
+        <div class="modal-dialog-store" onclick="event.stopPropagation()">
+            <button class="btn-close-store-modal" onclick="fecharModalLojas()" title="Fechar">✕</button>
+            <div class="store-modal-header">
+                <img id="storeModalCover" src="" class="store-modal-cover" alt="Capa">
+                <div class="store-modal-info">
+                    <div class="store-modal-badge" id="storeModalBadge">PLATAFORMAS DISPONÍVEIS</div>
+                    <h2 id="storeModalTitle" class="store-modal-title">Jogo</h2>
+                    <div class="store-modal-meta">
+                        <span id="storeModalGenre">Gênero</span> • <span id="storeModalPrice" class="store-modal-price">Grátis</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="store-modal-body">
+                <h4 class="store-options-title">🛒 Escolha a Loja Oficial / Plataforma:</h4>
+                <div class="store-links-list" id="storeLinksList">
+                    <!-- Links gerados via JavaScript -->
+                </div>
+                
+                <a id="storeModalEvalBtn" href="#" class="btn-modal-eval">
+                    ✍️ Avaliar este Jogo no Overcritic
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════
+           CATÁLOGO ROBUSTO COM IMAGENS REAIS STEAM E SUPORTE MULTIPLATAFORMA
+        ═══════════════════════════════════ */
+        const CATALOGO_ESTENDIDO = {
+            trending: [
+                { title: "Baldur's Gate 3", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg", genre: "RPG / Estratégia", score: "Metacritic 96", badge: "🔥 #1 GOTY", priceBRL: 199.99, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1086940" },
+                { title: "Elden Ring", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg", genre: "Souls-like / RPG", score: "Metacritic 96", badge: "🏆 ACLAMADO", priceBRL: 229.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1245620" },
+                { title: "Black Myth: Wukong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg", genre: "Ação / RPG", score: "Steam: 96%", badge: "🔥 SUCESSO", priceBRL: 229.99, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2358720" },
+                { title: "Cyberpunk 2077", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg", genre: "Mundo Aberto / Sci-Fi", score: "Metacritic 86", badge: "⭐ EXPANSÃO", priceBRL: 199.90, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1091500" },
+                { title: "Helldivers 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg", genre: "Tiro Co-op / Ação", score: "Steam: Muito Positivo", badge: "CO-OP", priceBRL: 199.50, priceUSD: 39.99, platforms: ['PC', 'PS'], steamAppID: "553850" },
+                { title: "Grand Theft Auto V", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg", genre: "Mundo Aberto / Ação", score: "Metacritic 96", badge: "RECORDISTA", priceBRL: 82.41, priceUSD: 14.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "271590" },
+                { title: "Red Dead Redemption 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg", genre: "Faroeste / Aventura", score: "Metacritic 97", badge: "OBRA-PRIMA", priceBRL: 299.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1174180" },
+                { title: "Hogwarts Legacy", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/990080/header.jpg", genre: "Mundo Aberto / Magia", score: "Steam: 91%", badge: "MAGIA", priceBRL: 249.99, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "990080" },
+                { title: "Palworld", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1623730/header.jpg", genre: "Sobrevivência / Crafting", score: "Steam: 93%", badge: "EM ALTA", priceBRL: 88.99, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1623730" },
+                { title: "The Witcher 3: Wild Hunt", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg", genre: "RPG / Fantasia", score: "Metacritic 93", badge: "CLÁSSICO", priceBRL: 129.99, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "292030" },
+                { title: "God of War", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg", genre: "Ação / Mitologia", score: "Metacritic 94", badge: "PLAYSTATION", priceBRL: 199.90, priceUSD: 49.99, platforms: ['PC', 'PS'], steamAppID: "1593500" },
+                { title: "Forza Horizon 5", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1551360/header.jpg", genre: "Corrida / Mundo Aberto", score: "Metacritic 92", badge: "VELOCIDADE", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'XBOX'], steamAppID: "1551360" }
+            ],
+            releases: [
+                { title: "Marvel Rivals", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2767030/header.jpg", genre: "Hero Shooter / PvP", score: "🔥 Novo", badge: "LANÇAMENTO", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2767030" },
+                { title: "Dragon Age: The Veilguard", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1845910/header.jpg", genre: "RPG / Fantasia", score: "Recente", badge: "LANÇAMENTO", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1845910" },
+                { title: "Warhammer 40,000: Space Marine 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2183900/header.jpg", genre: "Ação / Tiro", score: "Steam: Muito Positivo", badge: "NOVIDADE", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2183900" },
+                { title: "Silent Hill 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2124490/header.jpg", genre: "Terror Psicológico", score: "Extremamente Positivo", badge: "REMAKE", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS'], steamAppID: "2124490" },
+                { title: "Metaphor: ReFantazio", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2620600/header.jpg", genre: "JRPG / Estratégia", score: "Metacritic 94", badge: "GOTY CANDIDATE", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2620600" },
+                { title: "S.T.A.L.K.E.R. 2: Heart of Chornobyl", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1643320/header.jpg", genre: "FPS / Sobrevivência", score: "Novo", badge: "AGUARDADO", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'XBOX'], steamAppID: "1643320" },
+                { title: "Indiana Jones and the Great Circle", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2677660/header.jpg", genre: "Aventura / Ação", score: "Novo", badge: "BETHESDA", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2677660" },
+                { title: "Frostpunk 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1601580/header.jpg", genre: "Estratégia / Gestão", score: "Steam: Positivo", badge: "LANÇAMENTO", priceBRL: 134.99, priceUSD: 44.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1601580" }
+            ],
+            metacritic: [
+                { title: "Disco Elysium - The Final Cut", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/632470/header.jpg", genre: "RPG Narrativo", score: "Metacritic 97", badge: "NOTA 97", priceBRL: 75.49, priceUSD: 19.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "632470" },
+                { title: "Half-Life 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/220/header.jpg", genre: "FPS / Clássico", score: "Metacritic 96", badge: "NOTA 96", priceBRL: 32.99, priceUSD: 9.99, platforms: ['PC'], steamAppID: "220" },
+                { title: "BioShock", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/7670/header.jpg", genre: "FPS / Mistério", score: "Metacritic 96", badge: "NOTA 96", priceBRL: 29.99, priceUSD: 19.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "7670" },
+                { title: "Portal 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/620/header.jpg", genre: "Puzzle / Co-op", score: "Metacritic 95", badge: "NOTA 95", priceBRL: 32.99, priceUSD: 9.99, platforms: ['PC', 'XBOX', 'SWITCH'], steamAppID: "620" },
+                { title: "Mass Effect Legendary Edition", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1328670/header.jpg", genre: "Sci-Fi / RPG", score: "Metacritic 90", badge: "TRILOGIA", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1328670" },
+                { title: "Resident Evil 4 Remake", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg", genre: "Terror / Ação", score: "Metacritic 93", badge: "NOTA 93", priceBRL: 169.00, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2050650" },
+                { title: "Persona 5 Royal", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1687950/header.jpg", genre: "JRPG / Anime", score: "Metacritic 95", badge: "NOTA 95", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1687950" },
+                { title: "Sekiro: Shadows Die Twice", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/814380/header.jpg", genre: "Ação / Souls", score: "Metacritic 90", badge: "GOTY", priceBRL: 274.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "814380" }
+            ],
+            free: [
+                { title: "Counter-Strike 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/730/header.jpg", genre: "Tático / FPS", score: "🔥 #1 Steam", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC'], steamAppID: "730" },
+                { title: "Dota 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/570/header.jpg", genre: "MOBA / Estratégia", score: "🔥 Popular", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC'], steamAppID: "570" },
+                { title: "Apex Legends", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172470/header.jpg", genre: "Battle Royale / FPS", score: "🔥 Muito Jogado", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1172470" },
+                { title: "Warframe", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/230410/header.jpg", genre: "Ação / Co-op Sci-Fi", score: "Steam: 91%", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "230410" },
+                { title: "Destiny 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1085660/header.jpg", genre: "MMO / Tiro", score: "Steam: Positivo", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1085660" },
+                { title: "Team Fortress 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/440/header.jpg", genre: "FPS / Clássico", score: "Steam: 93%", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC'], steamAppID: "440" },
+                { title: "PUBG: BATTLEGROUNDS", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/578080/header.jpg", genre: "Battle Royale / Sobrevivência", score: "Popular", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "578080" },
+                { title: "Path of Exile", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/238960/header.jpg", genre: "ARPG / Fantasia Sombria", score: "Steam: 90%", badge: "GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "238960" }
+            ],
+            deals: [
+                { title: "Hollow Knight", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg", genre: "Metroidvania / Ação", score: "Steam: 97%", badge: "-50% OFF", priceBRL: 23.49, priceUSD: 7.49, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "367520" },
+                { title: "DOOM Eternal", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/782330/header.jpg", genre: "FPS / Frenético", score: "Steam: 91%", badge: "-75% OFF", priceBRL: 37.25, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "782330" },
+                { title: "Dead Cells", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/588650/header.jpg", genre: "Rogue-lite / Ação", score: "Steam: 97%", badge: "-50% OFF", priceBRL: 23.74, priceUSD: 12.49, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "588650" },
+                { title: "Control Ultimate Edition", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/870780/header.jpg", genre: "Ação / Sobrenatural", score: "Steam: 90%", badge: "-80% OFF", priceBRL: 25.80, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "870780" },
+                { title: "Hades", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg", genre: "Rogue-like / Mitologia", score: "Steam: 98%", badge: "-60% OFF", priceBRL: 29.59, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1145360" },
+                { title: "Monster Hunter: World", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/582010/header.jpg", genre: "Ação / RPG", score: "Steam: Muito Positivo", badge: "-67% OFF", priceBRL: 32.96, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "582010" }
+            ]
+        };
+
+        /* ESTADO DA PÁGINA */
+        let categoriaAtual = 'trending';
+        let plataformaAtual = 'all';
+        let moedaAtual = localStorage.getItem('overcritic_currency') || 'BRL';
+        let paginaAtual = 0;
+        let cacheJogos = {
+            trending: [],
+            releases: [],
+            metacritic: [],
+            free: [],
+            deals: []
+        };
+        let jogosFiltrados = [];
+        window.jogosAtuaisNaTela = [];
+
+        /* INICIALIZAÇÃO */
+        window.addEventListener('DOMContentLoaded', () => {
+            verificarTemaELogin();
+
+            // Sincronizar seletor de moeda com o valor salvo
+            const currencySelect = document.getElementById('currencySelect');
+            if (currencySelect) currencySelect.value = moedaAtual;
+
+            mudarCategoria('trending');
+        });
+
+        function atualizarUIUsuario() {
+            const user = localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user');
+            const userEl = document.getElementById('currentUser');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (userEl) userEl.textContent = user ? user.toUpperCase() : 'VISITANTE';
+            if (loginBtn) loginBtn.style.display = user ? 'none' : 'flex';
+            if (logoutBtn) logoutBtn.style.display = user ? 'flex' : 'none';
+        }
+
+        function verificarTemaELogin() {
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', () => {
+                    const isLight = document.body.classList.toggle('light-mode');
+                    localStorage.setItem('overcritic_theme', isLight ? 'light' : 'dark');
+                });
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    window.location.href = 'conta_login.html?tab=login';
+                });
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    if (confirm('Deseja realmente sair da sua conta?')) {
+                        if (window.sbClient) {
+                            try { await window.sbClient.auth.signOut(); } catch(e) {}
+                        }
+                        localStorage.setItem('overcritic_currentUser', 'Visitante');
+                        localStorage.removeItem('overcritic_user');
+                        localStorage.removeItem('overcritic_user_email');
+                        atualizarUIUsuario();
+                    }
+                });
+            }
+
+            atualizarUIUsuario();
+        }
+
+        /* TROCA DE MOEDA */
+        function mudarMoeda(novaMoeda) {
+            moedaAtual = novaMoeda;
+            localStorage.setItem('overcritic_currency', novaMoeda);
+            filtrarJogosNaTela();
+        }
+
+        /* FILTRO POR PLATAFORMA (PC, PLAYSTATION, XBOX, SWITCH) */
+        function filtrarPlataforma(plat) {
+            plataformaAtual = plat;
+            document.querySelectorAll('.plat-chip-btn').forEach(btn => {
+                const p = btn.getAttribute('data-plat');
+                btn.classList.toggle('active', p === plat);
+            });
+            filtrarJogosNaTela();
+        }
+
+        /* DETECTOR INTELIGENTE DE PLATAFORMAS PARA JOGOS DA WEB */
+        function detectarPlataformas(titulo) {
+            const t = (titulo || '').toLowerCase();
+            // Exclusivos de PC / RTS / MMO
+            if (t.includes('counter-strike') || t.includes('dota') || t.includes('half-life') || t.includes('team fortress') || t.includes('civilization') || t.includes('total war') || t.includes('age of empires')) {
+                return ['PC'];
+            }
+            // Exclusivos PlayStation + PC
+            if (t.includes('god of war') || t.includes('spider-man') || t.includes('last of us') || t.includes('horizon zero') || t.includes('horizon forbidden') || t.includes('ghost of tsushima') || t.includes('helldivers') || t.includes('silent hill 2') || t.includes('bloodborne') || t.includes('death stranding')) {
+                return ['PC', 'PS'];
+            }
+            // Exclusivos Xbox + PC
+            if (t.includes('forza') || t.includes('halo') || t.includes('gears') || t.includes('starfield') || t.includes('s.t.a.l.k.e.r') || t.includes('sea of thieves')) {
+                return ['PC', 'XBOX'];
+            }
+            // Títulos com porte para Nintendo Switch
+            const switchGames = ['hollow knight', 'dead cells', 'hades', 'celeste', 'cuphead', 'witcher', 'persona', 'doom', 'portal', 'bioshock', 'hogwarts', 'monster hunter', 'lego', 'crash', 'spyro', 'sonic', 'dragon quest', 'final fantasy', 'assassin', 'resident evil', 'ori', 'skyrim', 'nier', 'tomb raider', 'apex', 'warframe'];
+            if (switchGames.some(kw => t.includes(kw))) {
+                return ['PC', 'PS', 'XBOX', 'SWITCH'];
+            }
+            // Multiplataforma moderno padrão
+            return ['PC', 'PS', 'XBOX'];
+        }
+
+        /* FORMATADOR DE PREÇO RESPEITANDO A MOEDA SELECIONADA */
+        function obterPrecoFormatado(jogo) {
+            if (jogo.isFree || jogo.price === 'Gratuito' || jogo.price === '100% Gratuito') {
+                return moedaAtual === 'BRL' ? '100% Gratuito' : 'Free to Play';
+            }
+
+            if (moedaAtual === 'BRL' && jogo.priceBRL !== undefined && jogo.priceBRL > 0) {
+                return `R$ ${jogo.priceBRL.toFixed(2).replace('.', ',')}`;
+            }
+
+            let baseUSD = 0;
+            if (jogo.priceUSD !== undefined && jogo.priceUSD > 0) {
+                baseUSD = jogo.priceUSD;
+            } else if (jogo.salePrice) {
+                baseUSD = parseFloat(jogo.salePrice) || 0;
+            } else if (jogo.priceBRL) {
+                baseUSD = jogo.priceBRL / 5.60;
+            } else if (typeof jogo.price === 'string') {
+                if (jogo.price.includes('R$')) {
+                    const num = parseFloat(jogo.price.replace(/[^\d,]/g, '').replace(',', '.'));
+                    if (!isNaN(num)) baseUSD = num / 5.60;
+                } else if (jogo.price.includes('$')) {
+                    const num = parseFloat(jogo.price.replace(/[^\d.]/g, ''));
+                    if (!isNaN(num)) baseUSD = num;
+                }
+            }
+
+            if (baseUSD <= 0) {
+                return moedaAtual === 'BRL' ? 'Ver Loja' : 'Check Store';
+            }
+
+            if (moedaAtual === 'BRL') {
+                return `R$ ${(baseUSD * 5.60).toFixed(2).replace('.', ',')}`;
+            } else if (moedaAtual === 'USD') {
+                return `$ ${baseUSD.toFixed(2)}`;
+            } else if (moedaAtual === 'EUR') {
+                return `€ ${(baseUSD * 0.92).toFixed(2).replace('.', ',')}`;
+            } else if (moedaAtual === 'GBP') {
+                return `£ ${(baseUSD * 0.78).toFixed(2).replace('.', ',')}`;
+            }
+            return `R$ ${(baseUSD * 5.60).toFixed(2).replace('.', ',')}`;
+        }
+
+        /* TROCA DE CATEGORIAS */
+        function mudarCategoria(cat) {
+            categoriaAtual = cat;
+            paginaAtual = 0;
+
+            document.querySelectorAll('.cat-tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (cat === 'trending') document.getElementById('tabTrending')?.classList.add('active');
+            if (cat === 'releases') document.getElementById('tabReleases')?.classList.add('active');
+            if (cat === 'metacritic') document.getElementById('tabMetacritic')?.classList.add('active');
+            if (cat === 'free') document.getElementById('tabFree')?.classList.add('active');
+            if (cat === 'deals') document.getElementById('tabDeals')?.classList.add('active');
+
+            const searchInput = document.getElementById('gameSearchInput');
+            if (searchInput) searchInput.value = '';
+
+            carregarCatalogo(cat);
+        }
+
+        /* CARREGAMENTO DE DADOS */
+        async function carregarCatalogo(cat, carregarMais = false) {
+            const grid = document.getElementById('gamesGrid');
+            const btnMais = document.getElementById('btnLoadMore');
+
+            if (!carregarMais) {
+                // Skeleton loader elegante
+                grid.innerHTML = Array(8).fill(0).map(() => `
+                    <div class="skeleton-card">
+                        <div class="skeleton-media"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line" style="width: 80%;"></div>
+                            <div class="skeleton-line" style="width: 50%;"></div>
+                            <div class="skeleton-line" style="width: 90%; margin-top: auto;"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            if (btnMais) btnMais.disabled = true;
+
+            try {
+                let novosJogos = [];
+
+                if (cat === 'trending') {
+                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&pageSize=24&pageNumber=${paginaAtual}`);
+                    if (!res.ok) throw new Error('API indisponível');
+                    const data = await res.json();
+                    novosJogos = data.map(item => ({
+                        title: item.title,
+                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                        genre: item.savings > 0 ? `Desconto -${Math.round(item.savings)}%` : 'Steam / PC',
+                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : (item.dealRating ? `Rating: ${item.dealRating}★` : '🔥 Popular'),
+                        steamAppID: item.steamAppID,
+                        badge: item.savings > 0 ? `-${Math.round(item.savings)}%` : 'EM ALTA',
+                        priceUSD: parseFloat(item.salePrice) || 0,
+                        salePrice: item.salePrice,
+                        platforms: detectarPlataformas(item.title),
+                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                    }));
+                } else if (cat === 'releases') {
+                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Release&pageSize=24&pageNumber=${paginaAtual}`);
+                    if (!res.ok) throw new Error('API indisponível');
+                    const data = await res.json();
+                    novosJogos = data.map(item => ({
+                        title: item.title,
+                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                        genre: 'Lançamento / Recente',
+                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🚀 Novo',
+                        steamAppID: item.steamAppID,
+                        badge: 'NOVO',
+                        priceUSD: parseFloat(item.salePrice) || 0,
+                        salePrice: item.salePrice,
+                        platforms: detectarPlataformas(item.title),
+                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                    }));
+                } else if (cat === 'metacritic') {
+                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Metacritic&pageSize=24&pageNumber=${paginaAtual}`);
+                    if (!res.ok) throw new Error('API indisponível');
+                    const data = await res.json();
+                    novosJogos = data.map(item => ({
+                        title: item.title,
+                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                        genre: 'Aclamação Crítica',
+                        score: item.metacriticScore ? `Metacritic ${item.metacriticScore}` : '⭐ 90+',
+                        steamAppID: item.steamAppID,
+                        badge: item.metacriticScore ? `NOTA ${item.metacriticScore}` : 'GOTY',
+                        priceUSD: parseFloat(item.salePrice) || 0,
+                        salePrice: item.salePrice,
+                        platforms: detectarPlataformas(item.title),
+                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                    }));
+                } else if (cat === 'deals') {
+                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Savings&pageSize=24&pageNumber=${paginaAtual}`);
+                    if (!res.ok) throw new Error('API indisponível');
+                    const data = await res.json();
+                    novosJogos = data.map(item => ({
+                        title: item.title,
+                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                        genre: 'Oferta Especial Steam',
+                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🏷️ Oferta',
+                        steamAppID: item.steamAppID,
+                        badge: item.savings ? `-${Math.round(item.savings)}%` : 'OFERTA',
+                        priceUSD: parseFloat(item.salePrice) || 0,
+                        salePrice: item.salePrice,
+                        platforms: detectarPlataformas(item.title),
+                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                    }));
+                } else if (cat === 'free') {
+                    novosJogos = CATALOGO_ESTENDIDO.free;
+                }
+
+                // Se a API retornar vazia, mesclamos com o catálogo oficial
+                if (!novosJogos || novosJogos.length === 0) {
+                    novosJogos = CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending;
+                }
+
+                if (carregarMais) {
+                    cacheJogos[cat] = [...(cacheJogos[cat] || []), ...novosJogos];
+                } else {
+                    // Garantir que os destaques integrados estejam no topo
+                    const baseIntegrada = CATALOGO_ESTENDIDO[cat] || [];
+                    const combinados = [...baseIntegrada];
+                    novosJogos.forEach(nj => {
+                        if (!combinados.some(c => c.title.toLowerCase() === nj.title.toLowerCase())) {
+                            combinados.push(nj);
+                        }
+                    });
+                    cacheJogos[cat] = combinados;
+                }
+
+                filtrarJogosNaTela();
+
+            } catch (err) {
+                console.warn('API externa em timeout ou offline. Carregando catálogo oficial integrado:', err);
+                if (!carregarMais) {
+                    cacheJogos[cat] = CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending;
+                    filtrarJogosNaTela();
+                }
+            } finally {
+                if (btnMais) btnMais.disabled = false;
+            }
+        }
+
+        function carregarMaisJogos() {
+            paginaAtual++;
+            carregarCatalogo(categoriaAtual, true);
+        }
+
+        /* FILTRAGEM INSTANTÂNEA POR NOME, GÊNERO E PLATAFORMA */
+        function filtrarJogosNaTela() {
+            const query = (document.getElementById('gameSearchInput')?.value || '').toLowerCase().trim();
+            const listaBase = cacheJogos[categoriaAtual] || CATALOGO_ESTENDIDO[categoriaAtual] || [];
+
+            jogosFiltrados = listaBase.filter(j => {
+                const matchQuery = !query || 
+                    (j.title || '').toLowerCase().includes(query) ||
+                    (j.genre || '').toLowerCase().includes(query) ||
+                    (j.score || '').toLowerCase().includes(query);
+
+                const platforms = j.platforms || ['PC'];
+                const matchPlatform = (plataformaAtual === 'all') || platforms.includes(plataformaAtual);
+
+                return matchQuery && matchPlatform;
+            });
+
+            renderizarGridJogos(jogosFiltrados);
+        }
+
+        /* RENDERIZADOR DE BADGES DE PLATAFORMAS */
+        function renderizarBadgesPlataforma(platforms) {
+            const plats = platforms || ['PC'];
+            let html = '';
+            if (plats.includes('PC')) html += `<span class="plat-badge plat-badge-pc" title="Disponível para PC (Steam / Epic)">💻 PC</span>`;
+            if (plats.includes('PS')) html += `<span class="plat-badge plat-badge-ps" title="Disponível para PlayStation 5 / PS4">🎮 PlayStation</span>`;
+            if (plats.includes('XBOX')) html += `<span class="plat-badge plat-badge-xbox" title="Disponível para Xbox Series X/S & One">🟢 Xbox</span>`;
+            if (plats.includes('SWITCH')) html += `<span class="plat-badge plat-badge-switch" title="Disponível para Nintendo Switch">🔴 Switch</span>`;
+            return html;
+        }
+
+        /* RENDERIZAÇÃO DA GRADE DE JOGOS */
+        function renderizarGridJogos(jogos) {
+            const grid = document.getElementById('gamesGrid');
+            const countBadge = document.getElementById('resultsCountBadge');
+            if (!grid) return;
+
+            window.jogosAtuaisNaTela = jogos || [];
+
+            if (countBadge) {
+                countBadge.textContent = `${jogos.length} jogos encontrados`;
+            }
+
+            if (!jogos || jogos.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">🔍</div>
+                        <h3 style="margin: 0 0 8px 0; color: var(--text-main); font-size: 1.3rem;">Nenhum jogo encontrado</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Tente pesquisar com outro nome ou alterne a plataforma/categoria acima.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+
+            jogos.forEach((jogo, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+
+                const safeTitle = (jogo.title || 'Jogo').replace(/[<>&"']/g, '');
+                const encodedTitle = encodeURIComponent(jogo.title || '');
+                const thumbUrl = jogo.thumb || gerarFallbackCapa(jogo.title);
+                const encodedThumb = encodeURIComponent(thumbUrl);
+                const encodedGenre = encodeURIComponent(jogo.genre || '');
+                const precoFormatado = obterPrecoFormatado(jogo);
+                const primaryPlatform = (jogo.platforms && jogo.platforms[0]) || 'PC';
+
+                card.innerHTML = `
+                    <div class="game-card-media">
+                        <img src="${thumbUrl}" class="game-card-img" alt="${safeTitle}" onerror="tratarErroCapa(this, '${safeTitle}')" loading="lazy" referrerpolicy="no-referrer">
+                        ${jogo.badge ? `<span class="badge-deal">${jogo.badge}</span>` : ''}
+                        ${jogo.score ? `<span class="badge-score">${jogo.score}</span>` : ''}
+                    </div>
+                    <div class="game-card-body">
+                        <h3 class="game-card-title" title="${safeTitle}">${safeTitle}</h3>
+                        <div class="game-card-platforms">
+                            ${renderizarBadgesPlataforma(jogo.platforms)}
+                        </div>
+                        <div class="game-card-meta">
+                            <span class="game-card-genre" title="${jogo.genre || 'Games'}">${jogo.genre || 'Games'}</span>
+                            <span class="game-card-price">${precoFormatado}</span>
+                        </div>
+                        <div class="game-card-actions">
+                            <a href="adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodedThumb}&genero=${encodedGenre}&plataforma=${primaryPlatform}" class="btn-action-eval" title="Avaliar e criar análise deste jogo">
+                                ✍️ Avaliar
+                            </a>
+                            <button type="button" class="btn-action-store" onclick="abrirModalLojas(${index})" title="Ver opções de lojas para PC, PlayStation, Xbox e Switch">
+                                🛒 Onde Jogar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* MODAL DE LOJAS OFICIAIS & PLATAFORMAS */
+        function abrirModalLojas(index) {
+            const jogo = window.jogosAtuaisNaTela[index];
+            if (!jogo) return;
+
+            const modal = document.getElementById('storeModal');
+            const titleEl = document.getElementById('storeModalTitle');
+            const coverEl = document.getElementById('storeModalCover');
+            const genreEl = document.getElementById('storeModalGenre');
+            const priceEl = document.getElementById('storeModalPrice');
+            const listEl = document.getElementById('storeLinksList');
+            const evalBtn = document.getElementById('storeModalEvalBtn');
+
+            const precoFmt = obterPrecoFormatado(jogo);
+            const plats = jogo.platforms || ['PC'];
+
+            if (titleEl) titleEl.textContent = jogo.title;
+            if (coverEl) {
+                coverEl.src = jogo.thumb || gerarFallbackCapa(jogo.title);
+                coverEl.onerror = () => tratarErroCapa(coverEl, jogo.title);
+            }
+            if (genreEl) genreEl.textContent = jogo.genre || 'Games';
+            if (priceEl) priceEl.textContent = precoFmt;
+
+            const encodedTitle = encodeURIComponent(jogo.title || '');
+            const encodedThumb = encodeURIComponent(jogo.thumb || '');
+            const encodedGenre = encodeURIComponent(jogo.genre || '');
+
+            let buttonsHtml = '';
+
+            if (plats.includes('PC')) {
+                const steamUrl = jogo.steamAppID ? `https://store.steampowered.com/app/${jogo.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodedTitle}`;
+                buttonsHtml += `
+                    <a href="${steamUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-steam" title="Abrir página oficial da Steam">
+                        <span>💻 <strong>Steam / PC</strong></span>
+                        <span>Visitar Loja ↗</span>
+                    </a>
+                `;
+            }
+
+            if (plats.includes('PS')) {
+                const psUrl = `https://store.playstation.com/pt-br/search/${encodedTitle}`;
+                buttonsHtml += `
+                    <a href="${psUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-ps" title="Abrir busca oficial na PlayStation Store Brasil">
+                        <span>🎮 <strong>PlayStation Store</strong> (PS5 / PS4)</span>
+                        <span>Buscar na PS Store ↗</span>
+                    </a>
+                `;
+            }
+
+            if (plats.includes('XBOX')) {
+                const xboxUrl = `https://www.xbox.com/pt-br/games/store/search?q=${encodedTitle}`;
+                buttonsHtml += `
+                    <a href="${xboxUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-xbox" title="Abrir busca oficial na Microsoft Xbox Store Brasil">
+                        <span>🟢 <strong>Xbox Store</strong> (Series X/S / One)</span>
+                        <span>Buscar no Xbox ↗</span>
+                    </a>
+                `;
+            }
+
+            if (plats.includes('SWITCH')) {
+                const switchUrl = `https://www.nintendo.com/pt-br/search/#q=${encodedTitle}&p=1&cat=gme`;
+                buttonsHtml += `
+                    <a href="${switchUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-switch" title="Abrir busca oficial na Nintendo eShop Brasil">
+                        <span>🔴 <strong>Nintendo eShop</strong> (Switch)</span>
+                        <span>Buscar na Nintendo ↗</span>
+                    </a>
+                `;
+            }
+
+            if (listEl) listEl.innerHTML = buttonsHtml;
+
+            if (evalBtn) {
+                evalBtn.href = `adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodedThumb}&genero=${encodedGenre}&plataforma=${plats[0] || 'PC'}`;
+            }
+
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function fecharModalLojas(e) {
+            if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('btn-close-store-modal')) {
+                return;
+            }
+            const modal = document.getElementById('storeModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') fecharModalLojas();
+        });
+
+        /* FALLBACKS VISUAIS */
+        function gerarFallbackCapa(titulo) {
+            const seguro = (titulo || 'JOGO').substring(0, 24).replace(/[<>&"']/g, '');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215" viewBox="0 0 460 215">
+                <defs>
+                    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0a0f1d"/>
+                        <stop offset="50%" stop-color="#121829"/>
+                        <stop offset="100%" stop-color="#18233c"/>
+                    </linearGradient>
+                </defs>
+                <rect width="460" height="215" fill="url(#g)"/>
+                <rect x="3" y="3" width="454" height="209" fill="none" stroke="rgba(0, 240, 255, 0.3)" stroke-width="2" rx="14"/>
+                <text x="50%" y="44%" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="44">🎮</text>
+                <text x="50%" y="74%" text-anchor="middle" fill="#00f0ff" font-family="'Inter', sans-serif" font-weight="800" font-size="16">${seguro}</text>
+            </svg>`;
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+
+        function tratarErroCapa(img, titulo) {
+            img.onerror = null;
+            img.src = gerarFallbackCapa(titulo);
+        }
+    </script>
+</body>
+</html>

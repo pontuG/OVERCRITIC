@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERCRITIC - Descubra Novos Filmes, Séries & Animes</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #07090f;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #9d4edd;
+            --accent-gold: #ffb703;
+            --card-bg: rgba(13, 17, 27, 0.7);
+            --glass-border: rgba(0, 240, 255, 0.15);
+            --text-main: #f0f4fc;
+            --text-muted: #8b9bb4;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body.light-mode {
+            --bg-color: #d2d6df;
+            --accent-cyan: #c51b29;
+            --accent-purple: #800f1c;
+            --accent-gold: #d97706;
+            --card-bg: rgba(220, 224, 232, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.16);
+            --text-main: #0e121a;
+            --text-muted: #4a5568;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(157, 78, 221, 0.05) 0%, transparent 40%);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-mode {
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(197, 27, 41, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(128, 15, 28, 0.04) 0%, transparent 40%);
+        }
+
+        /* ═══════════════════════════════════
+           SIDEBAR / NAVEGAÇÃO GLOBAL
+        ═══════════════════════════════════ */
+        .sidebar {
+            width: 80px;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .sidebar {
+            background: #d8dde6;
+            border-right: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        .brand-icon {
+            margin-bottom: 35px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .brand-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .brand-icon img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            object-fit: cover;
+        }
+
+        body.light-mode .brand-icon img {
+            box-shadow: 0 0 15px rgba(197, 27, 41, 0.3);
+            border: 1px solid rgba(197, 27, 41, 0.3);
+        }
+
+        .brand-icon span {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        body.light-mode .nav-item:hover,
+        body.light-mode .nav-item.active {
+            background: rgba(197, 27, 41, 0.12);
+            box-shadow: 0 0 10px rgba(197, 27, 41, 0.2);
+            color: var(--accent-cyan);
+        }
+
+        .nav-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 65px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        body.light-mode .nav-item:hover::after {
+            background: #ffffff;
+            color: #0e121a;
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .sidebar-user {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-align: center;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ═══════════════════════════════════
+           MAIN CONTENT
+        ═══════════════════════════════════ */
+        .main-content {
+            margin-left: 80px;
+            padding: 35px 40px;
+            max-width: 1600px;
+            width: calc(100% - 80px);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* HERO HEADER */
+        .discovery-hero {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px 36px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        body.light-mode .discovery-hero {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.14);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero-left {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        body.light-mode .hero-tag {
+            background: rgba(197, 27, 41, 0.1);
+            border-color: rgba(197, 27, 41, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--text-main) 60%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light-mode .hero-title {
+            background: linear-gradient(135deg, #0e121a 50%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            max-width: 720px;
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            min-width: 290px;
+        }
+
+        .search-box-wrapper input {
+            width: 100%;
+            background: rgba(5, 7, 12, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 12px 16px 12px 42px;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .search-box-wrapper input {
+            background: #ffffff;
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #0e121a;
+        }
+
+        .search-box-wrapper input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+
+        .search-icon-fixed {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .btn-live-search {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-family: var(--font-family);
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-live-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        body.light-mode .btn-live-search {
+            background: rgba(197, 27, 41, 0.12);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        body.light-mode .btn-live-search:hover {
+            background: var(--accent-cyan);
+            color: #fff;
+        }
+
+        /* ═══════════════════════════════════
+           BARRA DE CATEGORIAS
+        ═══════════════════════════════════ */
+        .categories-bar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 12px 18px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        body.light-mode .categories-bar-card {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .cat-tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-family: var(--font-family);
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cat-tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.light-mode .cat-tab-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+            color: #000;
+        }
+
+        .cat-tab-btn.active {
+            background: rgba(0, 240, 255, 0.12);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+        }
+
+        body.light-mode .cat-tab-btn.active {
+            background: rgba(197, 27, 41, 0.14);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(197, 27, 41, 0.2);
+        }
+
+        .results-badge {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            white-space: nowrap;
+        }
+
+        body.light-mode .results-badge {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* ═══════════════════════════════════
+           BARRA DE FILTRO POR STREAMING / TIPO
+        ═══════════════════════════════════ */
+        .platforms-bar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 10px 18px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        body.light-mode .platforms-bar-card {
+            background: #dbe0ea;
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+
+        .plat-bar-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+
+        .plat-chips-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .plat-chip-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-family: var(--font-family);
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .plat-chip-btn:hover {
+            color: var(--text-main);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.06);
+        }
+
+        .plat-chip-btn.active {
+            background: var(--accent-cyan);
+            color: #07090f;
+            border-color: var(--accent-cyan);
+            font-weight: 800;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+        }
+
+        body.light-mode .plat-chip-btn {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .plat-chip-btn.active {
+            background: var(--accent-cyan);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(197, 27, 41, 0.3);
+        }
+
+        /* ═══════════════════════════════════
+           GRADE DE CARDS DE TÍTULOS (VERTICAL)
+        ═══════════════════════════════════ */
+        .titles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .title-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .title-card:hover {
+            transform: translateY(-7px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        body.light-mode .title-card {
+            background: #ffffff;
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        body.light-mode .title-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 14px 26px rgba(0, 0, 0, 0.12), 0 0 15px rgba(197, 27, 41, 0.2);
+        }
+
+        .title-card-media {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            background: #0d121c;
+            overflow: hidden;
+        }
+
+        .title-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .title-card:hover .title-card-img {
+            transform: scale(1.05);
+        }
+
+        .title-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(7, 9, 15, 0.2) 0%, rgba(7, 9, 15, 0) 40%, rgba(7, 9, 15, 0.85) 100%);
+            pointer-events: none;
+        }
+
+        .badge-type {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(13, 17, 27, 0.85);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(13, 17, 27, 0.88);
+            border: 1px solid rgba(255, 183, 3, 0.5);
+            color: var(--accent-gold);
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-highlight {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #c51b29, #800f1c);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .title-card-body {
+            padding: 14px 14px 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .title-card-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.25;
+            height: 2.5em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .title-card-platforms {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            min-height: 22px;
+        }
+
+        .provider-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            white-space: nowrap;
+        }
+
+        body.light-mode .provider-badge {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #4a5568;
+        }
+
+        .title-card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            padding-top: 4px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        body.light-mode .title-card-meta {
+            border-top-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .title-card-genre {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        .title-card-year {
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .title-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-action-eval {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            font-family: var(--font-family);
+            font-size: 0.76rem;
+            font-weight: 800;
+            padding: 8px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-action-eval:hover {
+            background: var(--accent-cyan);
+            color: #07090f;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+        }
+
+        body.light-mode .btn-action-eval {
+            background: rgba(197, 27, 41, 0.1);
+            color: var(--accent-cyan);
+        }
+
+        body.light-mode .btn-action-eval:hover {
+            background: var(--accent-cyan);
+            color: #ffffff;
+        }
+
+        .btn-action-watch {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 8px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-action-watch:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--text-main);
+        }
+
+        body.light-mode .btn-action-watch {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.12);
+            color: #0e121a;
+        }
+
+        body.light-mode .btn-action-watch:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* ═══════════════════════════════════
+           FOOTER / CARREGAR MAIS
+        ═══════════════════════════════════ */
+        .discovery-footer {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0 40px 0;
+        }
+
+        .btn-load-more {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 14px 36px;
+            border-radius: 30px;
+            font-family: var(--font-family);
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-load-more:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        body.light-mode .btn-load-more {
+            background: #ffffff;
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #0e121a;
+        }
+
+        body.light-mode .btn-load-more:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* SKELETON LOADER */
+        .skeleton-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: pulseSkeleton 1.5s infinite ease-in-out;
+        }
+
+        .skeleton-media {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .skeleton-body {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes pulseSkeleton {
+            0% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.6;
+            }
+        }
+
+        /* ═══════════════════════════════════
+           MODAL ONDE ASSISTIR / DETALHES
+        ═══════════════════════════════════ */
+        .modal-backdrop-watch {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .modal-dialog-watch {
+            background: #0d121c;
+            border: 1px solid var(--accent-cyan);
+            border-radius: 22px;
+            width: 100%;
+            max-width: 640px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 240, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.light-mode .modal-dialog-watch {
+            background: #ffffff;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close-modal:hover {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        .modal-watch-header {
+            display: flex;
+            gap: 20px;
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        body.light-mode .modal-watch-header {
+            border-bottom-color: rgba(0, 0, 0, 0.08);
+            background: #f7f9fc;
+        }
+
+        .modal-watch-cover {
+            width: 110px;
+            aspect-ratio: 2 / 3;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+            flex-shrink: 0;
+        }
+
+        .modal-watch-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .modal-watch-badge {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .modal-watch-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            line-height: 1.2;
+            color: var(--text-main);
+        }
+
+        .modal-watch-meta {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .modal-watch-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-synopsis-title,
+        .modal-options-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .modal-synopsis-text {
+            font-size: 0.88rem;
+            color: var(--text-main);
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 14px;
+            border-radius: 12px;
+        }
+
+        body.light-mode .modal-synopsis-text {
+            background: #f0f3f8;
+            border-color: rgba(0, 0, 0, 0.06);
+            color: #1a202c;
+        }
+
+        .watch-links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .watch-link-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+
+        .watch-link-row:hover {
+            transform: translateX(4px);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.08);
+            color: var(--accent-cyan);
+        }
+
+        body.light-mode .watch-link-row {
+            background: #f3f5f9;
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #0e121a;
+        }
+
+        body.light-mode .watch-link-row:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(197, 27, 41, 0.08);
+            color: var(--accent-cyan);
+        }
+
+        .btn-modal-eval {
+            background: linear-gradient(135deg, #00f0ff, #0099ff);
+            color: #000;
+            font-family: var(--font-family);
+            font-weight: 900;
+            font-size: 0.92rem;
+            padding: 14px;
+            border-radius: 14px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 18px rgba(0, 240, 255, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 6px;
+        }
+
+        .btn-modal-eval:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 240, 255, 0.6);
+        }
+
+        body.light-mode .btn-modal-eval {
+            background: linear-gradient(135deg, #c51b29, #990f1d);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(197, 27, 41, 0.35);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 100%;
+                height: 60px;
+                bottom: 0;
+                top: auto;
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 0;
+                border-right: none;
+                border-top: 1px solid var(--glass-border);
+            }
+
+            .brand-icon,
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                justify-content: space-around;
+                gap: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px 16px 85px 16px;
+            }
+
+            .discovery-hero {
+                padding: 20px;
+            }
+
+            .hero-title {
+                font-size: 1.5rem;
+            }
+
+            .titles-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 12px;
+            }
+
+            .title-card-body {
+                padding: 10px 8px;
+            }
+
+            .title-card-title {
+                font-size: 0.84rem;
+            }
+
+            .btn-action-eval,
+            .btn-action-watch {
+                font-size: 0.7rem;
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('overcritic_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- ══════ SIDEBAR (NAVEGAÇÃO GLOBAL) ══════ -->
+    <aside class="sidebar">
+        <a href="conta_login.html" class="brand-icon" title="Minha Conta / Perfil">
+            <img src="assets/overcritic_icon.png" alt="Overcritic Logo">
+            <span>HQ</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item" data-tooltip="Início">🏠</a>
+            <a href="adicionar_jogos.html" class="nav-item" data-tooltip="Críticas de Jogos">🎮</a>
+            <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
+            <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
+            <a href="descobrir_titulos.html" class="nav-item active" data-tooltip="Descobrir Títulos">🍿</a>
+            <a href="adicionar_platinas.html" class="nav-item" data-tooltip="Platinas & Troféus">🏆</a>
+            <a href="suporte_overcritic.html" class="nav-item" data-tooltip="Suporte & Sugestões">💡</a>
+            <a href="conta_login.html" class="nav-item" data-tooltip="Minha Conta / Perfil">👤</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button id="themeToggleBtn" class="nav-item" data-tooltip="Modo Claro/Escuro"
+                style="margin-bottom: 8px;">🌓</button>
+            <button id="loginBtn" class="nav-item" data-tooltip="Fazer Login / Criar Conta">🔑</button>
+            <button id="logoutBtn" class="nav-item" data-tooltip="Sair da Conta" style="display: none;">🚪</button>
+            <div class="sidebar-user" id="currentUser" style="cursor: pointer;" title="Acessar Perfil" onclick="window.location.href='conta_login.html?tab=perfil'">VISITANTE</div>
+        </div>
+    </aside>
+
+    <!-- ══════ CONTEÚDO PRINCIPAL ══════ -->
+    <main class="main-content">
+
+        <!-- CABEÇALHO HERO -->
+        <header class="discovery-hero">
+            <div class="hero-left">
+                <div class="hero-tag">🍿 HUB DE DESCOBERTA CINÉFILA & STREAMING</div>
+                <h1 class="hero-title">Descubra Novos Filmes, Séries & Animes</h1>
+                <p class="hero-desc">
+                    Explore os maiores lançamentos dos cinemas e streamings (Netflix, Prime Video, Max, Disney+,
+                    Crunchyroll), obras-primas mais aclamadas e descubra onde assistir no Brasil.
+                </p>
+            </div>
+            <div class="hero-actions">
+                <div class="search-box-wrapper">
+                    <span class="search-icon-fixed">🔍</span>
+                    <input type="text" id="titleSearchInput" placeholder="Buscar filmes, séries, animes..."
+                        oninput="tratarBuscaEmTempoReal()">
+                </div>
+                <button type="button" class="btn-live-search" onclick="executarBuscaTmdbOnline()"
+                    title="Buscar catálogo global TMDB">
+                    <span>⚡ Buscar no TMDB</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- BARRA DE CATEGORIAS -->
+        <div class="categories-bar-card">
+            <div class="category-tabs">
+                <button class="cat-tab-btn active" id="tabTrending" onclick="mudarCategoria('trending')">
+                    🔥 Em Alta & Tendências
+                </button>
+                <button class="cat-tab-btn" id="tabReleases" onclick="mudarCategoria('releases')">
+                    🍿 Lançamentos & Cinemas
+                </button>
+                <button class="cat-tab-btn" id="tabTop" onclick="mudarCategoria('top')">
+                    ⭐ Obras-Primas (Top Crítica)
+                </button>
+                <button class="cat-tab-btn" id="tabSeries" onclick="mudarCategoria('series')">
+                    📺 Melhores Séries
+                </button>
+                <button class="cat-tab-btn" id="tabAnime" onclick="mudarCategoria('anime')">
+                    ⛩️ Grandes Animes
+                </button>
+            </div>
+            <div class="results-badge" id="resultsCountBadge">
+                Carregando catálogo...
+            </div>
+        </div>
+
+        <!-- BARRA DE FILTRO POR STREAMING / TIPO -->
+        <div class="platforms-bar-card">
+            <span class="plat-bar-title">📺 Onde Assistir / Tipo:</span>
+            <div class="plat-chips-group">
+                <button class="plat-chip-btn active" id="chipAll" data-prov="all" onclick="filtrarProvedor('all')">🌐
+                    Todos</button>
+                <button class="plat-chip-btn" id="chipMovie" data-prov="Filme" onclick="filtrarProvedor('Filme')">🎬
+                    Apenas Filmes</button>
+                <button class="plat-chip-btn" id="chipSeries" data-prov="Série" onclick="filtrarProvedor('Série')">📺
+                    Apenas Séries</button>
+                <button class="plat-chip-btn" id="chipAnime" data-prov="Anime" onclick="filtrarProvedor('Anime')">⛩️
+                    Animes</button>
+                <button class="plat-chip-btn" id="chipCinema" data-prov="Cinema" onclick="filtrarProvedor('Cinema')">🍿
+                    No Cinema</button>
+                <button class="plat-chip-btn" id="chipNetflix" data-prov="Netflix"
+                    onclick="filtrarProvedor('Netflix')">🔴 Netflix</button>
+                <button class="plat-chip-btn" id="chipPrime" data-prov="Prime Video"
+                    onclick="filtrarProvedor('Prime Video')">🔵 Prime Video</button>
+                <button class="plat-chip-btn" id="chipMax" data-prov="Max" onclick="filtrarProvedor('Max')">🟣 Max
+                    (HBO)</button>
+                <button class="plat-chip-btn" id="chipDisney" data-prov="Disney+"
+                    onclick="filtrarProvedor('Disney+')">🟢 Disney+</button>
+                <button class="plat-chip-btn" id="chipCrunchyroll" data-prov="Crunchyroll"
+                    onclick="filtrarProvedor('Crunchyroll')">🟠 Crunchyroll</button>
+            </div>
+        </div>
+
+        <!-- GRADE DE CARDS -->
+        <div id="titlesGrid" class="titles-grid">
+            <!-- Renderizado dinamicamente via JS -->
+        </div>
+
+        <!-- FOOTER COM BOTÃO DE CARREGAR MAIS -->
+        <div class="discovery-footer">
+            <button id="btnLoadMore" class="btn-load-more" onclick="carregarMaisTitulos()">
+                ➕ Carregar Mais Títulos
+            </button>
+        </div>
+
+    </main>
+
+    <!-- ══════ MODAL ONDE ASSISTIR / DETALHES ══════ -->
+    <div id="watchModal" class="modal-backdrop-watch" style="display: none;" onclick="fecharModalWatch(event)">
+        <div class="modal-dialog-watch" onclick="event.stopPropagation()">
+            <button class="btn-close-modal" onclick="fecharModalWatch()" title="Fechar">✕</button>
+            <div class="modal-watch-header">
+                <img id="watchModalCover" src="" class="modal-watch-cover" alt="Capa">
+                <div class="modal-watch-info">
+                    <div class="modal-watch-badge" id="watchModalType">FILME</div>
+                    <h2 id="watchModalTitle" class="modal-watch-title">Título</h2>
+                    <div class="modal-watch-meta">
+                        <span id="watchModalYear">2024</span> •
+                        <span id="watchModalGenre">Gênero</span> •
+                        <span id="watchModalScore" style="color: var(--accent-gold); font-weight: 800;">⭐ 8.5
+                            TMDB</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-watch-body">
+                <div>
+                    <h4 class="modal-synopsis-title">📖 Sinopse da Obra:</h4>
+                    <p id="watchModalOverview" class="modal-synopsis-text">Carregando detalhes...</p>
+                </div>
+
+                <div>
+                    <h4 class="modal-options-title">🍿 Disponibilidade no Brasil (Streamings & Cinemas):</h4>
+                    <div class="watch-links-list" id="watchLinksList">
+                        <!-- Links gerados via JavaScript -->
+                    </div>
+                </div>
+
+                <a id="watchModalEvalBtn" href="#" class="btn-modal-eval">
+                    ✍️ Avaliar este Título no Overcritic
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════ JAVASCRIPT & INTEGRAÇÃO TMDB ══════ -->
+    <script>
+        const DEFAULT_TMDB_KEY = "8265bd1679663a7ea12ac168da84d2e8";
+        const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+
+        function getTmdbApiKey() {
+            return localStorage.getItem('OVERCRITIC_TMDB_USER_KEY') || DEFAULT_TMDB_KEY;
+        }
+
+        // Mapeamento de Gêneros TMDB
+        const TMDB_GENRES = {
+            28: "Ação", 12: "Aventura", 16: "Animação", 35: "Comédia", 80: "Crime",
+            99: "Documentário", 18: "Drama", 10751: "Família", 14: "Fantasia",
+            36: "História", 27: "Terror", 10402: "Música", 9648: "Mistério",
+            10749: "Romance", 878: "Ficção Científica", 10770: "Cinema TV",
+            53: "Suspense", 10752: "Guerra", 37: "Faroeste",
+            10759: "Ação & Aventura", 10762: "Kids", 10763: "Notícias",
+            10764: "Reality", 10765: "Sci-Fi & Fantasia", 10766: "Novela",
+            10767: "Talk Show", 10768: "Guerra & Política"
+        };
+
+        function mapearGeneros(genreIds) {
+            if (!genreIds || !genreIds.length) return "Drama, Aventura";
+            return genreIds.slice(0, 2).map(id => TMDB_GENRES[id] || "Geral").join(", ");
+        }
+
+        /* ═══════════════════════════════════
+           CATÁLOGO ESTENDIDO DE CONTINGÊNCIA (OFFLINE / FALLBACK ROBUSTO)
+        ═══════════════════════════════════ */
+        const CATALOGO_ESTENDIDO = {
+            trending: [
+                { id: 693134, title: "Duna: Parte 2", type: "Filme", year: "2024", genre: "Ficção Científica, Aventura", score: "8.5", badge: "🔥 EM ALTA", poster: "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg", overview: "Paul Atreides se une a Chani e aos Fremen enquanto busca vingança contra os conspiradores que destruíram sua família.", providers: ["Max", "Cinema", "Prime Video"] },
+                { id: 94605, title: "Arcane", type: "Série", year: "2024", genre: "Animação, Ficção Científica", score: "8.8", badge: "🏆 ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/abf8tHznhSvl9BAElD2cQYRrQI2.jpg", overview: "Em meio ao conflito entre as cidades-gêmeas de Piltover e Zaun, duas irmãs lutam em lados opostos de uma guerra entre tecnologias mágicas e convicções incompatíveis.", providers: ["Netflix"] },
+                { id: 157336, title: "Interestelar", type: "Filme", year: "2014", genre: "Ficção Científica, Drama", score: "8.7", badge: "OBRA-PRIMA", poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", overview: "Um grupo de astronautas viaja através de um buraco de minhoca no espaço à procura de um novo lar para a humanidade.", providers: ["Max", "Prime Video", "Apple TV+"] },
+                { id: 1399, title: "Game of Thrones", type: "Série", year: "2011", genre: "Drama, Fantasia", score: "8.5", badge: "FENÔMENO", poster: "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg", overview: "Nove famílias nobres lutam pelo controle das terras místicas de Westeros, enquanto um antigo inimigo retorna após estar adormecido por milênios.", providers: ["Max"] },
+                { id: 1429, title: "Attack on Titan (Shingeki no Kyojin)", type: "Anime", year: "2013", genre: "Anime, Fantasia, Ação", score: "8.7", badge: "⛩️ TOP ANIME", poster: "https://image.tmdb.org/t/p/w500/8C5LL4k9aIagGhyJkK80e980L1n.jpg", overview: "Após sua cidade natal ser destruída e sua mãe ser morta, o jovem Eren Jaeger jura limpar a terra de todos os Titãs gigantes que levaram a humanidade à beira da extinção.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 872585, title: "Oppenheimer", type: "Filme", year: "2023", genre: "Drama, História", score: "8.9", badge: "🏆 7 OSCARS", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", overview: "A história do físico americano J. Robert Oppenheimer, seu papel no Projeto Manhattan e no desenvolvimento da primeira bomba atômica.", providers: ["Prime Video", "Telecine", "Apple TV+"] },
+                { id: 100088, title: "The Last of Us", type: "Série", year: "2023", genre: "Drama, Sci-Fi", score: "8.6", badge: "RECORDISTA", poster: "https://image.tmdb.org/t/p/w500/uKvVjK19szUZRsPAHgvKiLsqGQ4.jpg", overview: "20 anos após a destruição da civilização moderna, Joel, um sobrevivente experiente, é contratado para contrabandear Ellie, uma jovem de 14 anos, para fora de uma zona de quarentena opressiva.", providers: ["Max"] },
+                { id: 912649, title: "Venom: A Última Rodada", type: "Filme", year: "2024", genre: "Ação, Ficção Científica", score: "7.8", badge: "POPULAR", poster: "https://image.tmdb.org/t/p/w500/aos8Vh1w918mU99w6nN7Z5sT6h6.jpg", overview: "Eddie e Venom estão em fuga. Caçados por ambos os seus mundos e com a rede se fechando, a dupla é forçada a tomar uma decisão devastadora.", providers: ["Max", "Prime Video", "Cinema"] }
+            ],
+            releases: [
+                { id: 1022789, title: "Divertida Mente 2", type: "Filme", year: "2024", genre: "Animação, Família", score: "8.0", badge: "BILHETERIA #1", poster: "https://image.tmdb.org/t/p/w500/gE0uNsqPqV2D4Y7J8d4xWzH7b0B.jpg", overview: "Com a chegada da adolescência, a sala de comando de Riley passa por uma demolição repentina para dar lugar a algo totalmente inesperado: novas Emoções!", providers: ["Disney+"] },
+                { id: 533535, title: "Deadpool & Wolverine", type: "Filme", year: "2024", genre: "Ação, Comédia", score: "8.1", badge: "SUCESSO", poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", overview: "Um apático Wade Wilson labuta na vida civil até que uma ameaça ao seu universo o força a colocar o uniforme novamente ao lado de Wolverine.", providers: ["Disney+", "Cinema"] },
+                { id: 933260, title: "A Substância", type: "Filme", year: "2024", genre: "Terror, Drama", score: "8.3", badge: "ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/lqoMzCcZY5yg5y2iMMyM0j6N9en.jpg", overview: "Uma celebridade em decadência usa uma droga do mercado negro que gera temporariamente uma versão mais jovem e melhor de si mesma.", providers: ["MUBI", "Cinema"] },
+                { id: 1034541, title: "Terrifier 3", type: "Filme", year: "2024", genre: "Terror, Suspense", score: "7.6", badge: "NOVO", poster: "https://image.tmdb.org/t/p/w500/ju10W5ga28AukKqA8sqJsm3e2v.jpg", overview: "Art the Clown está pronto para desencadear o caos sobre os moradores desavisados do condado de Miles enquanto eles adormecem na véspera de Natal.", providers: ["Cinema", "Prime Video"] },
+                { id: 1184918, title: "Robô Selvagem", type: "Filme", year: "2024", genre: "Animação, Ficção", score: "8.6", badge: "OBRA-PRIMA", poster: "https://image.tmdb.org/t/p/w500/8wW8g82U3a1n7tM06Q07p945d9u.jpg", overview: "A jornada épica de uma robô chamada Roz que naufraga em uma ilha deserta e deve aprender a se adaptar aos arredores hostis.", providers: ["Cinema", "Apple TV+"] }
+            ],
+            top: [
+                { id: 238, title: "O Poderoso Chefão", type: "Filme", year: "1972", genre: "Crime, Drama", score: "9.2", badge: "⭐ HISTÓRICO", poster: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", overview: "O patriarca envelhecido de uma dinastia do crime organizado transfere o controle de seu império clandestino para seu filho relutante.", providers: ["Netflix", "Paramount+", "Prime Video"] },
+                { id: 278, title: "Um Sonho de Liberdade", type: "Filme", year: "1994", genre: "Drama, Crime", score: "9.3", badge: "⭐ #1 IMDB", poster: "https://image.tmdb.org/t/p/w500/umXVRnKz7nqa5O5s0dY9aMv9b1.jpg", overview: "Dois homens presos se unem ao longo de vários anos, encontrando consolo e redenção eventual através de atos de decência comum.", providers: ["Max", "Prime Video"] },
+                { id: 1396, title: "Breaking Bad", type: "Série", year: "2008", genre: "Drama, Crime", score: "9.5", badge: "⭐ PERFEIÇÃO", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg", overview: "Um professor de química do ensino médio com câncer terminal de pulmão se junta a um ex-aluno para fabricar e vender metanfetamina para garantir o futuro financeiro de sua família.", providers: ["Netflix"] },
+                { id: 129, title: "A Viagem de Chihiro", type: "Anime", year: "2001", genre: "Anime, Fantasia", score: "8.9", badge: "⭐ OSCAR ANIME", poster: "https://image.tmdb.org/t/p/w500/393mh11whB890dpZ5mYvlslUh1T.jpg", overview: "Uma garota de dez anos chamada Chihiro vagueia por um mundo governado por deuses, bruxas e espíritos, e onde os humanos são transformados em bestas.", providers: ["Netflix"] },
+                { id: 155, title: "Batman: O Cavaleiro das Trevas", type: "Filme", year: "2008", genre: "Ação, Crime, Drama", score: "9.0", badge: "⭐ LENDÁRIO", poster: "https://image.tmdb.org/t/p/w500/i0tScqTct61pM9G2e9m9d5B0vU8.jpg", overview: "Quando a ameaça conhecida como o Coringa causa estragos e caos no povo de Gotham, Batman deve aceitar um dos maiores testes psicológicos e físicos de sua capacidade de combater a injustiça.", providers: ["Max", "Prime Video"] }
+            ],
+            series: [
+                { id: 76479, title: "The Boys", type: "Série", year: "2019", genre: "Ação, Sci-Fi", score: "8.5", badge: "SÁTIRA", poster: "https://image.tmdb.org/t/p/w500/2zmTngn1tYC1AvfnrFLhxeD82hz.jpg", overview: "Um grupo de vigilantes se propõe a derrubar super-heróis corruptos que abusam de seus superpoderes em vez de usá-los para o bem.", providers: ["Prime Video"] },
+                { id: 66732, title: "Stranger Things", type: "Série", year: "2016", genre: "Ficção Científica, Mistério", score: "8.6", badge: "SUCESSO", poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg", overview: "Quando um jovem garoto desaparece, sua mãe, um chefe de polícia e seus amigos devem enfrentar forças aterrorizantes para trazê-lo de volta.", providers: ["Netflix"] },
+                { id: 76331, title: "Succession", type: "Série", year: "2018", genre: "Drama", score: "8.9", badge: "EMMY WINNER", poster: "https://image.tmdb.org/t/p/w500/7udWJ7gZ8x8Lh08c4Q7H5z7J0k.jpg", overview: "A família Roy é conhecida por controlar o maior conglomerado de mídia e entretenimento do mundo. Contudo, seu mundo muda quando seu pai envelhecido renuncia à liderança da empresa.", providers: ["Max"] },
+                { id: 114472, title: "O Urso (The Bear)", type: "Série", year: "2022", genre: "Comédia, Drama", score: "8.7", badge: "ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/sHFlb2h8a95o3c1J4xZ8m9N0uT7.jpg", overview: "Um jovem chef de alta gastronomia volta para Chicago para administrar a lanchonete de sanduíches da sua família após uma morte trágica.", providers: ["Disney+"] },
+                { id: 85937, title: "Demon Slayer: Kimetsu no Yaiba", type: "Anime", year: "2019", genre: "Anime, Ação", score: "8.7", badge: "⛩️ ANIME TOP", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg", overview: "Após sua família ser chacinada por demônios e sua irmã transformada em uma criatura sedenta de sangue, Tanjiro embarca numa jornada perigosa para curá-la.", providers: ["Crunchyroll", "Netflix"] }
+            ],
+            anime: [
+                { id: 1429, title: "Attack on Titan (Shingeki no Kyojin)", type: "Anime", year: "2013", genre: "Anime, Fantasia, Ação", score: "8.7", badge: "⛩️ TOP ANIME", poster: "https://image.tmdb.org/t/p/w500/8C5LL4k9aIagGhyJkK80e980L1n.jpg", overview: "Após sua cidade natal ser destruída, Eren Jaeger jura limpar a terra de todos os Titãs gigantes.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 124834, title: "Solo Leveling", type: "Anime", year: "2024", genre: "Anime, Fantasia, Ação", score: "8.6", badge: "⛩️ NOVIDADE", poster: "https://image.tmdb.org/t/p/w500/geCRueV3ElhRTr03v1Gfw86iSYx.jpg", overview: "Em um mundo onde caçadores despertam poderes, Sung Jinwoo, o caçador mais fraco de todos, encontra um calabouço misterioso com uma missão secreta de evolução infinita.", providers: ["Crunchyroll"] },
+                { id: 85937, title: "Demon Slayer (Kimetsu no Yaiba)", type: "Anime", year: "2019", genre: "Anime, Ação", score: "8.7", badge: "⛩️ SUCESSO", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg", overview: "Tanjiro Kamado luta para vingar sua família e encontrar uma cura para sua irmã Nezuko.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 95479, title: "Jujutsu Kaisen", type: "Anime", year: "2020", genre: "Anime, Sobrenatural", score: "8.6", badge: "⛩️ EM ALTA", poster: "https://image.tmdb.org/t/p/w500/hD8pZJ8b3a0y1X6p7G5m4k9N0uT.jpg", overview: "Yuji Itadori engole um dedo amaldiçoado e se junta a uma escola de feiticeiros de Tóquio para purificar maldições ancestrais.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 37854, title: "One Piece", type: "Anime", year: "1999", genre: "Anime, Aventura", score: "8.9", badge: "⛩️ CLÁSSICO", poster: "https://image.tmdb.org/t/p/w500/cMD9Ygz11zjJzAv0rpURa1C06u.jpg", overview: "Monkey D. Luffy e sua tripulação navegam pelos mares perigosos em busca do lendário tesouro One Piece.", providers: ["Crunchyroll", "Netflix", "Max"] }
+            ]
+        };
+
+        /* ESTADO DA PÁGINA */
+        let categoriaAtual = 'trending';
+        let provedorFiltroAtual = 'all';
+        let paginaAtual = 1;
+        let cacheTitulos = {
+            trending: [],
+            releases: [],
+            top: [],
+            series: [],
+            anime: []
+        };
+        let titulosFiltrados = [];
+        window.titulosAtuaisNaTela = [];
+        let debounceBuscaTimer = null;
+
+        /* INICIALIZAÇÃO */
+        window.addEventListener('DOMContentLoaded', () => {
+            verificarTemaELogin();
+            mudarCategoria('trending');
+        });
+
+        function atualizarUIUsuario() {
+            const user = localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user');
+            const userEl = document.getElementById('currentUser');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (userEl) userEl.textContent = user ? user.toUpperCase() : 'VISITANTE';
+            if (loginBtn) loginBtn.style.display = user ? 'none' : 'flex';
+            if (logoutBtn) logoutBtn.style.display = user ? 'flex' : 'none';
+        }
+
+        function verificarTemaELogin() {
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', () => {
+                    const isLight = document.body.classList.toggle('light-mode');
+                    localStorage.setItem('overcritic_theme', isLight ? 'light' : 'dark');
+                });
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    window.location.href = 'conta_login.html?tab=login';
+                });
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    if (confirm('Deseja realmente sair da sua conta?')) {
+                        if (window.sbClient) {
+                            try { await window.sbClient.auth.signOut(); } catch(e) {}
+                        }
+                        localStorage.setItem('overcritic_currentUser', 'Visitante');
+                        localStorage.removeItem('overcritic_user');
+                        localStorage.removeItem('overcritic_user_email');
+                        atualizarUIUsuario();
+                    }
+                });
+            }
+
+            atualizarUIUsuario();
+        }
+
+        /* FILTRO POR STREAMING / PROVEDOR */
+        function filtrarProvedor(prov) {
+            provedorFiltroAtual = prov;
+            document.querySelectorAll('.plat-chip-btn').forEach(btn => {
+                const p = btn.getAttribute('data-prov');
+                btn.classList.toggle('active', p === prov);
+            });
+            filtrarTitulosNaTela();
+        }
+
+        /* TROCA DE CATEGORIAS */
+        function mudarCategoria(cat) {
+            categoriaAtual = cat;
+            paginaAtual = 1;
+
+            document.querySelectorAll('.cat-tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (cat === 'trending') document.getElementById('tabTrending')?.classList.add('active');
+            if (cat === 'releases') document.getElementById('tabReleases')?.classList.add('active');
+            if (cat === 'top') document.getElementById('tabTop')?.classList.add('active');
+            if (cat === 'series') document.getElementById('tabSeries')?.classList.add('active');
+            if (cat === 'anime') document.getElementById('tabAnime')?.classList.add('active');
+
+            const searchInput = document.getElementById('titleSearchInput');
+            if (searchInput) searchInput.value = '';
+
+            carregarCatalogo(cat);
+        }
+
+        /* DETECÇÃO INTELIGENTE DE PROVEDORES PARA O BRASIL */
+        function estimarProvedoresBr(item, isTv, isAnime) {
+            if (item.providers && item.providers.length) return item.providers;
+            if (isAnime) return ['Crunchyroll', 'Netflix'];
+            if (isTv) return ['Netflix', 'Max', 'Prime Video'];
+            return ['Cinema', 'Max', 'Prime Video', 'Netflix'];
+        }
+
+        /* CARREGAMENTO DE DADOS VIA API TMDB */
+        async function carregarCatalogo(cat, carregarMais = false) {
+            const grid = document.getElementById('titlesGrid');
+            const btnMais = document.getElementById('btnLoadMore');
+            const apiKey = getTmdbApiKey();
+
+            if (!carregarMais) {
+                // Skeleton loader elegante
+                grid.innerHTML = Array(8).fill(0).map(() => `
+                    <div class="skeleton-card">
+                        <div class="skeleton-media"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line" style="width: 80%;"></div>
+                            <div class="skeleton-line" style="width: 50%;"></div>
+                            <div class="skeleton-line" style="width: 90%; margin-top: auto;"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            if (btnMais) btnMais.disabled = true;
+
+            try {
+                let endpoint = '';
+                if (cat === 'trending') {
+                    endpoint = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                } else if (cat === 'releases') {
+                    endpoint = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                } else if (cat === 'top') {
+                    endpoint = `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                } else if (cat === 'series') {
+                    endpoint = `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                } else if (cat === 'anime') {
+                    endpoint = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=pt-BR&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=${paginaAtual}`;
+                }
+
+                const res = await fetch(endpoint);
+                if (!res.ok) throw new Error('Falha na resposta do TMDB');
+                const data = await res.json();
+
+                const results = data.results || [];
+                const novosTitulos = results.map(item => {
+                    const isTv = (item.first_air_date !== undefined) || (item.name !== undefined);
+                    const title = isTv ? (item.name || item.original_name) : (item.title || item.original_title);
+                    const date = isTv ? (item.first_air_date || '') : (item.release_date || '');
+                    const year = date ? date.substring(0, 4) : '2024';
+                    const isAnime = item.genre_ids?.includes(16) && (item.origin_country?.includes('JP') || item.original_language === 'ja');
+                    const tipo = isAnime ? 'Anime' : (isTv ? 'Série' : 'Filme');
+                    const score = item.vote_average ? item.vote_average.toFixed(1) : '8.0';
+                    const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : gerarFallbackCapa(title);
+                    const genres = mapearGeneros(item.genre_ids);
+
+                    return {
+                        id: item.id,
+                        title: title,
+                        type: tipo,
+                        year: year,
+                        genre: genres,
+                        score: score,
+                        badge: item.vote_average >= 8.4 ? '⭐ ACLAMADO' : (cat === 'releases' ? 'POPULAR' : 'EM ALTA'),
+                        poster: poster,
+                        overview: item.overview || 'Sinopse oficial não fornecida para este título.',
+                        providers: estimarProvedoresBr(item, isTv, isAnime),
+                        media_type: isTv ? 'tv' : 'movie'
+                    };
+                });
+
+                if (carregarMais) {
+                    cacheTitulos[cat] = [...(cacheTitulos[cat] || []), ...novosTitulos];
+                } else {
+                    const baseIntegrada = CATALOGO_ESTENDIDO[cat] || [];
+                    const combinados = [...baseIntegrada];
+                    novosTitulos.forEach(nt => {
+                        if (!combinados.some(c => c.title.toLowerCase() === nt.title.toLowerCase())) {
+                            combinados.push(nt);
+                        }
+                    });
+                    cacheTitulos[cat] = combinados;
+                }
+
+                filtrarTitulosNaTela();
+
+            } catch (err) {
+                console.warn('TMDB em contingência. Carregando catálogo oficial integrado:', err);
+                if (!carregarMais) {
+                    cacheTitulos[cat] = CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending;
+                    filtrarTitulosNaTela();
+                }
+            } finally {
+                if (btnMais) btnMais.disabled = false;
+            }
+        }
+
+        function carregarMaisTitulos() {
+            paginaAtual++;
+            carregarCatalogo(categoriaAtual, true);
+        }
+
+        /* BUSCA EM TEMPO REAL COM DEBOUNCE */
+        function tratarBuscaEmTempoReal() {
+            clearTimeout(debounceBuscaTimer);
+            debounceBuscaTimer = setTimeout(() => {
+                filtrarTitulosNaTela();
+            }, 250);
+        }
+
+        /* BUSCA ONLINE DIRETO NO TMDB */
+        async function executarBuscaTmdbOnline() {
+            const query = (document.getElementById('titleSearchInput')?.value || '').trim();
+            if (!query) {
+                filtrarTitulosNaTela();
+                return;
+            }
+
+            const grid = document.getElementById('titlesGrid');
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--accent-cyan); font-weight: 700;">Pesquisando "${query}" no catálogo global do TMDB... ⚡</div>`;
+
+            const apiKey = getTmdbApiKey();
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=pt-BR&query=${encodeURIComponent(query)}&include_adult=false`);
+                if (!res.ok) throw new Error('Erro na busca');
+                const data = await res.json();
+                const items = (data.results || []).filter(r => r.media_type === 'movie' || r.media_type === 'tv');
+
+                const titulosBuscados = items.map(item => {
+                    const isTv = item.media_type === 'tv';
+                    const title = isTv ? (item.name || item.original_name) : (item.title || item.original_title);
+                    const date = isTv ? (item.first_air_date || '') : (item.release_date || '');
+                    const year = date ? date.substring(0, 4) : 'N/D';
+                    const isAnime = item.genre_ids?.includes(16) && (item.origin_country?.includes('JP') || item.original_language === 'ja');
+                    const tipo = isAnime ? 'Anime' : (isTv ? 'Série' : 'Filme');
+                    const score = item.vote_average ? item.vote_average.toFixed(1) : '7.5';
+                    const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : gerarFallbackCapa(title);
+
+                    return {
+                        id: item.id,
+                        title: title,
+                        type: tipo,
+                        year: year,
+                        genre: mapearGeneros(item.genre_ids),
+                        score: score,
+                        badge: 'RESULTADO',
+                        poster: poster,
+                        overview: item.overview || 'Sinopse não disponível.',
+                        providers: estimarProvedoresBr(item, isTv, isAnime),
+                        media_type: item.media_type
+                    };
+                });
+
+                renderizarGridTitulos(titulosBuscados);
+            } catch (e) {
+                console.warn('Erro ao buscar online:', e);
+                filtrarTitulosNaTela();
+            }
+        }
+
+        /* FILTRAGEM LOCAL NA TELA */
+        function filtrarTitulosNaTela() {
+            const query = (document.getElementById('titleSearchInput')?.value || '').toLowerCase().trim();
+            const listaBase = cacheTitulos[categoriaAtual] || CATALOGO_ESTENDIDO[categoriaAtual] || [];
+
+            titulosFiltrados = listaBase.filter(t => {
+                const matchQuery = !query ||
+                    (t.title || '').toLowerCase().includes(query) ||
+                    (t.genre || '').toLowerCase().includes(query) ||
+                    (t.type || '').toLowerCase().includes(query);
+
+                let matchProv = true;
+                if (provedorFiltroAtual !== 'all') {
+                    if (provedorFiltroAtual === 'Filme' || provedorFiltroAtual === 'Série' || provedorFiltroAtual === 'Anime') {
+                        matchProv = t.type === provedorFiltroAtual;
+                    } else {
+                        const provs = t.providers || [];
+                        matchProv = provs.some(p => p.toLowerCase().includes(provedorFiltroAtual.toLowerCase()));
+                    }
+                }
+
+                return matchQuery && matchProv;
+            });
+
+            renderizarGridTitulos(titulosFiltrados);
+        }
+
+        /* RENDERIZAÇÃO DA GRADE DE TÍTULOS */
+        function renderizarGridTitulos(titulos) {
+            const grid = document.getElementById('titlesGrid');
+            const countBadge = document.getElementById('resultsCountBadge');
+            if (!grid) return;
+
+            window.titulosAtuaisNaTela = titulos || [];
+
+            if (countBadge) {
+                countBadge.textContent = `${titulos.length} títulos encontrados`;
+            }
+
+            if (!titulos || titulos.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">🎬</div>
+                        <h3 style="margin: 0 0 8px 0; color: var(--text-main); font-size: 1.3rem;">Nenhum título encontrado</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Tente pesquisar com outro nome ou altere o filtro de categoria/streaming acima.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+
+            titulos.forEach((obra, index) => {
+                const card = document.createElement('div');
+                card.className = 'title-card';
+
+                const safeTitle = (obra.title || 'Título').replace(/[<>&"']/g, '');
+                const encodedTitle = encodeURIComponent(obra.title || '');
+                const encodedPoster = encodeURIComponent(obra.poster || '');
+                const encodedGenre = encodeURIComponent(obra.genre || '');
+                const encodedType = encodeURIComponent(obra.type || 'Filme');
+                const encodedYear = encodeURIComponent(obra.year || '2024');
+                const encodedScore = encodeURIComponent(`${obra.score} / 10 (TMDB)`);
+
+                const provBadges = (obra.providers || []).slice(0, 2).map(p => `<span class="provider-badge">${p}</span>`).join('');
+
+                card.innerHTML = `
+                    <div class="title-card-media">
+                        <img src="${obra.poster}" class="title-card-img" alt="${safeTitle}" onerror="tratarErroCapa(this, '${safeTitle}')" loading="lazy">
+                        <div class="title-card-overlay"></div>
+                        <span class="badge-type">${obra.type}</span>
+                        ${obra.score ? `<span class="badge-score">⭐ ${obra.score}</span>` : ''}
+                        ${obra.badge ? `<span class="badge-highlight">${obra.badge}</span>` : ''}
+                    </div>
+                    <div class="title-card-body">
+                        <h3 class="title-card-title" title="${safeTitle}">${safeTitle}</h3>
+                        <div class="title-card-platforms">
+                            ${provBadges}
+                        </div>
+                        <div class="title-card-meta">
+                            <span class="title-card-genre" title="${obra.genre || 'Cinema'}">${obra.genre || 'Cinema'}</span>
+                            <span class="title-card-year">${obra.year || ''}</span>
+                        </div>
+                        <div class="title-card-actions">
+                            <a href="adicionar_midias.html?titulo=${encodedTitle}&capa=${encodedPoster}&tipo=${encodedType}&genero=${encodedGenre}&ano=${encodedYear}&nota=${encodedScore}" class="btn-action-eval" title="Criar análise desta obra">
+                                ✍️ Avaliar
+                            </a>
+                            <button type="button" class="btn-action-watch" onclick="abrirModalWatch(${index})" title="Ver onde assistir no Brasil e detalhes">
+                                📺 Onde Assistir
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* MODAL ONDE ASSISTIR & SINOPSE */
+        async function abrirModalWatch(index) {
+            const obra = window.titulosAtuaisNaTela[index];
+            if (!obra) return;
+
+            const modal = document.getElementById('watchModal');
+            const titleEl = document.getElementById('watchModalTitle');
+            const coverEl = document.getElementById('watchModalCover');
+            const typeEl = document.getElementById('watchModalType');
+            const yearEl = document.getElementById('watchModalYear');
+            const genreEl = document.getElementById('watchModalGenre');
+            const scoreEl = document.getElementById('watchModalScore');
+            const overviewEl = document.getElementById('watchModalOverview');
+            const listEl = document.getElementById('watchLinksList');
+            const evalBtn = document.getElementById('watchModalEvalBtn');
+
+            if (titleEl) titleEl.textContent = obra.title;
+            if (coverEl) {
+                coverEl.src = obra.poster || gerarFallbackCapa(obra.title);
+                coverEl.onerror = () => tratarErroCapa(coverEl, obra.title);
+            }
+            if (typeEl) typeEl.textContent = (obra.type || 'FILME').toUpperCase();
+            if (yearEl) yearEl.textContent = obra.year || '2024';
+            if (genreEl) genreEl.textContent = obra.genre || 'Entretenimento';
+            if (scoreEl) scoreEl.textContent = `⭐ ${obra.score || '8.5'} TMDB`;
+            if (overviewEl) overviewEl.textContent = obra.overview || 'Sinopse oficial não informada.';
+
+            const encodedTitle = encodeURIComponent(obra.title || '');
+            const encodedPoster = encodeURIComponent(obra.poster || '');
+            const encodedGenre = encodeURIComponent(obra.genre || '');
+            const encodedType = encodeURIComponent(obra.type || 'Filme');
+            const encodedYear = encodeURIComponent(obra.year || '2024');
+            const encodedScore = encodeURIComponent(`${obra.score} / 10 (TMDB)`);
+
+            if (evalBtn) {
+                evalBtn.href = `adicionar_midias.html?titulo=${encodedTitle}&capa=${encodedPoster}&tipo=${encodedType}&genero=${encodedGenre}&ano=${encodedYear}&nota=${encodedScore}`;
+            }
+
+            // Consulta provedores reais TMDB caso tenhamos o ID
+            listEl.innerHTML = `<div style="padding: 12px; color: var(--accent-cyan);">Buscando provedores oficiais no Brasil... ⏳</div>`;
+            if (modal) modal.style.display = 'flex';
+
+            let provedoresFinais = obra.providers || ['Cinema'];
+
+            if (obra.id) {
+                try {
+                    const apiKey = getTmdbApiKey();
+                    const type = obra.media_type || (obra.type === 'Série' || obra.type === 'Anime' ? 'tv' : 'movie');
+                    const res = await fetch(`https://api.themoviedb.org/3/${type}/${obra.id}/watch/providers?api_key=${apiKey}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const brData = data.results?.BR;
+                        if (brData) {
+                            const found = [];
+                            if (brData.flatrate) brData.flatrate.forEach(p => found.push(p.provider_name));
+                            if (brData.free) brData.free.forEach(p => found.push(p.provider_name));
+                            if (brData.ads) brData.ads.forEach(p => found.push(p.provider_name));
+                            if (!found.length && (brData.rent || brData.buy)) {
+                                (brData.rent || brData.buy).forEach(p => found.push(`${p.provider_name} (Aluguel)`));
+                            }
+                            if (found.length) provedoresFinais = found;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Erro ao consultar Watch Providers:', e);
+                }
+            }
+
+            let htmlLinks = '';
+            provedoresFinais.forEach(p => {
+                const lower = p.toLowerCase();
+                let url = `https://www.google.com/search?q=onde+assistir+${encodedTitle}+${encodeURIComponent(p)}`;
+                let icon = '📺';
+
+                if (lower.includes('netflix')) {
+                    url = `https://www.netflix.com/search?q=${encodedTitle}`;
+                    icon = '🔴';
+                } else if (lower.includes('prime') || lower.includes('amazon')) {
+                    url = `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${encodedTitle}`;
+                    icon = '🔵';
+                } else if (lower.includes('max') || lower.includes('hbo')) {
+                    url = `https://play.max.com/search?q=${encodedTitle}`;
+                    icon = '🟣';
+                } else if (lower.includes('disney')) {
+                    url = `https://www.disneyplus.com/search?q=${encodedTitle}`;
+                    icon = '🟢';
+                } else if (lower.includes('crunchyroll')) {
+                    url = `https://www.crunchyroll.com/pt-br/search?q=${encodedTitle}`;
+                    icon = '🟠';
+                } else if (lower.includes('cinema')) {
+                    url = `https://www.ingresso.com/busca?q=${encodedTitle}`;
+                    icon = '🍿';
+                } else if (lower.includes('apple')) {
+                    url = `https://tv.apple.com/br/search?term=${encodedTitle}`;
+                    icon = '🍎';
+                }
+
+                htmlLinks += `
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="watch-link-row">
+                        <span>${icon} <strong>${p}</strong></span>
+                        <span>Acessar Plataforma ↗</span>
+                    </a>
+                `;
+            });
+
+            if (!htmlLinks) {
+                htmlLinks = `
+                    <div style="padding: 10px; color: var(--text-muted); font-size: 0.85rem;">
+                        Não listado nos streamings por assinatura atualmente. Verifique em salas de cinema ou mídias digitais.
+                    </div>
+                `;
+            }
+
+            listEl.innerHTML = htmlLinks;
+        }
+
+        function fecharModalWatch(e) {
+            if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('btn-close-modal')) {
+                return;
+            }
+            const modal = document.getElementById('watchModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') fecharModalWatch();
+        });
+
+        /* FALLBACKS VISUAIS */
+        function gerarFallbackCapa(titulo) {
+            const seguro = (titulo || 'TÍTULO').substring(0, 22).replace(/[<>&"']/g, '');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450">
+                <defs>
+                    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#07090f"/>
+                        <stop offset="50%" stop-color="#111726"/>
+                        <stop offset="100%" stop-color="#18233c"/>
+                    </linearGradient>
+                </defs>
+                <rect width="300" height="450" fill="url(#g)"/>
+                <rect x="4" y="4" width="292" height="442" fill="none" stroke="rgba(0, 240, 255, 0.3)" stroke-width="2" rx="14"/>
+                <text x="50%" y="42%" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="52">🎬</text>
+                <text x="50%" y="62%" text-anchor="middle" fill="#00f0ff" font-family="'Inter', sans-serif" font-weight="800" font-size="16">${seguro}</text>
+                <text x="50%" y="70%" text-anchor="middle" fill="#8b9bb4" font-family="'Inter', sans-serif" font-size="12">OVERCRITIC</text>
+            </svg>`;
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+
+        function tratarErroCapa(img, titulo) {
+            img.onerror = null;
+            img.src = gerarFallbackCapa(titulo);
+        }
+    </script>
+</body>
+
+</html>

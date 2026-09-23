@@ -1,0 +1,3022 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERCRITIC - Críticas de Jogos</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Conexão com Supabase e Backend C# -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="js/apiClient.js"></script>
+    <style>
+        :root {
+            --bg-color: #07090f;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #9d4edd;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8f9fa;
+            --text-muted: #adb5bd;
+            --sidebar-width: 80px;
+            --sidebar-bg: rgba(10, 14, 23, 0.4);
+            --card-shadow: rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        /* --- MODO CLARO (Cinza Titânio Fosco & Vermelho Sangue) --- */
+        body.light-mode {
+            --bg-color: #d2d7e0;
+            --accent-cyan: #c51b29; 
+            --accent-purple: #800f1c;
+            --glass-bg: rgba(224, 228, 236, 0.88);
+            --glass-border: rgba(0, 0, 0, 0.12);
+            --text-main: #0e121a;
+            --text-muted: #525f73;
+            --sidebar-bg: rgba(214, 219, 228, 0.92);
+            --card-shadow: rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: rgba(197, 27, 41, 0.2);
+            background: radial-gradient(circle at 15% 50%, rgba(128, 15, 28, 0.05), transparent 40%),
+                        radial-gradient(circle at 85% 30%, rgba(197, 27, 41, 0.05), transparent 40%),
+                        var(--bg-color);
+        }
+
+        body.light-mode input[type="text"],
+        body.light-mode input[type="number"],
+        body.light-mode select,
+        body.light-mode textarea {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.16);
+            color: var(--text-main);
+        }
+        body.light-mode input:focus,
+        body.light-mode select:focus,
+        body.light-mode textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(197, 27, 41, 0.22);
+            background: #f2f5fa;
+        }
+        body.light-mode select option {
+            background: #eaedf4;
+            color: #0e121a;
+        }
+        body.light-mode select optgroup {
+            background: #dfe4ec;
+            color: var(--accent-cyan);
+        }
+        body.light-mode .suggestions-dropdown {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.14);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+        }
+        body.light-mode .suggestion-item:hover {
+            background: rgba(197, 27, 41, 0.1);
+        }
+        body.light-mode .nav-item:hover,
+        body.light-mode .nav-item.active {
+            background: rgba(197, 27, 41, 0.12);
+            box-shadow: 0 0 10px rgba(197, 27, 41, 0.2);
+            color: var(--accent-cyan);
+        }
+        body.light-mode .brand-icon img {
+            box-shadow: 0 0 15px rgba(197, 27, 41, 0.4);
+            border-color: rgba(197, 27, 41, 0.4);
+        }
+        body.light-mode .brand-icon:hover img {
+            box-shadow: 0 0 25px rgba(197, 27, 41, 0.7), 0 0 10px rgba(128, 15, 28, 0.5);
+            border-color: var(--accent-cyan);
+        }
+        body.light-mode .btn-primary {
+            color: #ffffff;
+            box-shadow: 0 4px 18px rgba(197, 27, 41, 0.35);
+        }
+        body.light-mode .btn-secondary {
+            background: #eaedf4;
+            color: var(--text-main);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+        body.light-mode .btn-secondary:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(197, 27, 41, 0.08);
+        }
+        body.light-mode .review-card {
+            background: #e0e4ec;
+            border-color: rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+        body.light-mode .review-card:hover {
+            border-color: rgba(197, 27, 41, 0.4);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.1), 0 0 15px rgba(197, 27, 41, 0.15);
+        }
+        body.light-mode .review-text-preview {
+            background: #d7dce5;
+            color: #1e293b;
+            border-left-color: var(--accent-cyan);
+        }
+        body.light-mode .filter-bar {
+            background: rgba(224, 228, 236, 0.88);
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+        body.light-mode .quick-rating-item {
+            background: #e0e4ec;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        body.light-mode .api-game-item {
+            background: #e0e4ec;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        body.light-mode .api-game-item:hover {
+            border-color: rgba(197, 27, 41, 0.35);
+            box-shadow: 0 6px 18px rgba(197, 27, 41, 0.12);
+        }
+        body.light-mode .api-pill-genre {
+            background: #d7dce5;
+            color: #334155;
+        }
+        body.light-mode .btn-mini-evaluate {
+            color: #ffffff;
+        }
+        body.light-mode .modal-content {
+            background: #e0e4ec;
+            border-color: rgba(0, 0, 0, 0.14);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            color: var(--text-main);
+        }
+        body.light-mode .stat-item {
+            background: #e0e4ec;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        body.light-mode .badge-status {
+            background: rgba(224, 228, 236, 0.95);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            background: radial-gradient(circle at 15% 50%, rgba(157, 78, 221, 0.15), transparent 40%),
+                        radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.15), transparent 40%),
+                        var(--bg-color);
+        }
+
+        /* ═══════════════════════════════════
+           SIDEBAR (idêntica ao index.html)
+        ═══════════════════════════════════ */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .brand-icon {
+            text-decoration: none;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .brand-icon:hover {
+            transform: scale(1.1);
+        }
+        .brand-icon img {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        .brand-icon:hover img {
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 10px rgba(157, 78, 221, 0.6);
+            border-color: var(--accent-cyan);
+        }
+        .brand-icon span { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--accent-cyan); }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+        .nav-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .sidebar-user {
+            font-size: 9px;
+            color: var(--accent-cyan);
+            text-align: center;
+            max-width: 70px;
+            word-break: break-all;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* ═══════════════════════════════════
+           MAIN CONTENT
+        ═══════════════════════════════════ */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 40px 40px;
+            flex: 1;
+            max-width: 1700px;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .header-section { margin-bottom: 30px; }
+
+        .greeting {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(90deg, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            margin-top: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ═══════════════════════════════════
+           GLASS CARD (base reutilizável)
+        ═══════════════════════════════════ */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 8px 32px var(--card-shadow);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.15);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), transparent);
+            margin-bottom: 24px;
+            border-radius: 2px;
+        }
+
+        /* ═══════════════════════════════════
+           FORM STYLES
+        ═══════════════════════════════════ */
+        .form-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .search-box {
+            background: rgba(0, 240, 255, 0.03);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            border-radius: 16px;
+            padding: 18px;
+            position: relative;
+        }
+
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(7, 9, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            display: none;
+        }
+        .suggestion-item {
+            padding: 12px 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.2s;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .suggestion-item:hover {
+            background: rgba(0, 240, 255, 0.08);
+            color: var(--accent-cyan);
+        }
+        .suggestion-item img {
+            width: 40px;
+            height: 22px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        input, select, textarea {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            padding: 10px 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 12px rgba(157, 78, 221, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(157, 78, 221, 0.15));
+            border: 1px solid var(--accent-cyan);
+            border-radius: 12px;
+            color: var(--accent-cyan);
+            padding: 12px 20px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        .btn-primary:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid #ff0055;
+            border-radius: 12px;
+            color: #ff0055;
+            padding: 12px 20px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background: #ff0055;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-ghost:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.06);
+        }
+
+        .cover-preview {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            display: none;
+            margin-top: 8px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .hint-text {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        /* ═══════════════════════════════════
+           FILTER BAR
+        ═══════════════════════════════════ */
+        .filter-bar {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* ═══════════════════════════════════
+           REVIEWS GRID
+        ═══════════════════════════════════ */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .review-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .review-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            border-color: rgba(0, 240, 255, 0.25);
+            box-shadow: 0 12px 36px var(--card-hover-shadow), 0 0 16px rgba(0, 240, 255, 0.08);
+        }
+
+        .review-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.3);
+        }
+
+        .review-card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .review-author {
+            font-size: 0.72rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .review-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .review-text-preview {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 12px;
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-purple);
+            max-height: 80px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: auto;
+            flex-wrap: wrap;
+        }
+
+        /* ═══════════════════════════════════
+           LIKE BUTTON
+        ═══════════════════════════════════ */
+        .like-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .like-btn:hover {
+            border-color: #ff5e5e;
+            color: #ff5e5e;
+            background: rgba(255, 94, 94, 0.08);
+        }
+        .like-btn.liked {
+            color: #ff5e5e;
+            border-color: #ff5e5e;
+            background: rgba(255, 94, 94, 0.12);
+        }
+
+        /* ═══════════════════════════════════
+           COMMENT SECTION
+        ═══════════════════════════════════ */
+        .comment-section {
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .comment-input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .comment-input-row input {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            border-radius: 10px;
+        }
+        .comment-input-row button {
+            padding: 8px 14px;
+            font-size: 0.78rem;
+            border-radius: 10px;
+        }
+
+        .comment-item {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            border-left: 2px solid var(--accent-purple);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .comment-item strong {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+        .no-comments {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-style: italic;
+            opacity: 0.6;
+        }
+
+        /* ═══════════════════════════════════
+           DASHBOARD TOP GRID (2 COLUNAS)
+        ═══════════════════════════════════ */
+        .dashboard-top-grid {
+            display: grid;
+            grid-template-columns: 1.12fr 0.98fr;
+            gap: 28px;
+            align-items: stretch;
+            margin-bottom: 35px;
+        }
+
+        .side-panels-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-column-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ═══════════════════════════════════
+           PAINEL 1: AVALIAÇÕES RÁPIDAS
+        ═══════════════════════════════════ */
+        .quick-reviews-card {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .panel-header-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .live-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+            animation: pulseDot 1.8s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+
+        .quick-feed-container {
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quick-feed-container::-webkit-scrollbar,
+        .api-games-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .quick-feed-container::-webkit-scrollbar-track,
+        .api-games-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .quick-feed-container::-webkit-scrollbar-thumb,
+        .api-games-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+        }
+        .quick-feed-container::-webkit-scrollbar-thumb:hover,
+        .api-games-list::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+
+        .quick-feed-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px 14px;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .quick-feed-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(0, 240, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .qf-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .qf-user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qf-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(157, 78, 221, 0.25));
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .qf-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .qf-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .qf-time {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .qf-badge-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qf-rating {
+            background: rgba(0, 240, 255, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            font-size: 0.75rem;
+            font-weight: 800;
+            border-radius: 8px;
+            padding: 3px 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .qf-tag {
+            background: rgba(157, 78, 221, 0.15);
+            color: #d896ff;
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            font-size: 0.68rem;
+            font-weight: 700;
+            border-radius: 6px;
+            padding: 2px 7px;
+            white-space: nowrap;
+        }
+
+        .qf-game-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qf-comment {
+            font-size: 0.82rem;
+            color: #e2e8f0;
+            line-height: 1.45;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border-left: 2px solid var(--accent-purple);
+        }
+
+        .qf-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2px;
+        }
+
+        .qf-like-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .qf-like-btn:hover {
+            border-color: #ff5e5e;
+            color: #ff5e5e;
+            background: rgba(255, 94, 94, 0.08);
+        }
+        .qf-like-btn.liked {
+            color: #ff5e5e;
+            border-color: #ff5e5e;
+            background: rgba(255, 94, 94, 0.15);
+        }
+
+        .qf-rate-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            color: var(--accent-cyan);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .qf-rate-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        /* ═══════════════════════════════════
+           PAINEL 2: JOGOS EM ALTA & LANÇAMENTOS (API)
+        ═══════════════════════════════════ */
+        .api-games-card {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .api-tabs-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 14px;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .api-tabs-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .api-tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .api-tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .api-tab-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+            color: var(--accent-cyan);
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+        }
+
+        .api-status-badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .api-games-list {
+            max-height: 380px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 6px;
+        }
+
+        .api-game-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .api-game-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 240, 255, 0.3);
+            transform: translateX(4px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .api-game-thumb {
+            width: 86px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            flex-shrink: 0;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .api-game-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .api-game-title {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .api-game-sub {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .api-pill-genre {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .api-pill-score {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-mini-evaluate {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(157, 78, 221, 0.15));
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-mini-evaluate:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* Form flash effect when auto-selecting game */
+        .form-highlight-pulse {
+            animation: highlightGlow 1.4s ease-out;
+        }
+        @keyframes highlightGlow {
+            0% { box-shadow: 0 0 35px rgba(0, 240, 255, 0.6); border-color: var(--accent-cyan); }
+            100% { box-shadow: 0 8px 32px var(--card-shadow); border-color: var(--glass-border); }
+        }
+
+        /* Loading skeleton */
+        .api-skeleton-loader {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 6px 0;
+        }
+        .skeleton-row {
+            height: 52px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s infinite;
+        }
+        @keyframes skeletonLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ═══════════════════════════════════
+           CENTRAL DE DESCOBERTA GAMER (MODAL & EXPANSÃO)
+        ═══════════════════════════════════ */
+        .btn-expand-discovery {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-expand-discovery:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+        body.light-mode .btn-expand-discovery {
+            background: rgba(197, 27, 41, 0.1);
+            border-color: rgba(197, 27, 41, 0.3);
+            color: var(--accent-cyan);
+        }
+        body.light-mode .btn-expand-discovery:hover {
+            background: var(--accent-cyan);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(197, 27, 41, 0.3);
+        }
+
+        .discovery-footer-action {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .btn-open-explorer {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(157, 78, 221, 0.12));
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            color: var(--accent-cyan);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .btn-open-explorer:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(157, 78, 221, 0.25));
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        .btn-open-arrow {
+            transition: transform 0.25s ease;
+            font-size: 0.9rem;
+        }
+        .btn-open-explorer:hover .btn-open-arrow {
+            transform: translateX(4px);
+        }
+        body.light-mode .btn-open-explorer {
+            background: #d8dde6;
+            border-color: rgba(197, 27, 41, 0.3);
+            color: var(--accent-cyan);
+        }
+        body.light-mode .btn-open-explorer:hover {
+            background: #cbd2dc;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 15px rgba(197, 27, 41, 0.2);
+        }
+
+        /* Modal Overlay & Container */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 10, 18, 0.85);
+            backdrop-filter: blur(16px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content.explorer-modal-content {
+            background: #0d121f;
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 240, 255, 0.15);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        body.light-mode .modal-content.explorer-modal-content {
+            background: #dce1eb;
+            border-color: rgba(0, 0, 0, 0.14);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25), 0 0 25px rgba(197, 27, 41, 0.15);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 22px;
+            right: 22px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            background: rgba(255, 68, 68, 0.4);
+            border-color: #ff4444;
+            transform: scale(1.1);
+        }
+        body.light-mode .modal-close-btn {
+            background: #eaedf4;
+            color: #0e121a;
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        body.light-mode .modal-close-btn:hover {
+            background: var(--accent-cyan);
+            color: #fff;
+            border-color: var(--accent-cyan);
+        }
+
+        /* Explorer Header & Search */
+        .explorer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding-right: 50px;
+        }
+        .explorer-badge-tag {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+        body.light-mode .explorer-badge-tag {
+            background: rgba(197, 27, 41, 0.1);
+            border-color: rgba(197, 27, 41, 0.3);
+            color: var(--accent-cyan);
+        }
+        .explorer-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            color: var(--text-main);
+        }
+        .explorer-subtitle {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            line-height: 1.5;
+        }
+        .explorer-search-wrapper {
+            flex: 1;
+            min-width: 260px;
+            max-width: 380px;
+        }
+        .explorer-search-wrapper input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .explorer-search-wrapper input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+        body.light-mode .explorer-search-wrapper input {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.16);
+            color: #0e121a;
+        }
+
+        /* Explorer Navigation Bar */
+        .explorer-nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 15px;
+        }
+        .explorer-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            max-width: 100%;
+        }
+        .explorer-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .explorer-tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .explorer-tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.07);
+        }
+        .explorer-tab-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+            color: var(--accent-cyan);
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+        body.light-mode .explorer-tab-btn {
+            background: #eaedf4;
+            border-color: rgba(0, 0, 0, 0.1);
+            color: var(--text-muted);
+        }
+        body.light-mode .explorer-tab-btn:hover {
+            background: #f0f3f8;
+            color: var(--text-main);
+        }
+        body.light-mode .explorer-tab-btn.active {
+            background: rgba(197, 27, 41, 0.12);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(197, 27, 41, 0.2);
+        }
+        .explorer-count-badge {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Explorer Cards Grid */
+        .explorer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            min-height: 250px;
+        }
+        .explorer-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .explorer-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 240, 255, 0.15);
+        }
+        body.light-mode .explorer-card {
+            background: #e8ecf4;
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+        body.light-mode .explorer-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 15px rgba(197, 27, 41, 0.15);
+        }
+        .explorer-card-media {
+            position: relative;
+            width: 100%;
+            height: 145px;
+            background: #000;
+            overflow: hidden;
+        }
+        .explorer-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .explorer-card:hover .explorer-card-img {
+            transform: scale(1.08);
+        }
+        .explorer-badge-deal {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #00f0ff, #7000ff);
+            color: #000;
+            font-size: 0.72rem;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+        body.light-mode .explorer-badge-deal {
+            background: linear-gradient(135deg, #c51b29, #800f1c);
+            color: #fff;
+        }
+        .explorer-badge-score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            color: #ffd166;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 209, 102, 0.3);
+        }
+        .explorer-card-body {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+        .explorer-card-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 2.7em;
+        }
+        .explorer-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+        .explorer-card-genre {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            border: 1px solid var(--glass-border);
+        }
+        body.light-mode .explorer-card-genre {
+            background: #d8dde6;
+        }
+        .explorer-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .btn-card-eval {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(157, 78, 221, 0.18));
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .btn-card-eval:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+        body.light-mode .btn-card-eval:hover {
+            color: #fff;
+        }
+        .btn-card-store {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-card-store:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        body.light-mode .btn-card-store {
+            background: #d8dde6;
+            border-color: rgba(0, 0, 0, 0.12);
+            color: var(--text-main);
+        }
+
+        .explorer-footer {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            margin-top: 10px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(13, 17, 27, 0.95);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.25);
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            color: var(--text-main);
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        body.light-mode .toast {
+            background: #e0e4ec;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(197, 27, 41, 0.25);
+        }
+
+        /* ═══════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════ */
+        @media (max-width: 1200px) {
+            .dashboard-top-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 900px) {
+            .explorer-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding-right: 40px;
+            }
+            .explorer-search-wrapper {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+        @media (max-width: 768px) {
+            /* Navegação adaptada para barra inferior no mobile */
+            .sidebar {
+                width: 100% !important;
+                height: 60px !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                flex-direction: row !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                padding: 0 10px !important;
+                border-right: none !important;
+                border-top: 1px solid var(--glass-border) !important;
+                border-bottom: none !important;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
+                z-index: 1000 !important;
+            }
+            .brand-icon {
+                display: none !important;
+            }
+            .nav-links {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                width: 100% !important;
+                gap: 0 !important;
+            }
+            .nav-item {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 1.25rem !important;
+                border-radius: 10px !important;
+            }
+            .sidebar-bottom {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 6px !important;
+                margin-top: 0 !important;
+            }
+            .sidebar-user {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                margin-bottom: 75px !important;
+                padding: 16px 12px !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+            }
+
+            .glass-card {
+                padding: 18px 14px !important;
+                border-radius: 16px !important;
+            }
+            .form-row { grid-template-columns: 1fr; }
+            .filter-bar {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .filter-bar input, .filter-bar select {
+                width: 100%;
+                min-width: 100%;
+            }
+            .reviews-grid { grid-template-columns: 1fr; }
+            .dashboard-top-grid { grid-template-columns: 1fr; }
+
+            /* Modal do Explorador de Jogos Adaptado */
+            .modal-content.explorer-modal-content {
+                padding: 18px 12px !important;
+                width: 95vw !important;
+                max-width: 95vw !important;
+                max-height: 92vh !important;
+                border-radius: 16px !important;
+                gap: 14px !important;
+            }
+            .modal-close-btn {
+                top: 12px !important;
+                right: 12px !important;
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 1rem !important;
+            }
+            .explorer-header {
+                padding-right: 36px;
+                gap: 10px;
+            }
+            .explorer-title {
+                font-size: 1.35rem;
+            }
+            .explorer-subtitle {
+                font-size: 0.78rem;
+            }
+            .explorer-nav-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding-bottom: 10px;
+            }
+            .explorer-tabs {
+                width: 100%;
+                padding-bottom: 6px;
+            }
+            .explorer-count-badge {
+                align-self: flex-start;
+            }
+            .explorer-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+                gap: 10px !important;
+            }
+            .explorer-card-media {
+                height: 105px !important;
+            }
+            .explorer-card-body {
+                padding: 10px 8px !important;
+                gap: 6px !important;
+            }
+            .explorer-card-title {
+                font-size: 0.82rem !important;
+                height: 2.4em !important;
+            }
+            .explorer-card-meta {
+                font-size: 0.7rem !important;
+            }
+            .explorer-card-actions {
+                flex-direction: column !important;
+                gap: 6px !important;
+            }
+            .btn-card-eval, .btn-card-store {
+                padding: 7px 6px !important;
+                font-size: 0.72rem !important;
+                width: 100% !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 12px 8px !important;
+            }
+            .explorer-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            .explorer-title {
+                font-size: 1.2rem;
+            }
+            .section-title {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        if (localStorage.getItem('overcritic_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- ══════ SIDEBAR (idêntica ao index) ══════ -->
+    <aside class="sidebar">
+        <a href="conta_login.html" class="brand-icon" title="Minha Conta / Perfil">
+            <img src="assets/overcritic_icon.png" alt="Overcritic Logo">
+            <span>HQ</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item" data-tooltip="Início">🏠</a>
+            <a href="adicionar_jogos.html" class="nav-item active" data-tooltip="Críticas de Jogos">🎮</a>
+            <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
+            <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
+            <a href="descobrir_titulos.html" class="nav-item" data-tooltip="Descobrir Títulos">🍿</a>
+            <a href="adicionar_platinas.html" class="nav-item" data-tooltip="Platinas & Troféus">🏆</a>
+            <a href="suporte_overcritic.html" class="nav-item" data-tooltip="Suporte & Sugestões">💡</a>
+            <a href="conta_login.html" class="nav-item" data-tooltip="Minha Conta / Perfil">👤</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button id="themeToggleBtn" class="nav-item" data-tooltip="Modo Claro/Escuro" style="margin-bottom: 8px;">🌓</button>
+            <button id="loginBtn" class="nav-item" data-tooltip="Fazer Login / Criar Conta">🔑</button>
+            <button id="logoutBtn" class="nav-item" data-tooltip="Sair" style="display:none;">🚪</button>
+            <div class="sidebar-user" id="currentUser" style="cursor: pointer;" title="Acessar Perfil" onclick="window.location.href='conta_login.html?tab=perfil'">VISITANTE</div>
+        </div>
+    </aside>
+
+    <!-- ══════ MAIN CONTENT ══════ -->
+    <main class="main-content">
+        <header class="header-section">
+            <h1 class="greeting">🎮 Críticas de Jogos</h1>
+            <div class="subtitle">Registre, avalie e compartilhe suas opiniões</div>
+        </header>
+
+        <!-- ══════ GRADE PRINCIPAL DO TOPO (2 COLUNAS) ══════ -->
+        <div class="dashboard-top-grid">
+
+            <!-- COLUNA ESQUERDA: FORMULÁRIO DE ANÁLISE -->
+            <div class="glass-card form-column-card" id="formCardContainer">
+                <h2 class="section-title">📝 Registrar Análise</h2>
+                <div class="section-divider"></div>
+
+                <form class="form-card" id="gameForm" onsubmit="salvarAnalise(event)">
+                    <input type="hidden" id="editingId" value="">
+
+                    <!-- BUSCA AUTOMÁTICA -->
+                    <div class="search-box">
+                        <div class="form-group" style="position: relative;">
+                            <label>🔍 Importar dados da internet</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="apiSearchInput" placeholder="Ex: Elden Ring, Spider-Man, God of War..." style="flex: 1;" autocomplete="off">
+                                <button type="button" class="btn-primary" id="btnAutoPreencher" onclick="buscarDadosInternet()">AUTO-PREENCHER</button>
+                            </div>
+                            <div id="suggestionsDropdown" class="suggestions-dropdown"></div>
+                            <div class="hint-text">Busca capa oficial, nota e palavras-chave no banco de jogos eletrônicos.</div>
+                        </div>
+                    </div>
+
+                    <!-- CAPA PREVIEW -->
+                    <img id="coverPreview" class="cover-preview" src="" alt="Capa Oficial do Jogo">
+                    <input type="hidden" id="gameCoverUrl">
+
+                    <!-- INFORMAÇÕES -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome do jogo</label>
+                            <input type="text" id="gameTitle" required placeholder="Nome do título">
+                        </div>
+                        <div class="form-group">
+                            <label>Gênero(s)</label>
+                            <input type="text" id="gameGenres" placeholder="Ex: RPG, Ação, Soulslike">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Palavras-chave / Tags</label>
+                            <input type="text" id="gameKeywords" placeholder="Ex: #SoulsLike, #MundoAberto">
+                        </div>
+                        <div class="form-group">
+                            <label>Média da internet (0 - 100)</label>
+                            <input type="text" id="internetRating" readonly placeholder="Importado da web" style="color: var(--accent-cyan);">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Plataforma jogada</label>
+                        <select id="gamePlatform">
+                            <option value="PC">PC (Steam/Epic)</option>
+                            <option value="PlayStation 5">PlayStation 5</option>
+                            <option value="PlayStation 4">PlayStation 4</option>
+                            <option value="Xbox Series X/S">Xbox Series X/S</option>
+                            <option value="Nintendo Switch">Nintendo Switch</option>
+                        </select>
+                    </div>
+
+                    <div class="section-divider" style="margin: 4px 0;"></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Sua nota pessoal (0/10)</label>
+                            <input type="number" id="myRating" min="0" max="10" step="0.5" required placeholder="Sua nota de 0 a 10">
+                        </div>
+                        <div class="form-group">
+                            <label>Status da sua jogatina</label>
+                            <select id="gameStatus">
+                                <option value="Zerado">Zerado / Concluído</option>
+                                <option value="Platinado">Platinado 🏆</option>
+                                <option value="Jogando">Jogando Atualmente</option>
+                                <option value="Abandonado">Abandonado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sua crítica / experiência pessoal</label>
+                        <textarea id="myReview" rows="4" placeholder="Escreva aqui o que você achou da jogabilidade, história, desempenho e se vale a pena..." required></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" id="btnSubmitForm" class="btn-primary" style="flex: 1;">REGISTRAR CRÍTICA</button>
+                        <button type="button" id="btnCancelarEdicao" class="btn-danger" style="display: none;" onclick="limparFormulario()">CANCELAR</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- COLUNA DIREITA: AVALIAÇÕES RÁPIDAS (SUPERIOR) & JOGOS DA API (INFERIOR) -->
+            <div class="side-panels-column">
+                
+                <!-- PAINEL DIREITA SUPERIOR: AVALIAÇÕES RÁPIDAS DOS PLAYERS -->
+                <div class="glass-card quick-reviews-card">
+                    <div class="panel-header-badge">
+                        <h2 class="section-title" style="margin: 0;">💬 Avaliações Rápidas</h2>
+                        <div class="live-tag">
+                            <span class="live-dot"></span> FEED AO VIVO
+                        </div>
+                    </div>
+                    <div class="hint-text" style="margin-bottom: 12px;">Opiniões instantâneas e destaques da comunidade gamer</div>
+                    <div class="section-divider" style="margin-bottom: 14px;"></div>
+
+                    <div id="quickFeedContainer" class="quick-feed-container">
+                        <!-- Itens renderizados dinamicamente via JS -->
+                    </div>
+                </div>
+
+                <!-- PAINEL DIREITA INFERIOR: JOGOS MAIS JOGADOS & LANÇAMENTOS (API) -->
+                <div class="glass-card api-games-card">
+                    <div class="panel-header-badge">
+                        <h2 class="section-title" style="margin: 0;">🔥 Descobrir Jogos</h2>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <a href="descobrir_jogos.html" class="btn-expand-discovery" title="Abrir Aba de Descoberta Completa" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">🪐 Abrir Aba</a>
+                            <div class="api-status-badge" id="apiStatusBadge">
+                                <span style="color:#00f0ff;">●</span> Online
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hint-text" style="margin-bottom: 12px;">Mais jogados e lançamentos para você jogar e avaliar</div>
+                    <div class="section-divider" style="margin-bottom: 14px;"></div>
+
+                    <!-- ABAS DE NAVEGAÇÃO DA API -->
+                    <div class="api-tabs-bar">
+                        <button class="api-tab-btn active" id="tabTrending" onclick="mudarAbaJogos('trending')">🔥 Mais Jogados</button>
+                        <button class="api-tab-btn" id="tabReleases" onclick="mudarAbaJogos('releases')">🚀 Lançamentos</button>
+                        <button class="api-tab-btn" id="tabMetacritic" onclick="mudarAbaJogos('metacritic')">⭐ Top Crítica</button>
+                        <button class="btn-ghost" style="margin-left: auto; padding: 4px 8px;" title="Recarregar Jogos" onclick="recarregarJogosApi()">🔄</button>
+                    </div>
+
+                    <!-- LISTA DE JOGOS CARREGADOS VIA API -->
+                    <div id="apiGamesList" class="api-games-list">
+                        <!-- Carregamento via Skeleton / JS -->
+                    </div>
+
+                    <!-- BOTÃO PROMINENTE PARA EXPLORAR O CATÁLOGO COMPLETO -->
+                    <div class="discovery-footer-action">
+                        <a href="descobrir_jogos.html" class="btn-open-explorer" style="text-decoration: none;">
+                            <span>🪐 Ver Catálogo Completo na Aba Descoberta</span>
+                            <span class="btn-open-arrow">➔</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══════ CRÍTICAS CADASTRADAS ══════ -->
+        <div class="glass-card">
+            <h2 class="section-title">📚 Críticas Cadastradas</h2>
+            <div class="section-divider"></div>
+
+            <div class="filter-bar">
+                <input type="text" id="searchFilter" placeholder="🔍 Filtrar por nome..." oninput="renderizarCriticas()">
+                <select id="statusFilter" onchange="renderizarCriticas()">
+                    <option value="">Todos os Status</option>
+                    <option value="Zerado">Zerado / Concluído</option>
+                    <option value="Platinado">Platinado 🏆</option>
+                    <option value="Jogando">Jogando Atualmente</option>
+                    <option value="Abandonado">Abandonado</option>
+                </select>
+                <select id="platformFilter" onchange="renderizarCriticas()">
+                    <option value="">Todas as Plataformas</option>
+                    <option value="PC">PC (Steam/Epic)</option>
+                    <option value="PlayStation 5">PlayStation 5</option>
+                    <option value="PlayStation 4">PlayStation 4</option>
+                    <option value="Xbox Series X/S">Xbox Series X/S</option>
+                    <option value="Nintendo Switch">Nintendo Switch</option>
+                </select>
+            </div>
+
+            <div id="reviewsGrid" class="reviews-grid"></div>
+        </div>
+    </main>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast" class="toast">
+        <span id="toastIcon">🎮</span>
+        <span id="toastMsg">Jogo selecionado</span>
+    </div>
+
+    <script>
+        let debounceTimer;
+
+        /* ═══════════════════════════════════
+           AUTENTICAÇÃO SIMPLES
+        ═══════════════════════════════════ */
+        function getCurrentUser() {
+            return localStorage.getItem('overcritic_currentUser') || null;
+        }
+
+        function setCurrentUser(username) {
+            if (username) {
+                localStorage.setItem('overcritic_currentUser', username);
+                migrarAnalisesAnonimasParaUsuario();
+            } else {
+                localStorage.removeItem('overcritic_currentUser');
+            }
+            updateAuthUI();
+            renderizarCriticas();
+        }
+
+        function updateAuthUI() {
+            const user = getCurrentUser();
+            document.getElementById('currentUser').textContent = user ? user.toUpperCase() : 'VISITANTE';
+            document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+            document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            window.location.href = 'conta_login.html?tab=login';
+        });
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            if (confirm('Deseja realmente sair da sua conta?')) {
+                if (window.sbClient) {
+                    try { await window.sbClient.auth.signOut(); } catch(e) {}
+                }
+                setCurrentUser(null);
+            }
+        });
+
+        /* ═══════════════════════════════════
+           PERSISTÊNCIA (localStorage)
+        ═══════════════════════════════════ */
+        const STORAGE_KEY = 'overcritic_reviews';
+
+        function obterJogosSalvos() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY))
+                || JSON.parse(localStorage.getItem('overcritic_jogos'))
+                || JSON.parse(localStorage.getItem('overclock_jogos'))
+                || [];
+        }
+
+        function salvarJogos(lista) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+            localStorage.setItem('overcritic_jogos', JSON.stringify(lista));
+        }
+
+        /* ═══════════════════════════════════
+           INTEGRAÇÃO COM O SUPABASE
+        ═══════════════════════════════════ */
+        function mapJogoParaSupabase(j) {
+            const currentUid = localStorage.getItem('overcritic_user_id') || null;
+            return {
+                id: Number(j.id),
+                user_id: j.userId || j.user_id || currentUid,
+                autor: j.autor || 'Anônimo',
+                titulo: j.titulo || 'Sem título',
+                generos: j.generos || '',
+                palavras_chave: j.palavrasChave || '',
+                media_internet: j.mediaInternet || '',
+                plataforma: j.plataforma || 'PC',
+                minha_nota: parseFloat(j.minhaNota) || 0,
+                status: j.status || 'Concluído',
+                review: j.review || '',
+                capa_url: j.capaUrl || '',
+                data_registro: j.dataRegistro || new Date().toLocaleDateString('pt-BR'),
+                likes: Array.isArray(j.likes) ? j.likes : [],
+                comments: Array.isArray(j.comments) ? j.comments : []
+            };
+        }
+
+        function mapSupabaseParaJogo(row) {
+            return {
+                id: Number(row.id),
+                userId: row.user_id,
+                autor: row.autor,
+                titulo: row.titulo,
+                generos: row.generos,
+                palavrasChave: row.palavras_chave,
+                mediaInternet: row.media_internet,
+                plataforma: row.plataforma,
+                minhaNota: row.minha_nota,
+                status: row.status,
+                review: row.review,
+                capaUrl: row.capa_url,
+                dataRegistro: row.data_registro,
+                likes: Array.isArray(row.likes) ? row.likes : [],
+                comments: Array.isArray(row.comments) ? row.comments : []
+            };
+        }
+
+        async function sincronizarJogosSupabase() {
+            if (!window.sbClient) return;
+            try {
+                const { data, error } = await window.sbClient
+                    .from('reviews_jogos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.info('ℹ️ [Supabase] Tabela reviews_jogos ainda não encontrada ou inicializando:', error.message);
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    const jogosSupabase = data.map(mapSupabaseParaJogo);
+                    const mapa = new Map();
+                    jogosSupabase.forEach(j => mapa.set(j.id, j));
+                    const locais = obterJogosSalvos();
+                    locais.forEach(j => {
+                        if (!mapa.has(j.id)) mapa.set(j.id, j);
+                    });
+                    const listaConsolidada = Array.from(mapa.values());
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(listaConsolidada));
+                    localStorage.setItem('overcritic_jogos', JSON.stringify(listaConsolidada));
+                    renderizarCriticas();
+                    console.log('⚡ [Supabase] ' + data.length + ' análises sincronizadas da nuvem!');
+                }
+            } catch (err) {
+                console.warn('Erro ao conectar com Supabase:', err);
+            }
+        }
+
+        async function salvarJogoNoSupabase(jogo) {
+            if (!window.sbClient) return;
+            try {
+                const payload = mapJogoParaSupabase(jogo);
+                const { error } = await window.sbClient
+                    .from('reviews_jogos')
+                    .upsert(payload, { onConflict: 'id' });
+                if (error) {
+                    console.warn('⚠️ [Supabase] Aviso ao salvar na nuvem:', error.message);
+                } else {
+                    console.log('☁️ [Supabase] Análise sincronizada na nuvem com sucesso!');
+                }
+            } catch (err) {
+                console.warn('Erro na requisição Supabase:', err);
+            }
+        }
+
+        async function excluirJogoDoSupabase(id) {
+            if (!window.sbClient) return;
+            try {
+                const { error } = await window.sbClient
+                    .from('reviews_jogos')
+                    .delete()
+                    .eq('id', Number(id));
+                if (!error) {
+                    console.log('🗑️ [Supabase] Análise removida da nuvem!');
+                }
+            } catch (err) {
+                console.warn('Erro ao excluir no Supabase:', err);
+            }
+        }
+
+        // Se o usuário estiver logado, associa automaticamente à sua autoria análises que eram anônimas
+        function migrarAnalisesAnonimasParaUsuario() {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+            const jogos = obterJogosSalvos();
+            let alterou = false;
+            jogos.forEach(j => {
+                if (!j.autor || j.autor === 'Anônimo') {
+                    j.autor = currentUser;
+                    alterou = true;
+                }
+            });
+            if (alterou) {
+                salvarJogos(jogos);
+            }
+        }
+
+        /* ═══════════════════════════════════
+           BUSCA & AUTO-PREENCHER
+        ═══════════════════════════════════ */
+        async function buscarSugestões(query) {
+            const dropdown = document.getElementById('suggestionsDropdown');
+            try {
+                const searchUrl = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=5`;
+                const response = await fetch(searchUrl);
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+
+                dropdown.innerHTML = '';
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.innerHTML = `
+                        <img src="${item.thumb}" alt="thumb">
+                        <span>🔍 ${item.external}</span>
+                    `;
+                    div.onclick = () => {
+                        document.getElementById('apiSearchInput').value = item.external;
+                        dropdown.style.display = 'none';
+                        buscarDadosInternet();
+                    };
+                    dropdown.appendChild(div);
+                });
+                dropdown.style.display = 'block';
+            } catch (err) {
+                console.error('Erro ao buscar sugestões:', err);
+            }
+        }
+
+        async function buscarDadosInternet() {
+            const query = document.getElementById('apiSearchInput').value.trim();
+            if (!query) return alert('Digite o nome de um jogo para buscar!');
+
+            const btn = document.getElementById('btnAutoPreencher');
+            btn.innerText = 'BUSCANDO...';
+            btn.disabled = true;
+
+            try {
+                const searchUrl = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=1`;
+                const response = await fetch(searchUrl);
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    alert('Jogo não localizado no banco de dados.');
+                    return;
+                }
+
+                const game = data[0];
+                document.getElementById('gameTitle').value = game.external;
+
+                let capaOficial = game.thumb;
+                if (game.steamAppID) {
+                    capaOficial = `https://cdn.akamai.steamstatic.com/steam/apps/${game.steamAppID}/header.jpg`;
+                }
+
+                const imgPreview = document.getElementById('coverPreview');
+                imgPreview.src = capaOficial;
+                imgPreview.style.display = 'block';
+                document.getElementById('gameCoverUrl').value = capaOficial;
+
+                const nomeLower = game.external.toLowerCase();
+                let generos = [], tags = [];
+
+                if (nomeLower.includes('elden') || nomeLower.includes('souls') || nomeLower.includes('bloodborne') || nomeLower.includes('sekiro')) {
+                    generos.push('Ação', 'RPG', 'Soulslike');
+                    tags.push('#SoulsLike', '#Desafio', '#FantasiaSombria');
+                } else if (nomeLower.includes('spider-man') || nomeLower.includes('batman') || nomeLower.includes('hero')) {
+                    generos.push('Ação', 'Aventura', 'Mundo Aberto');
+                    tags.push('#SuperHeroi', '#MundoAberto', '#Acao');
+                } else if (nomeLower.includes('duty') || nomeLower.includes('warzone') || nomeLower.includes('counter')) {
+                    generos.push('Tiro (FPS)', 'Ação');
+                    tags.push('#FPS', '#Multiplayer', '#Competitivo');
+                } else {
+                    generos.push('Ação', 'Aventura');
+                    tags.push('#Gaming', '#Singleplayer');
+                }
+
+                document.getElementById('gameGenres').value = generos.join(', ');
+                document.getElementById('gameKeywords').value = tags.join(', ');
+
+                const priceNum = parseFloat(game.cheapest) || 15;
+                const charCodeSum = game.external.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                const calculatedScore = 75 + ((charCodeSum + Math.floor(priceNum)) % 24);
+                document.getElementById('internetRating').value = `${calculatedScore} / 100`;
+
+                alert(`Dados de "${game.external}" carregados!`);
+
+            } catch (error) {
+                console.error('Erro ao buscar o jogo:', error);
+                alert('Erro na conexão. Tente novamente.');
+            } finally {
+                btn.innerText = 'AUTO-PREENCHER';
+                btn.disabled = false;
+            }
+        }
+
+        /* ═══════════════════════════════════
+           SALVAR / EDITAR / EXCLUIR
+        ═══════════════════════════════════ */
+        function salvarAnalise(event) {
+            event.preventDefault();
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                alert('Você precisa fazer login para registrar uma crítica.');
+                return;
+            }
+
+            const editingId = document.getElementById('editingId').value;
+            let jogosExistentes = obterJogosSalvos();
+
+            const dadosJogo = {
+                id: editingId ? parseInt(editingId) : Date.now(),
+                autor: currentUser,
+                titulo: document.getElementById('gameTitle').value,
+                generos: document.getElementById('gameGenres').value,
+                palavrasChave: document.getElementById('gameKeywords').value,
+                mediaInternet: document.getElementById('internetRating').value,
+                plataforma: document.getElementById('gamePlatform').value,
+                minhaNota: document.getElementById('myRating').value,
+                status: document.getElementById('gameStatus').value,
+                review: document.getElementById('myReview').value,
+                capaUrl: document.getElementById('gameCoverUrl').value,
+                dataRegistro: new Date().toLocaleDateString('pt-BR'),
+                likes: [],
+                comments: []
+            };
+
+            if (editingId) {
+                const original = jogosExistentes.find(j => j.id === parseInt(editingId));
+                if (original) {
+                    dadosJogo.likes = original.likes || [];
+                    dadosJogo.comments = original.comments || [];
+                }
+                jogosExistentes = jogosExistentes.map(j => j.id === parseInt(editingId) ? dadosJogo : j);
+                alert('Análise atualizada!');
+            } else {
+                jogosExistentes.push(dadosJogo);
+                salvarJogos(jogosExistentes);
+                
+                // Sincroniza também no feed de avaliações rápidas
+                try {
+                    let quickList = obterAvaliacoesRapidas();
+                    const avatarEmojis = ['⚡', '🎮', '🔥', '👑', '🐉', '⚔️', '👾', '🚀'];
+                    const emojiRandom = avatarEmojis[Math.floor(Math.random() * avatarEmojis.length)];
+                    
+                    const novoQuick = {
+                        id: Date.now(),
+                        autor: currentUser,
+                        avatar: emojiRandom,
+                        titulo: dadosJogo.titulo,
+                        nota: dadosJogo.minhaNota,
+                        tag: obterTagPorNota(dadosJogo.minhaNota),
+                        texto: dadosJogo.review.length > 130 ? dadosJogo.review.substring(0, 127) + '...' : dadosJogo.review,
+                        tempo: 'Agora mesmo',
+                        likes: 1,
+                        curtido: true
+                    };
+                    quickList.unshift(novoQuick);
+                    if (quickList.length > 25) quickList.pop();
+                    salvarAvaliacoesRapidas(quickList);
+                    renderizarAvaliacoesRapidas();
+                } catch (err) {
+                    console.error('Erro ao sincronizar feed rápido:', err);
+                }
+
+                alert('Análise registrada!');
+            }
+
+            salvarJogos(jogosExistentes);
+            salvarJogoNoSupabase(dadosJogo);
+            limparFormulario();
+            renderizarCriticas();
+        }
+
+        function editarCritica(id) {
+            const currentUser = getCurrentUser();
+            const jogos = obterJogosSalvos();
+            const jogo = jogos.find(j => j.id === id);
+            if (!jogo) return;
+
+            const podeEditar = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || jogo.autor === currentUser;
+            if (!podeEditar) {
+                alert('Você só pode editar suas próprias críticas.');
+                return;
+            }
+
+            document.getElementById('editingId').value = jogo.id;
+            document.getElementById('gameTitle').value = jogo.titulo || '';
+            document.getElementById('gameGenres').value = jogo.generos || '';
+            document.getElementById('gameKeywords').value = jogo.palavrasChave || '';
+            document.getElementById('internetRating').value = jogo.mediaInternet || '';
+            document.getElementById('gamePlatform').value = jogo.plataforma || 'PC';
+            document.getElementById('myRating').value = jogo.minhaNota || '';
+            document.getElementById('gameStatus').value = jogo.status || 'Zerado';
+            document.getElementById('myReview').value = jogo.review || '';
+            document.getElementById('gameCoverUrl').value = jogo.capaUrl || '';
+
+            const imgPreview = document.getElementById('coverPreview');
+            if (jogo.capaUrl) {
+                imgPreview.src = jogo.capaUrl;
+                imgPreview.style.display = 'block';
+            } else {
+                imgPreview.style.display = 'none';
+            }
+
+            document.getElementById('btnSubmitForm').innerText = 'SALVAR ALTERAÇÕES';
+            document.getElementById('btnCancelarEdicao').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function excluirCritica(id) {
+            const currentUser = getCurrentUser();
+            const jogos = obterJogosSalvos();
+            const jogo = jogos.find(j => j.id === id);
+            if (!jogo) return;
+
+            const podeExcluir = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || jogo.autor === currentUser;
+            if (!podeExcluir) {
+                alert('Você só pode excluir suas próprias críticas.');
+                return;
+            }
+
+            if (!confirm(`Tem certeza que deseja excluir a crítica de "${jogo.titulo}"?`)) return;
+            const novaLista = jogos.filter(j => j.id !== id);
+            salvarJogos(novaLista);
+            excluirJogoDoSupabase(id);
+            renderizarCriticas();
+        }
+
+        function limparFormulario() {
+            document.getElementById('editingId').value = '';
+            document.getElementById('gameForm').reset();
+            document.getElementById('gameCoverUrl').value = '';
+            document.getElementById('coverPreview').style.display = 'none';
+            document.getElementById('btnSubmitForm').innerText = 'REGISTRAR CRÍTICA';
+            document.getElementById('btnCancelarEdicao').style.display = 'none';
+        }
+
+        /* ═══════════════════════════════════
+           LIKE / COMENTÁRIOS
+        ═══════════════════════════════════ */
+        function toggleLike(reviewId) {
+            const user = getCurrentUser();
+            if (!user) { alert('Faça login para curtir.'); return; }
+            const jogos = obterJogosSalvos();
+            const review = jogos.find(j => j.id === reviewId);
+            if (!review) return;
+
+            if (!review.likes) review.likes = [];
+            const idx = review.likes.indexOf(user);
+            if (idx >= 0) review.likes.splice(idx, 1);
+            else review.likes.push(user);
+
+            salvarJogos(jogos);
+            salvarJogoNoSupabase(review);
+            renderizarCriticas();
+        }
+
+        function adicionarComentario(reviewId) {
+            const user = getCurrentUser();
+            if (!user) { alert('Faça login para comentar.'); return; }
+            const input = document.getElementById(`commentInput-${reviewId}`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const jogos = obterJogosSalvos();
+            const review = jogos.find(j => j.id === reviewId);
+            if (!review) return;
+
+            if (!review.comments) review.comments = [];
+            review.comments.push({
+                autor: user,
+                texto: text,
+                data: new Date().toLocaleString('pt-BR')
+            });
+            salvarJogos(jogos);
+            salvarJogoNoSupabase(review);
+            renderizarCriticas();
+        }
+
+        function toggleCommentSection(reviewId) {
+            const sec = document.getElementById(`commentSection-${reviewId}`);
+            sec.style.display = sec.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        /* ═══════════════════════════════════
+           RENDERIZAR CARDS
+        ═══════════════════════════════════ */
+        function renderizarCriticas() {
+            const grid = document.getElementById('reviewsGrid');
+            const filtroNome = document.getElementById('searchFilter').value.toLowerCase().trim();
+            const filtroStatus = document.getElementById('statusFilter').value;
+            const filtroPlataforma = document.getElementById('platformFilter').value;
+            const jogos = obterJogosSalvos();
+            const currentUser = getCurrentUser();
+            grid.innerHTML = '';
+
+            const jogosFiltrados = jogos.filter(j => {
+                const combinaNome = (j.titulo || '').toLowerCase().includes(filtroNome);
+                const combinaStatus = !filtroStatus || j.status === filtroStatus;
+                const combinaPlataforma = !filtroPlataforma || j.plataforma === filtroPlataforma;
+                return combinaNome && combinaStatus && combinaPlataforma;
+            });
+
+            if (jogosFiltrados.length === 0) {
+                grid.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 40px; opacity: 0.6;">Nenhuma crítica encontrada.</div>`;
+                return;
+            }
+
+            jogosFiltrados.forEach(j => {
+                const likes = j.likes || [];
+                const comments = j.comments || [];
+                const liked = currentUser && likes.includes(currentUser);
+                const isOwner = !currentUser || !j.autor || j.autor === 'Anônimo' || j.autor === currentUser;
+
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                card.innerHTML = `
+                    <img src="${j.capaUrl || 'https://via.placeholder.com/300x140/07090f/adb5bd?text=Sem+Capa'}" alt="Capa">
+                    <h3 class="review-card-title">${j.titulo}</h3>
+                    <div class="review-author">🖊️ por ${j.autor || 'Anônimo'} — ${j.dataRegistro || ''}</div>
+                    <div class="review-meta">
+                        <span>⭐ ${j.minhaNota}/10</span>
+                        <span>🎮 ${j.plataforma}</span>
+                    </div>
+                    <div class="review-meta">
+                        <span>📌 ${j.status}</span>
+                        <span>🌐 ${j.mediaInternet || 'N/A'}</span>
+                    </div>
+                    <div class="review-text-preview">${j.review}</div>
+                    <div class="card-actions">
+                        ${isOwner ? `<button class="btn-ghost" onclick="editarCritica(${j.id})">✏️ Editar</button>` : ''}
+                        ${isOwner ? `<button class="btn-ghost" style="border-color:#ff0055;color:#ff0055;" onclick="excluirCritica(${j.id})">🗑️</button>` : ''}
+                        <button class="like-btn ${liked ? 'liked' : ''}" onclick="toggleLike(${j.id})">
+                            ${liked ? '❤️' : '🤍'} ${likes.length}
+                        </button>
+                        <button class="btn-ghost" onclick="toggleCommentSection(${j.id})">💬 ${comments.length}</button>
+                    </div>
+                    <div id="commentSection-${j.id}" class="comment-section" style="display:none;">
+                        <div id="commentsList-${j.id}">
+                            ${comments.length === 0 ? '<span class="no-comments">Nenhum comentário ainda.</span>' : ''}
+                            ${comments.map(c => `
+                                <div class="comment-item">
+                                    <strong>${c.autor}</strong>: ${c.texto}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="comment-input-row">
+                            <input type="text" id="commentInput-${j.id}" placeholder="Escreva um comentário...">
+                            <button class="btn-primary" style="padding: 8px 16px;" onclick="adicionarComentario(${j.id})">Enviar</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ═══════════════════════════════════
+           AVALIAÇÕES RÁPIDAS (DIREITA SUPERIOR)
+        ═══════════════════════════════════ */
+        const QUICK_STORAGE_KEY = 'overcritic_quick_feed';
+
+        const SEED_QUICK_REVIEWS = [
+            {
+                id: 101,
+                autor: "CyberKnight",
+                avatar: "⚔️",
+                titulo: "Elden Ring: Shadow of the Erdtree",
+                nota: "9.8",
+                tag: "🏆 Obra-prima",
+                texto: "A atmosfera e a direção de arte são de outro patamar. Bosses brutais, mas vencer cada um é uma sensação incrível!",
+                tempo: "Há 12 min",
+                likes: 18,
+                curtido: false
+            },
+            {
+                id: 102,
+                autor: "Lara_Valkyrie",
+                avatar: "👑",
+                titulo: "Baldur's Gate 3",
+                nota: "10",
+                tag: "🔥 Insuperável",
+                texto: "Cada escolha realmente altera o rumo da narrativa. A escrita e os companheiros elevaram o patamar dos RPGs modernos.",
+                tempo: "Há 35 min",
+                likes: 29,
+                curtido: false
+            },
+            {
+                id: 103,
+                autor: "PixelHunter",
+                avatar: "🎯",
+                titulo: "Cyberpunk 2077: Phantom Liberty",
+                nota: "9.2",
+                tag: "💎 Gráficos Insanos",
+                texto: "Com o patch 2.0 e a expansão virou uma obra de arte. A trilha sonora e Dogtown te prendem por dezenas de horas.",
+                tempo: "Há 1h",
+                likes: 12,
+                curtido: false
+            },
+            {
+                id: 104,
+                autor: "Dante_BR",
+                avatar: "⚡",
+                titulo: "Black Myth: Wukong",
+                nota: "9.0",
+                tag: "⚡ Combate Fluido",
+                texto: "Visual de cair o queixo no Unreal Engine 5. Chefes super criativos e uma recriação espetacular da mitologia chinesa!",
+                tempo: "Há 2h",
+                likes: 21,
+                curtido: false
+            },
+            {
+                id: 105,
+                autor: "SpeedyGamer",
+                avatar: "🏎️",
+                titulo: "Forza Horizon 5",
+                nota: "8.8",
+                tag: "🎮 Pura Diversão",
+                texto: "Física deliciosa e ambientação perfeita no México. O jogo ideal para relaxar ouvindo uma boa playlist no fim de semana.",
+                tempo: "Há 3h",
+                likes: 8,
+                curtido: false
+            }
+        ];
+
+        function obterTagPorNota(nota) {
+            const n = parseFloat(nota);
+            if (n >= 9.5) return '🏆 Obra-prima';
+            if (n >= 8.5) return '🔥 Excelente';
+            if (n >= 7.0) return '⚡ Muito Bom';
+            if (n >= 5.0) return '⚖️ Mediano';
+            return '⚠️ Decepcionante';
+        }
+
+        function obterAvaliacoesRapidas() {
+            const salvo = localStorage.getItem(QUICK_STORAGE_KEY);
+            if (salvo) {
+                try {
+                    return JSON.parse(salvo);
+                } catch (e) {
+                    console.error('Erro ao ler avaliações rápidas:', e);
+                }
+            }
+            localStorage.setItem(QUICK_STORAGE_KEY, JSON.stringify(SEED_QUICK_REVIEWS));
+            return SEED_QUICK_REVIEWS;
+        }
+
+        function salvarAvaliacoesRapidas(lista) {
+            localStorage.setItem(QUICK_STORAGE_KEY, JSON.stringify(lista));
+        }
+
+        function renderizarAvaliacoesRapidas() {
+            const container = document.getElementById('quickFeedContainer');
+            if (!container) return;
+            const lista = obterAvaliacoesRapidas();
+            container.innerHTML = '';
+
+            if (lista.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:25px;font-size:0.8rem;opacity:0.7;">Nenhuma avaliação rápida ainda. Seja o primeiro a registrar!</div>';
+                return;
+            }
+
+            lista.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'quick-feed-item';
+                const escapedTitle = (item.titulo || '').replace(/'/g, "\\'");
+                div.innerHTML = `
+                    <div class="qf-top">
+                        <div class="qf-user-info">
+                            <div class="qf-avatar">${item.avatar || '🎮'}</div>
+                            <div class="qf-meta">
+                                <span class="qf-name">${item.autor}</span>
+                                <span class="qf-time">${item.tempo || 'Recentemente'}</span>
+                            </div>
+                        </div>
+                        <div class="qf-badge-group">
+                            <span class="qf-tag">${item.tag || '🎮 Destaque'}</span>
+                            <span class="qf-rating">⭐ ${item.nota}</span>
+                        </div>
+                    </div>
+                    <div class="qf-game-title">🕹️ ${item.titulo}</div>
+                    <div class="qf-comment">"${item.texto}"</div>
+                    <div class="qf-footer">
+                        <button class="qf-like-btn ${item.curtido ? 'liked' : ''}" onclick="curtirAvaliacaoRapida(${item.id})">
+                            ${item.curtido ? '❤️' : '🤍'} <span>${item.likes || 0}</span>
+                        </button>
+                        <button class="qf-rate-btn" onclick="avaliarJogoDaLista('${escapedTitle}')">
+                            ✍️ Avaliar também
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function curtirAvaliacaoRapida(id) {
+            let lista = obterAvaliacoesRapidas();
+            const item = lista.find(q => q.id === id);
+            if (!item) return;
+            if (item.curtido) {
+                item.likes = Math.max(0, (item.likes || 1) - 1);
+                item.curtido = false;
+            } else {
+                item.likes = (item.likes || 0) + 1;
+                item.curtido = true;
+            }
+            salvarAvaliacoesRapidas(lista);
+            renderizarAvaliacoesRapidas();
+        }
+
+        /* ═══════════════════════════════════
+           FALLBACK E GERADOR DE CAPAS
+        ═══════════════════════════════════ */
+        function gerarFallbackCapaJogo(titulo) {
+            const seguro = (titulo || 'JOGO').substring(0, 24).replace(/[<>&"']/g, '');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
+                <defs>
+                    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#070a12"/>
+                        <stop offset="50%" stop-color="#101726"/>
+                        <stop offset="100%" stop-color="#182338"/>
+                    </linearGradient>
+                </defs>
+                <rect width="320" height="180" fill="url(#g)"/>
+                <rect x="2" y="2" width="316" height="176" fill="none" stroke="rgba(0, 240, 255, 0.25)" stroke-width="2" rx="10"/>
+                <text x="50%" y="42%" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="38">🎮</text>
+                <text x="50%" y="74%" text-anchor="middle" fill="#00f0ff" font-family="'Segoe UI', sans-serif" font-weight="800" font-size="14">${seguro}</text>
+            </svg>`;
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+
+        function tratarErroImagemJogo(img, titulo) {
+            img.onerror = null;
+            img.src = gerarFallbackCapaJogo(titulo);
+        }
+
+        function mostrarToast(msg, icon = '✨') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            document.getElementById('toastMsg').textContent = msg;
+            document.getElementById('toastIcon').textContent = icon;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        /* ═══════════════════════════════════
+           JOGOS DA API (DIREITA INFERIOR)
+        ═══════════════════════════════════ */
+        let abaAtualJogos = 'trending';
+        const cacheJogosApi = {
+            trending: null,
+            releases: null,
+            metacritic: null
+        };
+
+        const FALLBACK_GAMES = {
+            trending: [
+                { title: "Baldur's Gate 3", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/capsule_231x87.jpg", genre: "RPG / Estratégia", score: "Metacritic: 96", steamAppID: "1086940" },
+                { title: "Elden Ring", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/capsule_231x87.jpg", genre: "Souls-like / Ação", score: "Metacritic: 96", steamAppID: "1245620" },
+                { title: "Black Myth: Wukong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/capsule_231x87.jpg", genre: "Ação RPG", score: "Steam: 96%", steamAppID: "2358720" },
+                { title: "Cyberpunk 2077", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/capsule_231x87.jpg", genre: "Mundo Aberto / Sci-Fi", score: "Metacritic: 86", steamAppID: "1091500" },
+                { title: "Helldivers 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/553850/capsule_231x87.jpg", genre: "Tiro Co-op", score: "Steam: Muito Positivo", steamAppID: "553850" },
+                { title: "Monster Hunter Wilds", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2246340/capsule_231x87.jpg", genre: "Ação / Caçada", score: "🔥 Muito Aguardado", steamAppID: "2246340" },
+                { title: "Grand Theft Auto V", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/capsule_231x87.jpg", genre: "Mundo Aberto / Ação", score: "Metacritic: 96", steamAppID: "271590" },
+                { title: "Red Dead Redemption 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/capsule_231x87.jpg", genre: "Aventura / Faroeste", score: "Metacritic: 97", steamAppID: "1174180" }
+            ],
+            releases: [
+                { title: "Marvel Rivals", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2767030/capsule_231x87.jpg", genre: "Hero Shooter", score: "🔥 Em Alta", steamAppID: "2767030" },
+                { title: "Dragon Age: The Veilguard", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1845910/capsule_231x87.jpg", genre: "RPG / Fantasia", score: "Recente", steamAppID: "1845910" },
+                { title: "Warhammer 40,000: Space Marine 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2183900/capsule_231x87.jpg", genre: "Ação / Tiro", score: "Steam: Muito Positivo", steamAppID: "2183900" },
+                { title: "Silent Hill 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2124490/capsule_231x87.jpg", genre: "Terror Psicológico", score: "Steam: Extremamente Positivo", steamAppID: "2124490" },
+                { title: "Metaphor: ReFantazio", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2620600/capsule_231x87.jpg", genre: "JRPG / Fantasia", score: "Metacritic: 94", steamAppID: "2620600" }
+            ],
+            metacritic: [
+                { title: "Disco Elysium - The Final Cut", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/632470/capsule_231x87.jpg", genre: "RPG Narrativo", score: "Metacritic: 97", steamAppID: "632470" },
+                { title: "Half-Life 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/220/capsule_231x87.jpg", genre: "FPS / Clássico", score: "Metacritic: 96", steamAppID: "220" },
+                { title: "BioShock", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/7670/capsule_231x87.jpg", genre: "FPS / Mistério", score: "Metacritic: 96", steamAppID: "7670" },
+                { title: "Portal 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/620/capsule_231x87.jpg", genre: "Puzzle / Co-op", score: "Metacritic: 95", steamAppID: "620" },
+                { title: "The Witcher 3: Wild Hunt", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/capsule_231x87.jpg", genre: "RPG / Fantasia", score: "Metacritic: 93", steamAppID: "292030" },
+                { title: "God of War", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/capsule_231x87.jpg", genre: "Ação / Aventura", score: "Metacritic: 94", steamAppID: "1593500" }
+            ],
+            free: [
+                { title: "Apex Legends", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172470/capsule_231x87.jpg", genre: "Battle Royale / Tiro", score: "🔥 Popular", steamAppID: "1172470" },
+                { title: "Counter-Strike 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/730/capsule_231x87.jpg", genre: "Tático / FPS", score: "🔥 #1 Steam", steamAppID: "730" },
+                { title: "Dota 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/570/capsule_231x87.jpg", genre: "MOBA / Estratégia", score: "🔥 Muito Jogado", steamAppID: "570" },
+                { title: "Warframe", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/230410/capsule_231x87.jpg", genre: "Ação Co-op / Sci-Fi", score: "Steam: 91%", steamAppID: "230410" },
+                { title: "Destiny 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1085660/capsule_231x87.jpg", genre: "MMO / Tiro", score: "Steam: Positivo", steamAppID: "1085660" }
+            ],
+            deals: [
+                { title: "Hollow Knight", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/capsule_231x87.jpg", genre: "-50% OFF", score: "Steam: 97%", steamAppID: "367520" },
+                { title: "DOOM Eternal", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/782330/capsule_231x87.jpg", genre: "-75% OFF", score: "Steam: 91%", steamAppID: "782330" },
+                { title: "Dead Cells", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/588650/capsule_231x87.jpg", genre: "-50% OFF", score: "Steam: 97%", steamAppID: "588650" }
+            ]
+        };
+
+        function mudarAbaJogos(aba) {
+            abaAtualJogos = aba;
+            document.querySelectorAll('.api-tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (aba === 'trending') document.getElementById('tabTrending')?.classList.add('active');
+            if (aba === 'releases') document.getElementById('tabReleases')?.classList.add('active');
+            if (aba === 'metacritic') document.getElementById('tabMetacritic')?.classList.add('active');
+
+            carregarJogosApi(aba);
+        }
+
+        function recarregarJogosApi() {
+            cacheJogosApi[abaAtualJogos] = null;
+            carregarJogosApi(abaAtualJogos);
+        }
+
+        async function carregarJogosApi(aba) {
+            const listEl = document.getElementById('apiGamesList');
+            if (!listEl) return;
+
+            if (cacheJogosApi[aba]) {
+                renderizarListaJogosApi(cacheJogosApi[aba]);
+                return;
+            }
+
+            listEl.innerHTML = `
+                <div class="api-skeleton-loader">
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                </div>
+            `;
+
+            try {
+                let jogos = [];
+
+                if (aba === 'trending') {
+                    const res = await fetch('https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&pageSize=12');
+                    if (!res.ok) throw new Error('Falha na requisição CheapShark');
+                    const data = await res.json();
+                    jogos = data.map(item => ({
+                        title: item.title,
+                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/capsule_231x87.jpg` : ''),
+                        genre: item.savings > 0 ? `-${Math.round(item.savings)}% OFF` : 'Steam / PC',
+                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : (item.dealRating ? `Deal: ${item.dealRating}★` : '🔥 Em Alta'),
+                        steamAppID: item.steamAppID,
+                        dealID: item.dealID
+                    }));
+                } else if (aba === 'releases') {
+                    try {
+                        const res = await fetch('https://www.freetogame.com/api/games?sort-by=release-date');
+                        if (res.ok) {
+                            const data = await res.json();
+                            jogos = data.slice(0, 12).map(item => ({
+                                title: item.title,
+                                thumb: item.thumbnail,
+                                genre: item.genre || 'Ação / Online',
+                                score: item.release_date ? `Data: ${item.release_date}` : '🚀 Novo',
+                                gameUrl: item.game_url
+                            }));
+                        } else {
+                            throw new Error('Falha FreeToGame');
+                        }
+                    } catch (errFree) {
+                        const res2 = await fetch('https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Release&pageSize=12');
+                        const data2 = await res2.json();
+                        jogos = data2.map(item => ({
+                            title: item.title,
+                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/capsule_231x87.jpg` : ''),
+                            genre: 'Novidade Steam',
+                            score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🚀 Recente',
+                            steamAppID: item.steamAppID
+                        }));
+                    }
+                } else if (aba === 'metacritic') {
+                    const res = await fetch('https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Metacritic&pageSize=12');
+                    if (!res.ok) throw new Error('Falha Metacritic');
+                    const data = await res.json();
+                    jogos = data.map(item => ({
+                        title: item.title,
+                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/capsule_231x87.jpg` : ''),
+                        genre: 'Aclamação Crítica',
+                        score: item.metacriticScore ? `Metacritic: ${item.metacriticScore}` : '⭐ 90+',
+                        steamAppID: item.steamAppID
+                    }));
+                }
+
+                if (!jogos || jogos.length === 0) {
+                    jogos = FALLBACK_GAMES[aba] || FALLBACK_GAMES.trending;
+                }
+
+                cacheJogosApi[aba] = jogos;
+                renderizarListaJogosApi(jogos);
+
+            } catch (error) {
+                console.warn('API online indisponível ou em modo offline, utilizando dados integrados:', error);
+                const fallback = FALLBACK_GAMES[aba] || FALLBACK_GAMES.trending;
+                cacheJogosApi[aba] = fallback;
+                renderizarListaJogosApi(fallback);
+            }
+        }
+
+        function renderizarListaJogosApi(lista) {
+            const listEl = document.getElementById('apiGamesList');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            lista.forEach(jogo => {
+                const item = document.createElement('div');
+                item.className = 'api-game-item';
+                const escapedTitle = (jogo.title || '').replace(/'/g, "\\'");
+                const thumbSrc = jogo.thumb || gerarFallbackCapaJogo(jogo.title);
+                
+                item.innerHTML = `
+                    <img src="${thumbSrc}" class="api-game-thumb" alt="${jogo.title}" onerror="tratarErroImagemJogo(this, '${escapedTitle}')">
+                    <div class="api-game-info">
+                        <div class="api-game-title" title="${jogo.title}">${jogo.title}</div>
+                        <div class="api-game-sub">
+                            <span class="api-pill-genre">${jogo.genre || 'Gaming'}</span>
+                            <span class="api-pill-score">${jogo.score || '🔥 Popular'}</span>
+                        </div>
+                    </div>
+                    <button class="btn-mini-evaluate" onclick="avaliarJogoDaLista('${escapedTitle}')" title="Preencher formulário para avaliar este título">
+                        ✍️ AVALIAR
+                    </button>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function avaliarJogoDaLista(titulo) {
+            const inputBusca = document.getElementById('apiSearchInput');
+            const formCard = document.getElementById('formCardContainer');
+            
+            if (inputBusca) {
+                inputBusca.value = titulo;
+            }
+            
+            // Rola a página suavemente para o formulário
+            if (formCard) {
+                formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                formCard.classList.remove('form-highlight-pulse');
+                void formCard.offsetWidth; // Força reflow para reiniciar animação
+                formCard.classList.add('form-highlight-pulse');
+            }
+
+            // Dispara a busca automática na internet para preencher os dados
+            buscarDadosInternet();
+        }
+
+        /* ═══════════════════════════════════
+           INIT
+        ═══════════════════════════════════ */
+        document.addEventListener('DOMContentLoaded', () => {
+            migrarAnalisesAnonimasParaUsuario();
+            updateAuthUI();
+            renderizarCriticas();
+            renderizarAvaliacoesRapidas();
+            carregarJogosApi('trending');
+            sincronizarJogosSupabase();
+
+            // Verificar se o usuário veio da aba descobrir_jogos.html com parâmetros
+            const urlParams = new URLSearchParams(window.location.search);
+            const tituloParam = urlParams.get('titulo');
+            const capaParam = urlParams.get('capa');
+            const generoParam = urlParams.get('genero');
+            const plataformaParam = urlParams.get('plataforma');
+
+            if (tituloParam) {
+                avaliarJogoDaLista(tituloParam);
+                if (capaParam) {
+                    const coverInput = document.getElementById('gameCoverUrl');
+                    const coverPreview = document.getElementById('coverPreview');
+                    const placeholder = document.getElementById('coverPlaceholder');
+                    if (coverInput) coverInput.value = capaParam;
+                    if (coverPreview) {
+                        coverPreview.src = capaParam;
+                        coverPreview.style.display = 'block';
+                    }
+                    if (placeholder) placeholder.style.display = 'none';
+                }
+                if (generoParam) {
+                    const genreInput = document.getElementById('gameGenre');
+                    if (genreInput) genreInput.value = generoParam;
+                }
+                if (plataformaParam) {
+                    const platformInput = document.getElementById('gamePlatform');
+                    if (platformInput) {
+                        const p = plataformaParam.toLowerCase();
+                        for (let opt of platformInput.options) {
+                            const val = opt.value.toLowerCase();
+                            if (val.includes(p) || p.includes(val) || (p === 'ps' && val.includes('playstation')) || (p === 'switch' && val.includes('switch')) || (p === 'xbox' && val.includes('xbox'))) {
+                                platformInput.value = opt.value;
+                                break;
+                            }
+                        }
+                    }
+                }
+                mostrarToast(`"${tituloParam}" selecionado da Central de Descoberta!`, '🪐');
+            }
+
+            const searchInput = document.getElementById('apiSearchInput');
+            const dropdown = document.getElementById('suggestionsDropdown');
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                const query = e.target.value.trim();
+                if (query.length < 2) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+                debounceTimer = setTimeout(() => buscarSugestões(query), 300);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-box')) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Listener de alternância de tema
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('light-mode');
+                    if (document.body.classList.contains('light-mode')) {
+                        localStorage.setItem('overcritic_theme', 'light');
+                    } else {
+                        localStorage.setItem('overcritic_theme', 'dark');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
