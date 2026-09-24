@@ -16,7 +16,6 @@
     <script src="js/gamerProfile.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/version.js"></script>
-    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -732,19 +731,22 @@
             /* Barra de navegação inferior no mobile */
             .sidebar {
                 width: 100% !important;
-                height: 60px !important;
+                max-width: 100vw !important;
+                height: 58px !important;
                 top: auto !important;
                 bottom: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
                 flex-direction: row !important;
-                justify-content: space-around !important;
+                justify-content: space-between !important;
                 align-items: center !important;
-                padding: 0 10px !important;
+                padding: 0 4px calc(env(safe-area-inset-bottom, 0px) + 2px) 4px !important;
                 border-right: none !important;
                 border-top: 1px solid var(--glass-border) !important;
                 box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
-                z-index: 1000 !important;
+                z-index: 9999 !important;
+                overflow-x: auto !important;
+                scrollbar-width: none !important;
             }
             .brand-icon, .sys-time {
                 display: none !important;
@@ -754,19 +756,28 @@
                 flex-direction: row !important;
                 justify-content: space-around !important;
                 align-items: center !important;
-                width: 100% !important;
-                gap: 0 !important;
+                flex: 1 1 auto !important;
+                width: auto !important;
+                min-width: 0 !important;
+                gap: 1px !important;
             }
             .nav-item {
-                width: 44px !important;
-                height: 44px !important;
-                font-size: 1.25rem !important;
-                border-radius: 10px !important;
+                flex: 1 1 0 !important;
+                width: 36px !important;
+                min-width: 28px !important;
+                max-width: 42px !important;
+                height: 38px !important;
+                font-size: 1.05rem !important;
+                border-radius: 8px !important;
+                padding: 0 !important;
             }
             .theme-toggle-container {
                 margin: 0 !important;
                 display: flex !important;
                 align-items: center !important;
+                flex-shrink: 0 !important;
+                border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+                padding-left: 2px !important;
             }
             .nav-item:hover::after {
                 display: none !important;
@@ -774,10 +785,10 @@
 
             .main-content {
                 margin-left: 0 !important;
-                margin-bottom: 75px !important;
-                padding: 16px 14px !important;
+                margin-bottom: 66px !important;
+                padding: 14px 12px calc(80px + env(safe-area-inset-bottom, 0px)) 12px !important;
                 width: 100% !important;
-                max-width: 100vw !important;
+                max-width: 100% !important;
             }
             .header-section {
                 margin-bottom: 20px !important;
@@ -840,12 +851,15 @@
             transition: opacity 1s ease, visibility 1s;
         }
         .intro-brand {
-            font-size: 3rem;
+            font-size: clamp(1.35rem, 6.6vw, 3rem);
             font-weight: 800;
-            letter-spacing: 10px;
+            letter-spacing: clamp(3px, 1.8vw, 10px);
             color: var(--text-main);
             text-shadow: 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-purple);
             animation: glowText 2s ease forwards;
+            max-width: 95vw;
+            text-align: center;
+            white-space: nowrap;
         }
         @keyframes glowText {
             0% { opacity: 0; filter: blur(10px); transform: scale(0.9); }
@@ -1416,6 +1430,7 @@
             100% { background-position: -200% 0; }
         }
     </style>
+    <link rel="stylesheet" href="css/responsive-global.css">
 </head>
 <body>
     <div id="overcriticToast"></div>

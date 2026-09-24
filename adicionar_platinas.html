@@ -16,7 +16,6 @@
     <script src="js/notifications.js"></script>
     <script src="js/trofeusDatabase.js"></script>
     <script src="js/version.js"></script>
-    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -1535,28 +1534,29 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-            .mobile-bottom-nav {
-                display: flex;
-            }
             .main-content {
-                margin-left: 0;
-                padding: 20px 16px 90px 16px;
+                margin-left: 0 !important;
+                margin-bottom: 66px !important;
+                padding: 14px 12px calc(80px + env(safe-area-inset-bottom, 0px)) 12px !important;
+                width: 100% !important;
+                max-width: 100% !important;
             }
             .hero-title {
-                font-size: 1.7rem;
+                font-size: 1.5rem !important;
             }
             .feed-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
+            }
+            .mobile-bottom-nav {
+                display: none !important;
             }
         }
     </style>
+    <link rel="stylesheet" href="css/responsive-global.css">
 </head>
 <body>
 
-    <!-- ══════ SIDEBAR FIXA ══════ -->
+    <!-- ══════ SIDEBAR (NAVEGAÇÃO GLOBAL UNIVERSAL) ══════ -->
     <aside class="sidebar">
         <a href="conta_login.html" class="brand-icon" title="Minha Conta / Perfil">
             <img src="assets/overcritic_icon.png" alt="Overcritic Logo">
@@ -1580,18 +1580,6 @@
             <div class="sidebar-user" id="currentUser" style="cursor: pointer;" title="Acessar Perfil" onclick="window.location.href='conta_login.html?tab=perfil'">VISITANTE</div>
         </div>
     </aside>
-
-    <!-- ══════ BARRA MOBILE INFERIOR ══════ -->
-    <nav class="mobile-bottom-nav">
-        <a href="index.html" class="mobile-nav-item"><span class="icon">🏠</span>Início</a>
-        <a href="adicionar_jogos.html" class="mobile-nav-item"><span class="icon">🎮</span>Jogos</a>
-        <a href="descobrir_jogos.html" class="mobile-nav-item"><span class="icon">🪐</span>Jogos+</a>
-        <a href="descobrir_titulos.html" class="mobile-nav-item"><span class="icon">🍿</span>Filmes+</a>
-        <a href="adicionar_midias.html" class="mobile-nav-item"><span class="icon">🎬</span>Mídias</a>
-        <a href="adicionar_platinas.html" class="mobile-nav-item active"><span class="icon">🏆</span>Platinas</a>
-        <a href="suporte_overcritic.html" class="mobile-nav-item"><span class="icon">💡</span>Suporte</a>
-        <a href="conta_login.html" class="mobile-nav-item"><span class="icon">👤</span>Conta</a>
-    </nav>
 
     <!-- ══════ CONTEÚDO PRINCIPAL ══════ -->
     <main class="main-content">

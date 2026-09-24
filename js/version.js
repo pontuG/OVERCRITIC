@@ -9,15 +9,27 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.09.3",
+    version: "26.09.4",
     year: "2026",
     month: "09",
-    build: 3,
+    build: 4,
     releaseDate: "24/09/2026",
     status: "Versão Estável",
-    codename: "Neon Genesis & Titanium",
+    codename: "Universal Viewport Flawless",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.09.4",
+            date: "24/09/2026",
+            title: "Responsividade 100% Universal & Mobile Flawless",
+            highlights: [
+                "Responsividade 100% funcional e testada para qualquer tela (smartphones de 320px a 430px, tablets, laptops e monitores 4K)",
+                "Correção definitiva da tela de abertura (Splash Intro) com tipografia clamp() fluida e logo proporcional",
+                "Nova barra de navegação inferior mobile ultraflexível para 9 itens com botão de tema integrado e sem cortes",
+                "Eliminação completa de overflow horizontal nos formulários, busca TMDB e cards de visualização de mídia e jogos",
+                "Unificação da navegação mobile em todas as páginas, padronizando a experiência do app"
+            ]
+        },
         {
             version: "26.09.3",
             date: "24/09/2026",

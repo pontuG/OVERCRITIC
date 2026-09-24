@@ -1,25 +1,115 @@
 /* ═════════════════════════════════════════════════════════════════
    OVERCRITIC - SISTEMA DE RESPONSIVIDADE UNIVERSAL & VERSÕES
-   Adaptado para Desktops 4K, Laptops (1366x768 / 1080p 125%/150%),
-   Tablets e Celulares — Sem necessidade de zoom manual.
+   100% Funcional para Qualquer Tela:
+   - Celulares Ultra-Compactos (320px - 360px)
+   - Smartphones Padrão e Modernos (375px - 430px)
+   - Tablets e Dobráveis (600px - 1024px)
+   - Laptops (1366x768 / 1080p com escala 125%/150%)
+   - Desktops Full HD (1080p), Quad HD (2K) e 4K (2160p)
+   Sem necessidade de zoom manual e com 0 overflow horizontal!
 ═════════════════════════════════════════════════════════════════ */
 
-/* ── 1. SEGURANÇA DE OVERFLOW E BOX MODEL ── */
+/* ── 1. SEGURANÇA TOTAL DE OVERFLOW E RESET UNIVERSAL ── */
 *, *::before, *::after {
     box-sizing: border-box;
 }
 
-html, body {
-    max-width: 100%;
-    overflow-x: hidden;
+html {
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100% !important;
 }
 
-img, video, iframe {
+body {
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+    margin: 0;
+    padding: 0;
+}
+
+/* Imagens, vídeos e elementos embutidos nunca vazam da viewport */
+img, video, iframe, canvas {
     max-width: 100%;
     height: auto;
 }
 
-/* ── 2. BADGE DE VERSÃO NA SIDEBAR ── */
+/* Previne que inputs expandam indevidamente containers flexíveis */
+input, select, textarea, button {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="text"], 
+input[type="number"], 
+input[type="search"], 
+input[type="url"], 
+input[type="email"], 
+input[type="password"] {
+    min-width: 0;
+}
+
+/* ── 2. INTRO / SPLASH SCREEN FLUIDA (OVERCRITIC) ── */
+#cleanIntro {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background: var(--bg-color, #07090f) !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    transition: opacity 1s ease, visibility 1s !important;
+}
+
+#cleanIntro > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: clamp(12px, 3vh, 22px) !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
+#cleanIntro img {
+    width: clamp(70px, 18vw, 120px) !important;
+    height: clamp(70px, 18vw, 120px) !important;
+    border-radius: clamp(16px, 4vw, 24px) !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 0 35px rgba(0, 240, 255, 0.5) !important;
+    border: 1px solid rgba(0, 240, 255, 0.4) !important;
+}
+
+.intro-brand {
+    font-size: clamp(1.35rem, 6.6vw, 3rem) !important;
+    letter-spacing: clamp(3px, 1.8vw, 10px) !important;
+    font-weight: 800 !important;
+    color: var(--text-main, #f8f9fa) !important;
+    text-shadow: 0 0 20px var(--accent-cyan, #00f0ff), 0 0 40px var(--accent-purple, #9d4edd) !important;
+    text-align: center !important;
+    max-width: 95vw !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+}
+
+.intro-hidden { 
+    opacity: 0 !important; 
+    visibility: hidden !important; 
+    pointer-events: none !important;
+}
+
+/* ── 3. BADGE DE VERSÃO NA SIDEBAR ── */
 .sidebar-version-pill {
     font-size: 0.65rem;
     font-weight: 800;
@@ -59,7 +149,7 @@ body.light-mode .sidebar-version-pill:hover {
     box-shadow: 0 0 12px rgba(197, 27, 41, 0.3);
 }
 
-/* ── 3. MODAL DE NOVIDADES / CHANGELOG ── */
+/* ── 4. MODAL DE NOVIDADES / CHANGELOG ── */
 .version-modal-overlay {
     position: fixed;
     top: 0;
@@ -346,7 +436,7 @@ body.light-mode .version-btn-ok {
 }
 
 /* ═════════════════════════════════════════════════════════════════
-   ── 4. RESPONSIVIDADE DINÂMICA (PARA EVITAR ZOOM MANUAL) ──
+   ── 5. RESPONSIVIDADE DINÂMICA (PARA EVITAR ZOOM MANUAL) ──
 ═════════════════════════════════════════════════════════════════ */
 
 /* ── COMPACTAÇÃO VERTICAL DA SIDEBAR (DESKTOP & LAPTOPS) ──
@@ -430,7 +520,7 @@ body.light-mode .version-btn-ok {
     }
 
     /* Cabeçalhos Hero Compactos */
-    .header-section, .trophies-hero, .support-hero {
+    .header-section, .trophies-hero, .support-hero, .discovery-hero {
         padding: 14px 22px !important;
         margin-bottom: 12px !important;
         border-radius: 16px !important;
@@ -584,51 +674,110 @@ body.light-mode .version-btn-ok {
     .filter-bar {
         grid-template-columns: 1.5fr 1fr 1fr !important;
     }
+
+    .difficulty-guide-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
 }
 
-/* DISPOSITIVOS MÓVEIS (<= 768px) */
+/* ═════════════════════════════════════════════════════════════════
+   ── 6. DISPOSITIVOS MÓVEIS (<= 768px): SMARTPHONES & TELAS ESTREITAS ──
+═════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-    /* Barra de Navegação Inferior Global */
+    /* Barra de Navegação Inferior Global Fluida & Responsiva */
     .sidebar {
+        position: fixed !important;
         width: 100% !important;
-        height: 60px !important;
+        max-width: 100vw !important;
+        height: 58px !important;
         top: auto !important;
         bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
+        display: flex !important;
         flex-direction: row !important;
-        justify-content: space-around !important;
+        justify-content: space-between !important;
         align-items: center !important;
-        padding: 0 8px !important;
+        padding: 0 4px calc(env(safe-area-inset-bottom, 0px) + 2px) 4px !important;
         border-right: none !important;
         border-top: 1px solid var(--glass-border, rgba(0, 240, 255, 0.16)) !important;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.45) !important;
-        z-index: 1000 !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+        background: var(--sidebar-bg, rgba(10, 14, 23, 0.96)) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        z-index: 9999 !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    .sidebar::-webkit-scrollbar {
+        display: none !important;
     }
 
     body.light-mode .sidebar {
         border-top-color: rgba(0, 0, 0, 0.15) !important;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+        background: rgba(220, 225, 235, 0.96) !important;
     }
 
-    .brand-icon, .sidebar-user, .sys-time, #sidebarVersionPill {
+    /* Esconde elementos desnecessários na barra mobile */
+    .brand-icon, 
+    .sidebar-user, 
+    .sys-time, 
+    #sidebarVersionPill, 
+    .sidebar-bottom #loginBtn, 
+    .sidebar-bottom #logoutBtn,
+    .mobile-bottom-nav {
         display: none !important;
     }
 
+    /* Links de navegação fluidos */
     .nav-links {
         display: flex !important;
         flex-direction: row !important;
         justify-content: space-around !important;
         align-items: center !important;
-        width: 100% !important;
+        flex: 1 1 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        gap: 1px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Botão de Tema na Barra Inferior */
+    .theme-toggle-container, 
+    .sidebar-bottom {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 2px 0 4px !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
         gap: 0 !important;
     }
 
+    body.light-mode .theme-toggle-container,
+    body.light-mode .sidebar-bottom {
+        border-left-color: rgba(0, 0, 0, 0.1) !important;
+    }
+
     .nav-item {
-        width: 44px !important;
-        height: 44px !important;
-        font-size: 1.25rem !important;
-        border-radius: 10px !important;
+        flex: 1 1 0 !important;
+        width: 36px !important;
+        min-width: 28px !important;
+        max-width: 42px !important;
+        height: 38px !important;
+        font-size: 1.05rem !important;
+        border-radius: 8px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .nav-item::after {
@@ -636,87 +785,202 @@ body.light-mode .version-btn-ok {
     }
 
     /* Conteúdo Principal Adaptado para o Mobile */
-    .main-content {
+    .main-content, .main-wrapper {
         margin-left: 0 !important;
-        margin-bottom: 70px !important;
-        padding: 16px 14px 85px 14px !important;
+        margin-bottom: 66px !important;
+        padding: 14px 12px calc(80px + env(safe-area-inset-bottom, 0px)) 12px !important;
         width: 100% !important;
-        max-width: 100vw !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
         gap: 16px !important;
     }
 
+    /* Cards e Containers Sem Overflow */
+    .glass-card, 
+    .form-card, 
+    .info-card, 
+    .bento-card, 
+    .auth-container, 
+    .review-card, 
+    .diff-card {
+        padding: 16px 14px !important;
+        border-radius: 16px !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
     /* Títulos Fluidos */
-    .greeting, .hero-title {
-        font-size: 1.5rem !important;
+    .greeting, .hero-title, .auth-title {
+        font-size: clamp(1.3rem, 5.5vw, 1.8rem) !important;
+        line-height: 1.25 !important;
     }
     
-    .subtitle {
-        font-size: 0.82rem !important;
+    .subtitle, .hero-desc, .auth-subtitle {
+        font-size: clamp(0.75rem, 3.2vw, 0.85rem) !important;
+        line-height: 1.4 !important;
     }
 
     /* Todos os Form-Rows viram 1 coluna para não espremer campos */
-    .form-row {
+    .form-row, .form-row-3, .form-row-2, .form-grid {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
     }
 
-    /* Barras de Filtros em 1 Coluna */
-    .filter-bar {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
+    /* Busca TMDB / Busca Automática */
+    .search-box {
+        padding: 14px !important;
+        border-radius: 14px !important;
+        max-width: 100% !important;
+    }
+    .search-box > .form-group > div[style*="display: flex"],
+    .search-box div[style*="display: flex"] {
+        display: flex !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .search-box input {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .search-box button {
+        flex-shrink: 0 !important;
+        padding: 10px 14px !important;
+        font-size: 0.8rem !important;
+        white-space: nowrap !important;
     }
 
-    /* Cards e Bento Grid */
-    .bento-grid {
+    /* Preview do Pôster e Formulário Perfeitamente Centralizados */
+    .cover-preview-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+
+    .cover-preview,
+    .cover-preview-placeholder {
+        width: 125px !important;
+        height: 180px !important;
+        margin: 0 auto !important;
+        flex-shrink: 0 !important;
+        align-self: center !important;
+        border-radius: 14px !important;
+    }
+
+    .cover-preview-info {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Barras de Filtros em 1 Coluna */
+    .filter-bar, .filter-section {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .filter-bar input, 
+    .filter-bar select, 
+    .filter-selects, 
+    .filter-selects select {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Grades de Cards, Críticas e Bento */
+    .bento-grid, 
+    .reviews-grid, 
+    .feed-grid, 
+    .dashboard-top-grid {
         grid-template-columns: 1fr !important;
         gap: 14px !important;
+        width: 100% !important;
     }
     .bento-col-showcase, .card-discover, .bento-card {
         grid-column: span 1 !important;
         grid-row: auto !important;
     }
 
-    /* Suporte Hero e Estatísticas */
-    .support-hero {
+    /* Hero de Troféus / Suporte / Estatísticas */
+    .trophies-hero, .support-hero, .discovery-hero {
         flex-direction: column !important;
         align-items: flex-start !important;
-        padding: 20px 16px !important;
+        padding: 18px 14px !important;
         gap: 14px !important;
     }
-    .hero-stats-row {
+    .hero-stats, .hero-stats-row, .stats-cards-row {
         width: 100% !important;
-        justify-content: space-between !important;
-        gap: 8px !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
     }
-    .hero-stat-card {
-        min-width: 85px !important;
-        padding: 10px 8px !important;
+    .stat-card, .hero-stat-card, .stat-mini-card {
+        min-width: 0 !important;
+        padding: 8px 6px !important;
+        text-align: center !important;
+    }
+    .stat-num, .stat-card-num, .stat-mini-number {
+        font-size: 1.15rem !important;
+    }
+    .stat-label, .stat-card-label, .stat-mini-label {
+        font-size: 0.58rem !important;
+        letter-spacing: 0.3px !important;
     }
 
-    /* Modais */
-    .version-modal-card {
+    /* Guia de Dificuldades (Troféus) */
+    .difficulty-guide-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    /* Modais Fluidos */
+    .version-modal-card, 
+    .modal-content, 
+    .explorer-modal-content {
         width: 95vw !important;
+        max-width: 95vw !important;
         max-height: 90vh !important;
         border-radius: 18px !important;
+        padding: 16px !important;
+        box-sizing: border-box !important;
     }
     .version-modal-header, .version-modal-body, .version-modal-footer {
-        padding: 16px !important;
+        padding: 14px !important;
     }
 }
 
-/* SMARTPHONES COMPACTOS (<= 480px) */
+/* ── 7. SMARTPHONES COMPACTOS & TELAS PEQUENAS (<= 480px) ── */
 @media (max-width: 480px) {
-    .main-content {
-        padding: 12px 10px 85px 10px !important;
+    .main-content, .main-wrapper {
+        padding: 10px 8px calc(76px + env(safe-area-inset-bottom, 0px)) 8px !important;
     }
 
-    .greeting, .hero-title {
-        font-size: 1.35rem !important;
+    .glass-card, .form-card, .info-card, .bento-card, .auth-container {
+        padding: 12px 10px !important;
+        border-radius: 14px !important;
+    }
+
+    /* Campo de Busca TMDB / RAWG empilhado se necessário para caber em telas ultra-estreitas */
+    .search-box > .form-group > div[style*="display: flex"],
+    .search-box div[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .search-box button {
+        width: 100% !important;
+        justify-content: center !important;
     }
 
     .card-showcase {
-        min-height: 200px !important;
-        padding: 16px !important;
+        min-height: 180px !important;
+        padding: 14px !important;
     }
 
     .showcase-content {
@@ -724,11 +988,49 @@ body.light-mode .version-btn-ok {
     }
 
     .showcase-covers-wrapper {
-        opacity: 0.25 !important;
+        opacity: 0.2 !important;
     }
 
-    .hero-stats-row {
-        display: grid !important;
+    .hero-stats, .hero-stats-row, .stats-cards-row {
         grid-template-columns: repeat(3, 1fr) !important;
+        gap: 4px !important;
+    }
+    .stat-card, .hero-stat-card, .stat-mini-card {
+        padding: 6px 4px !important;
+    }
+    .stat-num, .stat-card-num, .stat-mini-number {
+        font-size: 1.05rem !important;
+    }
+}
+
+/* ── 8. TELAS ULTRA-ESTREITAS (<= 360px - Ex: Galaxy S8, Fold fechado, iPhone 5/SE1) ── */
+@media (max-width: 360px) {
+    .sidebar {
+        padding: 0 2px calc(env(safe-area-inset-bottom, 0px) + 2px) 2px !important;
+    }
+
+    .nav-item {
+        font-size: 0.95rem !important;
+        width: 32px !important;
+        min-width: 26px !important;
+        height: 36px !important;
+    }
+
+    .hero-stats, .hero-stats-row, .stats-cards-row {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+    }
+
+    .difficulty-guide-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ── 9. TELAS ULTRA-LARGAS E DESKTOPS 4K (>= 1920px) ── */
+@media (min-width: 1920px) {
+    .main-content {
+        max-width: 1750px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 }

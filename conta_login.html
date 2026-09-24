@@ -16,7 +16,6 @@
     <script src="js/apiClient.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/version.js"></script>
-    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -451,13 +450,29 @@
             transform: translateY(-2px);
         }
 
-        @media (max-width: 600px) {
-            .sidebar { display: none; }
-            .main-wrapper { margin-left: 0; padding: 20px 15px; }
-            .auth-container { padding: 30px 20px; }
-            .stats-cards-row { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            .main-wrapper { 
+                margin-left: 0 !important; 
+                padding: 16px 14px calc(80px + env(safe-area-inset-bottom, 0px)) 14px !important; 
+            }
+            .auth-container { 
+                padding: 24px 16px !important; 
+                max-width: 100% !important;
+            }
+            .stats-cards-row { 
+                grid-template-columns: repeat(3, 1fr) !important; 
+            }
+        }
+        @media (max-width: 480px) {
+            .stats-cards-row { 
+                grid-template-columns: 1fr !important; 
+            }
+            .auth-container { 
+                padding: 20px 12px !important; 
+            }
         }
     </style>
+    <link rel="stylesheet" href="css/responsive-global.css">
 </head>
 <body>
     <script>
