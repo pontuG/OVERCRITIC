@@ -349,26 +349,182 @@ body.light-mode .version-btn-ok {
    ── 4. RESPONSIVIDADE DINÂMICA (PARA EVITAR ZOOM MANUAL) ──
 ═════════════════════════════════════════════════════════════════ */
 
-/* TELAS DE LAPTOPS & RESOLUÇÕES MÉDIAS (1024px a 1440px)
-   Ex: ThinkPad T490 (1366x768 e 1080p a 125%/150% DPI) */
-@media (max-width: 1440px) {
-    .main-content {
-        padding: 26px 32px !important;
-        max-width: 100% !important;
+/* ── COMPACTAÇÃO VERTICAL DA SIDEBAR (DESKTOP & LAPTOPS) ──
+   Garante que o PONTUG e a versão v26.09.3 caibam 100% na tela sem serem cortados */
+@media (min-width: 769px) {
+    .sidebar {
+        padding: clamp(6px, 1.2vh, 14px) 0 !important;
+        justify-content: space-between !important;
+        overflow-y: auto !important;
+        scrollbar-width: none !important;
+        height: 100vh !important;
     }
-    
-    .greeting, .hero-title {
-        font-size: clamp(1.6rem, 2.4vw, 2.2rem) !important;
-    }
-    
-    .header-section {
-        margin-bottom: 24px !important;
+    .sidebar::-webkit-scrollbar {
+        display: none !important;
     }
 
-    /* Bento Grid: 2 colunas equilibradas para não espremer */
+    .brand-icon {
+        margin-bottom: clamp(4px, 1vh, 10px) !important;
+        gap: 2px !important;
+    }
+    .brand-icon img {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    .brand-icon span {
+        font-size: 0.58rem !important;
+        letter-spacing: 1.5px !important;
+    }
+
+    .nav-links {
+        gap: clamp(3px, 0.7vh, 7px) !important;
+        flex-grow: 0 !important;
+        width: 100% !important;
+        align-items: center !important;
+    }
+    .nav-item {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1.1rem !important;
+        border-radius: 10px !important;
+    }
+    .nav-item::after {
+        left: 54px !important;
+        font-size: 0.72rem !important;
+        padding: 4px 10px !important;
+    }
+
+    .sidebar-bottom {
+        gap: 3px !important;
+        margin-top: auto !important;
+        padding-top: 4px !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    .sidebar-user {
+        font-size: 0.58rem !important;
+        padding: 2px 6px !important;
+        max-width: 66px !important;
+        letter-spacing: 0.5px !important;
+    }
+    .sidebar-version-pill {
+        margin-top: 2px !important;
+        font-size: 0.58rem !important;
+        padding: 2px 6px !important;
+        border-radius: 8px !important;
+    }
+    .sys-time {
+        font-size: 10px !important;
+    }
+}
+
+/* ── TELAS DE LAPTOPS & RESOLUÇÕES MÉDIAS (Telas 1080p com escala 125%/150% ou 1366x768) ──
+   Elimina a necessidade de dar zoom de 80%, fazendo tudo caber nativamente a 100% de zoom */
+@media (max-width: 1536px), (max-height: 880px) and (min-width: 769px) {
+    .main-content {
+        padding: 16px 26px 45px 26px !important;
+        gap: 14px !important;
+        max-width: 100% !important;
+    }
+
+    /* Cabeçalhos Hero Compactos */
+    .header-section, .trophies-hero, .support-hero {
+        padding: 14px 22px !important;
+        margin-bottom: 12px !important;
+        border-radius: 16px !important;
+    }
+    .hero-badge, .hero-tag {
+        font-size: 0.68rem !important;
+        padding: 2px 8px !important;
+        margin-bottom: 6px !important;
+    }
+    .greeting, .hero-title {
+        font-size: 1.55rem !important;
+        margin-bottom: 3px !important;
+    }
+    .subtitle, .hero-desc {
+        font-size: 0.8rem !important;
+        line-height: 1.35 !important;
+    }
+
+    /* Estatísticas do Topo */
+    .hero-stats, .hero-stats-row {
+        gap: 8px !important;
+    }
+    .stat-card, .hero-stat-card {
+        padding: 6px 12px !important;
+        min-width: 80px !important;
+        border-radius: 10px !important;
+    }
+    .stat-num, .stat-card-num {
+        font-size: 1.3rem !important;
+    }
+    .stat-label, .stat-card-label {
+        font-size: 0.62rem !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    /* Abas de Navegação */
+    .tabs-container {
+        margin-bottom: 12px !important;
+        padding-bottom: 6px !important;
+        gap: 6px !important;
+    }
+    .tab-btn {
+        padding: 6px 12px !important;
+        font-size: 0.78rem !important;
+        border-radius: 8px !important;
+    }
+
+    /* Guia das 4 Dificuldades de Platina (Troféus & Platinas) */
+    .difficulty-guide-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 12px !important;
+    }
+    .diff-card {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+    }
+    .diff-card-title {
+        font-size: 0.82rem !important;
+        font-weight: 800 !important;
+    }
+    .diff-badge {
+        font-size: 0.65rem !important;
+        padding: 1px 5px !important;
+    }
+    .diff-card-desc {
+        font-size: 0.72rem !important;
+        line-height: 1.3 !important;
+        margin: 4px 0 !important;
+    }
+    .diff-card-examples {
+        font-size: 0.68rem !important;
+        line-height: 1.25 !important;
+    }
+
+    /* Barra de Filtros e Chips */
+    .difficulty-filter-bar {
+        padding: 6px 12px !important;
+        margin-bottom: 12px !important;
+        gap: 6px !important;
+        border-radius: 12px !important;
+    }
+    .diff-filter-label {
+        font-size: 0.7rem !important;
+    }
+    .diff-chip {
+        padding: 3px 8px !important;
+        font-size: 0.7rem !important;
+    }
+
+    /* Bento Grid (Início) */
     .bento-grid {
         grid-template-columns: repeat(2, 1fr) !important;
-        gap: 18px !important;
+        gap: 14px !important;
     }
     .bento-col-showcase {
         grid-column: span 2 !important;
@@ -377,16 +533,19 @@ body.light-mode .version-btn-ok {
     .card-discover {
         grid-column: span 2 !important;
     }
+    .bento-card {
+        padding: 16px 18px !important;
+    }
 
     /* Dashboard Top Grid (adicionar_jogos & adicionar_midias) */
     .dashboard-top-grid {
-        gap: 20px !important;
-        margin-bottom: 25px !important;
+        gap: 16px !important;
+        margin-bottom: 20px !important;
     }
 
     /* Suporte: Grade do Formulário e Info Lateral */
     .form-grid-layout {
-        gap: 20px !important;
+        gap: 16px !important;
     }
 }
 
@@ -401,7 +560,7 @@ body.light-mode .version-btn-ok {
     }
 
     .form-card, .info-card, .glass-card {
-        padding: 22px !important;
+        padding: 18px !important;
     }
 }
 
