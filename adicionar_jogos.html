@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
     <script src="js/apiClient.js"></script>
+    <script src="js/gamerProfile.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -2503,13 +2504,15 @@
                 const comments = j.comments || [];
                 const liked = currentUser && likes.includes(currentUser);
                 const isOwner = !currentUser || !j.autor || j.autor === 'Anônimo' || j.autor === currentUser;
+                const isAdmin = (typeof window.isAdminUser === 'function' && window.isAdminUser()) || (localStorage.getItem('overcritic_is_admin') === 'true');
+                const canDelete = isOwner || isAdmin;
 
                 const card = document.createElement('div');
                 card.className = 'review-card';
                 card.innerHTML = `
                     <img src="${j.capaUrl || 'https://via.placeholder.com/300x140/07090f/adb5bd?text=Sem+Capa'}" alt="Capa">
                     <h3 class="review-card-title">${j.titulo}</h3>
-                    <div class="review-author">🖊️ por ${j.autor || 'Anônimo'} — ${j.dataRegistro || ''}</div>
+                    <div class="review-author" style="cursor: pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${j.autor || 'Anônimo'}', '${j.userId || ''}')" title="Ver perfil e catálogo deste jogador">🖊️ por <span style="text-decoration: underline; text-decoration-color: transparent; transition: all 0.2s;" onmouseover="this.style.textDecorationColor='var(--accent-cyan)'" onmouseout="this.style.textDecorationColor='transparent'">${j.autor || 'Anônimo'}</span> — ${j.dataRegistro || ''}</div>
                     <div class="review-meta">
                         <span>⭐ ${j.minhaNota}/10</span>
                         <span>🎮 ${j.plataforma}</span>
@@ -2521,7 +2524,7 @@
                     <div class="review-text-preview">${j.review}</div>
                     <div class="card-actions">
                         ${isOwner ? `<button class="btn-ghost" onclick="editarCritica(${j.id})">✏️ Editar</button>` : ''}
-                        ${isOwner ? `<button class="btn-ghost" style="border-color:#ff0055;color:#ff0055;" onclick="excluirCritica(${j.id})">🗑️</button>` : ''}
+                        ${canDelete ? `<button class="btn-ghost" style="border-color:#ff0055;color:#ff0055;" onclick="excluirCritica(${j.id})" title="${isAdmin && !isOwner ? 'Moderar/Excluir (Admin)' : 'Excluir crítica'}">🗑️ ${isAdmin && !isOwner ? '<span style="font-size:0.72rem; color:#ffd700; font-weight:bold;">Admin</span>' : ''}</button>` : ''}
                         <button class="like-btn ${liked ? 'liked' : ''}" onclick="toggleLike(${j.id})">
                             ${liked ? '❤️' : '🤍'} ${likes.length}
                         </button>

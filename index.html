@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
     <script src="js/apiClient.js"></script>
+    <script src="js/gamerProfile.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -973,6 +974,444 @@
             from { opacity: 0; transform: translateX(50px); }
             to { opacity: 1; transform: translateX(0); }
         }
+
+        /* =====================================
+           FEED SOCIAL DA COMUNIDADE (OVERCRITIC)
+        ===================================== */
+        .community-feed-section {
+            margin-top: 40px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .feed-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+        }
+
+        .feed-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .feed-main-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .feed-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .feed-filters-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feed-filter-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .feed-filter-btn:hover {
+            background: rgba(0, 240, 255, 0.08);
+            border-color: rgba(0, 240, 255, 0.3);
+            color: var(--text-main);
+        }
+
+        .feed-filter-btn.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        .feed-refresh-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+        }
+
+        .feed-refresh-btn:hover {
+            background: rgba(0, 240, 255, 0.12);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 22px;
+        }
+
+        @media (max-width: 600px) {
+            .feed-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feed-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(16px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .feed-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 240, 255, 0.35);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        body.light-mode .feed-card:hover {
+            border-color: rgba(197, 27, 41, 0.35);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1), 0 0 15px rgba(197, 27, 41, 0.1);
+        }
+
+        .feed-card-banner {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .feed-card-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .feed-card:hover .feed-card-cover {
+            transform: scale(1.05);
+        }
+
+        .feed-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(7, 9, 15, 0.95) 100%);
+        }
+
+        .feed-badge-type {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+        .feed-badge-jogo { background: rgba(0, 240, 255, 0.2); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); }
+        .feed-badge-midia { background: rgba(157, 78, 221, 0.25); border: 1px solid #c77dff; color: #c77dff; }
+        .feed-badge-platina { background: rgba(255, 215, 0, 0.2); border: 1px solid #ffd700; color: #ffd700; }
+
+        .feed-badge-score {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            background: rgba(13, 17, 27, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+
+        .feed-card-body {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .feed-user-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .feed-user-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .feed-user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+            border: 1px solid var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .feed-user-meta:hover .feed-user-avatar {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .feed-user-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .feed-user-meta:hover .feed-user-name {
+            color: var(--accent-cyan);
+        }
+
+        .feed-date {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .feed-card-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.3;
+            letter-spacing: -0.3px;
+        }
+
+        .feed-meta-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .feed-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .feed-review-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-style: italic;
+        }
+
+        .feed-card-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .feed-action-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .feed-action-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .feed-action-btn.liked {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .feed-btn-admin-del {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .feed-btn-admin-del:hover {
+            background: #ef4444;
+            color: #fff;
+            transform: scale(1.04);
+        }
+
+        /* Comments Drawer */
+        .feed-comments-container {
+            border-top: 1px solid var(--glass-border);
+            padding: 14px 20px;
+            background: rgba(0, 0, 0, 0.25);
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            animation: fadeInDown 0.3s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feed-comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .feed-comment-bubble {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+        }
+
+        .feed-comment-author {
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-right: 6px;
+        }
+
+        .feed-comment-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .feed-comment-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 0.82rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .feed-comment-input:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .feed-comment-send-btn {
+            background: var(--accent-cyan);
+            border: none;
+            color: #07090f;
+            font-weight: 800;
+            font-size: 0.8rem;
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .feed-comment-send-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Shimmer Loading Skeleton */
+        .feed-skeleton-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            height: 360px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .feed-skeleton-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 75%);
+            background-size: 200% 100%;
+            animation: feedShimmer 1.6s infinite;
+        }
+
+        @keyframes feedShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body>
@@ -1142,6 +1581,35 @@
                 <textarea id="quickNotes" class="quick-note-area" placeholder="Lembretes de metas..."></textarea>
             </div>
         </section>
+
+        <!-- SEÇÃO: FEED SOCIAL DA COMUNIDADE & ÚLTIMAS CRÍTICAS -->
+        <section class="community-feed-section" id="communityFeedSection">
+            <div class="feed-header-bar">
+                <div class="feed-title-wrap">
+                    <div class="feed-main-title">
+                        <span>🔥</span> FEED SOCIAL DA COMUNIDADE
+                    </div>
+                    <div class="feed-subtitle">
+                        Análises, notas e conquistas registradas pela comunidade em tempo real na nuvem
+                    </div>
+                </div>
+                <div class="feed-filters-wrap">
+                    <button class="feed-filter-btn active" data-filter="todos" onclick="filtrarFeedComunitario('todos')">🌐 Todos</button>
+                    <button class="feed-filter-btn" data-filter="jogos" onclick="filtrarFeedComunitario('jogos')">🎮 Jogos</button>
+                    <button class="feed-filter-btn" data-filter="midias" onclick="filtrarFeedComunitario('midias')">🎬 Cinema & Séries</button>
+                    <button class="feed-filter-btn" data-filter="platinas" onclick="filtrarFeedComunitario('platinas')">🏆 Platinas</button>
+                    <button class="feed-refresh-btn" onclick="carregarFeedComunitario(true)" title="Recarregar análises da nuvem">
+                        <span id="feedRefreshIcon">🔄</span> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <div class="feed-grid" id="communityFeedGrid">
+                <div class="feed-skeleton-card"></div>
+                <div class="feed-skeleton-card"></div>
+                <div class="feed-skeleton-card"></div>
+            </div>
+        </section>
     </main>
 
     <script>
@@ -1184,6 +1652,7 @@
 
             carregarEstatisticas();
             carregarAnotacoes();
+            carregarFeedComunitario();
         });
 
         // Clock
@@ -1542,11 +2011,399 @@
             }, 1000);
         }
 
+        // ══════════════════════════════════════
+        // ENGINE DO FEED SOCIAL DA COMUNIDADE
+        // ══════════════════════════════════════
+        let _feedItensGlobal = [];
+        let _filtroFeedAtual = 'todos';
+
+        async function carregarFeedComunitario(animarIcone = false) {
+            const grid = document.getElementById('communityFeedGrid');
+            const icon = document.getElementById('feedRefreshIcon');
+            if (animarIcone && icon) {
+                icon.style.transform = 'rotate(360deg)';
+                icon.style.transition = 'transform 0.6s ease';
+                setTimeout(() => { icon.style.transform = 'none'; icon.style.transition = 'none'; }, 600);
+            }
+
+            let itens = [];
+
+            // 1. Consulta em paralelo Supabase
+            if (window.sbClient) {
+                try {
+                    const [resJ, resM, resP] = await Promise.all([
+                        window.sbClient.from('reviews_jogos').select('*').order('created_at', { ascending: false }).limit(25),
+                        window.sbClient.from('reviews_midias').select('*').order('created_at', { ascending: false }).limit(25),
+                        window.sbClient.from('platinas').select('*').order('created_at', { ascending: false }).limit(25)
+                    ]);
+
+                    if (resJ.data) {
+                        resJ.data.forEach(j => {
+                            itens.push({
+                                id: j.id,
+                                userId: j.user_id,
+                                tipo: 'jogo',
+                                tipoLabel: '🎮 Jogo',
+                                titulo: j.titulo,
+                                autor: j.autor || 'Anônimo',
+                                data: j.data_registro || (j.created_at ? new Date(j.created_at).toLocaleDateString('pt-BR') : 'Recente'),
+                                rawDate: new Date(j.created_at || Date.now()).getTime(),
+                                score: j.minha_nota !== null && j.minha_nota !== undefined ? `⭐ ${j.minha_nota}/10` : '⭐ 10/10',
+                                status: j.status || 'Concluído',
+                                plataforma: j.plataforma || 'PC',
+                                review: j.review || 'Análise registrada sem texto.',
+                                cover: j.capa_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80',
+                                likes: Array.isArray(j.likes) ? j.likes : [],
+                                comments: Array.isArray(j.comments) ? j.comments : []
+                            });
+                        });
+                    }
+
+                    if (resM.data) {
+                        resM.data.forEach(m => {
+                            itens.push({
+                                id: m.id,
+                                userId: m.user_id,
+                                tipo: 'midia',
+                                tipoLabel: m.type === 'Série' ? '📺 Série' : (m.type === 'Anime' ? '🍙 Anime' : '🎬 Filme'),
+                                titulo: m.title || m.titulo,
+                                autor: m.autor || 'Anônimo',
+                                data: m.data_registro || (m.created_at ? new Date(m.created_at).toLocaleDateString('pt-BR') : 'Recente'),
+                                rawDate: new Date(m.created_at || Date.now()).getTime(),
+                                score: m.my_rating !== null && m.my_rating !== undefined ? `🍿 ${m.my_rating}/10` : '🍿 8.5/10',
+                                status: m.status || 'Assistido',
+                                plataforma: m.platform || 'Streaming',
+                                review: m.review || 'Crítica de cinema registrada.',
+                                cover: m.cover_url || 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+                                likes: Array.isArray(m.likes) ? m.likes : [],
+                                comments: Array.isArray(m.comments) ? m.comments : []
+                            });
+                        });
+                    }
+
+                    if (resP.data) {
+                        resP.data.forEach(p => {
+                            itens.push({
+                                id: p.id,
+                                userId: p.user_id,
+                                tipo: 'platina',
+                                tipoLabel: '🏆 Platina',
+                                titulo: p.titulo,
+                                autor: p.usuario || 'Gamer',
+                                data: p.data_conquista || (p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : 'Recente'),
+                                rawDate: new Date(p.created_at || Date.now()).getTime(),
+                                score: `🏆 ${p.nota || 100}%`,
+                                status: `${p.horas || 0}h jogadas`,
+                                plataforma: p.plataforma || 'Multiplataforma',
+                                review: p.relato || `Platina 100% conquistada com dificuldade ${p.dificuldade || 'Moderada'}!`,
+                                cover: p.cover_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&q=80',
+                                likes: Array.isArray(p.badges) ? p.badges : [],
+                                comments: []
+                            });
+                        });
+                    }
+                } catch(e) {
+                    console.warn('[Feed Supabase] Aviso ao sincronizar com nuvem:', e);
+                }
+            }
+
+            // 2. Fallback / Merge LocalStorage
+            try {
+                const localJogos = JSON.parse(localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos') || '[]');
+                localJogos.forEach(j => {
+                    if (!itens.some(item => String(item.id) === String(j.id))) {
+                        itens.push({
+                            id: j.id,
+                            tipo: 'jogo',
+                            tipoLabel: '🎮 Jogo',
+                            titulo: j.titulo,
+                            autor: j.autor || 'Anônimo',
+                            data: j.dataRegistro || 'Recente',
+                            rawDate: Date.now(),
+                            score: `⭐ ${j.minhaNota || 10}/10`,
+                            status: j.status || 'Concluído',
+                            plataforma: j.plataforma || 'PC',
+                            review: j.review || 'Análise registrada.',
+                            cover: j.capaUrl || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80',
+                            likes: Array.isArray(j.likes) ? j.likes : [],
+                            comments: Array.isArray(j.comments) ? j.comments : []
+                        });
+                    }
+                });
+
+                const localMidias = JSON.parse(localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias') || '[]');
+                localMidias.forEach(m => {
+                    if (!itens.some(item => String(item.id) === String(m.id))) {
+                        itens.push({
+                            id: m.id,
+                            tipo: 'midia',
+                            tipoLabel: m.type === 'Série' ? '📺 Série' : '🎬 Filme',
+                            titulo: m.title,
+                            autor: m.autor || 'Anônimo',
+                            data: m.createdAt ? new Date(m.createdAt).toLocaleDateString('pt-BR') : 'Recente',
+                            rawDate: Date.now() - 1000,
+                            score: `🍿 ${m.myRating || 8}/10`,
+                            status: m.status || 'Assistido',
+                            plataforma: m.platform || 'Streaming',
+                            review: m.review || 'Crítica registrada.',
+                            cover: m.coverUrl || 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+                            likes: Array.isArray(m.likes) ? m.likes : [],
+                            comments: Array.isArray(m.comments) ? m.comments : []
+                        });
+                    }
+                });
+            } catch(e) {}
+
+            // Ordena os itens (mais recentes primeiro)
+            itens.sort((a, b) => (b.rawDate || 0) - (a.rawDate || 0));
+            _feedItensGlobal = itens;
+            renderizarFeedItens();
+        }
+
+        function filtrarFeedComunitario(tipo) {
+            _filtroFeedAtual = tipo;
+            document.querySelectorAll('.feed-filter-btn').forEach(btn => {
+                if (btn.dataset.filter === tipo) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            renderizarFeedItens();
+        }
+
+        function renderizarFeedItens() {
+            const grid = document.getElementById('communityFeedGrid');
+            if (!grid) return;
+
+            let filtrados = _feedItensGlobal;
+            if (_filtroFeedAtual === 'jogos') {
+                filtrados = filtrados.filter(i => i.tipo === 'jogo');
+            } else if (_filtroFeedAtual === 'midias') {
+                filtrados = filtrados.filter(i => i.tipo === 'midia');
+            } else if (_filtroFeedAtual === 'platinas') {
+                filtrados = filtrados.filter(i => i.tipo === 'platina');
+            }
+
+            if (!filtrados.length) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">🪐</div>
+                        <h3 style="color: #fff; margin-bottom: 6px;">Nenhuma análise encontrada no filtro</h3>
+                        <p style="font-size: 0.88rem;">Seja o primeiro a publicar sua crítica na plataforma!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || 'Visitante').toLowerCase();
+            const isAdmin = (typeof window.isAdminUser === 'function' && window.isAdminUser()) 
+                         || (localStorage.getItem('overcritic_is_admin') === 'true');
+
+            grid.innerHTML = filtrados.map(item => {
+                const uniqueCardId = `feed_card_${item.tipo}_${String(item.id).replace(/\D/g, '') || item.id}`;
+                const hasLiked = currentUser !== 'visitante' && (item.likes || []).some(u => String(u).toLowerCase() === currentUser);
+                const isAuthorAdmin = (window.OVERCRITIC_ADMIN && (item.autor === window.OVERCRITIC_ADMIN.email || item.userId === window.OVERCRITIC_ADMIN.uid))
+                                   || (item.autor || '').toLowerCase().includes('gabriel')
+                                   || (item.autor || '').toLowerCase() === 'admin';
+
+                return `
+                    <div class="feed-card" id="${uniqueCardId}">
+                        <div class="feed-card-banner">
+                            <img class="feed-card-cover" src="${item.cover}" alt="${item.titulo}" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80'">
+                            <div class="feed-card-overlay"></div>
+                            <span class="feed-badge-type feed-badge-${item.tipo}">${item.tipoLabel}</span>
+                            <span class="feed-badge-score">${item.score}</span>
+                        </div>
+
+                        <div class="feed-card-body">
+                            <div class="feed-user-row">
+                                <div class="feed-user-meta" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}', '${item.userId || ''}')" title="Ver perfil e catálogo deste jogador">
+                                    <div class="feed-user-avatar">${(item.autor || 'J').charAt(0).toUpperCase()}</div>
+                                    <div class="feed-user-name">
+                                        <span>${item.autor}</span>
+                                        ${isAuthorAdmin ? '<span style="background:linear-gradient(135deg,#ffd700,#ff8c00);color:#07090f;font-size:0.68rem;padding:2px 6px;border-radius:6px;font-weight:800;">👑 ADMIN</span>' : ''}
+                                    </div>
+                                </div>
+                                <span class="feed-date">${item.data}</span>
+                            </div>
+
+                            <div class="feed-card-title">${item.titulo}</div>
+
+                            <div class="feed-meta-row">
+                                <span class="feed-pill">🎮 ${item.plataforma}</span>
+                                <span class="feed-pill">📌 ${item.status}</span>
+                            </div>
+
+                            <div class="feed-review-text">"${item.review}"</div>
+                        </div>
+
+                        <div class="feed-card-footer">
+                            <div style="display:flex; gap:8px;">
+                                <button class="feed-action-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLikeFeed('${item.tipo}', '${item.id}')" title="Curtir análise">
+                                    <span>${hasLiked ? '❤️' : '🤍'}</span>
+                                    <span>${(item.likes || []).length}</span>
+                                </button>
+                                ${item.tipo !== 'platina' ? `
+                                    <button class="feed-action-btn" onclick="toggleCommentsFeed('${uniqueCardId}')" title="Ver e adicionar comentários">
+                                        <span>💬</span>
+                                        <span id="comment_count_${uniqueCardId}">${(item.comments || []).length}</span>
+                                    </button>
+                                ` : ''}
+                            </div>
+
+                            ${isAdmin ? `
+                                <button class="feed-btn-admin-del" onclick="excluirItemFeedAdmin('${item.tipo}', '${item.id}', '${uniqueCardId}')" title="Moderar e excluir como Administrador">
+                                    🗑️ Moderar
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        ${item.tipo !== 'platina' ? `
+                            <div class="feed-comments-container" id="comments_box_${uniqueCardId}">
+                                <div class="feed-comments-list" id="comments_list_${uniqueCardId}">
+                                    ${(item.comments || []).length === 0 ? `<div style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">Nenhum comentário ainda. Seja o primeiro!</div>` : ''}
+                                    ${(item.comments || []).map(c => `
+                                        <div class="feed-comment-bubble">
+                                            <span class="feed-comment-author">${c.autor || 'Gamer'}:</span>
+                                            <span>${c.texto}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="feed-comment-input-row">
+                                    <input type="text" class="feed-comment-input" id="input_comment_${uniqueCardId}" placeholder="Escreva uma resposta...">
+                                    <button type="button" class="feed-comment-send-btn" onclick="enviarComentarioFeed('${item.tipo}', '${item.id}', '${uniqueCardId}')">Publicar</button>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function toggleLikeFeed(tipo, id) {
+            const currentUser = localStorage.getItem('overcritic_currentUser') || 'Visitante';
+            if (!currentUser || currentUser.toLowerCase() === 'visitante') {
+                exibirToast('🔒 <b>Atenção:</b> Faça login para curtir análises!');
+                return;
+            }
+
+            const item = _feedItensGlobal.find(i => i.tipo === tipo && String(i.id) === String(id));
+            if (!item) return;
+
+            if (!Array.isArray(item.likes)) item.likes = [];
+            const idx = item.likes.indexOf(currentUser);
+            if (idx >= 0) {
+                item.likes.splice(idx, 1);
+                exibirToast('🤍 Você removeu sua curtida.', 2500);
+            } else {
+                item.likes.push(currentUser);
+                exibirToast('❤️ Você curtiu esta análise!', 2500);
+            }
+
+            renderizarFeedItens();
+
+            // Sincroniza no Supabase
+            if (window.sbClient) {
+                const numId = Number(String(id).replace(/\D/g, '')) || id;
+                try {
+                    if (tipo === 'jogo') {
+                        await window.sbClient.from('reviews_jogos').update({ likes: item.likes }).eq('id', numId);
+                    } else if (tipo === 'midia') {
+                        await window.sbClient.from('reviews_midias').update({ likes: item.likes }).eq('id', numId);
+                    } else if (tipo === 'platina') {
+                        await window.sbClient.from('platinas').update({ badges: item.likes }).eq('id', numId);
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function toggleCommentsFeed(uniqueCardId) {
+            const box = document.getElementById(`comments_box_${uniqueCardId}`);
+            if (!box) return;
+            box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function enviarComentarioFeed(tipo, id, uniqueCardId) {
+            const currentUser = localStorage.getItem('overcritic_currentUser') || 'Visitante';
+            if (!currentUser || currentUser.toLowerCase() === 'visitante') {
+                exibirToast('🔒 <b>Atenção:</b> Faça login para comentar!');
+                return;
+            }
+
+            const input = document.getElementById(`input_comment_${uniqueCardId}`);
+            if (!input || !input.value.trim()) return;
+
+            const texto = input.value.trim();
+            const novoComentario = {
+                autor: currentUser,
+                texto,
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+
+            const item = _feedItensGlobal.find(i => i.tipo === tipo && String(i.id) === String(id));
+            if (!item) return;
+
+            if (!Array.isArray(item.comments)) item.comments = [];
+            item.comments.push(novoComentario);
+            input.value = '';
+
+            // Atualiza UI
+            const list = document.getElementById(`comments_list_${uniqueCardId}`);
+            const count = document.getElementById(`comment_count_${uniqueCardId}`);
+            if (count) count.textContent = item.comments.length;
+            if (list) {
+                const bubble = document.createElement('div');
+                bubble.className = 'feed-comment-bubble';
+                bubble.innerHTML = `<span class="feed-comment-author">${currentUser}:</span><span>${texto}</span>`;
+                list.appendChild(bubble);
+            }
+
+            exibirToast('💬 Comentário publicado com sucesso!', 2500);
+
+            // Persiste no Supabase
+            if (window.sbClient) {
+                const numId = Number(String(id).replace(/\D/g, '')) || id;
+                try {
+                    const tabela = tipo === 'jogo' ? 'reviews_jogos' : 'reviews_midias';
+                    await window.sbClient.from(tabela).update({ comments: item.comments }).eq('id', numId);
+                } catch(e) {
+                    console.warn('Erro ao salvar comentário na nuvem:', e);
+                }
+            }
+        }
+
+        async function excluirItemFeedAdmin(tipo, id, uniqueCardId) {
+            if (!confirm(`[ADMIN] Deseja realmente remover esta análise (${tipo}) de toda a comunidade?`)) return;
+
+            // Remove da lista em memória e da tela imediatamente
+            _feedItensGlobal = _feedItensGlobal.filter(i => !(i.tipo === tipo && String(i.id) === String(id)));
+            const cardEl = document.getElementById(uniqueCardId);
+            if (cardEl) {
+                cardEl.style.transition = 'all 0.4s ease';
+                cardEl.style.transform = 'scale(0.8)';
+                cardEl.style.opacity = '0';
+                setTimeout(() => cardEl.remove(), 400);
+            }
+
+            exibirToast('🗑️ <b>Moderação:</b> Análise removida da plataforma com sucesso pelo Administrador.');
+
+            // Remove do Supabase
+            if (window.sbClient) {
+                const numId = Number(String(id).replace(/\D/g, '')) || id;
+                try {
+                    let tabela = 'reviews_jogos';
+                    if (tipo === 'midia') tabela = 'reviews_midias';
+                    else if (tipo === 'platina') tabela = 'platinas';
+                    await window.sbClient.from(tabela).delete().eq('id', numId);
+                } catch(e) {
+                    console.warn('Erro ao remover no Supabase:', e);
+                }
+            }
+        }
+
         atualizarCapasDinamicas();
         atualizarEstadoAuthHeader();
-        window.addEventListener('pageshow', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); });
-        window.addEventListener('storage', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); });
-        
+        window.addEventListener('pageshow', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); });
+        window.addEventListener('storage', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); });
+        setInterval(carregarFeedComunitario, 30000);
     </script>
 </body>
 </html>

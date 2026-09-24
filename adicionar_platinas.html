@@ -12,6 +12,7 @@
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
+    <script src="js/gamerProfile.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -2264,6 +2265,122 @@
             atualizarEstatisticasGlobais();
         }
 
+        // ═══════════════════════════════════
+        // INTEGRAÇÃO COM SUPABASE (PLATINAS)
+        // ═══════════════════════════════════
+        function mapPlatinaParaSupabase(p) {
+            const uid = localStorage.getItem('overcritic_user_id') || null;
+            let idNum = p.id;
+            if (typeof idNum === 'string') {
+                idNum = Number(idNum.replace(/\D/g, '')) || Date.now();
+            }
+
+            return {
+                id: Number(idNum),
+                user_id: p.userId || p.user_id || uid,
+                usuario: p.user || p.usuario || 'Visitante',
+                titulo: p.title || p.titulo || 'Sem título',
+                plataforma: p.platform || p.plataforma || 'PC',
+                dificuldade: p.difficulty || p.dificuldade || 'Moderada',
+                horas: Number(p.hours || p.horas) || 0,
+                data_conquista: p.date || p.data_conquista || new Date().toLocaleDateString('pt-BR'),
+                nota: Number(p.progress !== undefined ? p.progress : p.nota) || 100,
+                relato: p.notes || p.relato || '',
+                cover_url: p.cover || p.cover_url || '',
+                badges: Array.isArray(p.badges) ? p.badges : (Array.isArray(p.applaudedBy) ? p.applaudedBy : [])
+            };
+        }
+
+        function mapSupabaseParaPlatina(row) {
+            return {
+                id: row.id,
+                userId: row.user_id,
+                user: row.usuario || 'Gamer',
+                title: row.titulo,
+                platform: row.plataforma,
+                difficulty: row.dificuldade,
+                difficultyCategory: (row.dificuldade || '').toLowerCase().includes('fácil') || (row.dificuldade || '').toLowerCase().includes('tranquila') ? 'facil' : ((row.dificuldade || '').toLowerCase().includes('difícil') ? 'dificil' : ((row.dificuldade || '').toLowerCase().includes('lendária') || (row.dificuldade || '').toLowerCase().includes('insana') ? 'lendaria' : 'moderada')),
+                hours: row.horas || 0,
+                progress: row.nota !== null && row.nota !== undefined ? Number(row.nota) : 100,
+                trophiesCount: '100% Conquistado',
+                notes: row.relato || '',
+                cover: row.cover_url,
+                date: row.data_conquista,
+                applause: Array.isArray(row.badges) ? row.badges.length : 0,
+                applaudedBy: Array.isArray(row.badges) ? row.badges : []
+            };
+        }
+
+        async function sincronizarPlatinasSupabase() {
+            if (!window.sbClient) return;
+            try {
+                const { data, error } = await window.sbClient
+                    .from('platinas')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.info('ℹ️ [Supabase Platinas]', error.message);
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    const platinasNuvem = data.map(mapSupabaseParaPlatina);
+                    const mapa = new Map();
+                    platinasNuvem.forEach(p => mapa.set(String(p.id), p));
+
+                    const locais = obterFeedSalvo();
+                    locais.forEach(p => {
+                        const chave = String(p.id).replace(/\D/g, '');
+                        if (!mapa.has(chave) && !mapa.has(String(p.id))) {
+                            mapa.set(String(p.id), p);
+                        }
+                    });
+
+                    const listaConsolidada = Array.from(mapa.values());
+                    salvarFeed(listaConsolidada);
+                    renderizarFeedComunidade();
+                    renderizarMinhasPlatinas();
+                    console.log('⚡ [Supabase] ' + data.length + ' platinas sincronizadas da nuvem!');
+                }
+            } catch (err) {
+                console.warn('Erro ao conectar com Supabase Platinas:', err);
+            }
+        }
+
+        async function salvarPlatinaNoSupabase(platina) {
+            if (!window.sbClient) return;
+            try {
+                const payload = mapPlatinaParaSupabase(platina);
+                const { error } = await window.sbClient
+                    .from('platinas')
+                    .upsert(payload, { onConflict: 'id' });
+                if (error) {
+                    console.warn('⚠️ [Supabase] Erro ao salvar platina:', error.message);
+                } else {
+                    console.log('☁️ [Supabase] Platina sincronizada na nuvem com sucesso!');
+                }
+            } catch (err) {
+                console.warn('Erro na requisição Supabase:', err);
+            }
+        }
+
+        async function excluirPlatinaDoSupabase(id) {
+            if (!window.sbClient) return;
+            try {
+                const numId = Number(String(id).replace(/\D/g, '')) || id;
+                const { error } = await window.sbClient
+                    .from('platinas')
+                    .delete()
+                    .eq('id', numId);
+                if (!error) {
+                    console.log('🗑️ [Supabase] Platina removida da nuvem!');
+                }
+            } catch (err) {
+                console.warn('Erro ao excluir no Supabase:', err);
+            }
+        }
+
         /* ═══════════════════════════════════
            RENDERIZAÇÃO: MAIS PLATINADOS & RANKING
         ═══════════════════════════════════ */
@@ -2544,6 +2661,10 @@
             const applaudedBy = Array.isArray(item.applaudedBy) ? item.applaudedBy : [];
             const hasApplauded = currentUser && applaudedBy.includes(currentUser);
 
+            const isOwner = currentUser && (currentUser.toLowerCase() === (item.user || '').toLowerCase());
+            const isAdmin = typeof window.isAdminUser === 'function' ? window.isAdminUser() : false;
+            const canDelete = isMinhaLista || isOwner || isAdmin;
+
             return `
                 <div class="platina-card ${is100 ? 'is-100' : ''}">
                     <div class="platina-cover-wrap">
@@ -2558,8 +2679,8 @@
 
                     <div class="platina-body">
                         <div class="platina-user-row">
-                            <div class="platina-avatar">${(item.user || 'P').charAt(0).toUpperCase()}</div>
-                            <span class="platina-username">${item.user}</span>
+                            <div class="platina-avatar" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.user}')">${(item.user || 'P').charAt(0).toUpperCase()}</div>
+                            <span class="platina-username" style="cursor:pointer; text-decoration:underline; text-decoration-color:transparent; transition:all 0.2s;" onmouseover="this.style.textDecorationColor='var(--accent-cyan)'" onmouseout="this.style.textDecorationColor='transparent'" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.user}')">${item.user}</span>
                             <span class="platina-date">${item.date || 'Recente'}</span>
                         </div>
 
@@ -2598,9 +2719,9 @@
                                     </button>
                                 ` : ''}
 
-                                ${isMinhaLista ? `
-                                    <button class="btn-delete-mine" onclick="excluirPlatina('${item.id}')" title="Excluir do meu perfil">
-                                        🗑️
+                                ${canDelete ? `
+                                    <button class="btn-delete-mine" onclick="excluirPlatina('${item.id}')" title="${isAdmin && !isOwner ? 'Moderar/Excluir (Admin)' : 'Excluir platina'}">
+                                        🗑️ ${isAdmin && !isOwner ? '<span style="font-size:0.75rem; color:#ffd700; font-weight:bold;">Admin</span>' : ''}
                                     </button>
                                 ` : ''}
                             </div>
@@ -2642,6 +2763,13 @@
 
             salvarFeed(feed);
 
+            if (window.sbClient) {
+                const numId = Number(String(id).replace(/\D/g, '')) || id;
+                window.sbClient.from('platinas').update({ badges: item.applaudedBy }).eq('id', numId).then(({ error }) => {
+                    if (error) console.warn('Aviso ao sincronizar parabéns na nuvem:', error);
+                });
+            }
+
             // Atualiza botões e contadores em todas as abas onde o card aparece
             document.querySelectorAll(`[data-applause-count="${id}"]`).forEach(el => {
                 el.textContent = item.applause;
@@ -2657,12 +2785,14 @@
             });
         }
 
-        function excluirPlatina(id) {
+        async function excluirPlatina(id) {
             if (!confirm('Deseja realmente remover este registro de platina?')) return;
 
             let feed = obterFeedSalvo();
             feed = feed.filter(p => p.id !== id);
             salvarFeed(feed);
+
+            await excluirPlatinaDoSupabase(id);
 
             renderizarFeedComunidade();
             renderizarMinhasPlatinas();
@@ -2880,6 +3010,7 @@
             const feed = obterFeedSalvo();
             feed.unshift(novoRegistro);
             salvarFeed(feed);
+            salvarPlatinaNoSupabase(novoRegistro);
 
             document.getElementById('platinaRegisterForm').reset();
             document.getElementById('gamePreviewBox').style.display = 'none';
@@ -3695,6 +3826,7 @@
             renderizarTopMaisPlatinados();
             renderizarFeedComunidade();
             renderizarMinhasPlatinas();
+            sincronizarPlatinasSupabase();
         });
     </script>
 </body>

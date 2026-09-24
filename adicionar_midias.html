@@ -12,6 +12,7 @@
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
+    <script src="js/gamerProfile.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -2229,8 +2230,132 @@
         }
 
         // ═══════════════════════════════════
-        // GERENCIAMENTO DAS CRÍTICAS SALVAS (CRUD)
+        // INTEGRAÇÃO COM SUPABASE & CRUD
         // ═══════════════════════════════════
+        function mapMidiaParaSupabase(m) {
+            const currentUid = localStorage.getItem('overcritic_user_id') || null;
+            const currentAuthor = localStorage.getItem('overcritic_currentUser') || 'Anônimo';
+            
+            // Converte id para numérico caso seja media_123456789
+            let idNum = m.id;
+            if (typeof idNum === 'string') {
+                idNum = Number(idNum.replace(/\D/g, '')) || Date.now();
+            }
+
+            return {
+                id: Number(idNum),
+                user_id: m.userId || m.user_id || currentUid,
+                autor: m.autor || currentAuthor,
+                titulo: m.title || m.titulo || 'Sem título',
+                tipo: m.type || m.tipo || 'Filme',
+                ano: String(m.year || m.ano || ''),
+                generos: m.genres || m.generos || '',
+                palavras_chave: m.keywords || m.palavras_chave || '',
+                media_internet: m.internetRating || m.media_internet || '',
+                onde_assistir: m.platform || m.onde_assistir || 'Cinema',
+                minha_nota: parseFloat(m.myRating !== undefined ? m.myRating : m.minha_nota) || 0,
+                status: m.status || 'Assistido',
+                review: m.review || '',
+                cover_url: m.coverUrl || m.cover_url || '',
+                data_registro: m.createdAt || m.data_registro || new Date().toISOString(),
+                likes: Array.isArray(m.likes) ? m.likes : [],
+                comments: Array.isArray(m.comments) ? m.comments : []
+            };
+        }
+
+        function mapSupabaseParaMidia(row) {
+            return {
+                id: row.id,
+                userId: row.user_id,
+                autor: row.autor || 'Anônimo',
+                title: row.titulo,
+                type: row.tipo,
+                year: row.ano,
+                genres: row.generos,
+                keywords: row.palavras_chave,
+                internetRating: row.media_internet,
+                platform: row.onde_assistir,
+                myRating: row.minha_nota,
+                status: row.status,
+                review: row.review,
+                coverUrl: row.cover_url,
+                createdAt: row.data_registro,
+                likes: Array.isArray(row.likes) ? row.likes : [],
+                comments: Array.isArray(row.comments) ? row.comments : []
+            };
+        }
+
+        async function sincronizarMidiasSupabase() {
+            if (!window.sbClient) return;
+            try {
+                const { data, error } = await window.sbClient
+                    .from('reviews_midias')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.info('ℹ️ [Supabase Midias]', error.message);
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    const midiasNuvem = data.map(mapSupabaseParaMidia);
+                    const mapa = new Map();
+                    midiasNuvem.forEach(m => mapa.set(String(m.id), m));
+                    
+                    const locais = obterReviews();
+                    locais.forEach(m => {
+                        const chave = String(m.id).replace(/\D/g, '');
+                        if (!mapa.has(chave) && !mapa.has(String(m.id))) {
+                            mapa.set(String(m.id), m);
+                        }
+                    });
+
+                    const listaConsolidada = Array.from(mapa.values());
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(listaConsolidada));
+                    localStorage.setItem('overcritic_midias', JSON.stringify(listaConsolidada));
+                    atualizarEstatisticas();
+                    filtrarReviews();
+                    console.log('⚡ [Supabase] ' + data.length + ' mídias sincronizadas da nuvem!');
+                }
+            } catch(e) {
+                console.warn('Erro ao conectar com Supabase Midias:', e);
+            }
+        }
+
+        async function salvarMidiaNoSupabase(midia) {
+            if (!window.sbClient) return;
+            try {
+                const payload = mapMidiaParaSupabase(midia);
+                const { error } = await window.sbClient
+                    .from('reviews_midias')
+                    .upsert(payload, { onConflict: 'id' });
+                if (error) {
+                    console.warn('⚠️ [Supabase] Erro ao salvar mídia:', error.message);
+                } else {
+                    console.log('☁️ [Supabase] Mídia persistida na nuvem com sucesso!');
+                }
+            } catch (err) {
+                console.warn('Erro na requisição Supabase:', err);
+            }
+        }
+
+        async function excluirMidiaDoSupabase(id) {
+            if (!window.sbClient) return;
+            try {
+                const numId = Number(String(id).replace(/\D/g, '')) || id;
+                const { error } = await window.sbClient
+                    .from('reviews_midias')
+                    .delete()
+                    .eq('id', numId);
+                if (!error) {
+                    console.log('🗑️ [Supabase] Mídia removida da nuvem!');
+                }
+            } catch (err) {
+                console.warn('Erro ao excluir no Supabase:', err);
+            }
+        }
+
         function obterReviews() {
             const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('overcritic_midias');
             if (!data) {
@@ -2268,12 +2393,15 @@
             const myRating = parseFloat(document.getElementById('myRating').value);
             const review = document.getElementById('mediaReview').value.trim();
             const coverUrl = document.getElementById('mediaCoverUrl').value || "https://placehold.co/400x600/07090f/00f0ff?text=SEM+CAPA";
+            const currentAuthor = localStorage.getItem('overcritic_currentUser') || 'Anônimo';
+            const currentUid = localStorage.getItem('overcritic_user_id') || null;
 
             let reviews = obterReviews();
+            let itemFinal = null;
 
             if (editingId) {
                 // Atualização
-                const index = reviews.findIndex(r => r.id === editingId);
+                const index = reviews.findIndex(r => String(r.id) === String(editingId));
                 if (index !== -1) {
                     reviews[index] = {
                         ...reviews[index],
@@ -2281,27 +2409,34 @@
                         platform, duration, status, myRating, review, coverUrl,
                         updatedAt: new Date().toISOString()
                     };
+                    itemFinal = reviews[index];
                     mostrarToast(`Análise de "${title}" atualizada!`, '✅');
                 }
             } else {
                 // Nova análise
                 const novoItem = {
-                    id: 'media_' + Date.now(),
+                    id: Date.now(),
+                    userId: currentUid,
+                    autor: currentAuthor,
                     title, type, year, genres, keywords, internetRating,
                     platform, duration, status, myRating, review, coverUrl,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    likes: [],
+                    comments: []
                 };
                 reviews.unshift(novoItem);
+                itemFinal = novoItem;
                 mostrarToast(`"${title}" cadastrado com sucesso!`, '🎉');
             }
 
             salvarReviewsNoStorage(reviews);
+            if (itemFinal) salvarMidiaNoSupabase(itemFinal);
             limparFormulario();
         }
 
         function editarReview(id) {
             const reviews = obterReviews();
-            const item = reviews.find(r => r.id === id);
+            const item = reviews.find(r => String(r.id) === String(id));
             if (!item) return;
 
             // Restaura todas as plataformas para permitir seleção livre na edição
@@ -2354,12 +2489,13 @@
 
         function excluirReview(id) {
             const reviews = obterReviews();
-            const item = reviews.find(r => r.id === id);
+            const item = reviews.find(r => String(r.id) === String(id));
             if (!item) return;
 
             if (confirm(`Deseja realmente remover a análise de "${item.title}"?`)) {
-                const novasReviews = reviews.filter(r => r.id !== id);
+                const novasReviews = reviews.filter(r => String(r.id) !== String(id));
                 salvarReviewsNoStorage(novasReviews);
+                excluirMidiaDoSupabase(id);
                 mostrarToast(`"${item.title}" removido com sucesso!`, '🗑️');
             }
         }
@@ -2425,6 +2561,31 @@
             renderizarCards(reviews);
         }
 
+        function toggleLikeMidia(id) {
+            const user = localStorage.getItem('overcritic_currentUser') || 'Visitante';
+            if (!user || user.toLowerCase() === 'visitante') {
+                mostrarToast('Faça login para curtir esta análise!', '🔒');
+                return;
+            }
+            let reviews = obterReviews();
+            const item = reviews.find(r => String(r.id) === String(id));
+            if (!item) return;
+            if (!Array.isArray(item.likes)) item.likes = [];
+            const idx = item.likes.indexOf(user);
+            if (idx >= 0) {
+                item.likes.splice(idx, 1);
+                mostrarToast('Você descurtiu.', '🤍');
+            } else {
+                item.likes.push(user);
+                mostrarToast('Você curtiu esta análise! ❤️', '✨');
+            }
+            salvarReviewsNoStorage(reviews);
+            if (window.sbClient) {
+                const numId = Number(String(id).replace(/\D/g, '')) || id;
+                window.sbClient.from('reviews_midias').update({ likes: item.likes }).eq('id', numId).then(() => {});
+            }
+        }
+
         function renderizarCards(reviews) {
             const grid = document.getElementById('reviewsGrid');
             if (!reviews.length) {
@@ -2438,6 +2599,10 @@
                 return;
             }
 
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || 'Visitante').toLowerCase();
+            const currentUid = localStorage.getItem('overcritic_user_id') || null;
+            const isAdmin = (typeof window.isAdminUser === 'function' && window.isAdminUser()) || (localStorage.getItem('overcritic_is_admin') === 'true');
+
             grid.innerHTML = reviews.map(r => {
                 let statusClass = 'status-assistido';
                 if (r.status === 'Assistindo') statusClass = 'status-assistindo';
@@ -2445,6 +2610,12 @@
                 else if (r.status === 'Abandonado') statusClass = 'status-abandonado';
 
                 const tags = (r.keywords || '').split(',').map(t => t.trim()).filter(Boolean);
+                const autorNome = r.autor || 'Anônimo';
+                const isOwner = (r.userId && r.userId === currentUid) || (autorNome.toLowerCase() === currentUser && currentUser !== 'visitante');
+                const canManage = isOwner || isAdmin;
+                
+                const likes = Array.isArray(r.likes) ? r.likes : [];
+                const hasLiked = currentUser !== 'visitante' && likes.some(u => String(u).toLowerCase() === currentUser);
 
                 return `
                     <div class="review-card">
@@ -2456,6 +2627,11 @@
                         </div>
 
                         <div class="card-body">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.78rem; color: var(--accent-cyan); font-weight: 700; cursor: pointer; text-decoration: underline; text-decoration-color: transparent; transition: all 0.2s;" onmouseover="this.style.textDecorationColor='var(--accent-cyan)'" onmouseout="this.style.textDecorationColor='transparent'" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${autorNome}', '${r.userId || ''}')" title="Ver perfil e catálogo deste usuário">👤 ${autorNome} ${isOwner ? '<span style="color:#10b981;">(Você)</span>' : ''}</span>
+                                <span style="font-size: 0.72rem; color: var(--text-muted);">${r.createdAt ? new Date(r.createdAt).toLocaleDateString('pt-BR') : ''}</span>
+                            </div>
+
                             <h3 class="card-title">${r.title} ${r.year ? `<span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">(${r.year})</span>` : ''}</h3>
                             
                             <div class="card-meta-line">
@@ -2484,8 +2660,15 @@
 
                             <div class="card-actions">
                                 <button class="btn-card-action" onclick="abrirModalDetalhes('${r.id}')">👁️ DETALHES</button>
-                                <button class="btn-card-action" onclick="editarReview('${r.id}')">✏️ EDITAR</button>
-                                <button class="btn-card-action btn-card-delete" onclick="excluirReview('${r.id}')">🗑️ EXCLUIR</button>
+                                <button class="btn-card-action" style="${hasLiked ? 'color: #ef4444; border-color: rgba(239, 68, 68, 0.4);' : ''}" onclick="toggleLikeMidia('${r.id}')">
+                                    ${hasLiked ? '❤️' : '🤍'} ${likes.length}
+                                </button>
+                                ${canManage ? `
+                                    <button class="btn-card-action" onclick="editarReview('${r.id}')">✏️ EDITAR</button>
+                                    <button class="btn-card-action btn-card-delete" onclick="excluirReview('${r.id}')">
+                                        🗑️ ${isAdmin && !isOwner ? 'MODERAR (Admin)' : 'EXCLUIR'}
+                                    </button>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
@@ -2714,6 +2897,7 @@
             atualizarEstatisticas();
             filtrarReviews();
             carregarTendencias();
+            sincronizarMidiasSupabase();
 
             if (localStorage.getItem('OVERCRITIC_TMDB_USER_KEY')) {
                 document.getElementById('apiStatusText').innerText = "TMDB: Chave Própria";
