@@ -14,6 +14,7 @@
     <script src="supabaseClient.js"></script>
     <script src="js/apiClient.js"></script>
     <script src="js/gamerProfile.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -2033,11 +2034,18 @@
             window.location.href = 'conta_login.html?tab=login';
         });
         document.getElementById('logoutBtn').addEventListener('click', async () => {
-            if (confirm('Deseja realmente sair da sua conta?')) {
+            const sair = await showConfirm('Deseja realmente sair da sua conta?', {
+                title: 'Encerrar Sessão',
+                confirmText: 'Sair da Conta',
+                cancelText: 'Permanecer',
+                isDanger: true
+            });
+            if (sair) {
                 if (window.sbClient) {
                     try { await window.sbClient.auth.signOut(); } catch(e) {}
                 }
                 setCurrentUser(null);
+                showToast.info('Você saiu da sua conta.');
             }
         });
 
@@ -2219,9 +2227,63 @@
             }
         }
 
+        const cacheCapasAlternativas = {};
+        async function buscarCapaAlternativa(titulo) {
+            if (!titulo) return null;
+            const limpo = titulo.trim();
+            if (cacheCapasAlternativas[limpo]) return cacheCapasAlternativas[limpo];
+
+            try {
+                const salvo = localStorage.getItem(`oc_cover_${limpo.toLowerCase()}`);
+                if (salvo) {
+                    cacheCapasAlternativas[limpo] = salvo;
+                    return salvo;
+                }
+            } catch(e) {}
+
+            const slug = limpo.replace(/\s+/g, '_');
+            try {
+                const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const url = (data.originalimage && data.originalimage.source) || (data.thumbnail && data.thumbnail.source);
+                    if (url) {
+                        cacheCapasAlternativas[limpo] = url;
+                        try { localStorage.setItem(`oc_cover_${limpo.toLowerCase()}`, url); } catch(e) {}
+                        return url;
+                    }
+                }
+            } catch(e) {}
+
+            try {
+                const termos = [`${limpo} video game`, `${limpo} game`, limpo];
+                for (const termo of termos) {
+                    const searchRes = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(termo)}&limit=3&namespace=0&format=json&origin=*`);
+                    if (searchRes.ok) {
+                        const searchData = await searchRes.json();
+                        const artigos = searchData[1] || [];
+                        for (const art of artigos) {
+                            const sumRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(art.replace(/\s+/g, '_'))}`);
+                            if (sumRes.ok) {
+                                const sumData = await sumRes.json();
+                                const url = (sumData.originalimage && sumData.originalimage.source) || (sumData.thumbnail && sumData.thumbnail.source);
+                                if (url) {
+                                    cacheCapasAlternativas[limpo] = url;
+                                    try { localStorage.setItem(`oc_cover_${limpo.toLowerCase()}`, url); } catch(e) {}
+                                    return url;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            return null;
+        }
+
         async function buscarDadosInternet() {
             const query = document.getElementById('apiSearchInput').value.trim();
-            if (!query) return alert('Digite o nome de um jogo para buscar!');
+            if (!query) return showToast.warning('Digite o nome de um jogo para buscar!');
 
             const btn = document.getElementById('btnAutoPreencher');
             btn.innerText = 'BUSCANDO...';
@@ -2232,23 +2294,40 @@
                 const response = await fetch(searchUrl);
                 const data = await response.json();
 
+                let gameTitle = query;
+                let capaOficial = '';
+
+                if (data && data.length > 0) {
+                    const game = data[0];
+                    gameTitle = game.external;
+                    capaOficial = game.thumb || '';
+                    if (game.steamAppID && game.steamAppID !== '0') {
+                        capaOficial = `https://cdn.akamai.steamstatic.com/steam/apps/${game.steamAppID}/header.jpg`;
+                    }
+                }
+
+                // Se não tem capa pela API comercial, busca via base global da Wikipedia
+                if (!capaOficial) {
+                    capaOficial = await buscarCapaAlternativa(gameTitle) || '';
+                }
+
                 if (!data || data.length === 0) {
-                    alert('Jogo não localizado no banco de dados.');
-                    return;
+                    if (!capaOficial) {
+                        showToast.error('Jogo não localizado no banco de dados comercial nem na base global.');
+                        return;
+                    }
                 }
 
-                const game = data[0];
-                document.getElementById('gameTitle').value = game.external;
+                document.getElementById('gameTitle').value = gameTitle;
 
-                let capaOficial = game.thumb;
-                if (game.steamAppID) {
-                    capaOficial = `https://cdn.akamai.steamstatic.com/steam/apps/${game.steamAppID}/header.jpg`;
+                if (capaOficial) {
+                    const imgPreview = document.getElementById('coverPreview');
+                    imgPreview.src = capaOficial;
+                    imgPreview.style.display = 'block';
+                    document.getElementById('gameCoverUrl').value = capaOficial;
+                    const placeholder = document.getElementById('coverPlaceholder');
+                    if (placeholder) placeholder.style.display = 'none';
                 }
-
-                const imgPreview = document.getElementById('coverPreview');
-                imgPreview.src = capaOficial;
-                imgPreview.style.display = 'block';
-                document.getElementById('gameCoverUrl').value = capaOficial;
 
                 const nomeLower = game.external.toLowerCase();
                 let generos = [], tags = [];
@@ -2275,11 +2354,11 @@
                 const calculatedScore = 75 + ((charCodeSum + Math.floor(priceNum)) % 24);
                 document.getElementById('internetRating').value = `${calculatedScore} / 100`;
 
-                alert(`Dados de "${game.external}" carregados!`);
+                showToast.success(`Dados de "${game.external}" carregados com sucesso!`);
 
             } catch (error) {
                 console.error('Erro ao buscar o jogo:', error);
-                alert('Erro na conexão. Tente novamente.');
+                showToast.error('Erro na conexão ao buscar dados. Tente novamente.');
             } finally {
                 btn.innerText = 'AUTO-PREENCHER';
                 btn.disabled = false;
@@ -2293,7 +2372,7 @@
             event.preventDefault();
             const currentUser = getCurrentUser();
             if (!currentUser) {
-                alert('Você precisa fazer login para registrar uma crítica.');
+                showToast.warning('Você precisa fazer login para registrar uma crítica.');
                 return;
             }
 
@@ -2324,7 +2403,7 @@
                     dadosJogo.comments = original.comments || [];
                 }
                 jogosExistentes = jogosExistentes.map(j => j.id === parseInt(editingId) ? dadosJogo : j);
-                alert('Análise atualizada!');
+                showToast.success('Análise atualizada com sucesso!');
             } else {
                 jogosExistentes.push(dadosJogo);
                 salvarJogos(jogosExistentes);
@@ -2355,7 +2434,7 @@
                     console.error('Erro ao sincronizar feed rápido:', err);
                 }
 
-                alert('Análise registrada!');
+                showToast.success('Análise registrada com sucesso!');
             }
 
             salvarJogos(jogosExistentes);
@@ -2372,7 +2451,7 @@
 
             const podeEditar = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || jogo.autor === currentUser;
             if (!podeEditar) {
-                alert('Você só pode editar suas próprias críticas.');
+                showToast.warning('Você só pode editar suas próprias críticas.');
                 return;
             }
 
@@ -2400,7 +2479,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function excluirCritica(id) {
+        async function excluirCritica(id) {
             const currentUser = getCurrentUser();
             const jogos = obterJogosSalvos();
             const jogo = jogos.find(j => j.id === id);
@@ -2408,15 +2487,23 @@
 
             const podeExcluir = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || jogo.autor === currentUser;
             if (!podeExcluir) {
-                alert('Você só pode excluir suas próprias críticas.');
+                showToast.warning('Você só pode excluir suas próprias críticas.');
                 return;
             }
 
-            if (!confirm(`Tem certeza que deseja excluir a crítica de "${jogo.titulo}"?`)) return;
+            const confirmou = await showConfirm(`Tem certeza que deseja excluir a crítica de "${jogo.titulo}"?`, {
+                title: 'Excluir Análise',
+                confirmText: 'Sim, Excluir',
+                cancelText: 'Cancelar',
+                isDanger: true
+            });
+            if (!confirmou) return;
+
             const novaLista = jogos.filter(j => j.id !== id);
             salvarJogos(novaLista);
             excluirJogoDoSupabase(id);
             renderizarCriticas();
+            showToast.success(`Crítica de "${jogo.titulo}" excluída com sucesso.`);
         }
 
         function limparFormulario() {
@@ -2433,15 +2520,20 @@
         ═══════════════════════════════════ */
         function toggleLike(reviewId) {
             const user = getCurrentUser();
-            if (!user) { alert('Faça login para curtir.'); return; }
+            if (!user) { showToast.warning('Faça login para curtir.'); return; }
             const jogos = obterJogosSalvos();
             const review = jogos.find(j => j.id === reviewId);
             if (!review) return;
 
             if (!review.likes) review.likes = [];
             const idx = review.likes.indexOf(user);
-            if (idx >= 0) review.likes.splice(idx, 1);
-            else review.likes.push(user);
+            if (idx >= 0) {
+                review.likes.splice(idx, 1);
+                showToast.info('Curtida removida.');
+            } else {
+                review.likes.push(user);
+                showToast.success('Você curtiu esta análise! ❤️');
+            }
 
             salvarJogos(jogos);
             salvarJogoNoSupabase(review);
@@ -2450,7 +2542,7 @@
 
         function adicionarComentario(reviewId) {
             const user = getCurrentUser();
-            if (!user) { alert('Faça login para comentar.'); return; }
+            if (!user) { showToast.warning('Faça login para comentar.'); return; }
             const input = document.getElementById(`commentInput-${reviewId}`);
             const text = input.value.trim();
             if (!text) return;
@@ -2468,6 +2560,8 @@
             salvarJogos(jogos);
             salvarJogoNoSupabase(review);
             renderizarCriticas();
+            input.value = '';
+            showToast.success('Comentário publicado com sucesso!');
         }
 
         function toggleCommentSection(reviewId) {

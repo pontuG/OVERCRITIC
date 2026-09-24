@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
     <script src="js/gamerProfile.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1660,7 +1661,7 @@
                 const res = await fetch(url);
                 if (!res.ok) return null;
                 const data = await res.json();
-                return data.results?.BR || data.results?.US || null;
+                return data.results?.BR || null;
             } catch (e) {
                 console.warn('Erro ao consultar provedores do TMDB:', e);
                 return null;
@@ -2487,16 +2488,23 @@
             mostrarToast('Carregado para edição', '✏️');
         }
 
-        function excluirReview(id) {
+        async function excluirReview(id) {
             const reviews = obterReviews();
             const item = reviews.find(r => String(r.id) === String(id));
             if (!item) return;
 
-            if (confirm(`Deseja realmente remover a análise de "${item.title}"?`)) {
+            const confirmou = await showConfirm(`Deseja realmente remover a análise de "${item.title}"?`, {
+                title: 'Excluir Análise',
+                confirmText: 'Sim, Excluir',
+                cancelText: 'Cancelar',
+                isDanger: true
+            });
+
+            if (confirmou) {
                 const novasReviews = reviews.filter(r => String(r.id) !== String(id));
                 salvarReviewsNoStorage(novasReviews);
                 excluirMidiaDoSupabase(id);
-                mostrarToast(`"${item.title}" removido com sucesso!`, '🗑️');
+                showToast.success(`"${item.title}" removido com sucesso!`);
             }
         }
 

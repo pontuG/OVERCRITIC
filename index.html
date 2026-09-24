@@ -14,6 +14,7 @@
     <script src="supabaseClient.js"></script>
     <script src="js/apiClient.js"></script>
     <script src="js/gamerProfile.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1917,7 +1918,13 @@
         }
 
         async function realizarLogoutRapido() {
-            if (confirm('Deseja realmente sair da sua conta?')) {
+            const sair = await showConfirm('Deseja realmente sair da sua conta?', {
+                title: 'Encerrar Sessão',
+                confirmText: 'Sair da Conta',
+                cancelText: 'Permanecer',
+                isDanger: true
+            });
+            if (sair) {
                 if (window.sbClient) {
                     try { await window.sbClient.auth.signOut(); } catch(e) {}
                 }
@@ -1925,7 +1932,7 @@
                 localStorage.removeItem('overcritic_user');
                 localStorage.removeItem('overcritic_user_email');
                 atualizarEstadoAuthHeader();
-                exibirToast('🚪 Você saiu da sua conta.');
+                showToast.info('Você saiu da sua conta.');
             }
         }
 
@@ -2371,7 +2378,13 @@
         }
 
         async function excluirItemFeedAdmin(tipo, id, uniqueCardId) {
-            if (!confirm(`[ADMIN] Deseja realmente remover esta análise (${tipo}) de toda a comunidade?`)) return;
+            const confirmou = await showConfirm(`[ADMIN] Deseja realmente remover esta análise (${tipo}) de toda a comunidade?`, {
+                title: 'Moderação de Conteúdo',
+                confirmText: 'Sim, Remover',
+                cancelText: 'Cancelar',
+                isDanger: true
+            });
+            if (!confirmou) return;
 
             // Remove da lista em memória e da tela imediatamente
             _feedItensGlobal = _feedItensGlobal.filter(i => !(i.tipo === tipo && String(i.id) === String(id)));
@@ -2383,7 +2396,7 @@
                 setTimeout(() => cardEl.remove(), 400);
             }
 
-            exibirToast('🗑️ <b>Moderação:</b> Análise removida da plataforma com sucesso pelo Administrador.');
+            showToast.success('Análise removida da plataforma com sucesso pelo Administrador.');
 
             // Remove do Supabase
             if (window.sbClient) {

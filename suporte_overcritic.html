@@ -13,6 +13,7 @@
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1151,7 +1152,13 @@
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
-                    if (confirm('Deseja realmente sair da sua conta?')) {
+                    const sair = await showConfirm('Deseja realmente sair da sua conta?', {
+                        title: 'Encerrar Sessão',
+                        confirmText: 'Sair da Conta',
+                        cancelText: 'Permanecer',
+                        isDanger: true
+                    });
+                    if (sair) {
                         if (window.sbClient) {
                             try { await window.sbClient.auth.signOut(); } catch(e) {}
                         }
@@ -1162,6 +1169,7 @@
                         localStorage.removeItem('overcritic_is_admin');
                         atualizarUIUsuario();
                         renderizarMinhasMensagens();
+                        showToast.info('Você saiu da sua conta.');
                     }
                 });
             }
@@ -1460,8 +1468,14 @@
             mostrarToast(`Status alterado para "${novoStatus}"!`, '✅');
         }
 
-        function adminExcluir(id) {
-            if (!confirm('Deseja realmente excluir este chamado?')) return;
+        async function adminExcluir(id) {
+            const confirmou = await showConfirm('Deseja realmente excluir este chamado de suporte?', {
+                title: 'Excluir Chamado',
+                confirmText: 'Sim, Excluir',
+                cancelText: 'Cancelar',
+                isDanger: true
+            });
+            if (!confirmou) return;
 
             let chamados = obterChamadosSalvos();
             chamados = chamados.filter(t => t.id !== id);

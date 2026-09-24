@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -322,12 +325,13 @@
 
         .search-box-wrapper {
             position: relative;
-            min-width: 260px;
-            max-width: 360px;
+            min-width: 280px;
+            max-width: 420px;
+            width: 100%;
         }
         .search-box-wrapper input {
             width: 100%;
-            padding: 12px 18px 12px 42px;
+            padding: 12px 38px 12px 42px;
             background: rgba(0, 0, 0, 0.35);
             border: 1px solid var(--glass-border);
             border-radius: 14px;
@@ -355,6 +359,37 @@
             font-size: 1rem;
             color: var(--text-muted);
             pointer-events: none;
+        }
+        .btn-clear-search {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-muted);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1;
+            padding: 0;
+            z-index: 2;
+        }
+        .btn-clear-search:hover {
+            color: #fff;
+            background: rgba(255, 51, 102, 0.7);
+            border-color: rgba(255, 51, 102, 0.9);
+            transform: translateY(-50%) scale(1.1);
+        }
+        @keyframes ocPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.06); }
         }
 
         /* ═══════════════════════════════════
@@ -1255,7 +1290,8 @@
                 </div>
                 <div class="search-box-wrapper">
                     <span class="search-icon-fixed">🔍</span>
-                    <input type="text" id="gameSearchInput" placeholder="Filtrar por nome, gênero..." oninput="filtrarJogosNaTela()">
+                    <input type="text" id="gameSearchInput" placeholder="Buscar qualquer jogo (Steam, PS, Xbox, Switch)..." oninput="tratarEntradaBusca(this.value)">
+                    <button type="button" id="btnClearSearch" class="btn-clear-search" onclick="limparBusca()" style="display: none;" title="Limpar busca">✕</button>
                 </div>
             </div>
         </header>
@@ -1411,6 +1447,60 @@
         };
         let jogosFiltrados = [];
         window.jogosAtuaisNaTela = [];
+        let buscaTimer = null;
+        let controllerBusca = null;
+        let buscaAtiva = false;
+        let ultimaBusca = '';
+
+        /* CATÁLOGO DE EXCLUSIVOS & CLÁSSICOS DE CONSOLES (PLAYSTATION, NINTENDO, XBOX) */
+        const JOGOS_CONSOLES_ICONS = [
+            // PlayStation
+            { title: "God of War Ragnarök", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg", genre: "Ação / Mitologia Nórdica", score: "Metacritic 94", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2322010" },
+            { title: "God of War III Remastered", thumb: "https://image.api.playstation.com/vulcan/img/rnd/202011/0711/p8JCvA8692BICXAPoyylh7ed.png", genre: "Hack and Slash / Mitologia", score: "Metacritic 81", badge: "CLÁSSICO PS", priceBRL: 99.50, priceUSD: 19.99, platforms: ['PS'] },
+            { title: "God of War (2005)", thumb: "https://upload.wikimedia.org/wikipedia/en/b/b5/God_of_War_%282005%29_cover.jpg", genre: "Hack and Slash / Mitologia Grega", score: "Metacritic 94", badge: "CLÁSSICO PS2", priceBRL: 99.00, priceUSD: 19.99, platforms: ['PS'] },
+            { title: "Bloodborne", thumb: "https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg", genre: "Soulslike / Terror Gótico", score: "Metacritic 92", badge: "PS4 EXCLUSIVO", priceBRL: 99.50, priceUSD: 19.99, platforms: ['PS'] },
+            { title: "Demon's Souls Remake", thumb: "https://upload.wikimedia.org/wikipedia/en/1/1b/Demon%27s_Souls_%282020_video_game%29.jpg", genre: "Action RPG / Fantasia", score: "Metacritic 92", badge: "PS5 EXCLUSIVO", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS'] },
+            { title: "The Last of Us Part I", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1888930/header.jpg", genre: "Sobrevivência / Ação", score: "Metacritic 89", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "1888930" },
+            { title: "The Last of Us Part II Remastered", thumb: "https://upload.wikimedia.org/wikipedia/en/4/4f/TLOU_P2_Box_Art_2.png", genre: "Ação / Narrativa", score: "Metacritic 93", badge: "PLAYSTATION", priceBRL: 249.50, priceUSD: 49.99, platforms: ['PS'] },
+            { title: "Marvel's Spider-Man Remastered", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817070/header.jpg", genre: "Ação / Super-Herói", score: "Metacritic 87", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "1817070" },
+            { title: "Marvel's Spider-Man: Miles Morales", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817190/header.jpg", genre: "Ação / Super-Herói", score: "Metacritic 85", badge: "PLAYSTATION", priceBRL: 199.90, priceUSD: 49.99, platforms: ['PC', 'PS'], steamAppID: "1817190" },
+            { title: "Marvel's Spider-Man 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2651280/header.jpg", genre: "Ação / Super-Herói", score: "Metacritic 90", badge: "PLAYSTATION", priceBRL: 299.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2651280" },
+            { title: "Ghost of Tsushima Director's Cut", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2215430/header.jpg", genre: "Mundo Aberto / Samurai", score: "Metacritic 88", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2215430" },
+            { title: "Horizon Zero Dawn Remastered", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2564270/header.jpg", genre: "Mundo Aberto / Ficção", score: "Metacritic 89", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 49.99, platforms: ['PC', 'PS'], steamAppID: "2564270" },
+            { title: "Horizon Forbidden West", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2420110/header.jpg", genre: "Mundo Aberto / Ficção", score: "Metacritic 88", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2420110" },
+            { title: "Gran Turismo 7", thumb: "https://upload.wikimedia.org/wikipedia/en/1/14/Gran_Turismo_7_cover_art.jpg", genre: "Simulação de Corrida", score: "Metacritic 87", badge: "PS EXCLUSIVO", priceBRL: 299.90, priceUSD: 69.99, platforms: ['PS'] },
+            { title: "Uncharted: Coleção Legado dos Ladrões", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1659420/header.jpg", genre: "Ação / Aventura", score: "Metacritic 88", badge: "PLAYSTATION", priceBRL: 199.90, priceUSD: 49.99, platforms: ['PC', 'PS'], steamAppID: "1659420" },
+            { title: "Returnal", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1649240/header.jpg", genre: "Roguelike / Sci-Fi", score: "Metacritic 86", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "1649240" },
+            { title: "Ratchet & Clank: Rift Apart", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1895880/header.jpg", genre: "Plataforma / Tiro", score: "Metacritic 88", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "1895880" },
+            { title: "Shadow of the Colossus Remake", thumb: "https://upload.wikimedia.org/wikipedia/en/7/77/Shadow_of_the_Colossus_PS4_Cover.jpg", genre: "Aventura / Obra-Prima", score: "Metacritic 91", badge: "PS EXCLUSIVO", priceBRL: 99.50, priceUSD: 19.99, platforms: ['PS'] },
+
+            // Nintendo Switch
+            { title: "The Legend of Zelda: Tears of the Kingdom", thumb: "https://upload.wikimedia.org/wikipedia/en/f/fb/The_Legend_of_Zelda_Tears_of_the_Kingdom_cover.jpg", genre: "Aventura / Mundo Aberto", score: "Metacritic 96", badge: "NINTENDO", priceBRL: 349.00, priceUSD: 69.99, platforms: ['SWITCH'] },
+            { title: "The Legend of Zelda: Breath of the Wild", thumb: "https://upload.wikimedia.org/wikipedia/en/c/c6/The_Legend_of_Zelda_Breath_of_the_Wild.jpg", genre: "Aventura / Mundo Aberto", score: "Metacritic 97", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "The Legend of Zelda: Echoes of Wisdom", thumb: "https://upload.wikimedia.org/wikipedia/en/b/bb/The_Legend_of_Zelda_Echoes_of_Wisdom_key_art.png", genre: "Aventura / Puzzle", score: "Metacritic 86", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "The Legend of Zelda: Link's Awakening", thumb: "https://upload.wikimedia.org/wikipedia/en/8/87/The_Legend_of_Zelda_Link%27s_Awakening_Switch.png", genre: "Aventura / Clássico", score: "Metacritic 87", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Super Mario Odyssey", thumb: "https://upload.wikimedia.org/wikipedia/en/8/8d/Super_Mario_Odyssey.jpg", genre: "Plataforma 3D", score: "Metacritic 97", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Super Mario Bros. Wonder", thumb: "https://upload.wikimedia.org/wikipedia/en/e/eb/Super_Mario_Bros._Wonder_cover_art.png", genre: "Plataforma 2D", score: "Metacritic 92", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Mario Kart 8 Deluxe", thumb: "https://upload.wikimedia.org/wikipedia/en/b/b5/MarioKart8Boxart.jpg", genre: "Corrida / Diversão", score: "Metacritic 92", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Super Smash Bros. Ultimate", thumb: "https://upload.wikimedia.org/wikipedia/en/5/50/Super_Smash_Bros._Ultimate.jpg", genre: "Luta / Crossover", score: "Metacritic 93", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Pokémon Scarlet e Violet", thumb: "https://upload.wikimedia.org/wikipedia/en/1/10/Pokemon_Scarlet_and_Violet_banner.png", genre: "RPG / Criaturas", score: "Metacritic 72", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Pokémon Legends: Arceus", thumb: "https://upload.wikimedia.org/wikipedia/en/9/93/Pokemon_Legends_Arceus_cover.jpg", genre: "RPG / Aventura", score: "Metacritic 83", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Metroid Prime Remastered", thumb: "https://upload.wikimedia.org/wikipedia/en/2/2f/Metroid_Prime_Remastered_cover_art.jpg", genre: "Aventura / Tiro Sci-Fi", score: "Metacritic 94", badge: "NINTENDO", priceBRL: 199.00, priceUSD: 39.99, platforms: ['SWITCH'] },
+            { title: "Metroid Dread", thumb: "https://upload.wikimedia.org/wikipedia/en/4/4b/Metroid_Dread_Box_Art.png", genre: "Ação / Metroidvania", score: "Metacritic 88", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Animal Crossing: New Horizons", thumb: "https://upload.wikimedia.org/wikipedia/en/1/1f/Animal_Crossing_New_Horizons.jpg", genre: "Simulação de Vida", score: "Metacritic 90", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Luigi's Mansion 3", thumb: "https://upload.wikimedia.org/wikipedia/en/c/c2/Luigi%27s_Mansion_3_box_art.jpg", genre: "Aventura / Fantasmas", score: "Metacritic 86", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+            { title: "Splatoon 3", thumb: "https://upload.wikimedia.org/wikipedia/en/6/65/Splatoon_3_box_art.jpg", genre: "Tiro / Multiplayer", score: "Metacritic 83", badge: "NINTENDO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'] },
+
+            // Xbox
+            { title: "Halo Infinite", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1240440/header.jpg", genre: "FPS / Sci-Fi", score: "Metacritic 87", badge: "XBOX", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'XBOX'], steamAppID: "1240440" },
+            { title: "Halo: The Master Chief Collection", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/976730/header.jpg", genre: "FPS / Clássico", score: "Steam: 92%", badge: "COLEÇÃO XBOX", priceBRL: 129.00, priceUSD: 39.99, platforms: ['PC', 'XBOX'], steamAppID: "976730" },
+            { title: "Gears 5", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1097840/header.jpg", genre: "Tiro em 3ª Pessoa", score: "Metacritic 84", badge: "XBOX", priceBRL: 149.00, priceUSD: 39.99, platforms: ['PC', 'XBOX'], steamAppID: "1097840" },
+            { title: "Starfield", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1716740/header.jpg", genre: "RPG Espacial", score: "Metacritic 83", badge: "BETHESDA / XBOX", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "1716740" },
+            { title: "Sea of Thieves", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172620/header.jpg", genre: "Piratas / Aventura Co-op", score: "Steam: 90%", badge: "XBOX", priceBRL: 89.00, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1172620" },
+            { title: "Forza Motorsport", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2436490/header.jpg", genre: "Simulação de Corrida", score: "Metacritic 85", badge: "XBOX", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "2436490" },
+            { title: "Senua's Saga: Hellblade II", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2461850/header.jpg", genre: "Aventura Cinemática", score: "Metacritic 81", badge: "XBOX", priceBRL: 229.00, priceUSD: 49.99, platforms: ['PC', 'XBOX'], steamAppID: "2461850" },
+            { title: "Hi-Fi RUSH", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817230/header.jpg", genre: "Ação Rítmica", score: "Metacritic 87", badge: "XBOX / GOTY", priceBRL: 149.00, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1817230" }
+        ];
 
         /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', () => {
@@ -1419,6 +1509,20 @@
             // Sincronizar seletor de moeda com o valor salvo
             const currencySelect = document.getElementById('currencySelect');
             if (currencySelect) currencySelect.value = moedaAtual;
+
+            const searchInput = document.getElementById('gameSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (buscaTimer) clearTimeout(buscaTimer);
+                        const q = searchInput.value.trim();
+                        if (q.length >= 2) executarBuscaGlobal(q);
+                    } else if (e.key === 'Escape') {
+                        limparBusca();
+                    }
+                });
+            }
 
             mudarCategoria('trending');
         });
@@ -1453,7 +1557,13 @@
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
-                    if (confirm('Deseja realmente sair da sua conta?')) {
+                    const sair = await showConfirm('Deseja realmente sair da sua conta?', {
+                        title: 'Encerrar Sessão',
+                        confirmText: 'Sair da Conta',
+                        cancelText: 'Permanecer',
+                        isDanger: true
+                    });
+                    if (sair) {
                         if (window.sbClient) {
                             try { await window.sbClient.auth.signOut(); } catch(e) {}
                         }
@@ -1461,6 +1571,7 @@
                         localStorage.removeItem('overcritic_user');
                         localStorage.removeItem('overcritic_user_email');
                         atualizarUIUsuario();
+                        showToast.info('Você saiu da sua conta.');
                     }
                 });
             }
@@ -1472,7 +1583,11 @@
         function mudarMoeda(novaMoeda) {
             moedaAtual = novaMoeda;
             localStorage.setItem('overcritic_currency', novaMoeda);
-            filtrarJogosNaTela();
+            if (buscaAtiva && ultimaBusca) {
+                executarBuscaGlobal(ultimaBusca);
+            } else {
+                filtrarJogosNaTela();
+            }
         }
 
         /* FILTRO POR PLATAFORMA (PC, PLAYSTATION, XBOX, SWITCH) */
@@ -1482,26 +1597,55 @@
                 const p = btn.getAttribute('data-plat');
                 btn.classList.toggle('active', p === plat);
             });
-            filtrarJogosNaTela();
+            const query = (document.getElementById('gameSearchInput')?.value || '').trim();
+            if (query.length >= 2) {
+                executarBuscaGlobal(query);
+            } else {
+                filtrarJogosNaTela();
+            }
+        }
+
+        /* DETECTOR INTELIGENTE DE GÊNEROS */
+        function detectarGenero(titulo) {
+            const t = (titulo || '').toLowerCase();
+            if (t.includes('souls') || t.includes('elden') || t.includes('bloodborne') || t.includes('sekiro') || t.includes('lies of p')) return 'Ação / Soulslike';
+            if (t.includes('god of war') || t.includes('spartan') || t.includes('ragnarok')) return 'Ação / Mitologia';
+            if (t.includes('spider-man') || t.includes('batman') || t.includes('marvel') || t.includes('hero') || t.includes('avengers')) return 'Ação / Super-Herói';
+            if (t.includes('forza') || t.includes('gran turismo') || t.includes('f1') || t.includes('need for speed') || t.includes('mario kart') || t.includes('racing')) return 'Corrida / Velocidade';
+            if (t.includes('zelda') || t.includes('witcher') || t.includes('skyrim') || t.includes('dragon age') || t.includes('baldur') || t.includes('final fantasy') || t.includes('persona')) return 'RPG / Aventura';
+            if (t.includes('call of duty') || t.includes('counter-strike') || t.includes('halo') || t.includes('doom') || t.includes('battlefield') || t.includes('half-life') || t.includes('warzone')) return 'Tiro (FPS) / Ação';
+            if (t.includes('resident evil') || t.includes('silent hill') || t.includes('dead space') || t.includes('outlast') || t.includes('alan wake')) return 'Terror / Sobrevivência';
+            if (t.includes('mario') || t.includes('sonic') || t.includes('crash') || t.includes('hollow knight') || t.includes('cuphead') || t.includes('celeste') || t.includes('metroid')) return 'Plataforma / Aventura';
+            if (t.includes('fifa') || t.includes('ea sports fc') || t.includes('nba') || t.includes('pes') || t.includes('efootball') || t.includes('football')) return 'Esporte / Futebol';
+            if (t.includes('gta') || t.includes('grand theft auto') || t.includes('red dead') || t.includes('cyberpunk') || t.includes('watch dogs') || t.includes('mafia')) return 'Mundo Aberto / Ação';
+            return 'Ação & Aventura';
         }
 
         /* DETECTOR INTELIGENTE DE PLATAFORMAS PARA JOGOS DA WEB */
         function detectarPlataformas(titulo) {
             const t = (titulo || '').toLowerCase();
+            // Exclusivos puros Nintendo
+            if (t.includes('zelda') || t.includes('mario') || t.includes('pokemon') || t.includes('metroid') || t.includes('kirby') || t.includes('animal crossing') || t.includes('smash bros') || t.includes('splatoon') || t.includes('donkey kong') || t.includes('fire emblem') || t.includes('xenoblade')) {
+                return ['SWITCH'];
+            }
             // Exclusivos de PC / RTS / MMO
-            if (t.includes('counter-strike') || t.includes('dota') || t.includes('half-life') || t.includes('team fortress') || t.includes('civilization') || t.includes('total war') || t.includes('age of empires')) {
+            if (t.includes('counter-strike') || t.includes('dota') || t.includes('half-life') || t.includes('team fortress') || t.includes('civilization') || t.includes('total war') || t.includes('age of empires') || t.includes('world of warcraft') || t.includes('league of legends')) {
                 return ['PC'];
             }
-            // Exclusivos PlayStation + PC
-            if (t.includes('god of war') || t.includes('spider-man') || t.includes('last of us') || t.includes('horizon zero') || t.includes('horizon forbidden') || t.includes('ghost of tsushima') || t.includes('helldivers') || t.includes('silent hill 2') || t.includes('bloodborne') || t.includes('death stranding')) {
+            // Clássicos puros PlayStation
+            if (t.includes('bloodborne') || t.includes('demon\'s souls') || t.includes('gran turismo') || t.includes('the order 1886') || t.includes('infamous') || t.includes('killzone') || t.includes('god of war iii') || t.includes('god of war (2005)')) {
+                return ['PS'];
+            }
+            // PlayStation + PC (God of War, Spider-Man, Last of Us, etc.)
+            if (t.includes('god of war') || t.includes('spider-man') || t.includes('last of us') || t.includes('horizon') || t.includes('ghost of tsushima') || t.includes('helldivers') || t.includes('silent hill 2') || t.includes('death stranding') || t.includes('uncharted') || t.includes('returnal') || t.includes('days gone')) {
                 return ['PC', 'PS'];
             }
             // Exclusivos Xbox + PC
-            if (t.includes('forza') || t.includes('halo') || t.includes('gears') || t.includes('starfield') || t.includes('s.t.a.l.k.e.r') || t.includes('sea of thieves')) {
+            if (t.includes('forza') || t.includes('halo') || t.includes('gears') || t.includes('starfield') || t.includes('s.t.a.l.k.e.r') || t.includes('sea of thieves') || t.includes('state of decay') || t.includes('fable')) {
                 return ['PC', 'XBOX'];
             }
-            // Títulos com porte para Nintendo Switch
-            const switchGames = ['hollow knight', 'dead cells', 'hades', 'celeste', 'cuphead', 'witcher', 'persona', 'doom', 'portal', 'bioshock', 'hogwarts', 'monster hunter', 'lego', 'crash', 'spyro', 'sonic', 'dragon quest', 'final fantasy', 'assassin', 'resident evil', 'ori', 'skyrim', 'nier', 'tomb raider', 'apex', 'warframe'];
+            // Jogos Multiplataforma com porte para Switch
+            const switchGames = ['hollow knight', 'dead cells', 'hades', 'celeste', 'cuphead', 'witcher', 'persona', 'doom', 'portal', 'bioshock', 'hogwarts', 'monster hunter', 'lego', 'crash', 'spyro', 'sonic', 'dragon quest', 'final fantasy', 'assassin', 'resident evil', 'ori', 'skyrim', 'nier', 'tomb raider', 'apex', 'warframe', 'minecraft', 'overcooked', 'fall guys', 'stardew', 'terraria', 'among us'];
             if (switchGames.some(kw => t.includes(kw))) {
                 return ['PC', 'PS', 'XBOX', 'SWITCH'];
             }
@@ -1552,6 +1696,276 @@
             return `R$ ${(baseUSD * 5.60).toFixed(2).replace('.', ',')}`;
         }
 
+        /* ════════════════════════════════════════════════════════
+           MOTOR DE BUSCA GLOBAL MULTIPLATAFORMA (LIVE SEARCH)
+           Pesquisa em tempo real na base mundial de jogos
+        ════════════════════════════════════════════════════════ */
+        function tratarEntradaBusca(valor) {
+            const query = valor.trim();
+            const btnClear = document.getElementById('btnClearSearch');
+            if (btnClear) btnClear.style.display = query ? 'flex' : 'none';
+
+            if (buscaTimer) clearTimeout(buscaTimer);
+
+            if (!query) {
+                buscaAtiva = false;
+                ultimaBusca = '';
+                const btnMais = document.getElementById('btnLoadMore');
+                if (btnMais) btnMais.style.display = 'inline-flex';
+                filtrarJogosNaTela();
+                return;
+            }
+
+            if (query.length < 2) {
+                filtrarJogosNaTela();
+                return;
+            }
+
+            // Debounce ágil de 280ms
+            buscaTimer = setTimeout(() => {
+                executarBuscaGlobal(query);
+            }, 280);
+        }
+
+        function limparBusca() {
+            const input = document.getElementById('gameSearchInput');
+            if (input) input.value = '';
+            const btnClear = document.getElementById('btnClearSearch');
+            if (btnClear) btnClear.style.display = 'none';
+            buscaAtiva = false;
+            ultimaBusca = '';
+            const btnMais = document.getElementById('btnLoadMore');
+            if (btnMais) btnMais.style.display = 'inline-flex';
+            filtrarJogosNaTela();
+        }
+
+        async function executarBuscaGlobal(query) {
+            buscaAtiva = true;
+            ultimaBusca = query;
+            const grid = document.getElementById('gamesGrid');
+            const countBadge = document.getElementById('resultsCountBadge');
+            const btnMais = document.getElementById('btnLoadMore');
+            if (btnMais) btnMais.style.display = 'none';
+
+            if (grid) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 45px 20px; color: var(--accent-cyan);">
+                        <div style="font-size: 2.4rem; animation: ocPulse 1.2s infinite; margin-bottom: 10px;">📡</div>
+                        <h3 style="margin: 0 0 6px 0; color: var(--text-main); font-size: 1.25rem;">Consultando base global de jogos...</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Pesquisando por "<strong>${query}</strong>" em todas as plataformas (Steam, PlayStation, Xbox, Switch)...</p>
+                    </div>
+                `;
+            }
+
+            if (controllerBusca) {
+                controllerBusca.abort();
+            }
+            controllerBusca = new AbortController();
+            const signal = controllerBusca.signal;
+
+            try {
+                const queryLower = query.toLowerCase();
+                const normQuery = queryLower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+                // Dicionário inteligente de siglas, abreviações e apelidos gamers
+                const ALIASES_JOGOS = {
+                    'gow': 'God of War',
+                    'gta': 'Grand Theft Auto',
+                    'rdr': 'Red Dead Redemption',
+                    'rdr2': 'Red Dead Redemption 2',
+                    'tlou': 'The Last of Us',
+                    'tlou2': 'The Last of Us Part II',
+                    'cod': 'Call of Duty',
+                    're4': 'Resident Evil 4',
+                    're2': 'Resident Evil 2',
+                    're': 'Resident Evil',
+                    'ff': 'Final Fantasy',
+                    'ff7': 'Final Fantasy VII',
+                    'bg3': "Baldur's Gate 3",
+                    'cp2077': 'Cyberpunk 2077',
+                    'mk': 'Mortal Kombat',
+                    'ac': "Assassin's Creed",
+                    'botw': 'Breath of the Wild',
+                    'totk': 'Tears of the Kingdom',
+                    'zelda': 'The Legend of Zelda',
+                    'cs2': 'Counter-Strike 2',
+                    'cs': 'Counter-Strike',
+                    'sm2': "Marvel's Spider-Man 2",
+                    'spider man': 'Spider-Man',
+                    'spiderman': 'Spider-Man',
+                    'nfs': 'Need for Speed'
+                };
+
+                const termoExpandido = ALIASES_JOGOS[queryLower] || null;
+                const termosDeBusca = [query];
+                if (termoExpandido && termoExpandido.toLowerCase() !== queryLower) {
+                    termosDeBusca.push(termoExpandido);
+                }
+
+                // 1. Busca no Catálogo Especial de Clássicos & Exclusivos de Console
+                const matchesConsoles = JOGOS_CONSOLES_ICONS.filter(j => {
+                    const titNorm = j.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const genNorm = (j.genre || '').toLowerCase();
+                    const matchQ = titNorm.includes(normQuery) || genNorm.includes(normQuery);
+                    const matchExp = termoExpandido ? (titNorm.includes(termoExpandido.toLowerCase()) || genNorm.includes(termoExpandido.toLowerCase())) : false;
+                    return matchQ || matchExp;
+                });
+
+                // 2. Busca nos Destaques Locais Integrados
+                const todosIntegrados = [
+                    ...CATALOGO_ESTENDIDO.trending,
+                    ...CATALOGO_ESTENDIDO.releases,
+                    ...CATALOGO_ESTENDIDO.metacritic,
+                    ...CATALOGO_ESTENDIDO.free,
+                    ...CATALOGO_ESTENDIDO.deals
+                ];
+                const matchesIntegrados = todosIntegrados.filter(j => {
+                    const titNorm = (j.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const matchQ = titNorm.includes(normQuery);
+                    const matchExp = termoExpandido ? titNorm.includes(termoExpandido.toLowerCase()) : false;
+                    return matchQ || matchExp;
+                });
+
+                // 3. Busca no Supabase (jogos cadastrados e analisados pela comunidade)
+                let matchesSupabase = [];
+                if (window.sbClient) {
+                    try {
+                        const { data } = await window.sbClient
+                            .from('reviews_jogos')
+                            .select('*')
+                            .or(`titulo.ilike.%${query}%,titulo.ilike.%${termoExpandido || query}%`)
+                            .limit(25);
+                        if (data && Array.isArray(data)) {
+                            matchesSupabase = data.map(item => ({
+                                title: item.titulo,
+                                thumb: item.capaUrl || '',
+                                genre: item.generos || 'Comunidade Overcritic',
+                                score: item.mediaInternet || (item.minhaNota ? `Nota: ${item.minhaNota}/10` : 'Comunidade'),
+                                badge: 'OVERCRITIC',
+                                priceBRL: 0,
+                                priceUSD: 0,
+                                isFree: false,
+                                platforms: item.plataforma ? [item.plataforma.toUpperCase().includes('PLAY') || item.plataforma.toUpperCase().includes('PS') ? 'PS' : (item.plataforma.toUpperCase().includes('XBOX') ? 'XBOX' : (item.plataforma.toUpperCase().includes('SWITCH') ? 'SWITCH' : 'PC'))] : detectarPlataformas(item.titulo)
+                            }));
+                        }
+                    } catch(e) {
+                        console.warn('Erro ao consultar Supabase na busca:', e);
+                    }
+                }
+
+                // 4. Busca Dinâmica Concorrente na API Global (CheapShark / Steam Stores)
+                let matchesApi = [];
+                try {
+                    const fetchPromises = termosDeBusca.map(t =>
+                        fetch(`https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(t)}&limit=60`, { signal })
+                            .then(r => r.ok ? r.json() : [])
+                            .catch(err => {
+                                if (err.name !== 'AbortError') console.warn('Erro API CheapShark:', err);
+                                return [];
+                            })
+                    );
+                    const results = await Promise.all(fetchPromises);
+                    const allApiItems = results.flat();
+                    if (Array.isArray(allApiItems)) {
+                        matchesApi = allApiItems.map(item => {
+                            const priceNum = parseFloat(item.cheapest) || 0;
+                            const steamId = item.steamAppID && item.steamAppID !== '0' ? item.steamAppID : null;
+                            const thumb = steamId 
+                                ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${steamId}/header.jpg` 
+                                : (item.thumb || '');
+                            
+                            return {
+                                title: item.external,
+                                thumb: thumb,
+                                genre: detectarGenero(item.external),
+                                score: steamId ? 'Steam Oficial' : 'Multi-Store',
+                                badge: priceNum === 0 ? 'GRÁTIS' : (priceNum < 15 ? 'OFERTA' : 'DISPONÍVEL'),
+                                priceUSD: priceNum,
+                                priceBRL: priceNum * 5.60,
+                                steamAppID: steamId,
+                                platforms: detectarPlataformas(item.external),
+                                storeUrl: steamId ? `https://store.steampowered.com/app/${steamId}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.external)}`
+                            };
+                        });
+                    }
+                } catch(e) {
+                    if (e.name !== 'AbortError') {
+                        console.warn('Erro na consulta da API global de jogos:', e);
+                    }
+                }
+
+                // 5. Mescla inteligente e desduplicação por título
+                const listaBruta = [...matchesConsoles, ...matchesIntegrados, ...matchesSupabase, ...matchesApi];
+                const unicos = [];
+                const titulosVistos = new Set();
+
+                for (const item of listaBruta) {
+                    const chave = (item.title || '')
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .replace(/[^a-z0-9]/g, '');
+                    if (!chave || titulosVistos.has(chave)) continue;
+                    titulosVistos.add(chave);
+                    unicos.push(item);
+                }
+
+                // 6. Ordenação por relevância:
+                // - Igual exato primeiro
+                // - Começa com o termo
+                // - Contém a palavra inteira
+                unicos.sort((a, b) => {
+                    const aTit = a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const bTit = b.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+                    if (aTit === normQuery && bTit !== normQuery) return -1;
+                    if (bTit === normQuery && aTit !== normQuery) return 1;
+
+                    if (aTit.startsWith(normQuery) && !bTit.startsWith(normQuery)) return -1;
+                    if (bTit.startsWith(normQuery) && !aTit.startsWith(normQuery)) return 1;
+
+                    return aTit.localeCompare(bTit);
+                });
+
+                // 7. Filtra pela plataforma ativa se selecionada (PC, PS, XBOX, SWITCH)
+                let filtrados = unicos;
+                if (plataformaAtual !== 'all') {
+                    filtrados = unicos.filter(j => {
+                        const plats = j.platforms || ['PC'];
+                        return plats.includes(plataformaAtual);
+                    });
+                }
+
+                renderizarGridJogos(filtrados);
+
+                if (countBadge) {
+                    const platTexto = plataformaAtual === 'all' ? 'todas as plataformas' : plataformaAtual;
+                    countBadge.textContent = `${filtrados.length} jogos encontrados em ${platTexto}`;
+                }
+
+                // 8. Se nada for localizado: tela amigável com botão de cadastrar
+                if (filtrados.length === 0) {
+                    const encodedQ = encodeURIComponent(query);
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                            <div style="font-size: 3.2rem; margin-bottom: 14px;">🎮</div>
+                            <h3 style="margin: 0 0 10px 0; color: var(--text-main); font-size: 1.4rem;">Nenhum jogo encontrado para "${query}"</h3>
+                            <p style="margin: 0 0 24px 0; font-size: 0.95rem; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                                Não encontramos registros com este nome na plataforma selecionada (${plataformaAtual === 'all' ? 'Todas' : plataformaAtual}).
+                                Você pode ser o primeiro a registrar e avaliar este título no Overcritic!
+                            </p>
+                            <a href="adicionar_jogos.html?titulo=${encodedQ}" class="btn-action-eval" style="display: inline-flex; padding: 12px 26px; font-size: 0.95rem; text-decoration: none; border-radius: 12px;">
+                                ✍️ Cadastrar e Avaliar "${query}" no Overcritic
+                            </a>
+                        </div>
+                    `;
+                }
+
+            } catch(err) {
+                console.error('Erro na busca global:', err);
+            }
+        }
+
         /* TROCA DE CATEGORIAS */
         function mudarCategoria(cat) {
             categoriaAtual = cat;
@@ -1564,8 +1978,16 @@
             if (cat === 'free') document.getElementById('tabFree')?.classList.add('active');
             if (cat === 'deals') document.getElementById('tabDeals')?.classList.add('active');
 
+            // Limpa a busca ao trocar de aba para exibir a categoria desejada
             const searchInput = document.getElementById('gameSearchInput');
             if (searchInput) searchInput.value = '';
+            const btnClear = document.getElementById('btnClearSearch');
+            if (btnClear) btnClear.style.display = 'none';
+            buscaAtiva = false;
+            ultimaBusca = '';
+
+            const btnMais = document.getElementById('btnLoadMore');
+            if (btnMais) btnMais.style.display = 'inline-flex';
 
             carregarCatalogo(cat);
         }
@@ -1767,6 +2189,21 @@
                 const precoFormatado = obterPrecoFormatado(jogo);
                 const primaryPlatform = (jogo.platforms && jogo.platforms[0]) || 'PC';
 
+                // Se não tem capa real, busca assincronamente na base global da Wikipedia
+                if (!jogo.thumb || jogo.thumb.startsWith('data:image/svg')) {
+                    buscarCapaAlternativa(jogo.title).then(capaUrl => {
+                        if (capaUrl && card) {
+                            const imgEl = card.querySelector('.game-card-img');
+                            if (imgEl) imgEl.src = capaUrl;
+                            jogo.thumb = capaUrl;
+                            const btnEval = card.querySelector('.btn-action-eval');
+                            if (btnEval) {
+                                btnEval.href = `adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodeURIComponent(capaUrl)}&genero=${encodedGenre}&plataforma=${primaryPlatform}`;
+                            }
+                        }
+                    });
+                }
+
                 card.innerHTML = `
                     <div class="game-card-media">
                         <img src="${thumbUrl}" class="game-card-img" alt="${safeTitle}" onerror="tratarErroCapa(this, '${safeTitle}')" loading="lazy" referrerpolicy="no-referrer">
@@ -1887,28 +2324,113 @@
             if (e.key === 'Escape') fecharModalLojas();
         });
 
+        /* ════════════════════════════════════════════════════════
+           MOTOR UNIVERSAL DE CAPAS ALTERNATIVAS (FALLBACK INTELIGENTE)
+           Busca dinamicamente capas de jogos em alta resolução 
+           via Wikipedia REST API e OpenSearch para qualquer jogo
+        ════════════════════════════════════════════════════════ */
+        const cacheCapasAlternativas = {};
+
+        async function buscarCapaAlternativa(titulo) {
+            if (!titulo) return null;
+            const limpo = titulo.trim();
+            if (cacheCapasAlternativas[limpo]) {
+                return cacheCapasAlternativas[limpo];
+            }
+
+            // Tentar recuperar do cache persistente do navegador
+            try {
+                const salvo = localStorage.getItem(`oc_cover_${limpo.toLowerCase()}`);
+                if (salvo) {
+                    cacheCapasAlternativas[limpo] = salvo;
+                    return salvo;
+                }
+            } catch(e) {}
+
+            // 1. Tenta resumo oficial direto na Wikipedia REST API
+            const slug = limpo.replace(/\s+/g, '_');
+            try {
+                const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const url = (data.originalimage && data.originalimage.source) || (data.thumbnail && data.thumbnail.source);
+                    if (url) {
+                        cacheCapasAlternativas[limpo] = url;
+                        try { localStorage.setItem(`oc_cover_${limpo.toLowerCase()}`, url); } catch(e) {}
+                        return url;
+                    }
+                }
+            } catch(e) {}
+
+            // 2. Se não achou com o slug direto, pesquisa via OpenSearch
+            try {
+                const termosDeBusca = [
+                    `${limpo} video game`,
+                    `${limpo} game`,
+                    limpo
+                ];
+
+                for (const termo of termosDeBusca) {
+                    const searchRes = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(termo)}&limit=3&namespace=0&format=json&origin=*`);
+                    if (searchRes.ok) {
+                        const searchData = await searchRes.json();
+                        const artigos = searchData[1] || [];
+                        for (const art of artigos) {
+                            const sumRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(art.replace(/\s+/g, '_'))}`);
+                            if (sumRes.ok) {
+                                const sumData = await sumRes.json();
+                                const url = (sumData.originalimage && sumData.originalimage.source) || (sumData.thumbnail && sumData.thumbnail.source);
+                                if (url) {
+                                    cacheCapasAlternativas[limpo] = url;
+                                    try { localStorage.setItem(`oc_cover_${limpo.toLowerCase()}`, url); } catch(e) {}
+                                    return url;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            return null;
+        }
+
         /* FALLBACKS VISUAIS */
         function gerarFallbackCapa(titulo) {
-            const seguro = (titulo || 'JOGO').substring(0, 24).replace(/[<>&"']/g, '');
+            const seguro = (titulo || 'OVERCRITIC').substring(0, 24).replace(/[<>&"']/g, '');
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215" viewBox="0 0 460 215">
                 <defs>
                     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#0a0f1d"/>
-                        <stop offset="50%" stop-color="#121829"/>
-                        <stop offset="100%" stop-color="#18233c"/>
+                        <stop offset="0%" stop-color="#080c16"/>
+                        <stop offset="50%" stop-color="#11192e"/>
+                        <stop offset="100%" stop-color="#16223d"/>
+                    </linearGradient>
+                    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#00f0ff"/>
+                        <stop offset="100%" stop-color="#9d4edd"/>
                     </linearGradient>
                 </defs>
                 <rect width="460" height="215" fill="url(#g)"/>
-                <rect x="3" y="3" width="454" height="209" fill="none" stroke="rgba(0, 240, 255, 0.3)" stroke-width="2" rx="14"/>
-                <text x="50%" y="44%" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="44">🎮</text>
-                <text x="50%" y="74%" text-anchor="middle" fill="#00f0ff" font-family="'Inter', sans-serif" font-weight="800" font-size="16">${seguro}</text>
+                <rect x="2" y="2" width="456" height="211" fill="none" stroke="url(#glow)" stroke-width="2" rx="14" opacity="0.4"/>
+                <text x="50%" y="42%" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="42">🎮</text>
+                <text x="50%" y="70%" text-anchor="middle" fill="#00f0ff" font-family="'Inter', sans-serif" font-weight="800" font-size="15" letter-spacing="1">${seguro}</text>
+                <text x="50%" y="85%" text-anchor="middle" fill="#8b9bb4" font-family="'Inter', sans-serif" font-weight="600" font-size="11">OVERCRITIC GAMES</text>
             </svg>`;
             return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
         }
 
-        function tratarErroCapa(img, titulo) {
+        async function tratarErroCapa(img, titulo) {
             img.onerror = null;
+            // Exibe o fallback elegante enquanto busca a capa na base global
             img.src = gerarFallbackCapa(titulo);
+
+            if (!titulo) return;
+
+            try {
+                const capaReal = await buscarCapaAlternativa(titulo);
+                if (capaReal && img) {
+                    img.src = capaReal;
+                }
+            } catch(e) {}
         }
     </script>
 </body>

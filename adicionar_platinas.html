@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
     <script src="js/gamerProfile.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1971,7 +1972,13 @@
         });
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
-            if (confirm('Deseja sair da sua conta?')) {
+            const sair = await showConfirm('Deseja sair da sua conta?', {
+                title: 'Encerrar Sessão',
+                confirmText: 'Sair da Conta',
+                cancelText: 'Permanecer',
+                isDanger: true
+            });
+            if (sair) {
                 if (window.sbClient) {
                     try { await window.sbClient.auth.signOut(); } catch(e) {}
                 }
@@ -1981,7 +1988,7 @@
                 atualizarDisplayUsuario();
                 renderizarFeedComunidade();
                 renderizarMinhasPlatinas();
-                mostrarToast('Você saiu da conta.', '🚪');
+                showToast.info('Você saiu da conta.');
             }
         });
 
@@ -2786,7 +2793,13 @@
         }
 
         async function excluirPlatina(id) {
-            if (!confirm('Deseja realmente remover este registro de platina?')) return;
+            const confirmou = await showConfirm('Deseja realmente remover este registro de platina?', {
+                title: 'Remover Conquista',
+                confirmText: 'Sim, Remover',
+                cancelText: 'Cancelar',
+                isDanger: true
+            });
+            if (!confirmou) return;
 
             let feed = obterFeedSalvo();
             feed = feed.filter(p => p.id !== id);
@@ -2796,7 +2809,7 @@
 
             renderizarFeedComunidade();
             renderizarMinhasPlatinas();
-            mostrarToast('Registro removido com sucesso.', '🗑️');
+            showToast.success('Registro removido com sucesso!');
         }
 
         /* ═══════════════════════════════════
@@ -2865,7 +2878,7 @@
 
         async function executarBuscaJogoFormulario() {
             const query = inputSearchApi.value.trim();
-            if (!query) return alert('Digite o nome do jogo que deseja buscar!');
+            if (!query) return showToast.warning('Digite o nome do jogo que deseja buscar!');
 
             const btn = document.getElementById('btnBuscarApi');
             btn.textContent = 'BUSCANDO...';
@@ -2876,14 +2889,14 @@
                 const data = await res.json();
 
                 if (!data || data.length === 0) {
-                    alert('Nenhum jogo encontrado na web com este nome.');
+                    showToast.error('Nenhum jogo encontrado na web com este nome.');
                     return;
                 }
 
                 preencherCamposDoJogo(data[0]);
-                mostrarToast('Dados e capa do jogo carregados!', '✨');
+                showToast.success('Dados e capa do jogo carregados!');
             } catch (err) {
-                alert('Erro ao conectar com a base de jogos. Verifique sua conexão.');
+                showToast.error('Erro ao conectar com a base de jogos. Verifique sua conexão.');
             } finally {
                 btn.textContent = 'BUSCAR CAPA & DADOS';
                 btn.disabled = false;
@@ -2976,7 +2989,7 @@
             const trophiesCount = document.getElementById('platinaTrophiesCount').value.trim() || 'Conquistas registradas';
             const notes = document.getElementById('platinaNotes').value.trim();
 
-            if (!title) return alert('Por favor, informe o nome do jogo.');
+            if (!title) return showToast.warning('Por favor, informe o nome do jogo.');
 
             if (!cover) {
                 cover = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80';
@@ -3539,7 +3552,7 @@
 
         async function buscarTrofeusJogoAoVivo() {
             const query = document.getElementById('apiLiveSearchInput').value.trim();
-            if (!query) return alert('Digite o nome de um jogo para consultar os troféus!');
+            if (!query) return showToast.warning('Digite o nome de um jogo para consultar os troféus!');
 
             const btn = document.getElementById('btnLiveSearch');
             btn.textContent = 'CONSULTANDO...';

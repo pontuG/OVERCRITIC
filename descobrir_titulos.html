@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1451,7 +1454,13 @@
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
-                    if (confirm('Deseja realmente sair da sua conta?')) {
+                    const sair = await showConfirm('Deseja realmente sair da sua conta?', {
+                        title: 'Encerrar Sessão',
+                        confirmText: 'Sair da Conta',
+                        cancelText: 'Permanecer',
+                        isDanger: true
+                    });
+                    if (sair) {
                         if (window.sbClient) {
                             try { await window.sbClient.auth.signOut(); } catch(e) {}
                         }
@@ -1459,6 +1468,7 @@
                         localStorage.removeItem('overcritic_user');
                         localStorage.removeItem('overcritic_user_email');
                         atualizarUIUsuario();
+                        showToast.info('Você saiu da sua conta.');
                     }
                 });
             }
@@ -1494,12 +1504,10 @@
             carregarCatalogo(cat);
         }
 
-        /* DETECÇÃO INTELIGENTE DE PROVEDORES PARA O BRASIL */
+        /* PROVEDORES CONFIRMADOS PARA O BRASIL */
         function estimarProvedoresBr(item, isTv, isAnime) {
             if (item.providers && item.providers.length) return item.providers;
-            if (isAnime) return ['Crunchyroll', 'Netflix'];
-            if (isTv) return ['Netflix', 'Max', 'Prime Video'];
-            return ['Cinema', 'Max', 'Prime Video', 'Netflix'];
+            return [];
         }
 
         /* CARREGAMENTO DE DADOS VIA API TMDB */
@@ -1793,11 +1801,11 @@
                 evalBtn.href = `adicionar_midias.html?titulo=${encodedTitle}&capa=${encodedPoster}&tipo=${encodedType}&genero=${encodedGenre}&ano=${encodedYear}&nota=${encodedScore}`;
             }
 
-            // Consulta provedores reais TMDB caso tenhamos o ID
-            listEl.innerHTML = `<div style="padding: 12px; color: var(--accent-cyan);">Buscando provedores oficiais no Brasil... ⏳</div>`;
+            // Consulta provedores reais TMDB exclusivos para o Brasil (BR)
+            listEl.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--accent-cyan); font-size: 0.9rem;">Buscando streamings oficiais no Brasil... ⏳</div>`;
             if (modal) modal.style.display = 'flex';
 
-            let provedoresFinais = obra.providers || ['Cinema'];
+            let brData = null;
 
             if (obra.id) {
                 try {
@@ -1806,27 +1814,16 @@
                     const res = await fetch(`https://api.themoviedb.org/3/${type}/${obra.id}/watch/providers?api_key=${apiKey}`);
                     if (res.ok) {
                         const data = await res.json();
-                        const brData = data.results?.BR;
-                        if (brData) {
-                            const found = [];
-                            if (brData.flatrate) brData.flatrate.forEach(p => found.push(p.provider_name));
-                            if (brData.free) brData.free.forEach(p => found.push(p.provider_name));
-                            if (brData.ads) brData.ads.forEach(p => found.push(p.provider_name));
-                            if (!found.length && (brData.rent || brData.buy)) {
-                                (brData.rent || brData.buy).forEach(p => found.push(`${p.provider_name} (Aluguel)`));
-                            }
-                            if (found.length) provedoresFinais = found;
-                        }
+                        brData = data.results?.BR || null;
                     }
                 } catch (e) {
                     console.warn('Erro ao consultar Watch Providers:', e);
                 }
             }
 
-            let htmlLinks = '';
-            provedoresFinais.forEach(p => {
-                const lower = p.toLowerCase();
-                let url = `https://www.google.com/search?q=onde+assistir+${encodedTitle}+${encodeURIComponent(p)}`;
+            function gerarLinkPlataforma(nome) {
+                const lower = nome.toLowerCase();
+                let url = `https://www.google.com/search?q=onde+assistir+${encodedTitle}+${encodeURIComponent(nome)}+brasil`;
                 let icon = '📺';
 
                 if (lower.includes('netflix')) {
@@ -1836,37 +1833,123 @@
                     url = `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${encodedTitle}`;
                     icon = '🔵';
                 } else if (lower.includes('max') || lower.includes('hbo')) {
-                    url = `https://play.max.com/search?q=${encodedTitle}`;
+                    url = `https://www.max.com/br/pt`;
                     icon = '🟣';
                 } else if (lower.includes('disney')) {
                     url = `https://www.disneyplus.com/search?q=${encodedTitle}`;
                     icon = '🟢';
+                } else if (lower.includes('globoplay') || lower.includes('globo')) {
+                    url = `https://globoplay.globo.com/busca/?q=${encodedTitle}`;
+                    icon = '🟡';
                 } else if (lower.includes('crunchyroll')) {
                     url = `https://www.crunchyroll.com/pt-br/search?q=${encodedTitle}`;
                     icon = '🟠';
-                } else if (lower.includes('cinema')) {
-                    url = `https://www.ingresso.com/busca?q=${encodedTitle}`;
-                    icon = '🍿';
                 } else if (lower.includes('apple')) {
                     url = `https://tv.apple.com/br/search?term=${encodedTitle}`;
                     icon = '🍎';
+                } else if (lower.includes('google play') || lower.includes('google')) {
+                    url = `https://play.google.com/store/search?q=${encodedTitle}&c=movies`;
+                    icon = '▶️';
+                } else if (lower.includes('paramount')) {
+                    url = `https://www.paramountplus.com/br/`;
+                    icon = '🔷';
+                } else if (lower.includes('claro')) {
+                    url = `https://www.clarotvmais.com.br/busca?q=${encodedTitle}`;
+                    icon = '🔴';
+                } else if (lower.includes('cinema')) {
+                    url = `https://www.ingresso.com/busca?q=${encodedTitle}`;
+                    icon = '🍿';
+                }
+                return { url, icon };
+            }
+
+            let htmlLinks = '';
+
+            if (brData) {
+                // 1. Assinatura e Gratuito
+                const assinaturaProvs = [];
+                const vistos = new Set();
+                const listaAssinatura = [...(brData.flatrate || []), ...(brData.free || []), ...(brData.ads || [])];
+
+                listaAssinatura.forEach(p => {
+                    let nome = p.provider_name;
+                    if (/hbo max amazon channel/i.test(nome)) nome = 'Max (Canal Prime)';
+                    else if (/hbo max|\bmax\b/i.test(nome)) nome = 'Max';
+                    else if (/netflix/i.test(nome)) nome = 'Netflix';
+                    else if (/disney/i.test(nome)) nome = 'Disney+';
+
+                    if (!vistos.has(nome)) {
+                        vistos.add(nome);
+                        assinaturaProvs.push({ name: nome });
+                    }
+                });
+
+                if (assinaturaProvs.length > 0) {
+                    htmlLinks += `<div style="font-size: 0.78rem; font-weight: 700; color: #00f0ff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">🟢 Por Assinatura / Incluso no Brasil:</div>`;
+                    assinaturaProvs.forEach(p => {
+                        const { url, icon } = gerarLinkPlataforma(p.name);
+                        htmlLinks += `
+                            <a href="${url}" target="_blank" rel="noopener noreferrer" class="watch-link-row">
+                                <span>${icon} <strong>${p.name}</strong></span>
+                                <span>Acessar Plataforma ↗</span>
+                            </a>
+                        `;
+                    });
                 }
 
-                htmlLinks += `
-                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="watch-link-row">
-                        <span>${icon} <strong>${p}</strong></span>
-                        <span>Acessar Plataforma ↗</span>
-                    </a>
-                `;
-            });
+                // 2. Aluguel ou Compra Digital
+                const aluguelCompra = [];
+                const vistosAluguel = new Set();
+                const listaAluguel = [...(brData.rent || []), ...(brData.buy || [])];
 
-            if (!htmlLinks) {
+                listaAluguel.forEach(p => {
+                    let nome = p.provider_name;
+                    if (!vistos.has(nome) && !vistosAluguel.has(nome)) {
+                        vistosAluguel.add(nome);
+                        aluguelCompra.push(nome);
+                    }
+                });
+
+                if (aluguelCompra.length > 0) {
+                    htmlLinks += `<div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin: 14px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">💳 Disponível para Aluguel ou Compra Digital:</div>`;
+                    aluguelCompra.forEach(p => {
+                        const { url, icon } = gerarLinkPlataforma(p);
+                        htmlLinks += `
+                            <a href="${url}" target="_blank" rel="noopener noreferrer" class="watch-link-row" style="opacity: 0.9;">
+                                <span>${icon} <strong>${p}</strong></span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">Alugar / Comprar ↗</span>
+                            </a>
+                        `;
+                    });
+                }
+
+                // Link direto para a página do JustWatch / TMDB com o status atualizado no Brasil
+                if (brData.link) {
+                    htmlLinks += `
+                        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: center;">
+                            <a href="${brData.link}" target="_blank" rel="noopener noreferrer" style="color: #fbc500; font-size: 0.8rem; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                                <span>⚡ Ver catálogo e preços no JustWatch Brasil ↗</span>
+                            </a>
+                        </div>
+                    `;
+                }
+            } else {
                 htmlLinks = `
-                    <div style="padding: 10px; color: var(--text-muted); font-size: 0.85rem;">
-                        Não listado nos streamings por assinatura atualmente. Verifique em salas de cinema ou mídias digitais.
+                    <div style="padding: 16px; text-align: center; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 10px;">
+                        <div style="font-size: 1.6rem; margin-bottom: 6px;">🇧🇷</div>
+                        <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 4px;">Nenhum streaming por assinatura confirmado no Brasil</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">O título pode estar em cartaz nos cinemas, em mídia física ou em transição de direitos.</div>
                     </div>
                 `;
             }
+
+            // Atalho de verificação rápida no Google Brasil
+            htmlLinks += `
+                <a href="https://www.google.com/search?q=onde+assistir+${encodedTitle}+no+brasil" target="_blank" rel="noopener noreferrer" class="watch-link-row" style="border-style: dashed; margin-top: 8px;">
+                    <span>🔍 <strong>Buscar onde assistir no Google Brasil</strong></span>
+                    <span>Pesquisar ↗</span>
+                </a>
+            `;
 
             listEl.innerHTML = htmlLinks;
         }
