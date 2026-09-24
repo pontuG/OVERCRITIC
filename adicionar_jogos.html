@@ -15,6 +15,8 @@
     <script src="js/apiClient.js"></script>
     <script src="js/gamerProfile.js"></script>
     <script src="js/notifications.js"></script>
+    <script src="js/version.js"></script>
+    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -2050,15 +2052,47 @@
         });
 
         /* ═══════════════════════════════════
-           PERSISTÊNCIA (localStorage)
+           PERSISTÊNCIA (localStorage) & ISOLAMENTO POR USUÁRIO
         ═══════════════════════════════════ */
         const STORAGE_KEY = 'overcritic_reviews';
 
+        function obterUsuarioAtualLogado() {
+            return (localStorage.getItem('overcritic_currentUser') || '').trim();
+        }
+
         function obterJogosSalvos() {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY))
-                || JSON.parse(localStorage.getItem('overcritic_jogos'))
-                || JSON.parse(localStorage.getItem('overclock_jogos'))
-                || [];
+            const currentUser = obterUsuarioAtualLogado().toLowerCase();
+            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const isLogged = currentUser && currentUser !== 'visitante';
+
+            const raw = localStorage.getItem(STORAGE_KEY)
+                     || localStorage.getItem('overcritic_jogos')
+                     || localStorage.getItem('overclock_jogos');
+            if (!raw) return [];
+
+            try {
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return [];
+
+                // Filtra apenas jogos do usuário atual e remove seeds/mocks
+                return parsed.filter(j => {
+                    if (!j) return false;
+                    const isSeed = j.id && (j.id === 101 || j.id === 102 || j.id === 103 || j.id === 104 || j.id === 105);
+                    if (isSeed) return false;
+
+                    if (!isLogged) {
+                        // Se visitante, mantém apenas o que foi cadastrado localmente como Visitante/Anônimo
+                        const dono = (j.autor || '').toLowerCase();
+                        return dono === 'visitante' || dono === 'anônimo' || dono === 'anonimo';
+                    }
+
+                    const dono = (j.autor || '').toLowerCase();
+                    const uid = j.userId || j.user_id;
+                    return (uid && uid === currentUid) || (dono && dono === currentUser);
+                });
+            } catch(e) {
+                return [];
+            }
         }
 
         function salvarJogos(lista) {
@@ -2112,30 +2146,48 @@
 
         async function sincronizarJogosSupabase() {
             if (!window.sbClient) return;
+
+            const currentUser = obterUsuarioAtualLogado();
+            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const isLogged = currentUser && currentUser.toLowerCase() !== 'visitante';
+
+            // Visitantes não herdam análises da nuvem
+            if (!isLogged) {
+                renderizarCriticas();
+                return;
+            }
+
             try {
-                const { data, error } = await window.sbClient
-                    .from('reviews_jogos')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                // Busca no Supabase EXCLUSIVAMENTE as análises pertencentes ao usuário logado
+                let query = window.sbClient.from('reviews_jogos').select('*');
+                if (currentUid) {
+                    query = query.or(`user_id.eq.${currentUid},autor.ilike.${currentUser}`);
+                } else {
+                    query = query.ilike('autor', currentUser);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
 
                 if (error) {
-                    console.info('ℹ️ [Supabase] Tabela reviews_jogos ainda não encontrada ou inicializando:', error.message);
+                    console.info('ℹ️ [Supabase]', error.message);
                     return;
                 }
 
-                if (data && data.length > 0) {
-                    const jogosSupabase = data.map(mapSupabaseParaJogo);
+                if (data) {
+                    const jogosNuvem = data.map(mapSupabaseParaJogo);
                     const mapa = new Map();
-                    jogosSupabase.forEach(j => mapa.set(j.id, j));
+                    jogosNuvem.forEach(j => mapa.set(j.id, j));
+
+                    // Mescla apenas com análises locais que sejam do mesmo usuário
                     const locais = obterJogosSalvos();
                     locais.forEach(j => {
                         if (!mapa.has(j.id)) mapa.set(j.id, j);
                     });
+
                     const listaConsolidada = Array.from(mapa.values());
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(listaConsolidada));
-                    localStorage.setItem('overcritic_jogos', JSON.stringify(listaConsolidada));
+                    salvarJogos(listaConsolidada);
                     renderizarCriticas();
-                    console.log('⚡ [Supabase] ' + data.length + ' análises sincronizadas da nuvem!');
+                    console.log('⚡ [Supabase] ' + listaConsolidada.length + ' análises pessoais sincronizadas!');
                 }
             } catch (err) {
                 console.warn('Erro ao conectar com Supabase:', err);
@@ -2724,13 +2776,15 @@
             const salvo = localStorage.getItem(QUICK_STORAGE_KEY);
             if (salvo) {
                 try {
-                    return JSON.parse(salvo);
+                    const parsed = JSON.parse(salvo);
+                    if (Array.isArray(parsed)) {
+                        return parsed.filter(item => item && item.id > 105);
+                    }
                 } catch (e) {
                     console.error('Erro ao ler avaliações rápidas:', e);
                 }
             }
-            localStorage.setItem(QUICK_STORAGE_KEY, JSON.stringify(SEED_QUICK_REVIEWS));
-            return SEED_QUICK_REVIEWS;
+            return [];
         }
 
         function salvarAvaliacoesRapidas(lista) {

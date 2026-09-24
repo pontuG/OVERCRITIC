@@ -15,6 +15,8 @@
     <script src="js/apiClient.js"></script>
     <script src="js/gamerProfile.js"></script>
     <script src="js/notifications.js"></script>
+    <script src="js/version.js"></script>
+    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -1694,66 +1696,167 @@
             requestAnimationFrame(step);
         }
 
-        // Stats loader & real-time sync
-        function carregarEstatisticas() {
-            // 1. Jogos
-            let countJogos = 0;
+        // ════════════════════════════════════════════════════════
+        // EXPURGO DE DADOS SEED E HIGIENIZAÇÃO DE CADASTROS INDEVIDOS
+        // ════════════════════════════════════════════════════════
+        function higienizarCadastrosLocais() {
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || '').trim();
+            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const isLogged = currentUser && currentUser.toLowerCase() !== 'visitante';
+
+            // 1. Limpeza de Mídias (remover seed-1, seed-2, etc. e itens de outros usuários)
             try {
-                const rawJogos = localStorage.getItem('overcritic_reviews') 
-                              || localStorage.getItem('overcritic_jogos') 
-                              || localStorage.getItem('overclock_jogos');
+                const rawMidias = localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias');
+                if (rawMidias) {
+                    const parsed = JSON.parse(rawMidias);
+                    if (Array.isArray(parsed)) {
+                        const limpas = parsed.filter(m => {
+                            if (!m) return false;
+                            const isSeed = typeof m.id === 'string' && m.id.startsWith('seed-');
+                            if (isSeed) return false;
+                            if (isLogged) {
+                                const dono = (m.autor || '').toLowerCase();
+                                const uid = m.userId || m.user_id;
+                                return (uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase());
+                            }
+                            return false;
+                        });
+                        localStorage.setItem('OVERCRITIC_MIDIAS', JSON.stringify(limpas));
+                        localStorage.setItem('overcritic_midias', JSON.stringify(limpas));
+                    }
+                } else if (!isLogged) {
+                    localStorage.setItem('OVERCRITIC_MIDIAS', JSON.stringify([]));
+                    localStorage.setItem('overcritic_midias', JSON.stringify([]));
+                }
+            } catch(e) {}
+
+            // 2. Limpeza de Jogos (remover seeds e itens de outros)
+            try {
+                const rawJogos = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos');
                 if (rawJogos) {
                     const parsed = JSON.parse(rawJogos);
-                    if (Array.isArray(parsed)) countJogos = parsed.length;
+                    if (Array.isArray(parsed)) {
+                        const limpos = parsed.filter(j => {
+                            if (!j) return false;
+                            const isSeed = j.id && (j.id === 101 || j.id === 102 || j.id === 103 || j.id === 104 || j.id === 105);
+                            if (isSeed) return false;
+                            if (isLogged) {
+                                const dono = (j.autor || '').toLowerCase();
+                                const uid = j.userId || j.user_id;
+                                return (uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase());
+                            }
+                            return false;
+                        });
+                        localStorage.setItem('overcritic_reviews', JSON.stringify(limpos));
+                        localStorage.setItem('overcritic_jogos', JSON.stringify(limpos));
+                    }
+                } else if (!isLogged) {
+                    localStorage.setItem('overcritic_reviews', JSON.stringify([]));
+                    localStorage.setItem('overcritic_jogos', JSON.stringify([]));
+                }
+            } catch(e) {}
+
+            // 3. Limpeza de Platinas Pessoais (remover plat_seed_ e separar do feed comunitário)
+            try {
+                const rawPlats = localStorage.getItem('overcritic_minhas_platinas') 
+                              || localStorage.getItem('overcritic_platinas_feed') 
+                              || localStorage.getItem('overcritic_platinas');
+                if (rawPlats) {
+                    const parsed = JSON.parse(rawPlats);
+                    if (Array.isArray(parsed)) {
+                        const limpas = parsed.filter(p => {
+                            if (!p) return false;
+                            const isSeed = typeof p.id === 'string' && p.id.startsWith('plat_seed_');
+                            if (isSeed) return false;
+                            if (isLogged) {
+                                const dono = (p.user || p.usuario || '').toLowerCase();
+                                const uid = p.userId || p.user_id;
+                                return (uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase());
+                            }
+                            return false;
+                        });
+                        localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(limpas));
+                    }
+                } else if (!isLogged) {
+                    localStorage.setItem('overcritic_minhas_platinas', JSON.stringify([]));
+                }
+            } catch(e) {}
+        }
+
+        // Stats loader & real-time sync (Apenas dados REAIS do usuário logado)
+        function carregarEstatisticas() {
+            higienizarCadastrosLocais();
+
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || '').trim();
+            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const estaLogado = currentUser && currentUser.toLowerCase() !== 'visitante';
+
+            // Se for novo usuário ou visitante não autenticado, zerar estatísticas pessoais
+            if (!estaLogado) {
+                animarNumero('statJogos', 0);
+                animarNumero('statMidias', 0);
+                animarNumero('statPlatinas', 0);
+                return;
+            }
+
+            // 1. Jogos do usuário
+            let countJogos = 0;
+            try {
+                const rawJogos = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos');
+                if (rawJogos) {
+                    const parsed = JSON.parse(rawJogos);
+                    if (Array.isArray(parsed)) {
+                        const meus = parsed.filter(j => {
+                            const dono = (j.autor || '').toLowerCase();
+                            const uid = j.userId || j.user_id;
+                            const isSeed = j.id && (j.id === 101 || j.id === 102 || j.id === 103 || j.id === 104 || j.id === 105);
+                            return !isSeed && ((uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase()));
+                        });
+                        countJogos = meus.length;
+                    }
                 }
             } catch (e) {
                 console.error('Erro ao ler estatísticas de jogos:', e);
             }
 
-            // 2. Mídias (Filmes / Séries)
+            // 2. Mídias do usuário
             let countMidias = 0;
             try {
-                const rawMidias = localStorage.getItem('OVERCRITIC_MIDIAS') 
-                               || localStorage.getItem('overcritic_midias') 
-                               || localStorage.getItem('overclock_midias');
+                const rawMidias = localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias');
                 if (rawMidias) {
                     const parsed = JSON.parse(rawMidias);
-                    if (Array.isArray(parsed)) countMidias = parsed.length;
-                } else {
-                    // Seed padrão de adicionar_midias.html possui 4 itens
-                    countMidias = 4;
+                    if (Array.isArray(parsed)) {
+                        const minhas = parsed.filter(m => {
+                            const dono = (m.autor || '').toLowerCase();
+                            const uid = m.userId || m.user_id;
+                            const isSeed = typeof m.id === 'string' && m.id.startsWith('seed-');
+                            return !isSeed && ((uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase()));
+                        });
+                        countMidias = minhas.length;
+                    }
                 }
             } catch (e) {
                 console.error('Erro ao ler estatísticas de mídias:', e);
             }
 
-            // 3. Platinas
+            // 3. Platinas do usuário
             let countPlatinas = 0;
             try {
-                const chaves = ['overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'overcritic_minhas_platinas'];
-                let listaPlatinas = null;
-                for (const k of chaves) {
-                    const raw = localStorage.getItem(k);
-                    if (raw) {
-                        try {
-                            const parsed = JSON.parse(raw);
-                            if (Array.isArray(parsed) && parsed.length > 0) {
-                                listaPlatinas = parsed;
-                                break;
-                            }
-                        } catch (err) {}
+                const rawPlats = localStorage.getItem('overcritic_minhas_platinas');
+                if (rawPlats) {
+                    const parsed = JSON.parse(rawPlats);
+                    if (Array.isArray(parsed)) {
+                        const minhas = parsed.filter(p => {
+                            const dono = (p.user || p.usuario || '').toLowerCase();
+                            const uid = p.userId || p.user_id;
+                            const isSeed = typeof p.id === 'string' && p.id.startsWith('plat_seed_');
+                            return !isSeed && ((uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase()));
+                        });
+                        countPlatinas = minhas.length;
                     }
-                }
-
-                if (listaPlatinas && listaPlatinas.length > 0) {
-                    countPlatinas = listaPlatinas.length;
-                } else {
-                    // Seed inicial (2 platinas padrão no feed)
-                    countPlatinas = 2;
                 }
             } catch (e) {
                 console.error('Erro ao ler estatísticas de platinas:', e);
-                countPlatinas = 2;
             }
 
             animarNumero('statJogos', countJogos);
@@ -1763,14 +1866,51 @@
 
         async function sincronizarEstatisticasSupabase() {
             if (!window.sbClient) return;
+
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || '').trim();
+            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const estaLogado = currentUser && currentUser.toLowerCase() !== 'visitante';
+
+            if (!estaLogado) {
+                animarNumero('statJogos', 0);
+                animarNumero('statMidias', 0);
+                animarNumero('statPlatinas', 0);
+                return;
+            }
+
             try {
-                const { count, error } = await window.sbClient
-                    .from('reviews_jogos')
-                    .select('*', { count: 'exact', head: true });
-                if (!error && typeof count === 'number' && count > 0) {
-                    animarNumero('statJogos', count);
+                // 1. Jogos do usuário logado na nuvem
+                let queryJogos = window.sbClient.from('reviews_jogos').select('*', { count: 'exact', head: true });
+                if (currentUid) {
+                    queryJogos = queryJogos.or(`user_id.eq.${currentUid},autor.ilike.${currentUser}`);
+                } else {
+                    queryJogos = queryJogos.ilike('autor', currentUser);
                 }
-            } catch (e) {}
+                const { count: cJogos, error: errJ } = await queryJogos;
+                if (!errJ && typeof cJogos === 'number') animarNumero('statJogos', cJogos);
+
+                // 2. Mídias do usuário logado na nuvem
+                let queryMidias = window.sbClient.from('reviews_midias').select('*', { count: 'exact', head: true });
+                if (currentUid) {
+                    queryMidias = queryMidias.or(`user_id.eq.${currentUid},autor.ilike.${currentUser}`);
+                } else {
+                    queryMidias = queryMidias.ilike('autor', currentUser);
+                }
+                const { count: cMidias, error: errM } = await queryMidias;
+                if (!errM && typeof cMidias === 'number') animarNumero('statMidias', cMidias);
+
+                // 3. Platinas do usuário logado na nuvem
+                let queryPlatinas = window.sbClient.from('platinas').select('*', { count: 'exact', head: true });
+                if (currentUid) {
+                    queryPlatinas = queryPlatinas.or(`user_id.eq.${currentUid},usuario.ilike.${currentUser}`);
+                } else {
+                    queryPlatinas = queryPlatinas.ilike('usuario', currentUser);
+                }
+                const { count: cPlatinas, error: errP } = await queryPlatinas;
+                if (!errP && typeof cPlatinas === 'number') animarNumero('statPlatinas', cPlatinas);
+            } catch (e) {
+                console.warn('Erro ao sincronizar estatísticas pessoais do Supabase:', e);
+            }
         }
 
         // Sincronização em tempo real (mudança de abas, retorno pelo histórico ou alteração de storage)

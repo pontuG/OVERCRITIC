@@ -14,6 +14,8 @@
     <script src="supabaseClient.js"></script>
     <script src="js/gamerProfile.js"></script>
     <script src="js/notifications.js"></script>
+    <script src="js/version.js"></script>
+    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -1832,73 +1834,8 @@
             }
         }
 
-        // Dados Iniciais de Demonstração (caso o localStorage esteja vazio)
-        const SEED_DATA = [
-            {
-                id: "seed-1",
-                title: "Interestelar",
-                type: "Filme",
-                year: "2014",
-                genres: "Ficção Científica, Drama, Aventura",
-                keywords: "#Espaço, #Nolan, #ObraPrima",
-                internetRating: "8.7 / 10 (TMDB)",
-                platform: "Max",
-                duration: "2h 49m",
-                status: "Assistido",
-                myRating: 10,
-                review: "Uma das experiências cinematográficas mais grandiosas do século. Trilha sonora inesquecível de Hans Zimmer e um peso dramático sem precedentes sobre o tempo e o amor.",
-                coverUrl: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: "seed-2",
-                title: "Breaking Bad",
-                type: "Série",
-                year: "2008",
-                genres: "Crime, Drama, Suspense",
-                keywords: "#WalterWhite, #ObraPrima, #Maratona",
-                internetRating: "8.9 / 10 (TMDB)",
-                platform: "Netflix",
-                duration: "5 Temporadas (62 eps)",
-                status: "Assistido",
-                myRating: 10,
-                review: "Roteiro perfeito do primeiro ao último segundo. O arco de transformação de Walter White em Heisenberg é a aula definitiva de construção de personagem.",
-                coverUrl: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: "seed-3",
-                title: "Attack on Titan (Shingeki no Kyojin)",
-                type: "Anime",
-                year: "2013",
-                genres: "Ação, Fantasia, Suspense",
-                keywords: "#Shounen, #PlotTwist, #Anime",
-                internetRating: "8.6 / 10 (TMDB)",
-                platform: "Crunchyroll",
-                duration: "4 Temporadas (89 eps)",
-                status: "Assistido",
-                myRating: 9.5,
-                review: "Narrativa implacável, reviravoltas inacreditáveis e animação soberba pelo WIT Studio e MAPPA. Um marco da história da animação japonesa.",
-                coverUrl: "https://image.tmdb.org/t/p/w500/8C5LL4k9aIagGhyJkK80e980L1n.jpg",
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: "seed-4",
-                title: "Duna: Parte 2",
-                type: "Filme",
-                year: "2024",
-                genres: "Ficção Científica, Aventura",
-                keywords: "#Cinema, #DenisVilleneuve, #Épico",
-                internetRating: "8.5 / 10 (TMDB)",
-                platform: "Cinema",
-                duration: "2h 46m",
-                status: "Assistido",
-                myRating: 9.5,
-                review: "Visualmente arrebatador e som épico que estremece a sala. A consolidação definitiva de Denis Villeneuve no panteão dos grandes cineastas de ficção.",
-                coverUrl: "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg",
-                createdAt: new Date().toISOString()
-            }
-        ];
+        // Dados Iniciais: lista vazia para novos usuários / visitantes
+        const SEED_DATA = [];
 
         // ═══════════════════════════════════
         // BUSCA EM TEMPO REAL & AUTOCOMPLETE
@@ -2286,39 +2223,60 @@
             };
         }
 
+        function obterUsuarioAtualLogado() {
+            return (localStorage.getItem('overcritic_currentUser') || '').trim();
+        }
+
         async function sincronizarMidiasSupabase() {
             if (!window.sbClient) return;
+
+            const currentUser = obterUsuarioAtualLogado();
+            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const isLogged = currentUser && currentUser.toLowerCase() !== 'visitante';
+
+            // Visitantes não herdam análises da nuvem
+            if (!isLogged) {
+                atualizarEstatisticas();
+                filtrarReviews();
+                return;
+            }
+
             try {
-                const { data, error } = await window.sbClient
-                    .from('reviews_midias')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                // Busca no Supabase EXCLUSIVAMENTE as mídias pertencentes ao usuário logado
+                let query = window.sbClient.from('reviews_midias').select('*');
+                if (currentUid && currentUser) {
+                    query = query.or(`user_id.eq.${currentUid},autor.ilike.${currentUser}`);
+                } else if (currentUid) {
+                    query = query.eq('user_id', currentUid);
+                } else if (currentUser) {
+                    query = query.ilike('autor', currentUser);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
 
                 if (error) {
                     console.info('ℹ️ [Supabase Midias]', error.message);
                     return;
                 }
 
-                if (data && data.length > 0) {
-                    const midiasNuvem = data.map(mapSupabaseParaMidia);
-                    const mapa = new Map();
-                    midiasNuvem.forEach(m => mapa.set(String(m.id), m));
-                    
-                    const locais = obterReviews();
-                    locais.forEach(m => {
-                        const chave = String(m.id).replace(/\D/g, '');
-                        if (!mapa.has(chave) && !mapa.has(String(m.id))) {
-                            mapa.set(String(m.id), m);
-                        }
-                    });
+                const midiasNuvem = (data || []).map(mapSupabaseParaMidia);
+                const mapa = new Map();
+                midiasNuvem.forEach(m => mapa.set(String(m.id), m));
+                
+                const locais = obterReviews();
+                locais.forEach(m => {
+                    const chave = String(m.id).replace(/\D/g, '');
+                    if (!mapa.has(chave) && !mapa.has(String(m.id))) {
+                        mapa.set(String(m.id), m);
+                    }
+                });
 
-                    const listaConsolidada = Array.from(mapa.values());
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(listaConsolidada));
-                    localStorage.setItem('overcritic_midias', JSON.stringify(listaConsolidada));
-                    atualizarEstatisticas();
-                    filtrarReviews();
-                    console.log('⚡ [Supabase] ' + data.length + ' mídias sincronizadas da nuvem!');
-                }
+                const listaConsolidada = Array.from(mapa.values());
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(listaConsolidada));
+                localStorage.setItem('overcritic_midias', JSON.stringify(listaConsolidada));
+                atualizarEstatisticas();
+                filtrarReviews();
+                console.log('⚡ [Supabase] ' + listaConsolidada.length + ' mídias do usuário sincronizadas!');
             } catch(e) {
                 console.warn('Erro ao conectar com Supabase Midias:', e);
             }
@@ -2358,14 +2316,32 @@
         }
 
         function obterReviews() {
-            const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('overcritic_midias');
-            if (!data) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_DATA));
-                localStorage.setItem('overcritic_midias', JSON.stringify(SEED_DATA));
-                return SEED_DATA;
-            }
+            const currentUser = obterUsuarioAtualLogado().toLowerCase();
+            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const isLogged = currentUser && currentUser !== 'visitante';
+
+            const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('overcritic_midias');
+            if (!raw) return [];
+
             try {
-                return JSON.parse(data);
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return [];
+
+                // Expurgar seeds legadas e cadastros de terceiros
+                return parsed.filter(m => {
+                    if (!m) return false;
+                    const strId = String(m.id || '');
+                    if (strId.startsWith('seed-')) return false;
+
+                    if (!isLogged) {
+                        const dono = (m.autor || '').toLowerCase();
+                        return dono === 'visitante' || dono === 'anônimo' || dono === 'anonimo';
+                    }
+
+                    const dono = (m.autor || '').toLowerCase();
+                    const uid = m.userId || m.user_id;
+                    return (uid && uid === currentUid) || (dono && dono === currentUser);
+                });
             } catch (e) {
                 return [];
             }

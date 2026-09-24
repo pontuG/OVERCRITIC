@@ -13,6 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
     <script src="js/notifications.js"></script>
+    <script src="js/version.js"></script>
+    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -327,6 +329,91 @@
         .search-box-wrapper input:focus {
             border-color: var(--accent-cyan);
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+
+        /* DROPDOWN DE SUGESTÕES EM TEMPO REAL */
+        .title-suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(12, 16, 26, 0.98);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 14px;
+            margin-top: 8px;
+            max-height: 380px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.85);
+            display: none;
+        }
+
+        body.light-mode .title-suggestions-dropdown {
+            background: #ffffff;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .title-sugg-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s ease;
+        }
+
+        body.light-mode .title-sugg-item {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .title-sugg-item:hover, .title-sugg-item.active {
+            background: rgba(0, 240, 255, 0.12);
+        }
+
+        .title-sugg-img {
+            width: 38px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background: #111;
+        }
+
+        .title-sugg-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .title-sugg-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .title-sugg-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .title-sugg-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent-cyan);
         }
 
         .search-icon-fixed {
@@ -1220,8 +1307,9 @@
             <div class="hero-actions">
                 <div class="search-box-wrapper">
                     <span class="search-icon-fixed">🔍</span>
-                    <input type="text" id="titleSearchInput" placeholder="Buscar filmes, séries, animes..."
-                        oninput="tratarBuscaEmTempoReal()">
+                    <input type="text" id="titleSearchInput" placeholder="Buscar filmes, séries, animes ou siglas (ex: GOT, AOT, TLOU, Duna)..."
+                        autocomplete="off" oninput="tratarBuscaEmTempoRealComSugestoes(this.value)">
+                    <div class="title-suggestions-dropdown" id="titleSuggestionsDropdown"></div>
                 </div>
                 <button type="button" class="btn-live-search" onclick="executarBuscaTmdbOnline()"
                     title="Buscar catálogo global TMDB">
@@ -1278,6 +1366,10 @@
                     onclick="filtrarProvedor('Disney+')">🟢 Disney+</button>
                 <button class="plat-chip-btn" id="chipCrunchyroll" data-prov="Crunchyroll"
                     onclick="filtrarProvedor('Crunchyroll')">🟠 Crunchyroll</button>
+                <button class="plat-chip-btn" id="chipParamount" data-prov="Paramount+"
+                    onclick="filtrarProvedor('Paramount+')">🔷 Paramount+</button>
+                <button class="plat-chip-btn" id="chipApple" data-prov="Apple TV+"
+                    onclick="filtrarProvedor('Apple TV+')">🍎 Apple TV+</button>
             </div>
         </div>
 
@@ -1360,48 +1452,388 @@
         }
 
         /* ═══════════════════════════════════
+           DICIONÁRIO DE SIGLAS E ABREVIAÇÕES DE FILMES & SÉRIES
+        ═══════════════════════════════════ */
+        const MAPA_SIGLAS_TITULOS = {
+            'got': 'Game of Thrones',
+            'game of thrones': 'Game of Thrones',
+            'aot': 'Attack on Titan (Shingeki no Kyojin)',
+            'snk': 'Attack on Titan (Shingeki no Kyojin)',
+            'shingeki': 'Attack on Titan (Shingeki no Kyojin)',
+            'tlou': 'The Last of Us',
+            'last of us': 'The Last of Us',
+            'the last of us': 'The Last of Us',
+            'bb': 'Breaking Bad',
+            'breaking bad': 'Breaking Bad',
+            'bcs': 'Better Call Saul',
+            'better call saul': 'Better Call Saul',
+            'st': 'Stranger Things',
+            'stranger': 'Stranger Things',
+            'stranger things': 'Stranger Things',
+            'ds': 'Demon Slayer: Kimetsu no Yaiba',
+            'kny': 'Demon Slayer: Kimetsu no Yaiba',
+            'demon slayer': 'Demon Slayer: Kimetsu no Yaiba',
+            'jjk': 'Jujutsu Kaisen',
+            'jujutsu': 'Jujutsu Kaisen',
+            'op': 'One Piece',
+            'one piece': 'One Piece',
+            'dp': 'Deadpool & Wolverine',
+            'dp3': 'Deadpool & Wolverine',
+            'deadpool': 'Deadpool & Wolverine',
+            'duna': 'Duna: Parte 2',
+            'duna 2': 'Duna: Parte 2',
+            'dune': 'Duna: Parte 2',
+            'dune 2': 'Duna: Parte 2',
+            'venom': 'Venom: A Última Rodada',
+            'venom 3': 'Venom: A Última Rodada',
+            'oppen': 'Oppenheimer',
+            'oppenheimer': 'Oppenheimer',
+            'inter': 'Interestelar',
+            'interestelar': 'Interestelar',
+            'interstellar': 'Interestelar',
+            'the boys': 'The Boys',
+            'boys': 'The Boys',
+            'the bear': 'O Urso (The Bear)',
+            'bear': 'O Urso (The Bear)',
+            'o urso': 'O Urso (The Bear)',
+            'arcane': 'Arcane',
+            'succession': 'Succession',
+            'gladiador': 'Gladiador 2',
+            'gladiador 2': 'Gladiador 2',
+            'gladiator': 'Gladiador 2',
+            'wicked': 'Wicked',
+            'moana': 'Moana 2',
+            'moana 2': 'Moana 2',
+            'sonic': 'Sonic 3: O Filme',
+            'sonic 3': 'Sonic 3: O Filme',
+            'ainda estou aqui': 'Ainda Estou Aqui',
+            'aea': 'Ainda Estou Aqui',
+            'auto da compadecida': 'O Auto da Compadecida 2',
+            'auto da compadecida 2': 'O Auto da Compadecida 2'
+        };
+
+        /* ═══════════════════════════════════
            CATÁLOGO ESTENDIDO DE CONTINGÊNCIA (OFFLINE / FALLBACK ROBUSTO)
         ═══════════════════════════════════ */
         const CATALOGO_ESTENDIDO = {
             trending: [
-                { id: 693134, title: "Duna: Parte 2", type: "Filme", year: "2024", genre: "Ficção Científica, Aventura", score: "8.5", badge: "🔥 EM ALTA", poster: "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg", overview: "Paul Atreides se une a Chani e aos Fremen enquanto busca vingança contra os conspiradores que destruíram sua família.", providers: ["Max", "Cinema", "Prime Video"] },
-                { id: 94605, title: "Arcane", type: "Série", year: "2024", genre: "Animação, Ficção Científica", score: "8.8", badge: "🏆 ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/abf8tHznhSvl9BAElD2cQYRrQI2.jpg", overview: "Em meio ao conflito entre as cidades-gêmeas de Piltover e Zaun, duas irmãs lutam em lados opostos de uma guerra entre tecnologias mágicas e convicções incompatíveis.", providers: ["Netflix"] },
-                { id: 157336, title: "Interestelar", type: "Filme", year: "2014", genre: "Ficção Científica, Drama", score: "8.7", badge: "OBRA-PRIMA", poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", overview: "Um grupo de astronautas viaja através de um buraco de minhoca no espaço à procura de um novo lar para a humanidade.", providers: ["Max", "Prime Video", "Apple TV+"] },
-                { id: 1399, title: "Game of Thrones", type: "Série", year: "2011", genre: "Drama, Fantasia", score: "8.5", badge: "FENÔMENO", poster: "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg", overview: "Nove famílias nobres lutam pelo controle das terras místicas de Westeros, enquanto um antigo inimigo retorna após estar adormecido por milênios.", providers: ["Max"] },
-                { id: 1429, title: "Attack on Titan (Shingeki no Kyojin)", type: "Anime", year: "2013", genre: "Anime, Fantasia, Ação", score: "8.7", badge: "⛩️ TOP ANIME", poster: "https://image.tmdb.org/t/p/w500/8C5LL4k9aIagGhyJkK80e980L1n.jpg", overview: "Após sua cidade natal ser destruída e sua mãe ser morta, o jovem Eren Jaeger jura limpar a terra de todos os Titãs gigantes que levaram a humanidade à beira da extinção.", providers: ["Crunchyroll", "Netflix"] },
-                { id: 872585, title: "Oppenheimer", type: "Filme", year: "2023", genre: "Drama, História", score: "8.9", badge: "🏆 7 OSCARS", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", overview: "A história do físico americano J. Robert Oppenheimer, seu papel no Projeto Manhattan e no desenvolvimento da primeira bomba atômica.", providers: ["Prime Video", "Telecine", "Apple TV+"] },
-                { id: 100088, title: "The Last of Us", type: "Série", year: "2023", genre: "Drama, Sci-Fi", score: "8.6", badge: "RECORDISTA", poster: "https://image.tmdb.org/t/p/w500/uKvVjK19szUZRsPAHgvKiLsqGQ4.jpg", overview: "20 anos após a destruição da civilização moderna, Joel, um sobrevivente experiente, é contratado para contrabandear Ellie, uma jovem de 14 anos, para fora de uma zona de quarentena opressiva.", providers: ["Max"] },
-                { id: 912649, title: "Venom: A Última Rodada", type: "Filme", year: "2024", genre: "Ação, Ficção Científica", score: "7.8", badge: "POPULAR", poster: "https://image.tmdb.org/t/p/w500/aos8Vh1w918mU99w6nN7Z5sT6h6.jpg", overview: "Eddie e Venom estão em fuga. Caçados por ambos os seus mundos e com a rede se fechando, a dupla é forçada a tomar uma decisão devastadora.", providers: ["Max", "Prime Video", "Cinema"] }
+                { id: 693134, title: "Duna: Parte 2", type: "Filme", release_date: "2024-03-01", year: "2024", genre: "Ficção Científica, Aventura", score: "8.5", badge: "🔥 EM ALTA", poster: "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg", overview: "Paul Atreides se une a Chani e aos Fremen enquanto busca vingança contra os conspiradores que destruíram sua família.", providers: ["Max", "Prime Video", "Apple TV+"] },
+                { id: 94605, title: "Arcane", type: "Série", release_date: "2024-11-09", year: "2024", genre: "Animação, Ficção Científica", score: "8.8", badge: "🏆 ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/m3Tzf6k537PnhOEwaSRNCSxedLS.jpg", overview: "Em meio ao conflito entre as cidades-gêmeas de Piltover e Zaun, duas irmãs lutam em lados opostos de uma guerra entre tecnologias mágicas e convicções incompatíveis.", providers: ["Netflix"] },
+                { id: 157336, title: "Interestelar", type: "Filme", release_date: "2014-11-05", year: "2014", genre: "Ficção Científica, Drama", score: "8.7", badge: "OBRA-PRIMA", poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", overview: "Um grupo de astronautas viaja através de um buraco de minhoca no espaço à procura de um novo lar para a humanidade.", providers: ["Max", "Prime Video", "Apple TV+"] },
+                { id: 1399, title: "Game of Thrones", type: "Série", release_date: "2011-04-17", year: "2011", genre: "Drama, Fantasia", score: "8.5", badge: "FENÔMENO", poster: "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg", overview: "Nove famílias nobres lutam pelo controle das terras místicas de Westeros, enquanto um antigo inimigo retorna após estar adormecido por milênios.", providers: ["Max"] },
+                { id: 1429, title: "Attack on Titan (Shingeki no Kyojin)", type: "Anime", release_date: "2013-04-07", year: "2013", genre: "Anime, Fantasia, Ação", score: "8.7", badge: "⛩️ TOP ANIME", poster: "https://image.tmdb.org/t/p/w500/8aMqmB5xSblsZc7bLMEhE28yHa2.jpg", overview: "Após sua cidade natal ser destruída e sua mãe ser morta, o jovem Eren Jaeger jura limpar a terra de todos os Titãs gigantes que levaram a humanidade à beira da extinção.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 872585, title: "Oppenheimer", type: "Filme", release_date: "2023-07-20", year: "2023", genre: "Drama, História", score: "8.9", badge: "🏆 7 OSCARS", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", overview: "A história do físico americano J. Robert Oppenheimer, seu papel no Projeto Manhattan e no desenvolvimento da primeira bomba atômica.", providers: ["Prime Video", "Apple TV+"] },
+                { id: 100088, title: "The Last of Us", type: "Série", release_date: "2023-01-15", year: "2023", genre: "Drama, Sci-Fi", score: "8.6", badge: "RECORDISTA", poster: "https://image.tmdb.org/t/p/w500/ieMLFFCwdep90d67kOT0oFtv2yX.jpg", overview: "20 anos após a destruição da civilização moderna, Joel, um sobrevivente experiente, é contratado para contrabandear Ellie, uma jovem de 14 anos, para fora de uma zona de quarentena opressiva.", providers: ["Max"] },
+                { id: 912649, title: "Venom: A Última Rodada", type: "Filme", release_date: "2024-10-22", year: "2024", genre: "Ação, Ficção Científica", score: "7.8", badge: "POPULAR", poster: "https://image.tmdb.org/t/p/w500/eZIIPjL7oGqfmF7Gw5ZnbDjH6yu.jpg", overview: "Eddie e Venom estão em fuga. Caçados por ambos os seus mundos e com a rede se fechando, a dupla é forçada a tomar uma decisão devastadora.", providers: ["Max", "Prime Video"] }
             ],
             releases: [
-                { id: 1022789, title: "Divertida Mente 2", type: "Filme", year: "2024", genre: "Animação, Família", score: "8.0", badge: "BILHETERIA #1", poster: "https://image.tmdb.org/t/p/w500/gE0uNsqPqV2D4Y7J8d4xWzH7b0B.jpg", overview: "Com a chegada da adolescência, a sala de comando de Riley passa por uma demolição repentina para dar lugar a algo totalmente inesperado: novas Emoções!", providers: ["Disney+"] },
-                { id: 533535, title: "Deadpool & Wolverine", type: "Filme", year: "2024", genre: "Ação, Comédia", score: "8.1", badge: "SUCESSO", poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", overview: "Um apático Wade Wilson labuta na vida civil até que uma ameaça ao seu universo o força a colocar o uniforme novamente ao lado de Wolverine.", providers: ["Disney+", "Cinema"] },
-                { id: 933260, title: "A Substância", type: "Filme", year: "2024", genre: "Terror, Drama", score: "8.3", badge: "ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/lqoMzCcZY5yg5y2iMMyM0j6N9en.jpg", overview: "Uma celebridade em decadência usa uma droga do mercado negro que gera temporariamente uma versão mais jovem e melhor de si mesma.", providers: ["MUBI", "Cinema"] },
-                { id: 1034541, title: "Terrifier 3", type: "Filme", year: "2024", genre: "Terror, Suspense", score: "7.6", badge: "NOVO", poster: "https://image.tmdb.org/t/p/w500/ju10W5ga28AukKqA8sqJsm3e2v.jpg", overview: "Art the Clown está pronto para desencadear o caos sobre os moradores desavisados do condado de Miles enquanto eles adormecem na véspera de Natal.", providers: ["Cinema", "Prime Video"] },
-                { id: 1184918, title: "Robô Selvagem", type: "Filme", year: "2024", genre: "Animação, Ficção", score: "8.6", badge: "OBRA-PRIMA", poster: "https://image.tmdb.org/t/p/w500/8wW8g82U3a1n7tM06Q07p945d9u.jpg", overview: "A jornada épica de uma robô chamada Roz que naufraga em uma ilha deserta e deve aprender a se adaptar aos arredores hostis.", providers: ["Cinema", "Apple TV+"] }
+                { id: 1000837, title: "Ainda Estou Aqui", type: "Filme", release_date: "2024-11-07", year: "2024", genre: "Drama, História", score: "8.4", badge: "🍿 NO CINEMA", poster: "https://image.tmdb.org/t/p/w500/1l7agaAY6JIcJLKMP2RCgHriGP6.jpg", overview: "No início dos anos 70, a família Paiva precisa resistir e se reinventar após o desaparecimento de Rubens Paiva no auge da ditadura militar brasileira.", providers: ["Cinema"] },
+                { id: 558449, title: "Gladiador 2", type: "Filme", release_date: "2024-11-14", year: "2024", genre: "Ação, Aventura, Drama", score: "7.9", badge: "🍿 NO CINEMA", poster: "https://image.tmdb.org/t/p/w500/342bly9MqveL65TnEFzx8TTUxcL.jpg", overview: "Lucius entra no Coliseu de Roma para desafiar os imperadores tirânicos e honrar o legado heroico de Maximus.", providers: ["Cinema"] },
+                { id: 402431, title: "Wicked", type: "Filme", release_date: "2024-11-20", year: "2024", genre: "Fantasia, Musical", score: "8.1", badge: "🍿 NO CINEMA", poster: "https://image.tmdb.org/t/p/w500/xDGbZ0JJ3mYaGKy4Nzd9Kph6M9L.jpg", overview: "A história não contada das bruxas de Oz, revelando o início da amizade entre Elphaba e Glinda antes de seus destinos colidirem.", providers: ["Cinema"] },
+                { id: 1022789, title: "Divertida Mente 2", type: "Filme", release_date: "2024-06-20", year: "2024", genre: "Animação, Família", score: "8.0", badge: "BILHETERIA #1", poster: "https://image.tmdb.org/t/p/w500/lHKNS35r4RTa9GO72vdadMLxoiV.jpg", overview: "Com a chegada da adolescência, a sala de comando de Riley passa por uma demolição repentina para dar lugar a novas Emoções!", providers: ["Disney+"] },
+                { id: 533535, title: "Deadpool & Wolverine", type: "Filme", release_date: "2024-07-26", year: "2024", genre: "Ação, Comédia", score: "8.1", badge: "SUCESSO", poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", overview: "Um apático Wade Wilson labuta na vida civil até que uma ameaça ao seu universo o força a colocar o uniforme novamente ao lado de Wolverine.", providers: ["Disney+"] },
+                { id: 933260, title: "A Substância", type: "Filme", release_date: "2024-09-19", year: "2024", genre: "Terror, Drama", score: "8.3", badge: "ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/vWeOgzlhnP1sS23H3rzctGHB9Nb.jpg", overview: "Uma celebridade em decadência usa uma droga do mercado negro que gera temporariamente uma versão mais jovem e melhor de si mesma.", providers: ["MUBI"] },
+                { id: 1034541, title: "Terrifier 3", type: "Filme", release_date: "2024-10-31", year: "2024", genre: "Terror, Suspense", score: "7.6", badge: "POPULAR", poster: "https://image.tmdb.org/t/p/w500/i1jKmbxUPwOIzLQDmUUSTOZl62c.jpg", overview: "Art the Clown está pronto para desencadear o caos sobre os moradores desavisados do condado de Miles na véspera de Natal.", providers: ["Prime Video"] },
+                { id: 1184918, title: "Robô Selvagem", type: "Filme", release_date: "2024-10-10", year: "2024", genre: "Animação, Ficção", score: "8.6", badge: "OBRA-PRIMA", poster: "https://image.tmdb.org/t/p/w500/gAHNIZKG8fmK7njOTpMmLKJXiag.jpg", overview: "A jornada épica de uma robô chamada Roz que naufraga em uma ilha deserta e aprende a se adaptar aos arredores hostis com animais selvagens.", providers: ["Apple TV+", "Prime Video"] }
             ],
             top: [
-                { id: 238, title: "O Poderoso Chefão", type: "Filme", year: "1972", genre: "Crime, Drama", score: "9.2", badge: "⭐ HISTÓRICO", poster: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", overview: "O patriarca envelhecido de uma dinastia do crime organizado transfere o controle de seu império clandestino para seu filho relutante.", providers: ["Netflix", "Paramount+", "Prime Video"] },
-                { id: 278, title: "Um Sonho de Liberdade", type: "Filme", year: "1994", genre: "Drama, Crime", score: "9.3", badge: "⭐ #1 IMDB", poster: "https://image.tmdb.org/t/p/w500/umXVRnKz7nqa5O5s0dY9aMv9b1.jpg", overview: "Dois homens presos se unem ao longo de vários anos, encontrando consolo e redenção eventual através de atos de decência comum.", providers: ["Max", "Prime Video"] },
-                { id: 1396, title: "Breaking Bad", type: "Série", year: "2008", genre: "Drama, Crime", score: "9.5", badge: "⭐ PERFEIÇÃO", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg", overview: "Um professor de química do ensino médio com câncer terminal de pulmão se junta a um ex-aluno para fabricar e vender metanfetamina para garantir o futuro financeiro de sua família.", providers: ["Netflix"] },
-                { id: 129, title: "A Viagem de Chihiro", type: "Anime", year: "2001", genre: "Anime, Fantasia", score: "8.9", badge: "⭐ OSCAR ANIME", poster: "https://image.tmdb.org/t/p/w500/393mh11whB890dpZ5mYvlslUh1T.jpg", overview: "Uma garota de dez anos chamada Chihiro vagueia por um mundo governado por deuses, bruxas e espíritos, e onde os humanos são transformados em bestas.", providers: ["Netflix"] },
-                { id: 155, title: "Batman: O Cavaleiro das Trevas", type: "Filme", year: "2008", genre: "Ação, Crime, Drama", score: "9.0", badge: "⭐ LENDÁRIO", poster: "https://image.tmdb.org/t/p/w500/i0tScqTct61pM9G2e9m9d5B0vU8.jpg", overview: "Quando a ameaça conhecida como o Coringa causa estragos e caos no povo de Gotham, Batman deve aceitar um dos maiores testes psicológicos e físicos de sua capacidade de combater a injustiça.", providers: ["Max", "Prime Video"] }
+                { id: 238, title: "O Poderoso Chefão", type: "Filme", release_date: "1972-03-24", year: "1972", genre: "Crime, Drama", score: "9.2", badge: "⭐ HISTÓRICO", poster: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", overview: "O patriarca envelhecido de uma dinastia do crime organizado transfere o controle de seu império clandestino para seu filho relutante.", providers: ["Netflix", "Paramount+", "Prime Video"] },
+                { id: 278, title: "Um Sonho de Liberdade", type: "Filme", release_date: "1994-09-23", year: "1994", genre: "Drama, Crime", score: "9.3", badge: "⭐ #1 IMDB", poster: "https://image.tmdb.org/t/p/w500/umX3lBhHoTV7Lsci140Yr8VpXyN.jpg", overview: "Dois homens presos se unem ao longo de vários anos, encontrando consolo e redenção eventual através de atos de decência comum.", providers: ["Max", "Prime Video"] },
+                { id: 1396, title: "Breaking Bad", type: "Série", release_date: "2008-01-20", year: "2008", genre: "Drama, Crime", score: "9.5", badge: "⭐ PERFEIÇÃO", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg", overview: "Um professor de química do ensino médio com câncer terminal de pulmão se junta a um ex-aluno para fabricar e vender metanfetamina para garantir o futuro financeiro de sua família.", providers: ["Netflix"] },
+                { id: 129, title: "A Viagem de Chihiro", type: "Anime", release_date: "2001-07-20", year: "2001", genre: "Anime, Fantasia", score: "8.9", badge: "⭐ OSCAR ANIME", poster: "https://image.tmdb.org/t/p/w500/hhoKhsyJ3hFaxEm5pMdZRiTu2lJ.jpg", overview: "Uma garota de dez anos chamada Chihiro vagueia por um mundo governado por deuses, bruxas e espíritos, e onde os humanos são transformados em bestas.", providers: ["Netflix"] },
+                { id: 155, title: "Batman: O Cavaleiro das Trevas", type: "Filme", release_date: "2008-07-18", year: "2008", genre: "Ação, Crime, Drama", score: "9.0", badge: "⭐ LENDÁRIO", poster: "https://image.tmdb.org/t/p/w500/4lj1ikfsSmMZNyfdi8R8Tv5tsgb.jpg", overview: "Quando a ameaça conhecida como o Coringa causa estragos e caos no povo de Gotham, Batman deve aceitar um dos maiores testes psicológicos e físicos de sua capacidade de combater a injustiça.", providers: ["Max", "Prime Video"] }
             ],
             series: [
-                { id: 76479, title: "The Boys", type: "Série", year: "2019", genre: "Ação, Sci-Fi", score: "8.5", badge: "SÁTIRA", poster: "https://image.tmdb.org/t/p/w500/2zmTngn1tYC1AvfnrFLhxeD82hz.jpg", overview: "Um grupo de vigilantes se propõe a derrubar super-heróis corruptos que abusam de seus superpoderes em vez de usá-los para o bem.", providers: ["Prime Video"] },
-                { id: 66732, title: "Stranger Things", type: "Série", year: "2016", genre: "Ficção Científica, Mistério", score: "8.6", badge: "SUCESSO", poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg", overview: "Quando um jovem garoto desaparece, sua mãe, um chefe de polícia e seus amigos devem enfrentar forças aterrorizantes para trazê-lo de volta.", providers: ["Netflix"] },
-                { id: 76331, title: "Succession", type: "Série", year: "2018", genre: "Drama", score: "8.9", badge: "EMMY WINNER", poster: "https://image.tmdb.org/t/p/w500/7udWJ7gZ8x8Lh08c4Q7H5z7J0k.jpg", overview: "A família Roy é conhecida por controlar o maior conglomerado de mídia e entretenimento do mundo. Contudo, seu mundo muda quando seu pai envelhecido renuncia à liderança da empresa.", providers: ["Max"] },
-                { id: 114472, title: "O Urso (The Bear)", type: "Série", year: "2022", genre: "Comédia, Drama", score: "8.7", badge: "ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/sHFlb2h8a95o3c1J4xZ8m9N0uT7.jpg", overview: "Um jovem chef de alta gastronomia volta para Chicago para administrar a lanchonete de sanduíches da sua família após uma morte trágica.", providers: ["Disney+"] },
-                { id: 85937, title: "Demon Slayer: Kimetsu no Yaiba", type: "Anime", year: "2019", genre: "Anime, Ação", score: "8.7", badge: "⛩️ ANIME TOP", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg", overview: "Após sua família ser chacinada por demônios e sua irmã transformada em uma criatura sedenta de sangue, Tanjiro embarca numa jornada perigosa para curá-la.", providers: ["Crunchyroll", "Netflix"] }
+                { id: 76479, title: "The Boys", type: "Série", release_date: "2019-07-26", year: "2019", genre: "Ação, Sci-Fi", score: "8.5", badge: "SÁTIRA", poster: "https://image.tmdb.org/t/p/w500/2zmTngn1tYC1AvfnrFLhxeD82hz.jpg", overview: "Um grupo de vigilantes se propõe a derrubar super-heróis corruptos que abusam de seus superpoderes em vez de usá-los para o bem.", providers: ["Prime Video"] },
+                { id: 66732, title: "Stranger Things", type: "Série", release_date: "2016-07-15", year: "2016", genre: "Ficção Científica, Mistério", score: "8.6", badge: "SUCESSO", poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg", overview: "Quando um jovem garoto desaparece, sua mãe, um chefe de polícia e seus amigos devem enfrentar forças aterrorizantes para trazê-lo de volta.", providers: ["Netflix"] },
+                { id: 76331, title: "Succession", type: "Série", release_date: "2018-06-03", year: "2018", genre: "Drama", score: "8.9", badge: "EMMY WINNER", poster: "https://image.tmdb.org/t/p/w500/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg", overview: "A família Roy é conhecida por controlar o maior conglomerado de mídia e entretenimento do mundo. Contudo, seu mundo muda quando seu pai envelhecido renuncia à liderança da empresa.", providers: ["Max"] },
+                { id: 114472, title: "O Urso (The Bear)", type: "Série", release_date: "2022-06-23", year: "2022", genre: "Comédia, Drama", score: "8.7", badge: "ACLAMADO", poster: "https://image.tmdb.org/t/p/w500/2N892H3CirkrFC4vulZfMVSUbAZ.jpg", overview: "Um jovem chef de alta gastronomia volta para Chicago para administrar a lanchonete de sanduíches da sua família após uma morte trágica.", providers: ["Disney+"] },
+                { id: 85937, title: "Demon Slayer: Kimetsu no Yaiba", type: "Anime", release_date: "2019-04-06", year: "2019", genre: "Anime, Ação", score: "8.7", badge: "⛩️ ANIME TOP", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg", overview: "Após sua família ser chacinada por demônios e sua irmã transformada em uma criatura sedenta de sangue, Tanjiro embarca numa jornada perigosa para curá-la.", providers: ["Crunchyroll", "Netflix"] }
             ],
             anime: [
-                { id: 1429, title: "Attack on Titan (Shingeki no Kyojin)", type: "Anime", year: "2013", genre: "Anime, Fantasia, Ação", score: "8.7", badge: "⛩️ TOP ANIME", poster: "https://image.tmdb.org/t/p/w500/8C5LL4k9aIagGhyJkK80e980L1n.jpg", overview: "Após sua cidade natal ser destruída, Eren Jaeger jura limpar a terra de todos os Titãs gigantes.", providers: ["Crunchyroll", "Netflix"] },
-                { id: 124834, title: "Solo Leveling", type: "Anime", year: "2024", genre: "Anime, Fantasia, Ação", score: "8.6", badge: "⛩️ NOVIDADE", poster: "https://image.tmdb.org/t/p/w500/geCRueV3ElhRTr03v1Gfw86iSYx.jpg", overview: "Em um mundo onde caçadores despertam poderes, Sung Jinwoo, o caçador mais fraco de todos, encontra um calabouço misterioso com uma missão secreta de evolução infinita.", providers: ["Crunchyroll"] },
-                { id: 85937, title: "Demon Slayer (Kimetsu no Yaiba)", type: "Anime", year: "2019", genre: "Anime, Ação", score: "8.7", badge: "⛩️ SUCESSO", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg", overview: "Tanjiro Kamado luta para vingar sua família e encontrar uma cura para sua irmã Nezuko.", providers: ["Crunchyroll", "Netflix"] },
-                { id: 95479, title: "Jujutsu Kaisen", type: "Anime", year: "2020", genre: "Anime, Sobrenatural", score: "8.6", badge: "⛩️ EM ALTA", poster: "https://image.tmdb.org/t/p/w500/hD8pZJ8b3a0y1X6p7G5m4k9N0uT.jpg", overview: "Yuji Itadori engole um dedo amaldiçoado e se junta a uma escola de feiticeiros de Tóquio para purificar maldições ancestrais.", providers: ["Crunchyroll", "Netflix"] },
-                { id: 37854, title: "One Piece", type: "Anime", year: "1999", genre: "Anime, Aventura", score: "8.9", badge: "⛩️ CLÁSSICO", poster: "https://image.tmdb.org/t/p/w500/cMD9Ygz11zjJzAv0rpURa1C06u.jpg", overview: "Monkey D. Luffy e sua tripulação navegam pelos mares perigosos em busca do lendário tesouro One Piece.", providers: ["Crunchyroll", "Netflix", "Max"] }
+                { id: 1429, title: "Attack on Titan (Shingeki no Kyojin)", type: "Anime", release_date: "2013-04-07", year: "2013", genre: "Anime, Fantasia, Ação", score: "8.7", badge: "⛩️ TOP ANIME", poster: "https://image.tmdb.org/t/p/w500/8aMqmB5xSblsZc7bLMEhE28yHa2.jpg", overview: "Após sua cidade natal ser destruída, Eren Jaeger jura limpar a terra de todos os Titãs gigantes.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 124834, title: "Solo Leveling", type: "Anime", release_date: "2024-01-07", year: "2024", genre: "Anime, Fantasia, Ação", score: "8.6", badge: "⛩️ NOVIDADE", poster: "https://image.tmdb.org/t/p/w500/7h8ZHFmx73HnEagDI6KbWAw4ea3.jpg", overview: "Em um mundo onde caçadores despertam poderes, Sung Jinwoo, o caçador mais fraco de todos, encontra um calabouço misterioso com uma missão secreta de evolução infinita.", providers: ["Crunchyroll"] },
+                { id: 85937, title: "Demon Slayer (Kimetsu no Yaiba)", type: "Anime", release_date: "2019-04-06", year: "2019", genre: "Anime, Ação", score: "8.7", badge: "⛩️ SUCESSO", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg", overview: "Tanjiro Kamado luta para vingar sua família e encontrar uma cura para sua irmã Nezuko.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 95479, title: "Jujutsu Kaisen", type: "Anime", release_date: "2020-10-03", year: "2020", genre: "Anime, Sobrenatural", score: "8.6", badge: "⛩️ EM ALTA", poster: "https://image.tmdb.org/t/p/w500/8R1mMSC1gX1cg5ed7ns49JOEqw3.jpg", overview: "Yuji Itadori engole um dedo amaldiçoado e se junta a uma escola de feiticeiros de Tóquio para purificar maldições ancestrais.", providers: ["Crunchyroll", "Netflix"] },
+                { id: 37854, title: "One Piece", type: "Anime", release_date: "1999-10-20", year: "1999", genre: "Anime, Aventura", score: "8.9", badge: "⛩️ CLÁSSICO", poster: "https://image.tmdb.org/t/p/w500/9ltisibeD4gzqjM1AzmQwCdyirQ.jpg", overview: "Monkey D. Luffy e sua tripulação navegam pelos mares perigosos em busca do lendário tesouro One Piece.", providers: ["Crunchyroll", "Netflix", "Max"] }
             ]
         };
+
+        /* ═══════════════════════════════════
+           CONSULTA OFICIAL & CACHE DE STREAMING NO BRASIL (TMDB WATCH PROVIDERS)
+        ═══════════════════════════════════ */
+        const cacheProvedoresBr = new Map();
+
+        async function obterProvedoresReaisBr(id, mediaType) {
+            if (!id) return null;
+            const type = (mediaType === 'tv' || mediaType === 'Série' || mediaType === 'Anime') ? 'tv' : 'movie';
+            const cacheKey = `${type}_${id}`;
+            if (cacheProvedoresBr.has(cacheKey)) {
+                return cacheProvedoresBr.get(cacheKey);
+            }
+
+            try {
+                const salvo = sessionStorage.getItem(`oc_watch_${cacheKey}`);
+                if (salvo) {
+                    const parsed = JSON.parse(salvo);
+                    cacheProvedoresBr.set(cacheKey, parsed);
+                    return parsed;
+                }
+            } catch (e) {}
+
+            try {
+                const apiKey = getTmdbApiKey();
+                const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}/watch/providers?api_key=${apiKey}`);
+                if (!res.ok) return null;
+                const data = await res.json();
+                const provs = [];
+
+                // 1. Provedores por assinatura (flatrate) confirmados no Brasil
+                const brFlatrate = data.results?.BR?.flatrate || [];
+                brFlatrate.forEach(p => {
+                    const nome = (p.provider_name || '').toLowerCase();
+                    if (nome.includes('netflix')) provs.push('Netflix');
+                    else if (nome.includes('hbo') || nome.includes('max')) provs.push('Max');
+                    else if (nome.includes('prime') || nome.includes('amazon')) provs.push('Prime Video');
+                    else if (nome.includes('disney')) provs.push('Disney+');
+                    else if (nome.includes('crunchyroll')) provs.push('Crunchyroll');
+                    else if (nome.includes('paramount')) provs.push('Paramount+');
+                    else if (nome.includes('apple')) provs.push('Apple TV+');
+                    else if (nome.includes('globoplay')) provs.push('Globoplay');
+                    else if (nome.includes('mubi')) provs.push('MUBI');
+                });
+
+                // 2. Fallback de redes/estúdio das regiões primárias se BR não preencheu
+                if (provs.length === 0 && data.results) {
+                    const usFlatrate = data.results?.US?.flatrate || [];
+                    usFlatrate.forEach(p => {
+                        const nome = (p.provider_name || '').toLowerCase();
+                        if (nome.includes('hbo') || nome.includes('max')) provs.push('Max');
+                        else if (nome.includes('netflix')) provs.push('Netflix');
+                        else if (nome.includes('disney')) provs.push('Disney+');
+                        else if (nome.includes('paramount')) provs.push('Paramount+');
+                        else if (nome.includes('apple')) provs.push('Apple TV+');
+                    });
+                }
+
+                const listaUnica = Array.from(new Set(provs));
+                if (listaUnica.length > 0) {
+                    cacheProvedoresBr.set(cacheKey, listaUnica);
+                    try {
+                        sessionStorage.setItem(`oc_watch_${cacheKey}`, JSON.stringify(listaUnica));
+                    } catch (e) {}
+                    return listaUnica;
+                }
+                return null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function enriquecerProvedoresEmBackground(titulos) {
+            if (!titulos || !titulos.length) return;
+            let houveMudanca = false;
+
+            const promises = titulos.map(async (t) => {
+                if (!t.id) return;
+                const reais = await obterProvedoresReaisBr(t.id, t.media_type);
+                if (reais && reais.length > 0) {
+                    const provsAtuais = t.providers || [];
+                    const preservaCinema = provsAtuais.includes('Cinema');
+                    const novosProvs = preservaCinema ? Array.from(new Set(['Cinema', ...reais])) : reais;
+
+                    const saoIguais = novosProvs.length === provsAtuais.length && novosProvs.every(p => provsAtuais.includes(p));
+                    if (!saoIguais) {
+                        t.providers = novosProvs;
+                        houveMudanca = true;
+                    }
+                }
+            });
+
+            await Promise.allSettled(promises);
+            if (houveMudanca) {
+                filtrarTitulosNaTela();
+            }
+        }
+
+        /* ═══════════════════════════════════
+           ESTIMADOR INTELIGENTE E ESTRITO DE STREAMING NO BRASIL
+           (NUNCA atribui múltiplos streamings concorrentes sem verificação)
+        ═══════════════════════════════════ */
+        function estimarStreamingsPorObra(titulo, genero, isAnime, isTv) {
+            const t = (titulo || '').toLowerCase().trim();
+
+            // 1. Animes japoneses
+            if (isAnime) {
+                if (t.includes('attack on titan') || t.includes('shingeki') || t.includes('demon slayer') || t.includes('kimetsu') || t.includes('jujutsu') || t.includes('one piece') || t.includes('spy x family') || t.includes('dandadan') || t.includes('naruto')) {
+                    return ["Crunchyroll", "Netflix"];
+                }
+                return ["Crunchyroll"];
+            }
+
+            // 2. HBO / Max / DC / Warner Bros Exclusivos (NUNCA Netflix)
+            if (
+                t.includes('lanterna') || t.includes('lanterns') || t.includes('green lantern') ||
+                t.includes('batman') || t.includes('coringa') || t.includes('joker') || t.includes('pinguim') || t.includes('penguin') ||
+                t.includes('superman') || t.includes('super-homem') || t.includes('dc') || t.includes('peacemaker') || t.includes('pacificador') ||
+                t.includes('game of thrones') || t.includes('thrones') || t.includes('house of the dragon') || t.includes('casa do dragão') ||
+                t.includes('duna') || t.includes('dune') || t.includes('succession') || t.includes('the last of us') || t.includes('last of us') ||
+                t.includes('euphoria') || t.includes('white lotus') || t.includes('true detective') || t.includes('sopranos') || t.includes('chernobyl') ||
+                t.includes('matrix') || t.includes('harry potter') || t.includes('interestelar') || t.includes('interstellar') || t.includes('rick and morty')
+            ) {
+                return ["Max"];
+            }
+
+            // 3. Netflix Exclusivos / Originais (NUNCA Max)
+            if (
+                t.includes('monstro') || t.includes('monster') || t.includes('dahmer') || t.includes('lizzie borden') || t.includes('menendez') ||
+                t.includes('stranger things') || t.includes('stranger') || t.includes('wandinha') || t.includes('wednesday') ||
+                t.includes('round 6') || t.includes('squid game') || t.includes('arcane') || t.includes('black mirror') ||
+                t.includes('crown') || t.includes('bridgerton') || t.includes('cobra kai') || t.includes('ozark') || t.includes('dark') ||
+                t.includes('heartstopper') || t.includes('lupin') || t.includes('gambito da rainha') || t.includes('queen\'s gambit') ||
+                t.includes('outer banks') || t.includes('sex education') || t.includes('emily em paris') || t.includes('emily in paris') ||
+                t.includes('la casa de papel') || t.includes('money heist') || t.includes('elite') || t.includes('sandman') ||
+                t.includes('witcher') || t.includes('sintonia') || t.includes('sweet tooth') || t.includes('umbrella academy') ||
+                t.includes('rebel moon') || t.includes('resgate') || t.includes('extraction') || t.includes('alerta vermelho') ||
+                t.includes('glass onion') || t.includes('bird box') || t.includes('breaking bad') || t.includes('better call saul')
+            ) {
+                return ["Netflix"];
+            }
+
+            // 4. Paramount+ Exclusivos (NUNCA Netflix nem Max)
+            if (
+                t.includes('lioness') || t.includes('special ops') || t.includes('mobland') || t.includes('terra da máfia') ||
+                t.includes('yellowstone') || t.includes('1883') || t.includes('1923') || t.includes('kingstown') ||
+                t.includes('tulsa king') || t.includes('landman') || t.includes('halo') || t.includes('star trek') ||
+                t.includes('dexter') || t.includes('south park')
+            ) {
+                return ["Paramount+"];
+            }
+
+            // 5. Disney+ / Marvel / Star Wars / FX (NUNCA Netflix nem Max)
+            if (
+                t.includes('deadpool') || t.includes('wolverine') || t.includes('marvel') || t.includes('vingadores') || t.includes('avengers') ||
+                t.includes('star wars') || t.includes('mandalorian') || t.includes('andor') || t.includes('ahsoka') || t.includes('loki') ||
+                t.includes('agatha') || t.includes('disney') || t.includes('pixar') || t.includes('divertida mente') || t.includes('inside out') ||
+                t.includes('moana') || t.includes('frozen') || t.includes('rei leão') || t.includes('lion king') || t.includes('toy story') ||
+                t.includes('the bear') || t.includes('o urso') || t.includes('shogun') || t.includes('shōgun') || t.includes('percy jackson')
+            ) {
+                return ["Disney+"];
+            }
+
+            // 6. Prime Video (Amazon Originais / MGM)
+            if (
+                t.includes('boys') || t.includes('gen v') || t.includes('fallout') || t.includes('reacher') ||
+                t.includes('anéis de poder') || t.includes('aneis de poder') || t.includes('rings of power') ||
+                t.includes('invencível') || t.includes('invincible') || t.includes('roda do tempo') || t.includes('wheel of time') ||
+                t.includes('jack ryan') || t.includes('fleabag') || t.includes('good omens') || t.includes('oppenheimer') ||
+                t.includes('terrifier') || t.includes('saltburn')
+            ) {
+                return ["Prime Video"];
+            }
+
+            // 7. Apple TV+
+            if (
+                t.includes('severance') || t.includes('ruptura') || t.includes('ted lasso') || t.includes('silo') ||
+                t.includes('slow horses') || t.includes('fundação') || t.includes('foundation') || t.includes('morning show')
+            ) {
+                return ["Apple TV+"];
+            }
+
+            if (t.includes('substância') || t.includes('substance')) {
+                return ["MUBI"];
+            }
+
+            // Fallback seguro: nunca injetar plataformas concorrentes aleatoriamente
+            return [];
+        }
+
+        /* ═══════════════════════════════════
+           MOTOR DINÂMICO DE DATA (CALCULA SE É CINEMA, LANÇAMENTO OU STREAMING)
+        ═══════════════════════════════════ */
+        function calcularMetadadosDinamicos(item, mediaType, categoria) {
+            const hoje = new Date();
+            const dataStr = item.release_date || item.first_air_date || (item.year ? `${item.year}-01-01` : '');
+            let diffDias = 9999;
+
+            if (dataStr) {
+                const dObj = new Date(dataStr);
+                if (!isNaN(dObj.getTime())) {
+                    diffDias = Math.floor((hoje - dObj) / (1000 * 60 * 60 * 24));
+                }
+            }
+
+            const isMovie = mediaType === 'movie' || item.type === 'Filme';
+            const isTv = mediaType === 'tv' || item.type === 'Série';
+            const isAnime = item.type === 'Anime' || (item.genre_ids && item.genre_ids.includes(16) && (item.original_language === 'ja' || item.origin_country?.includes('JP')));
+
+            // Regra Dinâmica de Cinema:
+            // O filme deve ter estreado entre -20 dias (estreia iminente) até +75 dias (janela média de exibição nos cinemas)
+            // OU pertencer aos lançamentos da categoria now_playing dentro do limite temporal
+            const estaNoCinema = isMovie && !isTv && !isAnime && (
+                (diffDias >= -20 && diffDias <= 75) ||
+                (categoria === 'releases' && diffDias >= -30 && diffDias <= 80)
+            );
+
+            let providers = [];
+            if (estaNoCinema) {
+                providers.push("Cinema");
+            }
+
+            // Preserva provedores conhecidos estáticos
+            if (item.providers && item.providers.length) {
+                item.providers.forEach(p => {
+                    if (p.toLowerCase() === 'cinema') {
+                        if (estaNoCinema && !providers.includes("Cinema")) providers.push("Cinema");
+                    } else {
+                        if (!providers.includes(p)) providers.push(p);
+                    }
+                });
+            }
+
+            // Se o filme saiu dos cinemas e não tem streaming definido, estima provedores oficiais no Brasil
+            if (providers.length === 0 || (providers.length === 1 && providers[0] === 'Cinema' && !estaNoCinema)) {
+                const est = estimarStreamingsPorObra(item.title, item.genre_ids || item.genre, isAnime, isTv);
+                if (est && est.length) {
+                    providers = est;
+                }
+            }
+
+            // Badge dinâmico de status
+            let badge = 'EM ALTA';
+            if (estaNoCinema) {
+                badge = '🍿 NO CINEMA';
+            } else if (diffDias >= -15 && diffDias <= 45) {
+                badge = '✨ LANÇAMENTO';
+            } else if ((item.vote_average && item.vote_average >= 8.4) || (item.score && parseFloat(item.score) >= 8.4)) {
+                badge = '🏆 TOP CRÍTICA';
+            } else if (categoria === 'releases') {
+                badge = 'POPULAR';
+            } else if (categoria === 'top') {
+                badge = '⭐ CLÁSSICO';
+            }
+
+            return {
+                providers: providers,
+                badge: badge,
+                estaNoCinema: estaNoCinema,
+                isLancamento: diffDias >= -15 && diffDias <= 60
+            };
+        }
+
+        /* SANITIZAÇÃO DINÂMICA DO CATÁLOGO DE ACORDO COM A DATA ATUAL */
+        function sanitizarCatalogoPorDataAtual() {
+            for (const cat in CATALOGO_ESTENDIDO) {
+                CATALOGO_ESTENDIDO[cat] = CATALOGO_ESTENDIDO[cat].map(obra => {
+                    const meta = calcularMetadadosDinamicos(obra, obra.type === 'Série' ? 'tv' : 'movie', cat);
+                    return {
+                        ...obra,
+                        providers: meta.providers,
+                        badge: meta.badge
+                    };
+                });
+            }
+        }
 
         /* ESTADO DA PÁGINA */
         let categoriaAtual = 'trending';
@@ -1420,6 +1852,8 @@
 
         /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', () => {
+            sanitizarCatalogoPorDataAtual();
+            configurarBuscaComSugestoes();
             verificarTemaELogin();
             mudarCategoria('trending');
         });
@@ -1501,23 +1935,25 @@
             const searchInput = document.getElementById('titleSearchInput');
             if (searchInput) searchInput.value = '';
 
+            const dropdown = document.getElementById('titleSuggestionsDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+
             carregarCatalogo(cat);
         }
 
         /* PROVEDORES CONFIRMADOS PARA O BRASIL */
-        function estimarProvedoresBr(item, isTv, isAnime) {
-            if (item.providers && item.providers.length) return item.providers;
-            return [];
+        function estimarProvedoresBr(item, isTv, isAnime, cat) {
+            const meta = calcularMetadadosDinamicos(item, isTv ? 'tv' : 'movie', cat);
+            return meta.providers;
         }
 
-        /* CARREGAMENTO DE DADOS VIA API TMDB */
+        /* CARREGAMENTO DE DADOS VIA API TMDB COM AUTO-ATUALIZAÇÃO DINÂMICA */
         async function carregarCatalogo(cat, carregarMais = false) {
             const grid = document.getElementById('titlesGrid');
             const btnMais = document.getElementById('btnLoadMore');
             const apiKey = getTmdbApiKey();
 
             if (!carregarMais) {
-                // Skeleton loader elegante
                 grid.innerHTML = Array(8).fill(0).map(() => `
                     <div class="skeleton-card">
                         <div class="skeleton-media"></div>
@@ -1537,7 +1973,7 @@
                 if (cat === 'trending') {
                     endpoint = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
                 } else if (cat === 'releases') {
-                    endpoint = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                    endpoint = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=pt-BR&region=BR&page=${paginaAtual}`;
                 } else if (cat === 'top') {
                     endpoint = `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
                 } else if (cat === 'series') {
@@ -1562,17 +1998,27 @@
                     const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : gerarFallbackCapa(title);
                     const genres = mapearGeneros(item.genre_ids);
 
+                    // Aplica cálculo de data dinâmica para classificar lançamento, cinema e streaming
+                    const meta = calcularMetadadosDinamicos({
+                        ...item,
+                        title,
+                        type: tipo,
+                        release_date: date,
+                        score
+                    }, isTv ? 'tv' : 'movie', cat);
+
                     return {
                         id: item.id,
                         title: title,
                         type: tipo,
                         year: year,
+                        release_date: date,
                         genre: genres,
                         score: score,
-                        badge: item.vote_average >= 8.4 ? '⭐ ACLAMADO' : (cat === 'releases' ? 'POPULAR' : 'EM ALTA'),
+                        badge: meta.badge,
                         poster: poster,
                         overview: item.overview || 'Sinopse oficial não fornecida para este título.',
-                        providers: estimarProvedoresBr(item, isTv, isAnime),
+                        providers: meta.providers,
                         media_type: isTv ? 'tv' : 'movie'
                     };
                 });
@@ -1591,6 +2037,7 @@
                 }
 
                 filtrarTitulosNaTela();
+                enriquecerProvedoresEmBackground(novosTitulos);
 
             } catch (err) {
                 console.warn('TMDB em contingência. Carregando catálogo oficial integrado:', err);
@@ -1608,21 +2055,180 @@
             carregarCatalogo(categoriaAtual, true);
         }
 
-        /* BUSCA EM TEMPO REAL COM DEBOUNCE */
-        function tratarBuscaEmTempoReal() {
+        /* ═══════════════════════════════════
+           SISTEMA DE SUGESTÕES EM TEMPO REAL & SIGLAS
+        ═══════════════════════════════════ */
+        function configurarBuscaComSugestoes() {
+            const input = document.getElementById('titleSearchInput');
+            const dropdown = document.getElementById('titleSuggestionsDropdown');
+            if (!input || !dropdown) return;
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    dropdown.style.display = 'none';
+                } else if (e.key === 'Enter') {
+                    dropdown.style.display = 'none';
+                    executarBuscaTmdbOnline();
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+
+        function tratarBuscaEmTempoRealComSugestoes(valor) {
+            const query = (valor || '').trim();
+            const dropdown = document.getElementById('titleSuggestionsDropdown');
+
             clearTimeout(debounceBuscaTimer);
             debounceBuscaTimer = setTimeout(() => {
                 filtrarTitulosNaTela();
-            }, 250);
+            }, 180);
+
+            if (query.length < 2) {
+                if (dropdown) dropdown.style.display = 'none';
+                return;
+            }
+
+            exibirSugestoesTitulos(query);
+        }
+
+        async function exibirSugestoesTitulos(query) {
+            const dropdown = document.getElementById('titleSuggestionsDropdown');
+            if (!dropdown) return;
+
+            const qLower = query.toLowerCase().trim();
+            const sugestoes = [];
+
+            // 1. Resolução instantânea por SIGLA (ex: GOT, AOT, TLOU, BB, DP, etc.)
+            let tituloSigla = MAPA_SIGLAS_TITULOS[qLower] || null;
+            if (!tituloSigla) {
+                for (const sigla in MAPA_SIGLAS_TITULOS) {
+                    if (sigla.startsWith(qLower) || qLower.startsWith(sigla)) {
+                        tituloSigla = MAPA_SIGLAS_TITULOS[sigla];
+                        break;
+                    }
+                }
+            }
+
+            // 2. Procura no catálogo integrado e no cache de títulos
+            const poolCompleto = [];
+            for (const cat in CATALOGO_ESTENDIDO) {
+                poolCompleto.push(...(CATALOGO_ESTENDIDO[cat] || []));
+            }
+            for (const cat in cacheTitulos) {
+                poolCompleto.push(...(cacheTitulos[cat] || []));
+            }
+
+            // Adiciona match de sigla com prioridade máxima
+            if (tituloSigla) {
+                const matchExato = poolCompleto.find(t => t.title.toLowerCase() === tituloSigla.toLowerCase());
+                if (matchExato) {
+                    sugestoes.push({ ...matchExato, viaSigla: true });
+                } else {
+                    sugestoes.push({
+                        title: tituloSigla,
+                        type: 'Mídia',
+                        year: 'Popular',
+                        score: '9.0',
+                        poster: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=80',
+                        viaSigla: true
+                    });
+                }
+            }
+
+            // Busca por texto parcial no pool local
+            poolCompleto.forEach(item => {
+                if (sugestoes.length >= 6) return;
+                const nomeLower = (item.title || '').toLowerCase();
+                if (nomeLower.includes(qLower) && !sugestoes.some(s => s.title.toLowerCase() === nomeLower)) {
+                    sugestoes.push(item);
+                }
+            });
+
+            // Se ainda tiver poucas sugestões e o usuário digitou mais de 2 letras, consulta o TMDB multi-search
+            if (sugestoes.length < 4 && qLower.length >= 3) {
+                try {
+                    const apiKey = getTmdbApiKey();
+                    const termoBusca = tituloSigla || query;
+                    const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=pt-BR&query=${encodeURIComponent(termoBusca)}&include_adult=false&page=1`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        (data.results || []).slice(0, 4).forEach(item => {
+                            if (sugestoes.length >= 6) return;
+                            if (item.media_type !== 'movie' && item.media_type !== 'tv') return;
+                            const isTv = item.media_type === 'tv';
+                            const title = isTv ? (item.name || item.original_name) : (item.title || item.original_title);
+                            if (!sugestoes.some(s => s.title.toLowerCase() === title.toLowerCase())) {
+                                const date = isTv ? (item.first_air_date || '') : (item.release_date || '');
+                                const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=80';
+                                sugestoes.push({
+                                    id: item.id,
+                                    title: title,
+                                    type: isTv ? 'Série' : 'Filme',
+                                    year: date ? date.substring(0, 4) : 'TMDB',
+                                    score: item.vote_average ? item.vote_average.toFixed(1) : '7.8',
+                                    poster: poster
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            if (sugestoes.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            dropdown.innerHTML = sugestoes.map((s, idx) => `
+                <div class="title-sugg-item" onclick="selecionarSugestaoTitulo('${encodeURIComponent(s.title)}')">
+                    <img src="${s.poster}" class="title-sugg-img" alt="${s.title}" onerror="this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=80'">
+                    <div class="title-sugg-info">
+                        <div class="title-sugg-name">
+                            ${s.viaSigla ? `⚡ [Sigla Detectada] ` : ''}${s.title}
+                        </div>
+                        <div class="title-sugg-meta">
+                            <span class="title-sugg-badge">${s.type || 'Filme'}</span>
+                            <span>📅 ${s.year || '2024'}</span>
+                            <span style="color: var(--accent-gold); font-weight: 700;">⭐ ${s.score || '8.0'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            dropdown.style.display = 'block';
+        }
+
+        function selecionarSugestaoTitulo(tituloCodificado) {
+            const titulo = decodeURIComponent(tituloCodificado);
+            const input = document.getElementById('titleSearchInput');
+            const dropdown = document.getElementById('titleSuggestionsDropdown');
+
+            if (input) input.value = titulo;
+            if (dropdown) dropdown.style.display = 'none';
+
+            filtrarTitulosNaTela();
+            if (!titulosFiltrados.some(t => t.title.toLowerCase() === titulo.toLowerCase())) {
+                executarBuscaTmdbOnline();
+            }
         }
 
         /* BUSCA ONLINE DIRETO NO TMDB */
         async function executarBuscaTmdbOnline() {
-            const query = (document.getElementById('titleSearchInput')?.value || '').trim();
+            const queryRaw = (document.getElementById('titleSearchInput')?.value || '').trim();
+            const query = MAPA_SIGLAS_TITULOS[queryRaw.toLowerCase()] || queryRaw;
+
             if (!query) {
                 filtrarTitulosNaTela();
                 return;
             }
+
+            const dropdown = document.getElementById('titleSuggestionsDropdown');
+            if (dropdown) dropdown.style.display = 'none';
 
             const grid = document.getElementById('titlesGrid');
             grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--accent-cyan); font-weight: 700;">Pesquisando "${query}" no catálogo global do TMDB... ⚡</div>`;
@@ -1644,22 +2250,32 @@
                     const score = item.vote_average ? item.vote_average.toFixed(1) : '7.5';
                     const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : gerarFallbackCapa(title);
 
+                    const meta = calcularMetadadosDinamicos({
+                        ...item,
+                        title,
+                        type: tipo,
+                        release_date: date,
+                        score
+                    }, item.media_type, 'search');
+
                     return {
                         id: item.id,
                         title: title,
                         type: tipo,
                         year: year,
+                        release_date: date,
                         genre: mapearGeneros(item.genre_ids),
                         score: score,
-                        badge: 'RESULTADO',
+                        badge: meta.badge,
                         poster: poster,
                         overview: item.overview || 'Sinopse não disponível.',
-                        providers: estimarProvedoresBr(item, isTv, isAnime),
+                        providers: meta.providers,
                         media_type: item.media_type
                     };
                 });
 
                 renderizarGridTitulos(titulosBuscados);
+                enriquecerProvedoresEmBackground(titulosBuscados);
             } catch (e) {
                 console.warn('Erro ao buscar online:', e);
                 filtrarTitulosNaTela();
@@ -1681,9 +2297,22 @@
                 if (provedorFiltroAtual !== 'all') {
                     if (provedorFiltroAtual === 'Filme' || provedorFiltroAtual === 'Série' || provedorFiltroAtual === 'Anime') {
                         matchProv = t.type === provedorFiltroAtual;
+                    } else if (provedorFiltroAtual === 'Cinema') {
+                        matchProv = (t.providers || []).includes('Cinema');
                     } else {
                         const provs = t.providers || [];
-                        matchProv = provs.some(p => p.toLowerCase().includes(provedorFiltroAtual.toLowerCase()));
+                        const f = provedorFiltroAtual.toLowerCase();
+                        matchProv = provs.some(p => {
+                            const pl = (p || '').toLowerCase();
+                            if (f === 'netflix') return pl === 'netflix';
+                            if (f === 'max') return pl === 'max' || pl.includes('hbo');
+                            if (f === 'prime video') return pl.includes('prime') || pl.includes('amazon');
+                            if (f === 'disney+') return pl.includes('disney');
+                            if (f === 'crunchyroll') return pl.includes('crunchyroll');
+                            if (f === 'paramount+') return pl.includes('paramount');
+                            if (f === 'apple tv+') return pl.includes('apple');
+                            return pl.includes(f);
+                        });
                     }
                 }
 

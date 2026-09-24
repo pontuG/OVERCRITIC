@@ -14,6 +14,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js"></script>
     <script src="js/notifications.js"></script>
+    <script src="js/version.js"></script>
+    <link rel="stylesheet" href="css/responsive-global.css">
     <style>
         :root {
             --bg-color: #07090f;
@@ -438,7 +440,7 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(11, 15, 25, 0.85);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
             padding: 12px 16px;
@@ -448,18 +450,120 @@
             outline: none;
             transition: all 0.25s ease;
         }
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 15px;
+            padding-right: 42px;
+        }
+        .form-group select option {
+            background-color: #0b0f19;
+            color: #f0f4fc;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+        }
         .form-group input:focus,
-        .form-group select:focus,
         .form-group textarea:focus {
             border-color: var(--accent-cyan);
             box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
-            background: rgba(0, 0, 0, 0.5);
+            background-color: #0f1526;
+            color: #ffffff;
         }
+        .form-group select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+            background-color: #0f1526;
+            color: #ffffff;
+        }
+        .form-group input[readonly] {
+            opacity: 0.85;
+            cursor: default;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        /* ── MODO CLARO ── */
         body.light-mode .form-group input,
-        body.light-mode .form-group select,
         body.light-mode .form-group textarea {
-            background: #eaedf4;
+            background-color: #ffffff;
             border-color: rgba(0, 0, 0, 0.18);
+            color: #0e121a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+        body.light-mode .form-group select {
+            background-color: #ffffff;
+            border-color: rgba(0, 0, 0, 0.18);
+            color: #0e121a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c51b29' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat !important;
+            background-position: right 14px center !important;
+            background-size: 15px !important;
+        }
+        body.light-mode .form-group select option {
+            background-color: #ffffff;
+            color: #0e121a;
+            padding: 12px 16px;
+        }
+        body.light-mode .form-group input:focus,
+        body.light-mode .form-group textarea:focus {
+            background-color: #ffffff !important;
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 14px rgba(197, 27, 41, 0.22) !important;
+            color: #0e121a !important;
+        }
+        body.light-mode .form-group select:focus {
+            background-color: #ffffff !important;
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 14px rgba(197, 27, 41, 0.22) !important;
+            color: #0e121a !important;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c51b29' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 14px center !important;
+            background-size: 15px !important;
+        }
+        body.light-mode .form-group input[readonly] {
+            background-color: #e2e6ef !important;
+            color: #4a5568 !important;
+            border-color: rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .admin-select-filter {
+            padding: 7px 32px 7px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 8px;
+            background-color: #0b0f19;
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .admin-select-filter option {
+            background-color: #0b0f19;
+            color: #f0f4fc;
+        }
+        body.light-mode .admin-select-filter {
+            background-color: #ffffff;
+            border-color: rgba(0, 0, 0, 0.18);
+            color: #0e121a;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c51b29' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
+            background-size: 13px !important;
+        }
+        body.light-mode .admin-select-filter option {
+            background-color: #ffffff;
             color: #0e121a;
         }
 
@@ -871,7 +975,10 @@
         <!-- CABEÇALHO HERO -->
         <header class="support-hero">
             <div class="hero-left">
-                <div class="hero-tag">💡 CANAL DIRETO COM O ADMIN</div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+                    <div class="hero-tag" style="margin-bottom: 0;">💡 CANAL DIRETO COM O ADMIN</div>
+                    <div class="hero-tag" style="margin-bottom: 0; cursor: pointer;" onclick="abrirChangelogModal()" title="Clique para ver novidades desta versão">🚀 <span class="site-version-text">v26.09.3</span></div>
+                </div>
                 <h1 class="hero-title">Suporte & Sugestões</h1>
                 <p class="hero-desc">
                     Tem uma ideia para melhorar o Overcritic, encontrou um bug ou precisa de ajuda técnica? Envie sua mensagem diretamente para o Administrador do sistema.
@@ -943,11 +1050,11 @@
                             <label for="ticketSection">Página ou Área Relacionada</label>
                             <select id="ticketSection">
                                 <option value="Geral da Plataforma">🌐 Geral da Plataforma</option>
-                                <option value="Críticas de Jogos">🎮 Críticas de Jogos (adicionar_jogos)</option>
-                                <option value="Descobrir Jogos">🪐 Descobrir Jogos (descobrir_jogos)</option>
-                                <option value="Filmes & Séries">🎬 Filmes & Séries (adicionar_midias)</option>
-                                <option value="Descobrir Títulos">🍿 Descobrir Títulos (descobrir_titulos)</option>
-                                <option value="Platinas & Troféus">🏆 Platinas & Troféus (adicionar_platinas)</option>
+                                <option value="Críticas de Jogos">🎮 Críticas de Jogos</option>
+                                <option value="Descobrir Jogos">🪐 Descobrir Jogos</option>
+                                <option value="Filmes & Séries">🎬 Filmes & Séries</option>
+                                <option value="Descobrir Títulos">🍿 Descobrir Títulos</option>
+                                <option value="Platinas & Troféus">🏆 Platinas & Troféus</option>
                                 <option value="Design & Visual">🎨 Design / Cores / Modo Claro & Escuro</option>
                             </select>
                         </div>
@@ -1025,7 +1132,7 @@
                         <span>👑 Caixa de Entrada do Administrador</span>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <select id="adminFilterStatus" onchange="renderizarChamadosAdmin()" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-main);">
+                        <select id="adminFilterStatus" class="admin-select-filter" onchange="renderizarChamadosAdmin()">
                             <option value="todos">Todos os Status</option>
                             <option value="Aberto">Apenas Abertos</option>
                             <option value="Em Análise">Apenas Em Análise</option>
