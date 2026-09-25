@@ -545,6 +545,13 @@
             });
         } catch(e) {}
 
+        // Filtra quaisquer registros que tenham sido excluídos
+        if (window.isItemExcluidoGlobal) {
+            jogos = jogos.filter(j => !window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor));
+            platinas = platinas.filter(p => !window.isItemExcluidoGlobal('platina', p.id, p.titulo || p.title, p.usuario || p.user));
+            midias = midias.filter(m => !window.isItemExcluidoGlobal('midia', m.id, m.title || m.titulo, m.autor));
+        }
+
         // Atualiza estatísticas no modal
         document.getElementById('gpStatJogos').textContent = jogos.length;
         document.getElementById('gpCountTabJogos').textContent = jogos.length;

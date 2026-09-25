@@ -2329,7 +2329,9 @@
                     return;
                 }
 
-                const midiasNuvem = (data || []).map(mapSupabaseParaMidia);
+                const midiasNuvem = (data || [])
+                    .filter(m => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('midia', m.id, m.titulo || m.title, m.autor))
+                    .map(mapSupabaseParaMidia);
                 const mapa = new Map();
                 midiasNuvem.forEach(m => mapa.set(String(m.id), m));
                 
@@ -2369,17 +2371,19 @@
             }
         }
 
-        async function excluirMidiaDoSupabase(id) {
+        async function excluirMidiaDoSupabase(id, title) {
             if (!window.sbClient) return;
             try {
                 const numId = Number(String(id).replace(/\D/g, '')) || id;
-                const { error } = await window.sbClient
+                await window.sbClient
                     .from('reviews_midias')
                     .delete()
                     .eq('id', numId);
-                if (!error) {
-                    console.log('🗑️ [Supabase] Mídia removida da nuvem!');
+                if (title) {
+                    await window.sbClient.from('reviews_midias').delete().ilike('titulo', title);
+                    await window.sbClient.from('reviews_midias').delete().ilike('title', title);
                 }
+                console.log('🗑️ [Supabase] Mídia removida da nuvem!');
             } catch (err) {
                 console.warn('Erro ao excluir no Supabase:', err);
             }
@@ -2397,9 +2401,10 @@
                 const parsed = JSON.parse(raw);
                 if (!Array.isArray(parsed)) return [];
 
-                // Expurgar seeds legadas e cadastros de terceiros
+                // Expurgar seeds legadas, cadastros de terceiros e itens excluídos
                 return parsed.filter(m => {
                     if (!m) return false;
+                    if (window.isItemExcluidoGlobal && window.isItemExcluidoGlobal('midia', m.id, m.title || m.titulo, m.autor)) return false;
                     const strId = String(m.id || '');
                     if (strId.startsWith('seed-')) return false;
 
@@ -2545,17 +2550,32 @@
             const item = reviews.find(r => String(r.id) === String(id));
             if (!item) return;
 
-            const confirmou = await showConfirm(`Deseja realmente remover a análise de "${item.title}"?`, {
-                title: 'Excluir Análise',
+            const currentUser = (localStorage.getItem('overcritic_currentUser') || 'Visitante').toLowerCase();
+            const isAdmin = (typeof window.isAdminUser === 'function' && window.isAdminUser()) || (localStorage.getItem('overcritic_is_admin') === 'true');
+            const isOwner = currentUser !== 'visitante' && (item.autor || '').toLowerCase() === currentUser;
+
+            const modalTitle = isAdmin && !isOwner ? 'Moderação de Conteúdo (Admin)' : 'Excluir Análise';
+            const confirmMsg = isAdmin && !isOwner
+                ? `[ADMIN] Deseja realmente remover permanentemente a análise de "${item.title}" de toda a plataforma?`
+                : `Deseja realmente remover a análise de "${item.title}"?`;
+
+            const confirmou = await showConfirm(confirmMsg, {
+                title: modalTitle,
                 confirmText: 'Sim, Excluir',
                 cancelText: 'Cancelar',
                 isDanger: true
             });
 
             if (confirmou) {
-                const novasReviews = reviews.filter(r => String(r.id) !== String(id));
-                salvarReviewsNoStorage(novasReviews);
-                excluirMidiaDoSupabase(id);
+                // Registra exclusão global definitiva
+                if (window.registrarExclusaoGlobal) {
+                    await window.registrarExclusaoGlobal('midia', id, item.title, item.autor);
+                } else {
+                    const novasReviews = reviews.filter(r => String(r.id) !== String(id));
+                    salvarReviewsNoStorage(novasReviews);
+                    await excluirMidiaDoSupabase(id, item.title, item.autor);
+                }
+                filtrarReviews();
                 showToast.success(`"${item.title}" removido com sucesso!`);
             }
         }

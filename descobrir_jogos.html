@@ -1011,6 +1011,54 @@
             color: #fca5a5;
         }
 
+        .store-row-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .store-row-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .store-tag-price {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.2px;
+        }
+        .store-tag-gamepass {
+            background: #107c10;
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            box-shadow: 0 2px 6px rgba(16, 124, 16, 0.4);
+        }
+        .store-tag-free {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .store-row-action {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.82rem;
+            opacity: 0.9;
+        }
+
         .btn-modal-eval {
             margin-top: 6px;
             width: 100%;
@@ -1346,12 +1394,12 @@
         ═══════════════════════════════════ */
         const CATALOGO_ESTENDIDO = {
             trending: [
-                { title: "Baldur's Gate 3", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg", genre: "RPG / Estratégia", score: "Metacritic 96", badge: "🔥 #1 GOTY", priceBRL: 199.99, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1086940" },
+                { title: "Baldur's Gate 3", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg", genre: "RPG / Estratégia", score: "Metacritic 96", badge: "🔥 #1 GOTY", priceBRL: 199.99, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1086940" },
                 { title: "Elden Ring", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg", genre: "Souls-like / RPG", score: "Metacritic 96", badge: "🏆 ACLAMADO", priceBRL: 229.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1245620" },
                 { title: "Black Myth: Wukong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg", genre: "Ação / RPG", score: "Steam: 96%", badge: "🔥 SUCESSO", priceBRL: 229.99, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2358720" },
-                { title: "Cyberpunk 2077", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg", genre: "Mundo Aberto / Sci-Fi", score: "Metacritic 86", badge: "⭐ EXPANSÃO", priceBRL: 199.90, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1091500" },
+                { title: "Cyberpunk 2077", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg", genre: "Mundo Aberto / Sci-Fi", score: "Metacritic 86", badge: "⭐ EXPANSÃO", priceBRL: 199.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1091500" },
                 { title: "Helldivers 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg", genre: "Tiro Co-op / Ação", score: "Steam: Muito Positivo", badge: "CO-OP", priceBRL: 199.50, priceUSD: 39.99, platforms: ['PC', 'PS'], steamAppID: "553850" },
-                { title: "Grand Theft Auto V", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg", genre: "Mundo Aberto / Ação", score: "Metacritic 96", badge: "RECORDISTA", priceBRL: 82.41, priceUSD: 14.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "271590" },
+                { title: "Grand Theft Auto V", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg", genre: "Mundo Aberto / Ação", score: "Metacritic 96", badge: "RECORDISTA", priceBRL: 82.41, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "271590" },
                 { title: "Red Dead Redemption 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg", genre: "Faroeste / Aventura", score: "Metacritic 97", badge: "OBRA-PRIMA", priceBRL: 299.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1174180" },
                 { title: "Hogwarts Legacy", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/990080/header.jpg", genre: "Mundo Aberto / Magia", score: "Steam: 91%", badge: "MAGIA", priceBRL: 249.99, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "990080" },
                 { title: "Palworld", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1623730/header.jpg", genre: "Sobrevivência / Crafting", score: "Steam: 93%", badge: "EM ALTA", priceBRL: 88.99, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1623730" },
@@ -1411,6 +1459,7 @@
             free: [],
             deals: []
         };
+        let cacheFreeToGame = null;
         let jogosFiltrados = [];
         window.jogosAtuaisNaTela = [];
         let buscaTimer = null;
@@ -1421,6 +1470,7 @@
         /* CATÁLOGO DE EXCLUSIVOS & CLÁSSICOS DE CONSOLES (PLAYSTATION, NINTENDO, XBOX) */
         const JOGOS_CONSOLES_ICONS = [
             // PlayStation
+            { title: "God of War", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg", genre: "Ação / Mitologia", score: "Metacritic 94", badge: "PLAYSTATION HITS", priceBRL: 199.90, priceUSD: 49.99, platforms: ['PC', 'PS'], steamAppID: "1593500" },
             { title: "God of War Ragnarök", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg", genre: "Ação / Mitologia Nórdica", score: "Metacritic 94", badge: "PLAYSTATION", priceBRL: 249.90, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2322010" },
             { title: "God of War III Remastered", thumb: "https://image.api.playstation.com/vulcan/img/rnd/202011/0711/p8JCvA8692BICXAPoyylh7ed.png", genre: "Hack and Slash / Mitologia", score: "Metacritic 81", badge: "CLÁSSICO PS", priceBRL: 99.50, priceUSD: 19.99, platforms: ['PS'] },
             { title: "God of War (2005)", thumb: "https://upload.wikimedia.org/wikipedia/en/b/b5/God_of_War_%282005%29_cover.jpg", genre: "Hack and Slash / Mitologia Grega", score: "Metacritic 94", badge: "CLÁSSICO PS2", priceBRL: 99.00, priceUSD: 19.99, platforms: ['PS'] },
@@ -1465,7 +1515,11 @@
             { title: "Sea of Thieves", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172620/header.jpg", genre: "Piratas / Aventura Co-op", score: "Steam: 90%", badge: "XBOX", priceBRL: 89.00, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1172620" },
             { title: "Forza Motorsport", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2436490/header.jpg", genre: "Simulação de Corrida", score: "Metacritic 85", badge: "XBOX", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "2436490" },
             { title: "Senua's Saga: Hellblade II", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2461850/header.jpg", genre: "Aventura Cinemática", score: "Metacritic 81", badge: "XBOX", priceBRL: 229.00, priceUSD: 49.99, platforms: ['PC', 'XBOX'], steamAppID: "2461850" },
-            { title: "Hi-Fi RUSH", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817230/header.jpg", genre: "Ação Rítmica", score: "Metacritic 87", badge: "XBOX / GOTY", priceBRL: 149.00, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1817230" }
+            { title: "Hi-Fi RUSH", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817230/header.jpg", genre: "Ação Rítmica", score: "Metacritic 87", badge: "XBOX / GOTY", priceBRL: 149.00, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1817230", gamePass: true },
+            { title: "Fable", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2769570/header.jpg", genre: "RPG de Ação & Aventura", score: "Xbox Game Studios", badge: "AGUARDADO", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "2769570", gamePass: true },
+            { title: "Avowed", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2457220/header.jpg", genre: "RPG / Fantasia em 1ª Pessoa", score: "Obsidian / Xbox", badge: "LANÇAMENTO", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "2457220", gamePass: true },
+            { title: "DOOM: The Dark Ages", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3017860/header.jpg", genre: "FPS / Ação Frenética", score: "id Software / Bethesda", badge: "AGUARDADO", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "3017860", gamePass: true },
+            { title: "South of Midnight", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1934570/header.jpg", genre: "Ação / Aventura Fantástica", score: "Compulsion / Xbox", badge: "NOVIDADE", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'XBOX'], steamAppID: "1934570", gamePass: true }
         ];
 
         /* INICIALIZAÇÃO */
@@ -1588,45 +1642,523 @@
         }
 
         /* DETECTOR INTELIGENTE DE PLATAFORMAS PARA JOGOS DA WEB */
-        function detectarPlataformas(titulo) {
+        function detectarPlataformas(titulo, platTexto = '') {
             const t = (titulo || '').toLowerCase();
-            // Exclusivos puros Nintendo
-            if (t.includes('zelda') || t.includes('mario') || t.includes('pokemon') || t.includes('metroid') || t.includes('kirby') || t.includes('animal crossing') || t.includes('smash bros') || t.includes('splatoon') || t.includes('donkey kong') || t.includes('fire emblem') || t.includes('xenoblade')) {
+            const p = (platTexto || '').toLowerCase();
+
+            // Exclusivos puros Nintendo Switch
+            if (t.includes('zelda') || t.includes('mario') || t.includes('pokemon') || t.includes('metroid') || 
+                t.includes('kirby') || t.includes('animal crossing') || t.includes('smash bros') || 
+                t.includes('splatoon') || t.includes('donkey kong') || t.includes('fire emblem') || 
+                t.includes('xenoblade') || t.includes('luigi') || t.includes('pikmin') || t.includes('bayonetta 2') || t.includes('bayonetta 3')) {
                 return ['SWITCH'];
             }
-            // Exclusivos de PC / RTS / MMO
-            if (t.includes('counter-strike') || t.includes('dota') || t.includes('half-life') || t.includes('team fortress') || t.includes('civilization') || t.includes('total war') || t.includes('age of empires') || t.includes('world of warcraft') || t.includes('league of legends')) {
-                return ['PC'];
-            }
-            // Clássicos puros PlayStation
-            if (t.includes('bloodborne') || t.includes('demon\'s souls') || t.includes('gran turismo') || t.includes('the order 1886') || t.includes('infamous') || t.includes('killzone') || t.includes('god of war iii') || t.includes('god of war (2005)')) {
+
+            // Exclusivos puros PlayStation (Clássicos de Console sem porte PC)
+            if (t.includes('bloodborne') || t.includes('demon\'s souls') || t.includes('gran turismo 7') || 
+                t.includes('the order 1886') || t.includes('infamous') || t.includes('killzone') || 
+                t.includes('god of war iii') || t.includes('god of war (2005)') || t.includes('shadow of the colossus')) {
                 return ['PS'];
             }
-            // PlayStation + PC (God of War, Spider-Man, Last of Us, etc.)
-            if (t.includes('god of war') || t.includes('spider-man') || t.includes('last of us') || t.includes('horizon') || t.includes('ghost of tsushima') || t.includes('helldivers') || t.includes('silent hill 2') || t.includes('death stranding') || t.includes('uncharted') || t.includes('returnal') || t.includes('days gone')) {
+
+            // PlayStation + PC (Portes Oficiais PlayStation Studios para PC)
+            if (t.includes('god of war') || t.includes('spider-man') || t.includes('last of us') || 
+                t.includes('horizon') || t.includes('ghost of tsushima') || t.includes('helldivers') || 
+                t.includes('silent hill 2') || t.includes('death stranding') || t.includes('uncharted') || 
+                t.includes('returnal') || t.includes('days gone') || t.includes('ratchet')) {
                 return ['PC', 'PS'];
             }
+
             // Exclusivos Xbox + PC
-            if (t.includes('forza') || t.includes('halo') || t.includes('gears') || t.includes('starfield') || t.includes('s.t.a.l.k.e.r') || t.includes('sea of thieves') || t.includes('state of decay') || t.includes('fable')) {
+            if (t.includes('forza') || t.includes('halo') || t.includes('gears') || 
+                t.includes('starfield') || t.includes('s.t.a.l.k.e.r') || t.includes('sea of thieves') || 
+                t.includes('state of decay') || t.includes('fable') || t.includes('senua\'s saga') || 
+                t.includes('hi-fi rush')) {
                 return ['PC', 'XBOX'];
             }
-            // Jogos Multiplataforma com porte para Switch
-            const switchGames = ['hollow knight', 'dead cells', 'hades', 'celeste', 'cuphead', 'witcher', 'persona', 'doom', 'portal', 'bioshock', 'hogwarts', 'monster hunter', 'lego', 'crash', 'spyro', 'sonic', 'dragon quest', 'final fantasy', 'assassin', 'resident evil', 'ori', 'skyrim', 'nier', 'tomb raider', 'apex', 'warframe', 'minecraft', 'overcooked', 'fall guys', 'stardew', 'terraria', 'among us'];
-            if (switchGames.some(kw => t.includes(kw))) {
+
+            // Grandes Jogos Multiplataforma presentes em PC, PlayStation, Xbox e Switch
+            const multiComSwitch = [
+                'hollow knight', 'dead cells', 'hades', 'celeste', 'cuphead', 'witcher', 'persona', 
+                'doom', 'portal', 'bioshock', 'hogwarts', 'monster hunter', 'lego', 'crash', 'spyro', 
+                'sonic', 'dragon quest', 'final fantasy', 'assassin', 'resident evil', 'ori', 'skyrim', 
+                'nier', 'tomb raider', 'apex', 'warframe', 'minecraft', 'overcooked', 'fall guys', 
+                'stardew', 'terraria', 'among us', 'fortnite', 'overwatch', 'fifa', 'ea sports fc', 
+                'nba', 'rocket league', 'dragon ball', 'naruto', 'prince of persia', 'diablo'
+            ];
+            if (multiComSwitch.some(kw => t.includes(kw))) {
                 return ['PC', 'PS', 'XBOX', 'SWITCH'];
             }
-            // Multiplataforma moderno padrão
+
+            // Se for explicitamente apenas PC / Navegador (FreeToGame PC-only ou RTS clássico)
+            if (p.includes('pc') && !p.includes('playstation') && !p.includes('xbox') && !p.includes('switch') && 
+                (t.includes('counter-strike') || t.includes('dota') || t.includes('half-life') || 
+                 t.includes('team fortress') || t.includes('civilization') || t.includes('total war') || 
+                 t.includes('age of empires') || t.includes('world of warcraft') || t.includes('league of legends') || 
+                 t.includes('valorant') || t.includes('runescape') || t.includes('eve online') || t.includes('world of tanks'))) {
+                return ['PC'];
+            }
+
+            // Padrão Multiplataforma moderno (PC, PlayStation e Xbox)
             return ['PC', 'PS', 'XBOX'];
         }
 
-        /* FORMATADOR DE PREÇO RESPEITANDO A MOEDA SELECIONADA */
+        /* ════════════════════════════════════════════════════════
+           SISTEMA DE PRECIFICAÇÃO REGIONAL E POR PLATAFORMA (OVERCRITIC MATRIX)
+           Mapeia fielmente os preços oficiais do Brasil (Steam, PS Store, Xbox, eShop)
+           utilizando correspondência autoritativa por Steam AppID e correspondência exata.
+        ════════════════════════════════════════════════════════ */
+
+        // Banco de Preços Indexado por Steam AppID (Precisão 100% sem ambiguidades)
+        const TABELA_APPID_PRECOS = {
+            // God of War
+            '1593500': { title: "God of War", steam: 199.90, ps: 99.50, usd: 49.99 },
+            '2322010': { title: "God of War Ragnarök", steam: 249.90, ps: 349.90, usd: 59.99 },
+            
+            // Spider-Man
+            '1817070': { title: "Marvel's Spider-Man Remastered", steam: 249.90, ps: 249.90, usd: 59.99 },
+            '1817190': { title: "Marvel's Spider-Man: Miles Morales", steam: 199.90, ps: 249.50, usd: 49.99 },
+            '2651280': { title: "Marvel's Spider-Man 2", steam: 299.90, ps: 349.90, usd: 59.99 },
+
+            // The Last of Us
+            '1888930': { title: "The Last of Us Part I", steam: 249.90, ps: 349.90, usd: 59.99 },
+
+            // Ghost of Tsushima & Exclusivos Sony no PC
+            '2215430': { title: "Ghost of Tsushima Director's Cut", steam: 249.90, ps: 349.90, usd: 59.99 },
+            '2564270': { title: "Horizon Zero Dawn Remastered", steam: 249.90, ps: 249.90, usd: 49.99 },
+            '2420110': { title: "Horizon Forbidden West Complete Edition", steam: 249.90, ps: 349.90, usd: 59.99 },
+            '1659420': { title: "Uncharted: Coleção Legado dos Ladrões", steam: 199.90, ps: 249.50, usd: 49.99 },
+            '1649240': { title: "Returnal", steam: 249.90, ps: 349.90, usd: 59.99 },
+            '1895880': { title: "Ratchet & Clank: Em Uma Outra Dimensão", steam: 249.90, ps: 349.90, usd: 59.99 },
+            '553850':  { title: "Helldivers 2", steam: 199.50, ps: 199.50, usd: 39.99 },
+
+            // FromSoftware / Soulslike
+            '1245620': { title: "Elden Ring", steam: 229.90, ps: 299.90, xbox: 299.90, usd: 59.99 },
+            '814380':  { title: "Sekiro: Shadows Die Twice", steam: 274.00, ps: 274.50, xbox: 274.50, usd: 59.99 },
+            '374320':  { title: "Dark Souls III", steam: 229.90, ps: 249.90, xbox: 249.90, usd: 59.99 },
+            '570940':  { title: "Dark Souls: Remastered", steam: 172.45, ps: 179.90, xbox: 179.90, switch: 199.00, usd: 39.99 },
+            '2358720': { title: "Black Myth: Wukong", steam: 229.99, ps: 299.90, usd: 59.99 },
+            '1627720': { title: "Lies of P", steam: 249.90, ps: 299.90, xbox: 299.90, gamePass: true, usd: 59.99 },
+
+            // RPGs
+            '1086940': { title: "Baldur's Gate 3", steam: 199.99, ps: 299.90, xbox: 299.90, usd: 59.99 },
+            '1091500': { title: "Cyberpunk 2077", steam: 199.90, ps: 199.50, xbox: 199.50, usd: 59.99 },
+            '292030':  { title: "The Witcher 3: Wild Hunt", steam: 129.99, ps: 149.50, xbox: 149.50, switch: 199.00, usd: 39.99 },
+            '1845910': { title: "Dragon Age: The Veilguard", steam: 249.00, ps: 349.90, xbox: 349.90, usd: 59.99 },
+            '2620600': { title: "Metaphor: ReFantazio", steam: 299.00, ps: 349.90, xbox: 349.90, usd: 69.99 },
+            '1687950': { title: "Persona 5 Royal", steam: 249.00, ps: 299.90, xbox: 299.90, switch: 299.90, usd: 59.99 },
+            '2161700': { title: "Persona 3 Reload", steam: 349.90, ps: 349.90, xbox: 349.90, gamePass: true, usd: 69.99 },
+            '1328670': { title: "Mass Effect Legendary Edition", steam: 249.00, ps: 299.90, xbox: 299.90, usd: 59.99 },
+            '632470':  { title: "Disco Elysium - The Final Cut", steam: 75.49, ps: 199.50, xbox: 149.00, switch: 199.00, usd: 19.99 },
+
+            // Rockstar
+            '271590':  { title: "Grand Theft Auto V", steam: 82.41, ps: 99.50, xbox: 99.50, usd: 29.99 },
+            '1174180': { title: "Red Dead Redemption 2", steam: 299.90, ps: 249.90, xbox: 249.90, usd: 59.99 },
+            '2688580': { title: "Red Dead Redemption", steam: 249.00, ps: 249.00, switch: 249.00, usd: 49.99 },
+
+            // Sucessos Mundiais
+            '990080':  { title: "Hogwarts Legacy", steam: 249.99, ps: 299.90, xbox: 299.90, switch: 299.90, usd: 59.99 },
+            '1623730': { title: "Palworld", steam: 88.99, ps: 159.90, xbox: 112.45, gamePass: true, usd: 29.99 },
+            '2124490': { title: "Silent Hill 2", steam: 349.90, ps: 349.90, usd: 69.99 },
+            '2183900': { title: "Warhammer 40,000: Space Marine 2", steam: 249.00, ps: 349.90, xbox: 349.90, usd: 59.99 },
+            '2677660': { title: "Indiana Jones and the Great Circle", steam: 349.00, ps: 349.00, xbox: 349.00, gamePass: true, usd: 69.99 },
+            '1643320': { title: "S.T.A.L.K.E.R. 2: Heart of Chornobyl", steam: 249.00, xbox: 249.00, gamePass: true, usd: 59.99 },
+            '1601580': { title: "Frostpunk 2", steam: 134.99, ps: 199.50, xbox: 199.50, gamePass: true, usd: 44.99 },
+
+            // Capcom
+            '2050650': { title: "Resident Evil 4", steam: 169.00, ps: 199.50, xbox: 199.50, usd: 39.99 },
+            '1196590': { title: "Resident Evil Village", steam: 139.90, ps: 184.50, xbox: 184.00, usd: 39.99 },
+            '883710':  { title: "Resident Evil 2", steam: 139.90, ps: 169.50, xbox: 169.00, usd: 39.99 },
+            '952060':  { title: "Resident Evil 3", steam: 139.90, ps: 169.50, xbox: 169.00, usd: 39.99 },
+            '582010':  { title: "Monster Hunter: World", steam: 99.90, ps: 104.90, xbox: 104.90, usd: 29.99 },
+            '2246340': { title: "Monster Hunter Wilds", steam: 279.00, ps: 332.90, xbox: 332.00, usd: 69.99 },
+
+            // Xbox & Bethesda
+            '1551360': { title: "Forza Horizon 5", steam: 249.00, xbox: 249.00, gamePass: true, usd: 59.99 },
+            '2436490': { title: "Forza Motorsport", steam: 299.00, xbox: 299.00, gamePass: true, usd: 69.99 },
+            '1716740': { title: "Starfield", steam: 299.00, xbox: 299.00, gamePass: true, usd: 69.99 },
+            '1240440': { title: "Halo Infinite", steam: 249.00, xbox: 249.00, gamePass: true, usd: 59.99 },
+            '976730':  { title: "Halo: The Master Chief Collection", steam: 129.00, xbox: 129.00, gamePass: true, usd: 39.99 },
+            '1097840': { title: "Gears 5", steam: 149.00, xbox: 149.00, gamePass: true, usd: 39.99 },
+            '1172620': { title: "Sea of Thieves", steam: 89.00, ps: 199.50, xbox: 89.00, gamePass: true, usd: 39.99 },
+            '2461850': { title: "Senua's Saga: Hellblade II", steam: 229.00, xbox: 229.00, gamePass: true, usd: 49.99 },
+            '1817230': { title: "Hi-Fi RUSH", steam: 149.00, ps: 149.50, xbox: 149.00, gamePass: true, usd: 29.99 },
+            '2457220': { title: "Avowed", steam: 299.00, xbox: 299.00, gamePass: true, usd: 69.99 },
+            '2769570': { title: "Fable", steam: 299.00, xbox: 299.00, gamePass: true, usd: 69.99 },
+            '3017860': { title: "DOOM: The Dark Ages", steam: 299.00, ps: 349.90, xbox: 299.00, gamePass: true, usd: 69.99 },
+            '1934570': { title: "South of Midnight", steam: 249.00, xbox: 249.00, gamePass: true, usd: 59.99 },
+            '782330':  { title: "DOOM Eternal", steam: 149.00, ps: 149.50, xbox: 149.50, switch: 199.00, usd: 39.99 },
+            '379720':  { title: "DOOM", steam: 61.50, ps: 79.90, xbox: 61.50, switch: 199.00, usd: 19.99 },
+
+            // Indies Consagrados
+            '367520':  { title: "Hollow Knight", steam: 46.99, ps: 62.50, xbox: 54.95, switch: 27.99, gamePass: true, usd: 14.99 },
+            '588650':  { title: "Dead Cells", steam: 47.49, ps: 104.90, xbox: 92.45, switch: 99.99, gamePass: true, usd: 24.99 },
+            '1145360': { title: "Hades", steam: 73.99, ps: 124.90, xbox: 124.90, switch: 124.90, usd: 24.99 },
+            '1145350': { title: "Hades II", steam: 88.99, usd: 29.99 },
+            '870780':  { title: "Control Ultimate Edition", steam: 129.00, ps: 199.50, xbox: 199.50, usd: 39.99 },
+
+            // Valve & Clássicos
+            '220':     { title: "Half-Life 2", steam: 32.99, usd: 9.99 },
+            '620':     { title: "Portal 2", steam: 32.99, switch: 69.99, usd: 9.99 },
+            '7670':    { title: "BioShock", steam: 29.99, ps: 83.50, xbox: 83.50, switch: 83.50, usd: 19.99 },
+            '409710':  { title: "BioShock Remastered", steam: 29.99, ps: 83.50, xbox: 83.50, switch: 83.50, usd: 19.99 },
+
+            // Gratuitos (F2P)
+            '730':     { title: "Counter-Strike 2", steam: 0, isFree: true },
+            '570':     { title: "Dota 2", steam: 0, isFree: true },
+            '1172470': { title: "Apex Legends", steam: 0, ps: 0, xbox: 0, switch: 0, isFree: true },
+            '230410':  { title: "Warframe", steam: 0, ps: 0, xbox: 0, switch: 0, isFree: true },
+            '1085660': { title: "Destiny 2", steam: 0, ps: 0, xbox: 0, isFree: true },
+            '440':     { title: "Team Fortress 2", steam: 0, isFree: true },
+            '578080':  { title: "PUBG: BATTLEGROUNDS", steam: 0, ps: 0, xbox: 0, isFree: true },
+            '238960':  { title: "Path of Exile", steam: 0, ps: 0, xbox: 0, isFree: true },
+            '2767030': { title: "Marvel Rivals", steam: 0, ps: 0, xbox: 0, isFree: true }
+        };
+
+        // Banco de Preços Indexado por Títulos / Aliases Normalizados
+        const TABELA_PRECOS_CONHECIDOS = {
+            // God of War
+            'god of war ragnarok': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '2322010' },
+            'god of war iii remastered': { ps: 99.50, brl: 99.50, usd: 19.99 },
+            'god of war 3 remastered': { ps: 99.50, brl: 99.50, usd: 19.99 },
+            'god of war iii': { ps: 99.50, brl: 99.50, usd: 19.99 },
+            'god of war 2005': { ps: 99.00, brl: 99.00, usd: 19.99 },
+            'god of war 2018': { steam: 199.90, ps: 99.50, brl: 199.90, usd: 49.99, steamAppID: '1593500' },
+            'god of war': { steam: 199.90, ps: 99.50, brl: 199.90, usd: 49.99, steamAppID: '1593500' },
+
+            // Spider-Man
+            'marvels spider man remastered': { steam: 249.90, ps: 249.90, brl: 249.90, usd: 59.99, steamAppID: '1817070' },
+            'marvels spider man miles morales': { steam: 199.90, ps: 249.50, brl: 199.90, usd: 49.99, steamAppID: '1817190' },
+            'spider man miles morales': { steam: 199.90, ps: 249.50, brl: 199.90, usd: 49.99, steamAppID: '1817190' },
+            'marvels spider man 2': { steam: 299.90, ps: 349.90, brl: 299.90, usd: 59.99, steamAppID: '2651280' },
+            'spider man 2': { steam: 299.90, ps: 349.90, brl: 299.90, usd: 59.99, steamAppID: '2651280' },
+            'marvels spider man': { steam: 249.90, ps: 249.90, brl: 249.90, usd: 59.99, steamAppID: '1817070' },
+            'spider man': { steam: 249.90, ps: 249.90, brl: 249.90, usd: 59.99, steamAppID: '1817070' },
+
+            // The Last of Us
+            'the last of us part i': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '1888930' },
+            'the last of us part 1': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '1888930' },
+            'the last of us part ii remastered': { ps: 249.50, brl: 249.50, usd: 49.99 },
+            'the last of us part ii': { ps: 249.50, brl: 249.50, usd: 49.99 },
+            'the last of us part 2': { ps: 249.50, brl: 249.50, usd: 49.99 },
+            'the last of us': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '1888930' },
+
+            // PlayStation Exclusivos
+            'bloodborne': { ps: 99.50, brl: 99.50, usd: 19.99 },
+            'demons souls remake': { ps: 349.90, brl: 349.90, usd: 69.99 },
+            'demons souls': { ps: 349.90, brl: 349.90, usd: 69.99 },
+            'gran turismo 7': { ps: 349.90, brl: 349.90, usd: 69.99 },
+            'shadow of the colossus remake': { ps: 99.50, brl: 99.50, usd: 19.99 },
+            'shadow of the colossus': { ps: 99.50, brl: 99.50, usd: 19.99 },
+            'ghost of tsushima directors cut': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '2215430' },
+            'ghost of tsushima': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '2215430' },
+            'horizon zero dawn remastered': { steam: 249.90, ps: 249.90, brl: 249.90, usd: 49.99, steamAppID: '2564270' },
+            'horizon zero dawn': { steam: 249.90, ps: 249.90, brl: 249.90, usd: 49.99, steamAppID: '2564270' },
+            'horizon forbidden west complete edition': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '2420110' },
+            'horizon forbidden west': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '2420110' },
+            'uncharted colecao legado dos ladroes': { steam: 199.90, ps: 249.50, brl: 199.90, usd: 49.99, steamAppID: '1659420' },
+            'uncharted legacy of thieves': { steam: 199.90, ps: 249.50, brl: 199.90, usd: 49.99, steamAppID: '1659420' },
+            'returnal': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '1649240' },
+            'ratchet clank rift apart': { steam: 249.90, ps: 349.90, brl: 249.90, usd: 59.99, steamAppID: '1895880' },
+            'helldivers 2': { steam: 199.50, ps: 199.50, brl: 199.50, usd: 39.99, steamAppID: '553850' },
+
+            // FromSoftware / Souls
+            'elden ring': { steam: 229.90, ps: 299.90, xbox: 299.90, brl: 229.90, usd: 59.99, steamAppID: '1245620' },
+            'black myth wukong': { steam: 229.99, ps: 299.90, brl: 229.99, usd: 59.99, steamAppID: '2358720' },
+            'sekiro shadows die twice': { steam: 274.00, ps: 274.50, xbox: 274.50, brl: 274.00, usd: 59.99, steamAppID: '814380' },
+            'sekiro': { steam: 274.00, ps: 274.50, xbox: 274.50, brl: 274.00, usd: 59.99, steamAppID: '814380' },
+            'dark souls iii': { steam: 229.90, ps: 249.90, xbox: 249.90, brl: 229.90, usd: 59.99, steamAppID: '374320' },
+            'dark souls 3': { steam: 229.90, ps: 249.90, xbox: 249.90, brl: 229.90, usd: 59.99, steamAppID: '374320' },
+            'dark souls remastered': { steam: 172.45, ps: 179.90, xbox: 179.90, switch: 199.00, brl: 172.45, usd: 39.99, steamAppID: '570940' },
+            'lies of p': { steam: 249.90, ps: 299.90, xbox: 299.90, brl: 249.90, gamePass: true, usd: 59.99, steamAppID: '1627720' },
+
+            // RPGs
+            'baldurs gate 3': { steam: 199.99, ps: 299.90, xbox: 299.90, brl: 199.99, usd: 59.99, steamAppID: '1086940' },
+            'cyberpunk 2077': { steam: 199.90, ps: 199.50, xbox: 199.50, brl: 199.90, usd: 59.99, steamAppID: '1091500' },
+            'the witcher 3 wild hunt': { steam: 129.99, ps: 149.50, xbox: 149.50, switch: 199.00, brl: 129.99, usd: 39.99, steamAppID: '292030' },
+            'the witcher 3': { steam: 129.99, ps: 149.50, xbox: 149.50, switch: 199.00, brl: 129.99, usd: 39.99, steamAppID: '292030' },
+            'dragon age the veilguard': { steam: 249.00, ps: 349.90, xbox: 349.90, brl: 249.00, usd: 59.99, steamAppID: '1845910' },
+            'metaphor refantazio': { steam: 299.00, ps: 349.90, xbox: 349.90, brl: 299.00, usd: 69.99, steamAppID: '2620600' },
+            'persona 5 royal': { steam: 249.00, ps: 299.90, xbox: 299.90, switch: 299.90, brl: 249.00, usd: 59.99, steamAppID: '1687950' },
+            'persona 3 reload': { steam: 349.90, ps: 349.90, xbox: 349.90, brl: 349.90, gamePass: true, usd: 69.99, steamAppID: '2161700' },
+            'mass effect legendary edition': { steam: 249.00, ps: 299.90, xbox: 299.90, brl: 249.00, usd: 59.99, steamAppID: '1328670' },
+            'disco elysium the final cut': { steam: 75.49, ps: 199.50, xbox: 149.00, switch: 199.00, brl: 75.49, usd: 19.99, steamAppID: '632470' },
+            'disco elysium': { steam: 75.49, ps: 199.50, xbox: 149.00, switch: 199.00, brl: 75.49, usd: 19.99, steamAppID: '632470' },
+
+            // Rockstar
+            'grand theft auto vi': { ps: 349.90, xbox: 349.00, brl: 349.90, usd: 69.99 },
+            'gta 6': { ps: 349.90, xbox: 349.00, brl: 349.90, usd: 69.99 },
+            'grand theft auto v': { steam: 82.41, ps: 99.50, xbox: 99.50, brl: 82.41, usd: 29.99, steamAppID: '271590' },
+            'gta v': { steam: 82.41, ps: 99.50, xbox: 99.50, brl: 82.41, usd: 29.99, steamAppID: '271590' },
+            'gta 5': { steam: 82.41, ps: 99.50, xbox: 99.50, brl: 82.41, usd: 29.99, steamAppID: '271590' },
+            'red dead redemption 2': { steam: 299.90, ps: 249.90, xbox: 249.90, brl: 299.90, usd: 59.99, steamAppID: '1174180' },
+            'rdr2': { steam: 299.90, ps: 249.90, xbox: 249.90, brl: 299.90, usd: 59.99, steamAppID: '1174180' },
+            'red dead redemption': { steam: 249.00, ps: 249.00, switch: 249.00, brl: 249.00, usd: 49.99, steamAppID: '2688580' },
+            'rdr': { steam: 249.00, ps: 249.00, switch: 249.00, brl: 249.00, usd: 49.99, steamAppID: '2688580' },
+
+            // Outros Grandes
+            'hogwarts legacy': { steam: 249.99, ps: 299.90, xbox: 299.90, switch: 299.90, brl: 249.99, usd: 59.99, steamAppID: '990080' },
+            'palworld': { steam: 88.99, xbox: 112.45, ps: 159.90, brl: 88.99, gamePass: true, usd: 29.99, steamAppID: '1623730' },
+            'silent hill 2': { steam: 349.90, ps: 349.90, brl: 349.90, usd: 69.99, steamAppID: '2124490' },
+            'warhammer 40000 space marine 2': { steam: 249.00, ps: 349.90, xbox: 349.90, brl: 249.00, usd: 59.99, steamAppID: '2183900' },
+            'space marine 2': { steam: 249.00, ps: 349.90, xbox: 349.90, brl: 249.00, usd: 59.99, steamAppID: '2183900' },
+            'indiana jones and the great circle': { steam: 349.00, ps: 349.00, xbox: 349.00, brl: 349.00, gamePass: true, usd: 69.99, steamAppID: '2677660' },
+            'indiana jones': { steam: 349.00, ps: 349.00, xbox: 349.00, brl: 349.00, gamePass: true, usd: 69.99, steamAppID: '2677660' },
+            'stalker 2 heart of chornobyl': { steam: 249.00, xbox: 249.00, brl: 249.00, gamePass: true, usd: 59.99, steamAppID: '1643320' },
+            'stalker 2': { steam: 249.00, xbox: 249.00, brl: 249.00, gamePass: true, usd: 59.99, steamAppID: '1643320' },
+            'frostpunk 2': { steam: 134.99, ps: 199.50, xbox: 199.50, brl: 134.99, gamePass: true, usd: 44.99, steamAppID: '1601580' },
+
+            // Capcom
+            'resident evil 4 remake': { steam: 169.00, ps: 199.50, xbox: 199.50, brl: 169.00, usd: 39.99, steamAppID: '2050650' },
+            'resident evil 4': { steam: 169.00, ps: 199.50, xbox: 199.50, brl: 169.00, usd: 39.99, steamAppID: '2050650' },
+            're4': { steam: 169.00, ps: 199.50, xbox: 199.50, brl: 169.00, usd: 39.99, steamAppID: '2050650' },
+            'resident evil village': { steam: 139.90, ps: 184.50, xbox: 184.00, brl: 139.90, usd: 39.99, steamAppID: '1196590' },
+            'resident evil 2 remake': { steam: 139.90, ps: 169.50, xbox: 169.00, brl: 139.90, usd: 39.99, steamAppID: '883710' },
+            'resident evil 2': { steam: 139.90, ps: 169.50, xbox: 169.00, brl: 139.90, usd: 39.99, steamAppID: '883710' },
+            'resident evil 3 remake': { steam: 139.90, ps: 169.50, xbox: 169.00, brl: 139.90, usd: 39.99, steamAppID: '952060' },
+            'resident evil 3': { steam: 139.90, ps: 169.50, xbox: 169.00, brl: 139.90, usd: 39.99, steamAppID: '952060' },
+            'monster hunter world': { steam: 99.90, ps: 104.90, xbox: 104.90, brl: 99.90, usd: 29.99, steamAppID: '582010' },
+            'monster hunter wilds': { steam: 279.00, ps: 332.90, xbox: 332.00, brl: 279.00, usd: 69.99, steamAppID: '2246340' },
+
+            // Xbox & Bethesda
+            'forza horizon 5': { steam: 249.00, xbox: 249.00, brl: 249.00, gamePass: true, usd: 59.99, steamAppID: '1551360' },
+            'forza motorsport': { steam: 299.00, xbox: 299.00, brl: 299.00, gamePass: true, usd: 69.99, steamAppID: '2436490' },
+            'starfield': { steam: 299.00, xbox: 299.00, brl: 299.00, gamePass: true, usd: 69.99, steamAppID: '1716740' },
+            'halo infinite': { steam: 249.00, xbox: 249.00, brl: 249.00, gamePass: true, usd: 59.99, steamAppID: '1240440' },
+            'halo the master chief collection': { steam: 129.00, xbox: 129.00, brl: 129.00, gamePass: true, usd: 39.99, steamAppID: '976730' },
+            'gears 5': { steam: 149.00, xbox: 149.00, brl: 149.00, gamePass: true, usd: 39.99, steamAppID: '1097840' },
+            'sea of thieves': { steam: 89.00, ps: 199.50, xbox: 89.00, brl: 89.00, gamePass: true, usd: 39.99, steamAppID: '1172620' },
+            'senuas saga hellblade ii': { steam: 229.00, xbox: 229.00, brl: 229.00, gamePass: true, usd: 49.99, steamAppID: '2461850' },
+            'hellblade 2': { steam: 229.00, xbox: 229.00, brl: 229.00, gamePass: true, usd: 49.99, steamAppID: '2461850' },
+            'hi fi rush': { steam: 149.00, ps: 149.50, xbox: 149.00, brl: 149.00, gamePass: true, usd: 29.99, steamAppID: '1817230' },
+            'avowed': { steam: 299.00, xbox: 299.00, brl: 299.00, gamePass: true, usd: 69.99, steamAppID: '2457220' },
+            'fable': { steam: 299.00, xbox: 299.00, brl: 299.00, gamePass: true, usd: 69.99, steamAppID: '2769570' },
+            'doom the dark ages': { steam: 299.00, ps: 349.90, xbox: 299.00, brl: 299.00, gamePass: true, usd: 69.99, steamAppID: '3017860' },
+            'south of midnight': { steam: 249.00, xbox: 249.00, brl: 249.00, gamePass: true, usd: 59.99, steamAppID: '1934570' },
+            'doom eternal': { steam: 149.00, ps: 149.50, xbox: 149.50, switch: 199.00, brl: 149.00, usd: 39.99, steamAppID: '782330' },
+            'doom': { steam: 61.50, ps: 79.90, xbox: 61.50, switch: 199.00, brl: 61.50, usd: 19.99, steamAppID: '379720' },
+
+            // Indies
+            'hollow knight': { steam: 46.99, ps: 62.50, xbox: 54.95, switch: 27.99, brl: 46.99, gamePass: true, usd: 14.99, steamAppID: '367520' },
+            'dead cells': { steam: 47.49, ps: 104.90, xbox: 92.45, switch: 99.99, brl: 47.49, gamePass: true, usd: 24.99, steamAppID: '588650' },
+            'hades ii': { steam: 88.99, brl: 88.99, usd: 29.99, steamAppID: '1145350' },
+            'hades 2': { steam: 88.99, brl: 88.99, usd: 29.99, steamAppID: '1145350' },
+            'hades': { steam: 73.99, ps: 124.90, xbox: 124.90, switch: 124.90, brl: 73.99, usd: 24.99, steamAppID: '1145360' },
+            'control ultimate edition': { steam: 129.00, ps: 199.50, xbox: 199.50, brl: 129.00, usd: 39.99, steamAppID: '870780' },
+            'control': { steam: 129.00, ps: 199.50, xbox: 199.50, brl: 129.00, usd: 39.99, steamAppID: '870780' },
+
+            // Nintendo
+            'the legend of zelda tears of the kingdom': { switch: 349.00, brl: 349.00, usd: 69.99 },
+            'zelda tears of the kingdom': { switch: 349.00, brl: 349.00, usd: 69.99 },
+            'the legend of zelda breath of the wild': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'zelda breath of the wild': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'the legend of zelda echoes of wisdom': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'the legend of zelda links awakening': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'super mario odyssey': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'mario odyssey': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'super mario bros wonder': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'mario bros wonder': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'mario kart 8 deluxe': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'mario kart 8': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'super smash bros ultimate': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'smash bros ultimate': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'pokemon scarlet e violet': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'pokemon scarlet': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'pokemon violet': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'pokemon legends arceus': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'metroid prime remastered': { switch: 199.00, brl: 199.00, usd: 39.99 },
+            'metroid dread': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'animal crossing new horizons': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'luigis mansion 3': { switch: 299.00, brl: 299.00, usd: 59.99 },
+            'splatoon 3': { switch: 299.00, brl: 299.00, usd: 59.99 },
+
+            // Valve & Clássicos
+            'half life 2': { steam: 32.99, brl: 32.99, usd: 9.99, steamAppID: '220' },
+            'portal 2': { steam: 32.99, switch: 69.99, brl: 32.99, usd: 9.99, steamAppID: '620' },
+            'bioshock remastered': { steam: 29.99, ps: 83.50, xbox: 83.50, switch: 83.50, brl: 29.99, usd: 19.99, steamAppID: '409710' },
+            'bioshock': { steam: 29.99, ps: 83.50, xbox: 83.50, switch: 83.50, brl: 29.99, usd: 19.99, steamAppID: '7670' },
+
+            // Gratuitos
+            'counter strike 2': { steam: 0, isFree: true, steamAppID: '730' },
+            'cs2': { steam: 0, isFree: true, steamAppID: '730' },
+            'dota 2': { steam: 0, isFree: true, steamAppID: '570' },
+            'apex legends': { steam: 0, ps: 0, xbox: 0, switch: 0, isFree: true, steamAppID: '1172470' },
+            'warframe': { steam: 0, ps: 0, xbox: 0, switch: 0, isFree: true, steamAppID: '230410' },
+            'destiny 2': { steam: 0, ps: 0, xbox: 0, isFree: true, steamAppID: '1085660' },
+            'team fortress 2': { steam: 0, isFree: true, steamAppID: '440' },
+            'pubg battlegrounds': { steam: 0, ps: 0, xbox: 0, isFree: true, steamAppID: '578080' },
+            'pubg': { steam: 0, ps: 0, xbox: 0, isFree: true, steamAppID: '578080' },
+            'path of exile': { steam: 0, ps: 0, xbox: 0, isFree: true, steamAppID: '238960' },
+            'marvel rivals': { steam: 0, ps: 0, xbox: 0, isFree: true, steamAppID: '2767030' }
+        };
+
+        const TITULOS_GAMEPASS = [
+            'fable', 'avowed', 'starfield', 'halo', 'gears', 'forza', 'sea of thieves',
+            'senua', 'hellblade', 'hi-fi rush', 'indiana jones', 's.t.a.l.k.e.r', 'stalker',
+            'south of midnight', 'doom', 'palworld', 'hollow knight', 'dead cells', 'lies of p',
+            'persona 3 reload', 'diablo iv', 'diablo 4', 'minecraft', 'age of empires', 'fallout',
+            'the elder scrolls', 'skyrim', 'ark', 'grounded', 'psychonauts 2', 'pentiment'
+        ];
+
+        function normalizarTextoBusca(str) {
+            if (!str) return '';
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function verificarGamePass(titulo) {
+            if (!titulo) return false;
+            const tNorm = normalizarTextoBusca(titulo);
+            return TITULOS_GAMEPASS.some(g => {
+                const gNorm = normalizarTextoBusca(g);
+                const reg = new RegExp('(?:^|\\s)' + gNorm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '(?:\\s|$)', 'i');
+                return reg.test(tNorm);
+            });
+        }
+
+        function obterDadosJogoConhecido(title = '', steamAppID = null) {
+            // 1. Prioridade máxima: correspondência por Steam AppID direto
+            if (steamAppID) {
+                const sId = String(steamAppID);
+                if (TABELA_APPID_PRECOS[sId]) {
+                    return TABELA_APPID_PRECOS[sId];
+                }
+            }
+
+            const tNorm = normalizarTextoBusca(title);
+            if (!tNorm) return null;
+
+            // 2. Correspondência EXATA por chave normalizada
+            if (TABELA_PRECOS_CONHECIDOS[tNorm]) {
+                return TABELA_PRECOS_CONHECIDOS[tNorm];
+            }
+
+            // 3. Busca por chaves ordenadas por comprimento decrescente (mais específica primeiro)
+            const chaves = Object.keys(TABELA_PRECOS_CONHECIDOS).sort((a, b) => b.length - a.length);
+            for (const chave of chaves) {
+                if (tNorm === chave) {
+                    return TABELA_PRECOS_CONHECIDOS[chave];
+                }
+                // Se o título contém a chave completa (ex: "God of War Ragnarok Digital Deluxe" contém "god of war ragnarok")
+                const regexChave = new RegExp('(?:^|\\s)' + chave.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '(?:\\s|$)', 'i');
+                if (regexChave.test(tNorm)) {
+                    return TABELA_PRECOS_CONHECIDOS[chave];
+                }
+            }
+
+            return null;
+        }
+
+        /* MOTOR DE CÁLCULO DE PREÇO REGIONALIZADO POR PLATAFORMA */
+        function calcularPrecoRegional(usdPrice, platform = 'PC', title = '', steamAppID = null) {
+            if (usdPrice === 0) return 0;
+
+            const jogoConhecido = obterDadosJogoConhecido(title, steamAppID);
+            if (jogoConhecido) {
+                if (jogoConhecido.isFree) return 0;
+                if (platform === 'PS' && jogoConhecido.ps !== undefined) return jogoConhecido.ps;
+                if (platform === 'XBOX' && jogoConhecido.xbox !== undefined) return jogoConhecido.xbox;
+                if (platform === 'SWITCH' && jogoConhecido.switch !== undefined) return jogoConhecido.switch;
+                if (platform === 'PC' && jogoConhecido.steam !== undefined) return jogoConhecido.steam;
+                return jogoConhecido.brl || jogoConhecido.steam || 299.00;
+            }
+
+            if (!usdPrice || usdPrice <= 0) return 0;
+
+            // Matriz Oficial de Tiers (Preços da Steam Brasil & Consoles para títulos não cadastrados)
+            if (usdPrice >= 65) {
+                // Faixa AAA $69.99 (ex: Fable, Starfield, Silent Hill 2)
+                if (platform === 'PS') return 349.90;
+                if (platform === 'SWITCH') return 349.00;
+                return 299.00; // Padrão Steam & Xbox
+            } else if (usdPrice >= 55) {
+                // Faixa AAA $59.99 (ex: Elden Ring, Black Myth Wukong)
+                if (platform === 'PS') return 299.90;
+                if (platform === 'SWITCH') return 299.00;
+                return 249.00; // Steam & Xbox
+            } else if (usdPrice >= 45) {
+                // Faixa AA $49.99 (ex: God of War 2018, Miles Morales)
+                if (platform === 'PS') return 249.50;
+                return 199.00;
+            } else if (usdPrice >= 35) {
+                // Faixa $39.99 (ex: Helldivers 2)
+                if (platform === 'PS') return 199.50;
+                return 149.00;
+            } else if (usdPrice >= 25) {
+                // Faixa $29.99 (ex: Palworld)
+                if (platform === 'PS') return 149.50;
+                return 88.99;
+            } else if (usdPrice >= 18) {
+                // Faixa $19.99
+                if (platform === 'PS') return 99.50;
+                return 73.99;
+            } else if (usdPrice >= 12) {
+                // Faixa $14.99
+                if (platform === 'PS') return 74.90;
+                return 46.99;
+            } else if (usdPrice >= 8) {
+                // Faixa $9.99
+                if (platform === 'PS') return 49.90;
+                return 32.99;
+            } else if (usdPrice >= 4) {
+                // Faixa $4.99
+                return 16.99;
+            } else {
+                return Math.max(3.49, Math.round(usdPrice * 3.5 * 100) / 100);
+            }
+        }
+
+        /* FORMATA O PREÇO PARA UMA PLATAFORMA ESPECÍFICA NO MODAL DE LOJAS */
+        function formatarPrecoPlataforma(jogo, platform = 'PC') {
+            if (jogo.isFree || jogo.price === 'Gratuito' || jogo.price === '100% Gratuito') {
+                return moedaAtual === 'BRL' ? 'Grátis' : 'Free';
+            }
+
+            if (moedaAtual === 'BRL') {
+                // Se a plataforma solicitada for PC e o jogo tiver promoção ativa com badge de %
+                if (platform === 'PC' && jogo.badge && (jogo.badge.includes('%') || jogo.badge.includes('OFF') || jogo.badge.includes('OFERTA')) && jogo.priceBRL > 0) {
+                    return `R$ ${jogo.priceBRL.toFixed(2).replace('.', ',')}`;
+                }
+
+                const baseUSD = jogo.priceUSD || (parseFloat(jogo.salePrice) || (jogo.priceBRL ? (jogo.priceBRL >= 290 ? 69.99 : 59.99) : 59.99));
+                const preco = calcularPrecoRegional(baseUSD, platform, jogo.title, jogo.steamAppID);
+                return `R$ ${preco.toFixed(2).replace('.', ',')}`;
+            } else if (moedaAtual === 'USD') {
+                const usd = jogo.priceUSD || (jogo.priceBRL ? (jogo.priceBRL >= 290 ? 69.99 : 59.99) : 59.99);
+                return `$ ${usd.toFixed(2)}`;
+            } else if (moedaAtual === 'EUR') {
+                const usd = jogo.priceUSD || (jogo.priceBRL ? (jogo.priceBRL >= 290 ? 69.99 : 59.99) : 59.99);
+                return `€ ${(usd * 0.92).toFixed(2).replace('.', ',')}`;
+            } else if (moedaAtual === 'GBP') {
+                const usd = jogo.priceUSD || (jogo.priceBRL ? (jogo.priceBRL >= 290 ? 69.99 : 59.99) : 59.99);
+                return `£ ${(usd * 0.78).toFixed(2).replace('.', ',')}`;
+            }
+            const preco = calcularPrecoRegional(jogo.priceUSD || 59.99, platform, jogo.title, jogo.steamAppID);
+            return `R$ ${preco.toFixed(2).replace('.', ',')}`;
+        }
+
+        /* FORMATADOR DE PREÇO RESPEITANDO A MOEDA SELECIONADA E A PLATAFORMA ATIVA */
         function obterPrecoFormatado(jogo) {
             if (jogo.isFree || jogo.price === 'Gratuito' || jogo.price === '100% Gratuito') {
                 return moedaAtual === 'BRL' ? '100% Gratuito' : 'Free to Play';
             }
 
-            if (moedaAtual === 'BRL' && jogo.priceBRL !== undefined && jogo.priceBRL > 0) {
-                return `R$ ${jogo.priceBRL.toFixed(2).replace('.', ',')}`;
+            const platAlvo = (plataformaAtual !== 'all') ? plataformaAtual : ((jogo.platforms && jogo.platforms[0]) || 'PC');
+
+            if (moedaAtual === 'BRL') {
+                // Se o jogo tem promoção ativa (com badge de desconto) e estamos na plataforma PC ou All
+                if ((platAlvo === 'PC' || plataformaAtual === 'all') && jogo.badge && (jogo.badge.includes('%') || jogo.badge.includes('OFF') || jogo.badge.includes('OFERTA')) && jogo.priceBRL > 0) {
+                    return `R$ ${jogo.priceBRL.toFixed(2).replace('.', ',')}`;
+                }
+
+                const baseUSD = jogo.priceUSD || (parseFloat(jogo.salePrice) || (jogo.priceBRL ? (jogo.priceBRL >= 290 ? 69.99 : 59.99) : 59.99));
+                const precoRegional = calcularPrecoRegional(baseUSD, platAlvo, jogo.title, jogo.steamAppID);
+                return `R$ ${precoRegional.toFixed(2).replace('.', ',')}`;
             }
 
             let baseUSD = 0;
@@ -1635,31 +2167,21 @@
             } else if (jogo.salePrice) {
                 baseUSD = parseFloat(jogo.salePrice) || 0;
             } else if (jogo.priceBRL) {
-                baseUSD = jogo.priceBRL / 5.60;
-            } else if (typeof jogo.price === 'string') {
-                if (jogo.price.includes('R$')) {
-                    const num = parseFloat(jogo.price.replace(/[^\d,]/g, '').replace(',', '.'));
-                    if (!isNaN(num)) baseUSD = num / 5.60;
-                } else if (jogo.price.includes('$')) {
-                    const num = parseFloat(jogo.price.replace(/[^\d.]/g, ''));
-                    if (!isNaN(num)) baseUSD = num;
-                }
+                baseUSD = jogo.priceBRL >= 290 ? 69.99 : (jogo.priceBRL >= 220 ? 59.99 : (jogo.priceBRL >= 140 ? 39.99 : 19.99));
             }
 
             if (baseUSD <= 0) {
                 return moedaAtual === 'BRL' ? 'Ver Loja' : 'Check Store';
             }
 
-            if (moedaAtual === 'BRL') {
-                return `R$ ${(baseUSD * 5.60).toFixed(2).replace('.', ',')}`;
-            } else if (moedaAtual === 'USD') {
+            if (moedaAtual === 'USD') {
                 return `$ ${baseUSD.toFixed(2)}`;
             } else if (moedaAtual === 'EUR') {
                 return `€ ${(baseUSD * 0.92).toFixed(2).replace('.', ',')}`;
             } else if (moedaAtual === 'GBP') {
                 return `£ ${(baseUSD * 0.78).toFixed(2).replace('.', ',')}`;
             }
-            return `R$ ${(baseUSD * 5.60).toFixed(2).replace('.', ',')}`;
+            return `R$ ${(calcularPrecoRegional(baseUSD, platAlvo, jogo.title, jogo.steamAppID)).toFixed(2).replace('.', ',')}`;
         }
 
         /* ════════════════════════════════════════════════════════
@@ -1813,17 +2335,19 @@
                             .or(`titulo.ilike.%${query}%,titulo.ilike.%${termoExpandido || query}%`)
                             .limit(25);
                         if (data && Array.isArray(data)) {
-                            matchesSupabase = data.map(item => ({
-                                title: item.titulo,
-                                thumb: item.capaUrl || '',
-                                genre: item.generos || 'Comunidade Overcritic',
-                                score: item.mediaInternet || (item.minhaNota ? `Nota: ${item.minhaNota}/10` : 'Comunidade'),
-                                badge: 'OVERCRITIC',
-                                priceBRL: 0,
-                                priceUSD: 0,
-                                isFree: false,
-                                platforms: item.plataforma ? [item.plataforma.toUpperCase().includes('PLAY') || item.plataforma.toUpperCase().includes('PS') ? 'PS' : (item.plataforma.toUpperCase().includes('XBOX') ? 'XBOX' : (item.plataforma.toUpperCase().includes('SWITCH') ? 'SWITCH' : 'PC'))] : detectarPlataformas(item.titulo)
-                            }));
+                            matchesSupabase = data
+                                .filter(item => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('jogo', item.id, item.titulo, item.autor))
+                                .map(item => ({
+                                    title: item.titulo,
+                                    thumb: item.capaUrl || '',
+                                    genre: item.generos || 'Comunidade Overcritic',
+                                    score: item.mediaInternet || (item.minhaNota ? `Nota: ${item.minhaNota}/10` : 'Comunidade'),
+                                    badge: 'OVERCRITIC',
+                                    priceBRL: 0,
+                                    priceUSD: 0,
+                                    isFree: false,
+                                    platforms: item.plataforma ? [item.plataforma.toUpperCase().includes('PLAY') || item.plataforma.toUpperCase().includes('PS') ? 'PS' : (item.plataforma.toUpperCase().includes('XBOX') ? 'XBOX' : (item.plataforma.toUpperCase().includes('SWITCH') ? 'SWITCH' : 'PC'))] : detectarPlataformas(item.titulo)
+                                }));
                         }
                     } catch(e) {
                         console.warn('Erro ao consultar Supabase na busca:', e);
@@ -1858,7 +2382,7 @@
                                 score: steamId ? 'Steam Oficial' : 'Multi-Store',
                                 badge: priceNum === 0 ? 'GRÁTIS' : (priceNum < 15 ? 'OFERTA' : 'DISPONÍVEL'),
                                 priceUSD: priceNum,
-                                priceBRL: priceNum * 5.60,
+                                priceBRL: calcularPrecoRegional(priceNum, 'PC', item.external, steamId),
                                 steamAppID: steamId,
                                 platforms: detectarPlataformas(item.external),
                                 storeUrl: steamId ? `https://store.steampowered.com/app/${steamId}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.external)}`
@@ -1866,13 +2390,40 @@
                         });
                     }
                 } catch(e) {
-                    if (e.name !== 'AbortError') {
-                        console.warn('Erro na consulta da API global de jogos:', e);
+                    if (e.name !== 'AbortError') console.warn('Erro API CheapShark:', e);
+                }
+
+                // 4.1 Busca na Base de Jogos Gratuitos e Populares (FreeToGame)
+                let matchesFree = [];
+                try {
+                    if (!cacheFreeToGame) {
+                        const ftgRes = await fetch('https://www.freetogame.com/api/games', { signal });
+                        if (ftgRes.ok) cacheFreeToGame = await ftgRes.json();
                     }
+                    if (cacheFreeToGame && Array.isArray(cacheFreeToGame)) {
+                        matchesFree = cacheFreeToGame.filter(item => {
+                            const tNorm = (item.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                            return tNorm.includes(normQuery) || (termoExpandido && tNorm.includes(termoExpandido.toLowerCase()));
+                        }).slice(0, 15).map(item => ({
+                            title: item.title,
+                            thumb: item.thumbnail,
+                            genre: item.genre ? `${item.genre} / Grátis` : 'Free to Play',
+                            score: '🔥 Gratuito',
+                            badge: 'GRÁTIS',
+                            isFree: true,
+                            priceUSD: 0,
+                            priceBRL: 0,
+                            steamAppID: null,
+                            platforms: detectarPlataformas(item.title, item.platform),
+                            storeUrl: item.game_url || item.freetogame_profile_url
+                        }));
+                    }
+                } catch(e) {
+                    if (e.name !== 'AbortError') console.warn('Erro ao consultar FreeToGame na busca:', e);
                 }
 
                 // 5. Mescla inteligente e desduplicação por título
-                const listaBruta = [...matchesConsoles, ...matchesIntegrados, ...matchesSupabase, ...matchesApi];
+                const listaBruta = [...matchesConsoles, ...matchesIntegrados, ...matchesSupabase, ...matchesFree, ...matchesApi];
                 const unicos = [];
                 const titulosVistos = new Set();
 
@@ -1969,7 +2520,7 @@
             carregarCatalogo(cat);
         }
 
-        /* CARREGAMENTO DE DADOS */
+        /* CARREGAMENTO DE DADOS COM SISTEMA MULTI-APIS */
         async function carregarCatalogo(cat, carregarMais = false) {
             const grid = document.getElementById('gamesGrid');
             const btnMais = document.getElementById('btnLoadMore');
@@ -1994,96 +2545,147 @@
                 let novosJogos = [];
 
                 if (cat === 'trending') {
-                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&pageSize=24&pageNumber=${paginaAtual}`);
+                    // Consulta os jogos com maior volume de avaliações e jogadores ativos mundiais
+                    let res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Reviews&desc=1&pageSize=24&pageNumber=${paginaAtual}`);
+                    if (!res.ok) {
+                        res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&pageSize=24&pageNumber=${paginaAtual}`);
+                    }
                     if (!res.ok) throw new Error('API indisponível');
                     const data = await res.json();
-                    novosJogos = data.map(item => ({
-                        title: item.title,
-                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
-                        genre: item.savings > 0 ? `Desconto -${Math.round(item.savings)}%` : 'Steam / PC',
-                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : (item.dealRating ? `Rating: ${item.dealRating}★` : '🔥 Popular'),
-                        steamAppID: item.steamAppID,
-                        badge: item.savings > 0 ? `-${Math.round(item.savings)}%` : 'EM ALTA',
-                        priceUSD: parseFloat(item.salePrice) || 0,
-                        salePrice: item.salePrice,
-                        platforms: detectarPlataformas(item.title),
-                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
-                    }));
+                    novosJogos = data.map(item => {
+                        const savingsNum = Math.round(parseFloat(item.savings) || 0);
+                        const rCount = parseInt(item.steamRatingCount) || 0;
+                        const pUSD = parseFloat(item.salePrice) || 0;
+                        const precoBase = calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID);
+                        const precoFinal = savingsNum > 0 ? Math.round(precoBase * (1 - savingsNum / 100) * 100) / 100 : precoBase;
+                        return {
+                            title: item.title,
+                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                            genre: detectarGenero(item.title),
+                            score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : (rCount > 0 ? `🔥 +${Math.round(rCount/1000)}k Análises` : '🔥 Mais Jogado'),
+                            steamAppID: item.steamAppID,
+                            badge: savingsNum > 0 ? `-${savingsNum}%` : 'EM ALTA',
+                            priceUSD: pUSD,
+                            priceBRL: precoFinal,
+                            salePrice: item.salePrice,
+                            platforms: detectarPlataformas(item.title),
+                            storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                        };
+                    });
                 } else if (cat === 'releases') {
-                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Release&pageSize=24&pageNumber=${paginaAtual}`);
+                    // Consulta lançamentos recentes das principais desenvolvedoras (filtro AAA)
+                    let res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&AAA=1&sortBy=Release&pageSize=24&pageNumber=${paginaAtual}`);
+                    if (!res.ok) {
+                        res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Recent&pageSize=24&pageNumber=${paginaAtual}`);
+                    }
                     if (!res.ok) throw new Error('API indisponível');
                     const data = await res.json();
-                    novosJogos = data.map(item => ({
-                        title: item.title,
-                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
-                        genre: 'Lançamento / Recente',
-                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🚀 Novo',
-                        steamAppID: item.steamAppID,
-                        badge: 'NOVO',
-                        priceUSD: parseFloat(item.salePrice) || 0,
-                        salePrice: item.salePrice,
-                        platforms: detectarPlataformas(item.title),
-                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
-                    }));
+                    novosJogos = data.map(item => {
+                        const savingsNum = Math.round(parseFloat(item.savings) || 0);
+                        const pUSD = parseFloat(item.salePrice) || 0;
+                        const precoBase = calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID);
+                        const precoFinal = savingsNum > 0 ? Math.round(precoBase * (1 - savingsNum / 100) * 100) / 100 : precoBase;
+                        return {
+                            title: item.title,
+                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                            genre: detectarGenero(item.title),
+                            score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🚀 Novo',
+                            steamAppID: item.steamAppID,
+                            badge: savingsNum > 0 ? `-${savingsNum}%` : 'LANÇAMENTO',
+                            priceUSD: pUSD,
+                            priceBRL: precoFinal,
+                            salePrice: item.salePrice,
+                            platforms: detectarPlataformas(item.title),
+                            storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                        };
+                    });
                 } else if (cat === 'metacritic') {
-                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Metacritic&pageSize=24&pageNumber=${paginaAtual}`);
+                    // Consulta exclusivamente obras aclamadas pela crítica com nota Metacritic de 88 a 99
+                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&metacritic=88&sortBy=Metacritic&pageSize=24&pageNumber=${paginaAtual}`);
                     if (!res.ok) throw new Error('API indisponível');
                     const data = await res.json();
-                    novosJogos = data.map(item => ({
-                        title: item.title,
-                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
-                        genre: 'Aclamação Crítica',
-                        score: item.metacriticScore ? `Metacritic ${item.metacriticScore}` : '⭐ 90+',
-                        steamAppID: item.steamAppID,
-                        badge: item.metacriticScore ? `NOTA ${item.metacriticScore}` : 'GOTY',
-                        priceUSD: parseFloat(item.salePrice) || 0,
-                        salePrice: item.salePrice,
-                        platforms: detectarPlataformas(item.title),
-                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
-                    }));
+                    novosJogos = data.map(item => {
+                        const scoreVal = parseInt(item.metacriticScore) || 90;
+                        const pUSD = parseFloat(item.salePrice) || 0;
+                        return {
+                            title: item.title,
+                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                            genre: detectarGenero(item.title),
+                            score: `Metacritic ${scoreVal}`,
+                            steamAppID: item.steamAppID,
+                            badge: `NOTA ${scoreVal}`,
+                            priceUSD: pUSD,
+                            priceBRL: calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID),
+                            salePrice: item.salePrice,
+                            platforms: detectarPlataformas(item.title),
+                            storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                        };
+                    });
                 } else if (cat === 'deals') {
-                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Savings&pageSize=24&pageNumber=${paginaAtual}`);
+                    // Consulta promoções Steam com avaliação positiva e descontos expressivos
+                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Savings&steamRating=75&pageSize=24&pageNumber=${paginaAtual}`);
                     if (!res.ok) throw new Error('API indisponível');
                     const data = await res.json();
-                    novosJogos = data.map(item => ({
-                        title: item.title,
-                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
-                        genre: 'Oferta Especial Steam',
-                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🏷️ Oferta',
-                        steamAppID: item.steamAppID,
-                        badge: item.savings ? `-${Math.round(item.savings)}%` : 'OFERTA',
-                        priceUSD: parseFloat(item.salePrice) || 0,
-                        salePrice: item.salePrice,
-                        platforms: detectarPlataformas(item.title),
-                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
-                    }));
+                    novosJogos = data.map(item => {
+                        const savingsNum = Math.round(parseFloat(item.savings) || 0);
+                        const pUSD = parseFloat(item.salePrice) || 0;
+                        const precoBase = calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID);
+                        const precoFinal = savingsNum > 0 ? Math.round(precoBase * (1 - savingsNum / 100) * 100) / 100 : precoBase;
+                        return {
+                            title: item.title,
+                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                            genre: detectarGenero(item.title),
+                            score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🏷️ Oferta',
+                            steamAppID: item.steamAppID,
+                            badge: savingsNum > 0 ? `-${savingsNum}% OFF` : 'OFERTA',
+                            priceUSD: pUSD,
+                            priceBRL: precoFinal,
+                            salePrice: item.salePrice,
+                            platforms: detectarPlataformas(item.title),
+                            storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                        };
+                    });
                 } else if (cat === 'free') {
-                    novosJogos = CATALOGO_ESTENDIDO.free;
+                    // Consome a API pública FreeToGame (centenas de jogos 100% gratuitos mundiais)
+                    if (!cacheFreeToGame) {
+                        const res = await fetch('https://www.freetogame.com/api/games?sort-by=popularity');
+                        if (!res.ok) throw new Error('FreeToGame indisponível');
+                        cacheFreeToGame = await res.json();
+                    }
+                    const inicio = paginaAtual * 24;
+                    const fim = inicio + 24;
+                    const slicePagina = (cacheFreeToGame || []).slice(inicio, fim);
+                    novosJogos = slicePagina.map(item => ({
+                        title: item.title,
+                        thumb: item.thumbnail,
+                        genre: item.genre ? `${item.genre} / Grátis` : 'Free to Play',
+                        score: '🔥 100% Gratuito',
+                        steamAppID: null,
+                        badge: 'GRÁTIS',
+                        isFree: true,
+                        priceUSD: 0,
+                        priceBRL: 0,
+                        platforms: detectarPlataformas(item.title, item.platform),
+                        storeUrl: item.game_url || item.freetogame_profile_url
+                    }));
                 }
 
-                // Se a API retornar vazia, mesclamos com o catálogo oficial
+                // Se a API retornar vazia, usa o catálogo de contingência
                 if (!novosJogos || novosJogos.length === 0) {
                     novosJogos = CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending;
                 }
 
+                // Atualiza o cache dinamicamente sem forçar itens estáticos no topo
                 if (carregarMais) {
                     cacheJogos[cat] = [...(cacheJogos[cat] || []), ...novosJogos];
                 } else {
-                    // Garantir que os destaques integrados estejam no topo
-                    const baseIntegrada = CATALOGO_ESTENDIDO[cat] || [];
-                    const combinados = [...baseIntegrada];
-                    novosJogos.forEach(nj => {
-                        if (!combinados.some(c => c.title.toLowerCase() === nj.title.toLowerCase())) {
-                            combinados.push(nj);
-                        }
-                    });
-                    cacheJogos[cat] = combinados;
+                    cacheJogos[cat] = novosJogos;
                 }
 
                 filtrarJogosNaTela();
 
             } catch (err) {
-                console.warn('API externa em timeout ou offline. Carregando catálogo oficial integrado:', err);
+                console.warn('API externa em timeout ou offline. Carregando catálogo oficial de contingência:', err);
                 if (!carregarMais) {
                     cacheJogos[cat] = CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending;
                     filtrarJogosNaTela();
@@ -2103,7 +2705,7 @@
             const query = (document.getElementById('gameSearchInput')?.value || '').toLowerCase().trim();
             const listaBase = cacheJogos[categoriaAtual] || CATALOGO_ESTENDIDO[categoriaAtual] || [];
 
-            jogosFiltrados = listaBase.filter(j => {
+            let filtrados = listaBase.filter(j => {
                 const matchQuery = !query || 
                     (j.title || '').toLowerCase().includes(query) ||
                     (j.genre || '').toLowerCase().includes(query) ||
@@ -2115,6 +2717,23 @@
                 return matchQuery && matchPlatform;
             });
 
+            // Se o usuário selecionou uma plataforma de console (PS, XBOX, SWITCH) sem busca textual
+            // e os jogos da API de PC retornaram poucos itens daquela plataforma,
+            // complementamos de forma fluida com os títulos consagrados daquela plataforma
+            if (plataformaAtual !== 'all' && !query) {
+                const consolesDaPlat = JOGOS_CONSOLES_ICONS.filter(cj => {
+                    const plats = cj.platforms || [];
+                    return plats.includes(plataformaAtual);
+                });
+
+                consolesDaPlat.forEach(cj => {
+                    if (!filtrados.some(f => f.title.toLowerCase() === cj.title.toLowerCase())) {
+                        filtrados.push(cj);
+                    }
+                });
+            }
+
+            jogosFiltrados = filtrados;
             renderizarGridJogos(jogosFiltrados);
         }
 
@@ -2138,7 +2757,23 @@
             window.jogosAtuaisNaTela = jogos || [];
 
             if (countBadge) {
-                countBadge.textContent = `${jogos.length} jogos encontrados`;
+                const platNomes = {
+                    'all': 'todas as plataformas',
+                    'PC': 'PC / Steam',
+                    'PS': 'PlayStation (PS5 / PS4)',
+                    'XBOX': 'Xbox Series X/S & One',
+                    'SWITCH': 'Nintendo Switch'
+                };
+                const catNomes = {
+                    'trending': 'Mais Jogados & Em Alta',
+                    'releases': 'Lançamentos Recentes',
+                    'metacritic': 'Aclamados (Top Crítica)',
+                    'free': 'Grandes Jogos Gratuitos',
+                    'deals': 'Super Promoções'
+                };
+                const platTexto = platNomes[plataformaAtual] || plataformaAtual;
+                const catTexto = catNomes[categoriaAtual] || categoriaAtual;
+                countBadge.textContent = `${jogos.length} jogos em ${catTexto} (${platTexto})`;
             }
 
             if (!jogos || jogos.length === 0) {
@@ -2238,14 +2873,26 @@
             const encodedThumb = encodeURIComponent(jogo.thumb || '');
             const encodedGenre = encodeURIComponent(jogo.genre || '');
 
+            const precoPC = formatarPrecoPlataforma(jogo, 'PC');
+            const precoPS = formatarPrecoPlataforma(jogo, 'PS');
+            const precoXbox = formatarPrecoPlataforma(jogo, 'XBOX');
+            const precoSwitch = formatarPrecoPlataforma(jogo, 'SWITCH');
+            const temGamePass = verificarGamePass(jogo.title);
+
             let buttonsHtml = '';
 
             if (plats.includes('PC')) {
                 const steamUrl = jogo.steamAppID ? `https://store.steampowered.com/app/${jogo.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodedTitle}`;
                 buttonsHtml += `
                     <a href="${steamUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-steam" title="Abrir página oficial da Steam">
-                        <span>💻 <strong>Steam / PC</strong></span>
-                        <span>Visitar Loja ↗</span>
+                        <div class="store-row-info">
+                            <span>💻</span>
+                            <strong>Steam / PC</strong>
+                        </div>
+                        <div class="store-row-meta">
+                            <span class="${jogo.isFree ? 'store-tag-free' : 'store-tag-price'}">${precoPC}</span>
+                            <span class="store-row-action">Visitar Loja ↗</span>
+                        </div>
                     </a>
                 `;
             }
@@ -2254,8 +2901,14 @@
                 const psUrl = `https://store.playstation.com/pt-br/search/${encodedTitle}`;
                 buttonsHtml += `
                     <a href="${psUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-ps" title="Abrir busca oficial na PlayStation Store Brasil">
-                        <span>🎮 <strong>PlayStation Store</strong> (PS5 / PS4)</span>
-                        <span>Buscar na PS Store ↗</span>
+                        <div class="store-row-info">
+                            <span>🎮</span>
+                            <strong>PlayStation Store</strong> <span style="font-size: 0.72rem; opacity: 0.8; font-weight: 500;">(PS5 / PS4)</span>
+                        </div>
+                        <div class="store-row-meta">
+                            <span class="${jogo.isFree ? 'store-tag-free' : 'store-tag-price'}">${precoPS}</span>
+                            <span class="store-row-action">Buscar na PS Store ↗</span>
+                        </div>
                     </a>
                 `;
             }
@@ -2264,8 +2917,15 @@
                 const xboxUrl = `https://www.xbox.com/pt-br/games/store/search?q=${encodedTitle}`;
                 buttonsHtml += `
                     <a href="${xboxUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-xbox" title="Abrir busca oficial na Microsoft Xbox Store Brasil">
-                        <span>🟢 <strong>Xbox Store</strong> (Series X/S / One)</span>
-                        <span>Buscar no Xbox ↗</span>
+                        <div class="store-row-info">
+                            <span>🟢</span>
+                            <strong>Xbox Store</strong> <span style="font-size: 0.72rem; opacity: 0.8; font-weight: 500;">(Series X/S / One)</span>
+                        </div>
+                        <div class="store-row-meta">
+                            ${temGamePass ? '<span class="store-tag-gamepass">Game Pass</span>' : ''}
+                            <span class="${jogo.isFree ? 'store-tag-free' : 'store-tag-price'}">${precoXbox}</span>
+                            <span class="store-row-action">Buscar no Xbox ↗</span>
+                        </div>
                     </a>
                 `;
             }
@@ -2274,8 +2934,14 @@
                 const switchUrl = `https://www.nintendo.com/pt-br/search/#q=${encodedTitle}&p=1&cat=gme`;
                 buttonsHtml += `
                     <a href="${switchUrl}" target="_blank" rel="noopener noreferrer" class="store-link-row store-link-switch" title="Abrir busca oficial na Nintendo eShop Brasil">
-                        <span>🔴 <strong>Nintendo eShop</strong> (Switch)</span>
-                        <span>Buscar na Nintendo ↗</span>
+                        <div class="store-row-info">
+                            <span>🔴</span>
+                            <strong>Nintendo eShop</strong> <span style="font-size: 0.72rem; opacity: 0.8; font-weight: 500;">(Switch)</span>
+                        </div>
+                        <div class="store-row-meta">
+                            <span class="${jogo.isFree ? 'store-tag-free' : 'store-tag-price'}">${precoSwitch}</span>
+                            <span class="store-row-action">Buscar na Nintendo ↗</span>
+                        </div>
                     </a>
                 `;
             }

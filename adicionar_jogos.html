@@ -2100,9 +2100,10 @@
                 const parsed = JSON.parse(raw);
                 if (!Array.isArray(parsed)) return [];
 
-                // Filtra apenas jogos do usuário atual e remove seeds/mocks
+                // Filtra apenas jogos do usuário atual e remove seeds/mocks e itens excluídos
                 return parsed.filter(j => {
                     if (!j) return false;
+                    if (window.isItemExcluidoGlobal && window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor)) return false;
                     const isSeed = j.id && (j.id === 101 || j.id === 102 || j.id === 103 || j.id === 104 || j.id === 105);
                     if (isSeed) return false;
 
@@ -2200,11 +2201,13 @@
                 }
 
                 if (data) {
-                    const jogosNuvem = data.map(mapSupabaseParaJogo);
+                    const jogosNuvem = data
+                        .filter(j => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor))
+                        .map(mapSupabaseParaJogo);
                     const mapa = new Map();
                     jogosNuvem.forEach(j => mapa.set(j.id, j));
 
-                    // Mescla apenas com análises locais que sejam do mesmo usuário
+                    // Mescla apenas com análises locais que sejam do mesmo usuário e não estejam excluídas
                     const locais = obterJogosSalvos();
                     locais.forEach(j => {
                         if (!mapa.has(j.id)) mapa.set(j.id, j);
@@ -2565,27 +2568,40 @@
 
         async function excluirCritica(id) {
             const currentUser = getCurrentUser();
+            const isAdmin = (typeof isAdminUser === 'function' && isAdminUser()) || (localStorage.getItem('overcritic_is_admin') === 'true');
             const jogos = obterJogosSalvos();
             const jogo = jogos.find(j => j.id === id);
             if (!jogo) return;
 
-            const podeExcluir = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || jogo.autor === currentUser;
+            const isOwner = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || (currentUser && jogo.autor.toLowerCase() === currentUser.toLowerCase());
+            const podeExcluir = isAdmin || isOwner;
             if (!podeExcluir) {
                 showToast.warning('Você só pode excluir suas próprias críticas.');
                 return;
             }
 
-            const confirmou = await showConfirm(`Tem certeza que deseja excluir a crítica de "${jogo.titulo}"?`, {
-                title: 'Excluir Análise',
+            const modalTitle = isAdmin && !isOwner ? 'Moderação de Conteúdo (Admin)' : 'Excluir Análise';
+            const confirmMsg = isAdmin && !isOwner
+                ? `[ADMIN] Deseja realmente remover permanentemente a análise de "${jogo.titulo}" de toda a plataforma?`
+                : `Tem certeza que deseja excluir a crítica de "${jogo.titulo}"?`;
+
+            const confirmou = await showConfirm(confirmMsg, {
+                title: modalTitle,
                 confirmText: 'Sim, Excluir',
                 cancelText: 'Cancelar',
                 isDanger: true
             });
             if (!confirmou) return;
 
-            const novaLista = jogos.filter(j => j.id !== id);
-            salvarJogos(novaLista);
-            excluirJogoDoSupabase(id);
+            // Remove e registra exclusão global definitiva
+            if (window.registrarExclusaoGlobal) {
+                await window.registrarExclusaoGlobal('jogo', id, jogo.titulo, jogo.autor);
+            } else {
+                const novaLista = jogos.filter(j => j.id !== id);
+                salvarJogos(novaLista);
+                excluirJogoDoSupabase(id);
+            }
+
             renderizarCriticas();
             showToast.success(`Crítica de "${jogo.titulo}" excluída com sucesso.`);
         }

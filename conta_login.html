@@ -817,9 +817,13 @@
 
         async function carregarEstatisticasPerfil() {
             try {
-                const jogos = JSON.parse(localStorage.getItem('overcritic_reviews') || '[]');
-                const midias = JSON.parse(localStorage.getItem('OVERCRITIC_MIDIAS') || '[]');
-                const platinas = JSON.parse(localStorage.getItem('overcritic_platinas_feed') || '[]');
+                const rawJogos = JSON.parse(localStorage.getItem('overcritic_reviews') || '[]');
+                const rawMidias = JSON.parse(localStorage.getItem('OVERCRITIC_MIDIAS') || '[]');
+                const rawPlatinas = JSON.parse(localStorage.getItem('overcritic_platinas_feed') || '[]');
+
+                const jogos = rawJogos.filter(j => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor));
+                const midias = rawMidias.filter(m => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('midia', m.id, m.title, m.autor));
+                const platinas = rawPlatinas.filter(p => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('platina', p.id, p.title || p.titulo, p.user || p.usuario));
 
                 document.getElementById('profJogosCount').innerText = jogos.length;
                 document.getElementById('profMidiasCount').innerText = midias.length;

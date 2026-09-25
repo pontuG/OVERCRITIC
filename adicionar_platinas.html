@@ -2302,6 +2302,10 @@
                 salvarFeed(feed);
             }
 
+            if (window.isItemExcluidoGlobal) {
+                feed = feed.filter(p => !window.isItemExcluidoGlobal('platina', p.id, p.title || p.titulo, p.user || p.usuario));
+            }
+
             return feed;
         }
 
@@ -2373,7 +2377,9 @@
                 }
 
                 if (data && data.length > 0) {
-                    const platinasNuvem = data.map(mapSupabaseParaPlatina);
+                    const platinasNuvem = data
+                        .filter(p => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('platina', p.id, p.titulo, p.usuario))
+                        .map(mapSupabaseParaPlatina);
                     const mapa = new Map();
                     platinasNuvem.forEach(p => mapa.set(String(p.id), p));
 
@@ -2857,19 +2863,35 @@
         }
 
         async function excluirPlatina(id) {
-            const confirmou = await showConfirm('Deseja realmente remover este registro de platina?', {
-                title: 'Remover Conquista',
+            let feed = obterFeedSalvo();
+            const item = feed.find(p => String(p.id) === String(id));
+            const tituloItem = item ? (item.title || item.titulo) : 'Platina';
+            const usuarioItem = item ? (item.user || item.usuario) : '';
+            const currentUser = (obterUsuarioAtual() || '').toLowerCase();
+            const isAdmin = typeof window.isAdminUser === 'function' ? window.isAdminUser() : false;
+            const isOwner = currentUser && usuarioItem.toLowerCase() === currentUser;
+
+            const modalTitle = isAdmin && !isOwner ? 'Moderação de Conteúdo (Admin)' : 'Remover Conquista';
+            const confirmMsg = isAdmin && !isOwner
+                ? `[ADMIN] Deseja realmente remover permanentemente a conquista de "${tituloItem}" de toda a plataforma?`
+                : `Deseja realmente remover o registro de platina de "${tituloItem}"?`;
+
+            const confirmou = await showConfirm(confirmMsg, {
+                title: modalTitle,
                 confirmText: 'Sim, Remover',
                 cancelText: 'Cancelar',
                 isDanger: true
             });
             if (!confirmou) return;
 
-            let feed = obterFeedSalvo();
-            feed = feed.filter(p => p.id !== id);
+            feed = feed.filter(p => String(p.id) !== String(id));
             salvarFeed(feed);
 
-            await excluirPlatinaDoSupabase(id);
+            if (window.registrarExclusaoGlobal) {
+                await window.registrarExclusaoGlobal('platina', id, tituloItem, usuarioItem);
+            } else {
+                await excluirPlatinaDoSupabase(id);
+            }
 
             renderizarFeedComunidade();
             renderizarMinhasPlatinas();

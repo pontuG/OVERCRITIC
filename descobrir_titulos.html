@@ -1411,11 +1411,47 @@
 
     <!-- ══════ JAVASCRIPT & INTEGRAÇÃO TMDB ══════ -->
     <script>
-        const DEFAULT_TMDB_KEY = "8265bd1679663a7ea12ac168da84d2e8";
+        // Pool de Chaves Oficiais TMDB (Primária + Secundárias para rotação automática e contingência)
+        const TMDB_API_KEYS = [
+            "8265bd1679663a7ea12ac168da84d2e8",
+            "2c46288716a18fb7aadcc2a801f3fc6b",
+            "15d2ea6d0dc1d476efbca3eba2b9bbfb"
+        ];
+        let currentTmdbKeyIndex = 0;
         const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 
         function getTmdbApiKey() {
-            return localStorage.getItem('OVERCRITIC_TMDB_USER_KEY') || DEFAULT_TMDB_KEY;
+            const userKey = localStorage.getItem('OVERCRITIC_TMDB_USER_KEY');
+            if (userKey && userKey.trim()) return userKey.trim();
+            return TMDB_API_KEYS[currentTmdbKeyIndex % TMDB_API_KEYS.length];
+        }
+
+        async function fetchTmdbComFallback(urlBuilder) {
+            let lastErr = null;
+            const userKey = localStorage.getItem('OVERCRITIC_TMDB_USER_KEY');
+            const keysToTry = (userKey && userKey.trim()) 
+                ? [userKey.trim(), ...TMDB_API_KEYS] 
+                : TMDB_API_KEYS;
+
+            for (let i = 0; i < keysToTry.length; i++) {
+                const keyIndex = (currentTmdbKeyIndex + i) % keysToTry.length;
+                const key = keysToTry[keyIndex];
+                const url = urlBuilder(key);
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        currentTmdbKeyIndex = keyIndex;
+                        return await res.json();
+                    } else if (res.status === 429 || res.status === 401) {
+                        console.warn(`[TMDB] Chave ${keyIndex + 1} indisponível (HTTP ${res.status}). Alternando para chave secundária...`);
+                    } else {
+                        throw new Error(`TMDB HTTP ${res.status}`);
+                    }
+                } catch (e) {
+                    lastErr = e;
+                }
+            }
+            throw lastErr || new Error('Todas as chaves da API falharam');
         }
 
         // Mapeamento de Gêneros TMDB
@@ -1935,7 +1971,6 @@
         async function carregarCatalogo(cat, carregarMais = false) {
             const grid = document.getElementById('titlesGrid');
             const btnMais = document.getElementById('btnLoadMore');
-            const apiKey = getTmdbApiKey();
 
             if (!carregarMais) {
                 grid.innerHTML = Array(8).fill(0).map(() => `
@@ -1953,24 +1988,34 @@
             if (btnMais) btnMais.disabled = true;
 
             try {
-                let endpoint = '';
+                let endpointBuilder = null;
                 if (cat === 'trending') {
-                    endpoint = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                    // Tendências reais e dinâmicas da semana (o que está mais bombando de verdade)
+                    endpointBuilder = (key) => `https://api.themoviedb.org/3/trending/all/week?api_key=${key}&language=pt-BR&page=${paginaAtual}`;
                 } else if (cat === 'releases') {
-                    endpoint = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=pt-BR&region=BR&page=${paginaAtual}`;
+                    // Filmes em cartaz e lançamentos reais nos cinemas brasileiros
+                    endpointBuilder = (key) => `https://api.themoviedb.org/3/movie/now_playing?api_key=${key}&language=pt-BR&region=BR&page=${paginaAtual}`;
                 } else if (cat === 'top') {
-                    endpoint = `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                    // Obras-primas consagradas pela crítica mundial (alta nota com volume massivo de votos)
+                    endpointBuilder = (key) => `https://api.themoviedb.org/3/discover/movie?api_key=${key}&language=pt-BR&sort_by=vote_average.desc&vote_count.gte=3000&page=${paginaAtual}`;
                 } else if (cat === 'series') {
-                    endpoint = `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=pt-BR&page=${paginaAtual}`;
+                    // Melhores séries narrativas de sucesso (exclui talk shows e jornalismo)
+                    endpointBuilder = (key) => `https://api.themoviedb.org/3/discover/tv?api_key=${key}&language=pt-BR&sort_by=vote_average.desc&vote_count.gte=1000&without_genres=10763,10767&page=${paginaAtual}`;
                 } else if (cat === 'anime') {
-                    endpoint = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=pt-BR&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=${paginaAtual}`;
+                    // Os maiores e mais aclamados animes da história
+                    endpointBuilder = (key) => `https://api.themoviedb.org/3/discover/tv?api_key=${key}&language=pt-BR&with_genres=16&with_original_language=ja&sort_by=vote_count.desc&vote_average.gte=7.5&page=${paginaAtual}`;
                 }
 
-                const res = await fetch(endpoint);
-                if (!res.ok) throw new Error('Falha na resposta do TMDB');
-                const data = await res.json();
+                const data = await fetchTmdbComFallback(endpointBuilder);
+                const rawResults = data.results || [];
 
-                const results = data.results || [];
+                // Filtra títulos sem identificador ou sem pôster oficial
+                const results = rawResults.filter(item => {
+                    const hasTitle = Boolean(item.title || item.name || item.original_title || item.original_name);
+                    const hasPoster = Boolean(item.poster_path);
+                    return hasTitle && hasPoster;
+                });
+
                 const novosTitulos = results.map(item => {
                     const isTv = (item.first_air_date !== undefined) || (item.name !== undefined);
                     const title = isTv ? (item.name || item.original_name) : (item.title || item.original_title);
@@ -2008,25 +2053,25 @@
                 });
 
                 if (carregarMais) {
-                    cacheTitulos[cat] = [...(cacheTitulos[cat] || []), ...novosTitulos];
-                } else {
-                    const baseIntegrada = CATALOGO_ESTENDIDO[cat] || [];
-                    const combinados = [...baseIntegrada];
+                    const existentes = cacheTitulos[cat] || [];
                     novosTitulos.forEach(nt => {
-                        if (!combinados.some(c => c.title.toLowerCase() === nt.title.toLowerCase())) {
-                            combinados.push(nt);
+                        if (!existentes.some(e => e.id === nt.id || e.title.toLowerCase() === nt.title.toLowerCase())) {
+                            existentes.push(nt);
                         }
                     });
-                    cacheTitulos[cat] = combinados;
+                    cacheTitulos[cat] = existentes;
+                } else {
+                    // Exibe 100% dos títulos reais retornados pela API (sem injetar itens fixos no topo)
+                    cacheTitulos[cat] = novosTitulos;
                 }
 
                 filtrarTitulosNaTela();
                 enriquecerProvedoresEmBackground(novosTitulos);
 
             } catch (err) {
-                console.warn('TMDB em contingência. Carregando catálogo oficial integrado:', err);
+                console.warn('[Descobrir] TMDB em contingência. Carregando catálogo oficial integrado:', err);
                 if (!carregarMais) {
-                    cacheTitulos[cat] = CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending;
+                    cacheTitulos[cat] = (CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending).map(item => ({ ...item }));
                     filtrarTitulosNaTela();
                 }
             } finally {
