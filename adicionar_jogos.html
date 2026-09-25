@@ -1625,64 +1625,15 @@
             }
         }
         @media (max-width: 768px) {
-            /* Navegação adaptada para barra inferior no mobile */
-            .sidebar {
-                width: 100% !important;
-                max-width: 100vw !important;
-                height: 58px !important;
-                top: auto !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                flex-direction: row !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                padding: 0 4px calc(env(safe-area-inset-bottom, 0px) + 2px) 4px !important;
-                border-right: none !important;
-                border-top: 1px solid var(--glass-border) !important;
-                border-bottom: none !important;
-                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
-                z-index: 9999 !important;
-                overflow-x: auto !important;
-                scrollbar-width: none !important;
-            }
-            .brand-icon, .sidebar-user, .sys-time {
+            /* Sidebar desktop e barra inferior ocultadas no celular em prol do Mobile Drawer */
+            .sidebar, .mobile-bottom-nav, .sidebar-bottom, .theme-toggle-container {
                 display: none !important;
-            }
-            .nav-links {
-                display: flex !important;
-                flex-direction: row !important;
-                justify-content: space-around !important;
-                align-items: center !important;
-                flex: 1 1 auto !important;
-                width: auto !important;
-                min-width: 0 !important;
-                gap: 1px !important;
-            }
-            .nav-item {
-                flex: 1 1 0 !important;
-                width: 36px !important;
-                min-width: 28px !important;
-                max-width: 42px !important;
-                height: 38px !important;
-                font-size: 1.05rem !important;
-                border-radius: 8px !important;
-                padding: 0 !important;
-            }
-            .sidebar-bottom, .theme-toggle-container {
-                display: flex !important;
-                flex-direction: row !important;
-                align-items: center !important;
-                flex-shrink: 0 !important;
-                margin: 0 !important;
-                padding: 0 2px 0 4px !important;
-                border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
             }
 
             .main-content {
                 margin-left: 0 !important;
-                margin-bottom: 66px !important;
-                padding: 14px 12px calc(80px + env(safe-area-inset-bottom, 0px)) 12px !important;
+                margin-bottom: 0 !important;
+                padding: 66px 12px 35px 12px !important;
                 width: 100% !important;
                 max-width: 100% !important;
             }
@@ -1888,7 +1839,9 @@
                     </div>
 
                     <!-- CAPA PREVIEW -->
-                    <img id="coverPreview" class="cover-preview" src="" alt="Capa Oficial do Jogo">
+                    <div class="poster-box-wrapper">
+                        <img id="coverPreview" class="cover-preview" src="" alt="Capa Oficial do Jogo" style="display: none;">
+                    </div>
                     <input type="hidden" id="gameCoverUrl">
 
                     <!-- INFORMAÇÕES -->
