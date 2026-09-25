@@ -985,13 +985,13 @@
         <!-- ABAS DE NAVEGAÇÃO INTERNA -->
         <div class="tabs-container">
             <button class="tab-btn active" id="tabNewTicket" onclick="alternarAba('novo')">
-                ✍️ Enviar Nova Mensagem
+                <span>✍️</span> <span class="tab-label-full">Enviar Nova Mensagem</span><span class="tab-label-mobile">Nova Mensagem</span>
             </button>
             <button class="tab-btn" id="tabMyTickets" onclick="alternarAba('meus')">
-                📨 Minhas Mensagens Enviadas <span class="tab-badge" id="myTicketsBadge">0</span>
+                <span>📨</span> <span class="tab-label-full">Minhas Mensagens Enviadas</span><span class="tab-label-mobile">Mensagens</span> <span class="tab-badge" id="myTicketsBadge">0</span>
             </button>
             <button class="tab-btn" id="tabAdminPanel" onclick="alternarAba('admin')">
-                👑 Painel do Administrador (Admin) <span class="tab-badge" id="adminTicketsBadge">0</span>
+                <span>👑</span> <span class="tab-label-full">Painel do Administrador (Admin)</span><span class="tab-label-mobile">Painel Admin</span> <span class="tab-badge" id="adminTicketsBadge">0</span>
             </button>
         </div>
 
@@ -1300,6 +1300,13 @@
                 secMeus.style.display = 'none';
                 secAdmin.style.display = 'block';
                 renderizarChamadosAdmin();
+            }
+
+            const activeBtn = document.querySelector('.tab-btn.active');
+            if (activeBtn) {
+                try {
+                    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                } catch(e) {}
             }
         }
 

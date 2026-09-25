@@ -1353,11 +1353,24 @@
             </div>
         </header>
 
+        <!-- ABAS DE NAVEGAÇÃO MOBILE (CADASTRO / CATÁLOGO / TENDÊNCIAS) -->
+        <div class="mobile-section-tabs" id="mobileMediaTabs">
+            <button type="button" class="mobile-section-tab active" id="mTabBtnMediaCadastrar" onclick="alternarSecaoMobile('cadastrar')">
+                <span>📝</span> Cadastrar
+            </button>
+            <button type="button" class="mobile-section-tab" id="mTabBtnMediaCatalogo" onclick="alternarSecaoMobile('catalogo')">
+                <span>🎬</span> Meu Catálogo
+            </button>
+            <button type="button" class="mobile-section-tab" id="mTabBtnMediaTendencias" onclick="alternarSecaoMobile('tendencias')">
+                <span>🔥</span> Tendências
+            </button>
+        </div>
+
         <!-- ══════ GRADE PRINCIPAL DO TOPO (2 COLUNAS) ══════ -->
         <div class="dashboard-top-grid">
 
             <!-- COLUNA ESQUERDA: FORMULÁRIO DE ANÁLISE -->
-            <div class="glass-card form-column-card" id="formCardContainer">
+            <div class="glass-card form-column-card" id="formMediaCardContainer">
                 <h2 class="section-title">📝 Registrar Análise de Mídia</h2>
                 <div class="section-divider"></div>
 
@@ -1485,7 +1498,7 @@
             </div>
 
             <!-- COLUNA DIREITA: STATS + TRENDING TMDB -->
-            <div class="right-column">
+            <div class="right-column" id="rightColumnCardContainer">
                 
                 <!-- PAINEL SUPERIOR: ESTATÍSTICAS -->
                 <div class="glass-card">
@@ -1542,37 +1555,39 @@
         </div>
 
         <!-- ══════ BARRA DE FILTROS & BUSCA DO CATÁLOGO ══════ -->
-        <div class="filter-section">
-            <div class="filter-search">
-                <input type="text" id="filterSearchInput" placeholder="🔍 Filtrar suas críticas por título ou tags..." oninput="filtrarReviews()" style="width: 100%;">
+        <div id="reviewsCatalogContainer">
+            <div class="filter-section">
+                <div class="filter-search">
+                    <input type="text" id="filterSearchInput" placeholder="🔍 Filtrar suas críticas por título ou tags..." oninput="filtrarReviews()" style="width: 100%;">
+                </div>
+                <div class="filter-selects">
+                    <select id="filterCategory" onchange="filtrarReviews()">
+                        <option value="Todos">Todas as Categorias</option>
+                        <option value="Filme">Apenas Filmes</option>
+                        <option value="Série">Apenas Séries</option>
+                        <option value="Anime">Apenas Animes</option>
+                        <option value="Documentário">Documentários</option>
+                    </select>
+                    <select id="filterStatus" onchange="filtrarReviews()">
+                        <option value="Todos">Todos os Status</option>
+                        <option value="Assistido">Assistido</option>
+                        <option value="Assistindo">Assistindo</option>
+                        <option value="Na Lista">Na Lista</option>
+                        <option value="Abandonado">Abandonado</option>
+                    </select>
+                    <select id="sortReviews" onchange="filtrarReviews()">
+                        <option value="recent">Mais Recentes</option>
+                        <option value="ratingHigh">Maior Nota</option>
+                        <option value="ratingLow">Menor Nota</option>
+                        <option value="titleAsc">Título (A-Z)</option>
+                    </select>
+                </div>
             </div>
-            <div class="filter-selects">
-                <select id="filterCategory" onchange="filtrarReviews()">
-                    <option value="Todos">Todas as Categorias</option>
-                    <option value="Filme">Apenas Filmes</option>
-                    <option value="Série">Apenas Séries</option>
-                    <option value="Anime">Apenas Animes</option>
-                    <option value="Documentário">Documentários</option>
-                </select>
-                <select id="filterStatus" onchange="filtrarReviews()">
-                    <option value="Todos">Todos os Status</option>
-                    <option value="Assistido">Assistido</option>
-                    <option value="Assistindo">Assistindo</option>
-                    <option value="Na Lista">Na Lista</option>
-                    <option value="Abandonado">Abandonado</option>
-                </select>
-                <select id="sortReviews" onchange="filtrarReviews()">
-                    <option value="recent">Mais Recentes</option>
-                    <option value="ratingHigh">Maior Nota</option>
-                    <option value="ratingLow">Menor Nota</option>
-                    <option value="titleAsc">Título (A-Z)</option>
-                </select>
-            </div>
-        </div>
 
-        <!-- ══════ GRADE DE CRÍTICAS SALVAS ══════ -->
-        <div id="reviewsGrid" class="reviews-grid">
-            <!-- Cards gerados via JS -->
+            <!-- ══════ GRADE DE CRÍTICAS SALVAS ══════ -->
+            <div id="reviewsGrid" class="reviews-grid">
+                <!-- Cards gerados via JS -->
+            </div>
         </div>
 
     </main>
@@ -1621,6 +1636,23 @@
 
         let currentApiTab = 'movies';
         let debounceTimer = null;
+
+        /* ═══════════════════════════════════
+           CONTROLE DE ABAS MOBILE
+        ═══════════════════════════════════ */
+        function alternarSecaoMobile(secao) {
+            document.body.setAttribute('data-mobile-media-tab', secao);
+            document.querySelectorAll('#mobileMediaTabs .mobile-section-tab').forEach(b => b.classList.remove('active'));
+            const btnMap = {
+                'cadastrar': 'mTabBtnMediaCadastrar',
+                'catalogo': 'mTabBtnMediaCatalogo',
+                'tendencias': 'mTabBtnMediaTendencias'
+            };
+            const target = document.getElementById(btnMap[secao]);
+            if (target) target.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        document.body.setAttribute('data-mobile-media-tab', 'cadastrar');
 
         // Recupera chave configurada pelo usuário ou chave padrão
         function getTmdbApiKey() {
@@ -2017,6 +2049,10 @@
 
             // Detecta Anime
             const isAnime = item.genre_ids?.includes(16) && (item.origin_country?.includes('JP') || item.original_language === 'ja');
+
+            if (typeof alternarSecaoMobile === 'function') {
+                alternarSecaoMobile('cadastrar');
+            }
 
             document.getElementById('mediaTitle').value = title;
             document.getElementById('mediaYear').value = year;
@@ -2443,9 +2479,15 @@
             salvarReviewsNoStorage(reviews);
             if (itemFinal) salvarMidiaNoSupabase(itemFinal);
             limparFormulario();
+            if (window.innerWidth <= 768 && typeof alternarSecaoMobile === 'function') {
+                alternarSecaoMobile('catalogo');
+            }
         }
 
         function editarReview(id) {
+            if (typeof alternarSecaoMobile === 'function') {
+                alternarSecaoMobile('cadastrar');
+            }
             const reviews = obterReviews();
             const item = reviews.find(r => String(r.id) === String(id));
             if (!item) return;

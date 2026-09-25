@@ -1814,6 +1814,19 @@
             <div class="subtitle">Registre, avalie e compartilhe suas opiniões</div>
         </header>
 
+        <!-- ABAS DE NAVEGAÇÃO MOBILE (CADASTRO / CRÍTICAS / EM ALTA) -->
+        <div class="mobile-section-tabs" id="mobileGameTabs">
+            <button type="button" class="mobile-section-tab active" id="mTabBtnCadastrar" onclick="alternarSecaoMobile('cadastrar')">
+                <span>📝</span> Cadastrar
+            </button>
+            <button type="button" class="mobile-section-tab" id="mTabBtnCriticas" onclick="alternarSecaoMobile('criticas')">
+                <span>📚</span> Críticas
+            </button>
+            <button type="button" class="mobile-section-tab" id="mTabBtnApi" onclick="alternarSecaoMobile('api')">
+                <span>🔥</span> Em Alta
+            </button>
+        </div>
+
         <!-- ══════ GRADE PRINCIPAL DO TOPO (2 COLUNAS) ══════ -->
         <div class="dashboard-top-grid">
 
@@ -1928,7 +1941,7 @@
                 </div>
 
                 <!-- PAINEL DIREITA INFERIOR: JOGOS MAIS JOGADOS & LANÇAMENTOS (API) -->
-                <div class="glass-card api-games-card">
+                <div class="glass-card api-games-card" id="apiGamesCardContainer">
                     <div class="panel-header-badge">
                         <h2 class="section-title" style="margin: 0;">🔥 Descobrir Jogos</h2>
                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -1967,7 +1980,7 @@
         </div>
 
         <!-- ══════ CRÍTICAS CADASTRADAS ══════ -->
-        <div class="glass-card">
+        <div class="glass-card" id="reviewsCardContainer">
             <h2 class="section-title">📚 Críticas Cadastradas</h2>
             <div class="section-divider"></div>
 
@@ -2002,6 +2015,23 @@
 
     <script>
         let debounceTimer;
+
+        /* ═══════════════════════════════════
+           CONTROLE DE ABAS MOBILE
+        ═══════════════════════════════════ */
+        function alternarSecaoMobile(secao) {
+            document.body.setAttribute('data-mobile-game-tab', secao);
+            document.querySelectorAll('#mobileGameTabs .mobile-section-tab').forEach(b => b.classList.remove('active'));
+            const btnMap = {
+                'cadastrar': 'mTabBtnCadastrar',
+                'criticas': 'mTabBtnCriticas',
+                'api': 'mTabBtnApi'
+            };
+            const target = document.getElementById(btnMap[secao]);
+            if (target) target.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        document.body.setAttribute('data-mobile-game-tab', 'cadastrar');
 
         /* ═══════════════════════════════════
            AUTENTICAÇÃO SIMPLES
@@ -2489,6 +2519,9 @@
             salvarJogoNoSupabase(dadosJogo);
             limparFormulario();
             renderizarCriticas();
+            if (window.innerWidth <= 768 && typeof alternarSecaoMobile === 'function') {
+                alternarSecaoMobile('criticas');
+            }
         }
 
         function editarCritica(id) {
@@ -2524,6 +2557,9 @@
 
             document.getElementById('btnSubmitForm').innerText = 'SALVAR ALTERAÇÕES';
             document.getElementById('btnCancelarEdicao').style.display = 'block';
+            if (typeof alternarSecaoMobile === 'function') {
+                alternarSecaoMobile('cadastrar');
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -3062,6 +3098,9 @@
         }
 
         function avaliarJogoDaLista(titulo) {
+            if (typeof alternarSecaoMobile === 'function') {
+                alternarSecaoMobile('cadastrar');
+            }
             const inputBusca = document.getElementById('apiSearchInput');
             const formCard = document.getElementById('formCardContainer');
             

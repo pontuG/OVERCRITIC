@@ -508,6 +508,17 @@ body.light-mode .version-btn-ok {
     .sys-time {
         font-size: 10px !important;
     }
+
+    /* Oculta abas de seções mobile no desktop */
+    .mobile-section-tabs {
+        display: none !important;
+    }
+    .tab-label-full {
+        display: inline !important;
+    }
+    .tab-label-mobile {
+        display: none !important;
+    }
 }
 
 /* ── TELAS DE LAPTOPS & RESOLUÇÕES MÉDIAS (Telas 1080p com escala 125%/150% ou 1366x768) ──
@@ -1375,6 +1386,131 @@ body.light-mode .version-btn-ok {
     .version-modal-header, .version-modal-body, .version-modal-footer {
         padding: 14px !important;
     }
+
+    /* ── 8. ABAS DE NAVEGAÇÃO MOBILE (CARROSSEL MODERNO & SEM CORTES) ── */
+    .tabs-container {
+        display: flex !important;
+        gap: 8px !important;
+        margin-bottom: 16px !important;
+        padding: 4px 6px 10px 6px !important;
+        border-bottom: 1px solid var(--glass-border) !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-snap-type: x mandatory !important;
+        scrollbar-width: none !important;
+        -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%) !important;
+        mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%) !important;
+    }
+    .tabs-container::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .tab-btn {
+        flex: 0 0 auto !important;
+        padding: 8px 14px !important;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        border-radius: 12px !important;
+        scroll-snap-align: start !important;
+        white-space: nowrap !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-sizing: border-box !important;
+        touch-action: pan-x !important;
+    }
+
+    /* Rótulos responsivos das abas de navegação */
+    .tab-label-full {
+        display: none !important;
+    }
+    .tab-label-mobile {
+        display: inline !important;
+    }
+
+    /* ── 9. ABAS DE SEÇÕES PARA TELAS DE CADASTRO (JOGOS E MÍDIAS) ── */
+    .mobile-section-tabs {
+        display: flex !important;
+        background: rgba(0, 0, 0, 0.35) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 14px !important;
+        padding: 4px !important;
+        margin-bottom: 18px !important;
+        gap: 4px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+    body.light-mode .mobile-section-tabs {
+        background: rgba(255, 255, 255, 0.7) !important;
+        border-color: rgba(0, 0, 0, 0.12) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .mobile-section-tab {
+        flex: 1 1 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 9px 8px !important;
+        border-radius: 10px !important;
+        border: 1px solid transparent !important;
+        background: transparent !important;
+        color: var(--text-muted) !important;
+        font-family: inherit !important;
+        font-size: 0.76rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    .mobile-section-tab:hover {
+        color: var(--text-main) !important;
+    }
+    .mobile-section-tab.active {
+        background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2)) !important;
+        border-color: rgba(0, 240, 255, 0.45) !important;
+        color: var(--accent-cyan) !important;
+        box-shadow: 0 2px 12px rgba(0, 240, 255, 0.25) !important;
+    }
+    body.light-mode .mobile-section-tab.active {
+        background: linear-gradient(135deg, rgba(197, 27, 41, 0.14), rgba(230, 57, 70, 0.14)) !important;
+        border-color: rgba(197, 27, 41, 0.35) !important;
+        color: #c51b29 !important;
+        box-shadow: 0 2px 8px rgba(197, 27, 41, 0.15) !important;
+    }
+
+    /* Controle de visibilidade das seções no mobile: Jogos */
+    body[data-mobile-game-tab="cadastrar"] #formCardContainer { display: flex !important; flex-direction: column !important; }
+    body[data-mobile-game-tab="cadastrar"] #apiGamesCardContainer { display: none !important; }
+    body[data-mobile-game-tab="cadastrar"] #reviewsCardContainer { display: none !important; }
+
+    body[data-mobile-game-tab="criticas"] #formCardContainer { display: none !important; }
+    body[data-mobile-game-tab="criticas"] #apiGamesCardContainer { display: none !important; }
+    body[data-mobile-game-tab="criticas"] #reviewsCardContainer { display: block !important; }
+
+    body[data-mobile-game-tab="api"] #formCardContainer { display: none !important; }
+    body[data-mobile-game-tab="api"] #apiGamesCardContainer { display: flex !important; }
+    body[data-mobile-game-tab="api"] #reviewsCardContainer { display: none !important; }
+
+    /* Controle de visibilidade das seções no mobile: Mídias */
+    body[data-mobile-media-tab="cadastrar"] #formMediaCardContainer { display: flex !important; flex-direction: column !important; }
+    body[data-mobile-media-tab="cadastrar"] #rightColumnCardContainer { display: none !important; }
+    body[data-mobile-media-tab="cadastrar"] #reviewsCatalogContainer { display: none !important; }
+
+    body[data-mobile-media-tab="catalogo"] #formMediaCardContainer { display: none !important; }
+    body[data-mobile-media-tab="catalogo"] #rightColumnCardContainer { display: none !important; }
+    body[data-mobile-media-tab="catalogo"] #reviewsCatalogContainer { display: block !important; }
+
+    body[data-mobile-media-tab="tendencias"] #formMediaCardContainer { display: none !important; }
+    body[data-mobile-media-tab="tendencias"] #rightColumnCardContainer { display: block !important; }
+    body[data-mobile-media-tab="tendencias"] #reviewsCatalogContainer { display: none !important; }
 }
 
 /* ── 7. SMARTPHONES COMPACTOS & TELAS PEQUENAS (<= 480px) ── */

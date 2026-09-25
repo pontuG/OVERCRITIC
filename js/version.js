@@ -9,15 +9,27 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.09.5",
+    version: "26.09.6",
     year: "2026",
     month: "09",
-    build: 5,
+    build: 6,
     releaseDate: "24/09/2026",
     status: "Versão Estável",
-    codename: "Mobile Drawer & Top Bar Experience",
+    codename: "Mobile Tabs & Seamless Navigation",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.09.6",
+            date: "24/09/2026",
+            title: "Abas Móveis Otimizadas & Navegação Seccionada sem Cortes",
+            highlights: [
+                "Carrossel de abas fluido em Troféus & Platinas com rolagem suave (scroll-snap), termos objetivos e máscara lateral translúcida eliminando cortes",
+                "Nova barra de abas de seções no celular para Críticas de Jogos (Cadastrar, Críticas, Em Alta), permitindo alternar telas instantaneamente",
+                "Nova barra de abas de seções no celular para Filmes & Séries (Cadastrar, Meu Catálogo, Tendências TMDB)",
+                "Redirecionamento inteligente ao tocar em 'Avaliar' ou 'Editar', alternando e rolando automaticamente para o formulário no mobile",
+                "Correção da propriedade CSS padrão background-clip para conformidade com especificações W3C"
+            ]
+        },
         {
             version: "26.09.5",
             date: "24/09/2026",

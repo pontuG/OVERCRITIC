@@ -1617,19 +1617,19 @@
         <!-- ABAS DE NAVEGAÇÃO -->
         <div class="tabs-container">
             <button class="tab-btn active" onclick="alternarAba('mais_platinados')">
-                <span>🔥</span> Mais Platinados & Dificuldades
+                <span>🔥</span> <span class="tab-label-full">Mais Platinados & Dificuldades</span><span class="tab-label-mobile">Ranking</span>
             </button>
             <button class="tab-btn" onclick="alternarAba('feed')">
-                <span>🌟</span> Mural da Comunidade
+                <span>🌟</span> <span class="tab-label-full">Mural da Comunidade</span><span class="tab-label-mobile">Mural</span>
             </button>
             <button class="tab-btn" onclick="alternarAba('minhas')">
-                <span>🎮</span> Minha Coleção Pessoal
+                <span>🎮</span> <span class="tab-label-full">Minha Coleção Pessoal</span><span class="tab-label-mobile">Coleção</span>
             </button>
             <button class="tab-btn" onclick="alternarAba('cadastrar')">
-                <span>➕</span> Registrar Nova Platina
+                <span>➕</span> <span class="tab-label-full">Registrar Nova Platina</span><span class="tab-label-mobile">Cadastrar</span>
             </button>
             <button class="tab-btn" onclick="alternarAba('api')">
-                <span>🔍</span> Explorador de Troféus (API)
+                <span>🔍</span> <span class="tab-label-full">Explorador de Troféus (API)</span><span class="tab-label-mobile">Explorador</span>
             </button>
         </div>
 
@@ -2581,24 +2581,32 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
+            let activeBtn = null;
             if (abaNome === 'mais_platinados') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                activeBtn = document.querySelectorAll('.tab-btn')[0];
                 document.getElementById('tabMaisPlatinados').classList.add('active');
                 renderizarTopMaisPlatinados();
             } else if (abaNome === 'feed') {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                activeBtn = document.querySelectorAll('.tab-btn')[1];
                 document.getElementById('tabFeed').classList.add('active');
                 renderizarFeedComunidade();
             } else if (abaNome === 'minhas') {
-                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                activeBtn = document.querySelectorAll('.tab-btn')[2];
                 document.getElementById('tabMinhas').classList.add('active');
                 renderizarMinhasPlatinas();
             } else if (abaNome === 'cadastrar') {
-                document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                activeBtn = document.querySelectorAll('.tab-btn')[3];
                 document.getElementById('tabCadastrar').classList.add('active');
             } else if (abaNome === 'api') {
-                document.querySelectorAll('.tab-btn')[4].classList.add('active');
+                activeBtn = document.querySelectorAll('.tab-btn')[4];
                 document.getElementById('tabApi').classList.add('active');
+            }
+
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                try {
+                    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                } catch(e) {}
             }
         }
 
