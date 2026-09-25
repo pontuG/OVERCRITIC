@@ -67,7 +67,7 @@ input[type="password"] {
     padding: 16px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-    transition: opacity 0.6s ease, visibility 0.6s ease !important;
+    transition: opacity 0.8s ease, visibility 0.8s ease !important;
 }
 
 #cleanIntro > div {

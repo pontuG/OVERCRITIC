@@ -9,27 +9,15 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.09.7",
+    version: "26.09.6",
     year: "2026",
     month: "09",
-    build: 7,
-    releaseDate: "25/09/2026",
+    build: 6,
+    releaseDate: "24/09/2026",
     status: "Versão Estável",
-    codename: "Instant Home Return & Splash Fix",
+    codename: "Mobile Tabs & Seamless Navigation",
     author: "pontuG (Admin)",
     changelog: [
-        {
-            version: "26.09.7",
-            date: "25/09/2026",
-            title: "Retorno Instantâneo ao Início & Correção da Splash Intro",
-            highlights: [
-                "Correção definitiva da tela inicial ficando presa na logo ao clicar no botão Início (Home 🏠)",
-                "Remoção de especificidade CSS conflitante (!important) que impedia o fechamento do overlay da logo",
-                "Ocultação imediata e inteligente sem 'flicker' para usuários já navegando na sessão",
-                "Failsafe incondicional de segurança garantindo a destruição e liberação total do painel inicial",
-                "Remoção e sincronização robusta de exclusões com permissão de moderador/administrador"
-            ]
-        },
         {
             version: "26.09.6",
             date: "24/09/2026",
