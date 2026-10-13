@@ -9,15 +9,27 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.09.6",
+    version: "26.10.1",
     year: "2026",
-    month: "09",
-    build: 6,
-    releaseDate: "24/09/2026",
+    month: "10",
+    build: 1,
+    releaseDate: "09/10/2026",
     status: "Versão Estável",
-    codename: "Mobile Tabs & Seamless Navigation",
+    codename: "Real-Time Geek News & Daily Trends Hub",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.1",
+            date: "09/10/2026",
+            title: "Radar Geek em Tempo Real & Atualização Diária de Lançamentos",
+            highlights: [
+                "Correção definitiva da aba 'Lançamentos Recentes': eliminação de clássicos antigos (God of War 2018/2005) com catálogo moderno (2024-2026) e filtros por ano e plataforma",
+                "Novo Radar Geek & Gamer em Tempo Real (js/geekNewsManager.js) integrado à Home com feed ao vivo, filtros por categorias (Games, Cinema & TV, Lançamentos) e cache inteligente",
+                "Ticker de Notícias ao Vivo (Breaking Geek News) no cabeçalho das páginas Home, Descobrir Jogos e Descobrir Títulos",
+                "Tendências Diárias em Alta: integração com API TMDB trending diário para filmes/séries e curadoria diária de jogos em alta na cultura gamer",
+                "Suporte estético e responsivo completo para temas Escuro e Claro com visual moderno, badges pulsantes e microinterações"
+            ]
+        },
         {
             version: "26.09.6",
             date: "24/09/2026",

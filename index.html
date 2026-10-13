@@ -16,6 +16,8 @@
     <script src="js/gamerProfile.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/version.js"></script>
+    <script src="js/avatarManager.js"></script>
+    <script src="js/geekNewsManager.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -190,20 +192,22 @@
         }
 
         /* Main Content */
+        /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
-            padding: 40px 60px;
+            padding: clamp(10px, 1.6vh, 26px) clamp(16px, 2.4vw, 40px);
             flex: 1;
             box-sizing: border-box;
             max-width: 1600px;
+            width: calc(100% - var(--sidebar-width));
         }
 
         .header-section {
-            margin-bottom: 40px;
+            margin-bottom: clamp(10px, 1.6vh, 22px);
         }
 
         .greeting {
-            font-size: 2.5rem;
+            font-size: clamp(1.4rem, 2.2vw, 2.2rem);
             font-weight: 800;
             margin: 0;
             background: linear-gradient(90deg, var(--text-main), var(--text-muted));
@@ -215,19 +219,19 @@
 
         .subtitle {
             color: var(--accent-cyan);
-            font-size: 1.1rem;
-            margin-top: 8px;
+            font-size: clamp(0.72rem, 0.9vw, 0.95rem);
+            margin-top: 4px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
         }
 
-        /* Bento Grid */
+        /* Bento Grid Proporcional & Fluido para Qualquer Zoom/Tela */
         .bento-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: minmax(180px, auto) minmax(180px, auto) minmax(150px, auto);
-            gap: 24px;
+            grid-template-rows: repeat(3, minmax(0, 1fr));
+            gap: clamp(10px, 1.4vh, 16px);
         }
 
         .bento-card {
@@ -235,8 +239,8 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 24px;
+            border-radius: clamp(14px, 1.4vw, 20px);
+            padding: clamp(12px, 1.4vh, 18px);
             box-shadow: 0 8px 32px var(--card-shadow);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
             position: relative;
@@ -245,6 +249,7 @@
             flex-direction: column;
             text-decoration: none;
             color: inherit;
+            min-height: 0;
         }
 
         .bento-card:hover {
@@ -265,13 +270,14 @@
             grid-row: span 3;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: clamp(10px, 1.4vh, 16px);
+            height: 100%;
         }
 
         .card-showcase {
             flex: 1;
-            min-height: 270px;
-            padding: 28px 30px;
+            min-height: 0;
+            padding: clamp(14px, 1.6vh, 22px) clamp(16px, 1.6vw, 24px);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -309,7 +315,8 @@
         .showcase-content {
             position: relative;
             z-index: 5;
-            max-width: 58%;
+            max-width: 50%;
+            padding-right: 12px;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -352,30 +359,30 @@
         }
 
         .card-showcase .card-title {
-            font-size: 1.75rem;
+            font-size: clamp(1.15rem, 1.45vw, 1.6rem);
             font-weight: 800;
-            margin: 0 0 6px 0;
+            margin: 0 0 clamp(2px, 0.4vh, 4px) 0;
             color: var(--text-main);
             line-height: 1.2;
             letter-spacing: -0.5px;
         }
 
         .card-showcase .card-desc {
-            font-size: 0.88rem;
+            font-size: clamp(0.72rem, 0.82vw, 0.84rem);
             color: var(--text-muted);
-            line-height: 1.45;
+            line-height: 1.35;
             margin: 0;
         }
 
         .showcase-action {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.82rem;
+            gap: 6px;
+            font-size: clamp(0.72rem, 0.8vw, 0.8rem);
             font-weight: 700;
             color: var(--accent-cyan);
-            margin-top: 14px;
-            padding: 6px 14px;
+            margin-top: clamp(6px, 1vh, 12px);
+            padding: clamp(4px, 0.6vh, 6px) clamp(10px, 1vw, 14px);
             border-radius: 10px;
             background: rgba(0, 240, 255, 0.08);
             border: 1px solid rgba(0, 240, 255, 0.2);
@@ -384,7 +391,7 @@
         }
         .showcase-action .action-arrow {
             transition: transform 0.3s ease;
-            font-size: 1rem;
+            font-size: 0.95rem;
             display: inline-block;
         }
         .card-showcase:hover .showcase-action {
@@ -429,10 +436,10 @@
         /* Covers Fan Showcase (Capas em Realce Meio Transparente) */
         .showcase-covers-wrapper {
             position: absolute;
-            right: -10px;
+            right: 0;
             top: 0;
             bottom: 0;
-            width: 55%;
+            width: 50%;
             pointer-events: none;
             overflow: hidden;
             display: flex;
@@ -471,96 +478,96 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
         }
 
-        /* Games Covers Fan */
+        /* Games Covers Fan - Posições e tamanhos fluidos com clamp() */
         .covers-games .cover-g-1 {
-            width: 145px;
-            height: 82px;
-            right: 18px;
-            top: 18px;
-            transform: rotate(7deg);
+            width: clamp(96px, 8.5vw, 130px);
+            height: clamp(54px, 4.8vw, 74px);
+            right: clamp(12px, 1.5vw, 22px);
+            top: clamp(12px, 1.5vh, 20px);
+            transform: rotate(4deg);
             z-index: 2;
         }
         .covers-games .cover-g-2 {
-            width: 160px;
-            height: 90px;
-            right: 90px;
-            top: 60px;
-            transform: rotate(-5deg);
-            z-index: 4;
-        }
-        .covers-games .cover-g-3 {
-            width: 150px;
-            height: 84px;
-            right: 25px;
-            bottom: 20px;
-            transform: rotate(5deg);
-            z-index: 3;
-        }
-        .covers-games .cover-g-4 {
-            width: 140px;
-            height: 78px;
-            right: 145px;
-            bottom: 35px;
-            transform: rotate(-9deg);
-            z-index: 1;
-        }
-        .card-games:hover .cover-g-1 {
-            transform: rotate(4deg) translate(5px, -5px) scale(1.04);
-        }
-        .card-games:hover .cover-g-2 {
-            transform: rotate(-2deg) translate(-5px, -2px) scale(1.06);
-        }
-        .card-games:hover .cover-g-3 {
-            transform: rotate(3deg) translate(6px, 5px) scale(1.05);
-        }
-        .card-games:hover .cover-g-4 {
-            transform: rotate(-7deg) translate(-8px, 4px) scale(1.04);
-        }
-
-        /* Movies Covers Fan */
-        .covers-movies .cover-m-1 {
-            width: 88px;
-            height: 130px;
-            right: 20px;
-            top: 20px;
-            transform: rotate(8deg);
-            z-index: 2;
-        }
-        .covers-movies .cover-m-2 {
-            width: 96px;
-            height: 142px;
-            right: 82px;
-            top: 38px;
+            width: clamp(105px, 9.5vw, 140px);
+            height: clamp(60px, 5.4vw, 80px);
+            right: clamp(60px, 6vw, 84px);
+            top: clamp(34px, 4vh, 52px);
             transform: rotate(-4deg);
             z-index: 4;
         }
+        .covers-games .cover-g-3 {
+            width: clamp(96px, 8.5vw, 130px);
+            height: clamp(54px, 4.8vw, 74px);
+            right: clamp(16px, 1.8vw, 24px);
+            bottom: clamp(12px, 1.5vh, 18px);
+            transform: rotate(3deg);
+            z-index: 3;
+        }
+        .covers-games .cover-g-4 {
+            width: clamp(90px, 8vw, 122px);
+            height: clamp(50px, 4.6vw, 68px);
+            right: clamp(85px, 8vw, 125px);
+            bottom: clamp(20px, 2.2vh, 30px);
+            transform: rotate(-6deg);
+            z-index: 1;
+        }
+        .card-games:hover .cover-g-1 {
+            transform: rotate(2deg) scale(1.05);
+        }
+        .card-games:hover .cover-g-2 {
+            transform: rotate(-1deg) scale(1.06);
+        }
+        .card-games:hover .cover-g-3 {
+            transform: rotate(1deg) scale(1.05);
+        }
+        .card-games:hover .cover-g-4 {
+            transform: rotate(-4deg) scale(1.04);
+        }
+
+        /* Movies Covers Fan - Proporções e posições fluidas */
+        .covers-movies .cover-m-1 {
+            width: clamp(56px, 5.2vw, 76px);
+            height: clamp(84px, 7.8vw, 114px);
+            right: clamp(14px, 1.8vw, 22px);
+            top: clamp(12px, 1.5vh, 18px);
+            transform: rotate(4deg);
+            z-index: 2;
+        }
+        .covers-movies .cover-m-2 {
+            width: clamp(62px, 5.8vw, 84px);
+            height: clamp(92px, 8.6vw, 126px);
+            right: clamp(52px, 5.5vw, 76px);
+            top: clamp(22px, 2.5vh, 32px);
+            transform: rotate(-3deg);
+            z-index: 4;
+        }
         .covers-movies .cover-m-3 {
-            width: 88px;
-            height: 130px;
-            right: 150px;
-            top: 50px;
-            transform: rotate(6deg);
+            width: clamp(56px, 5.2vw, 76px);
+            height: clamp(84px, 7.8vw, 114px);
+            right: clamp(95px, 9vw, 132px);
+            top: clamp(30px, 3.5vh, 44px);
+            transform: rotate(4deg);
             z-index: 1;
         }
         .covers-movies .cover-m-4 {
-            width: 84px;
-            height: 124px;
-            right: 42px;
-            bottom: 12px;
-            transform: rotate(-8deg);
+            width: clamp(52px, 4.8vw, 72px);
+            height: clamp(78px, 7.2vw, 108px);
+            right: clamp(28px, 3vw, 40px);
+            bottom: clamp(10px, 1.2vh, 16px);
+            transform: rotate(-5deg);
             z-index: 3;
         }
         .card-movies-main:hover .cover-m-1 {
-            transform: rotate(5deg) translate(4px, -4px) scale(1.04);
+            transform: rotate(2deg) scale(1.05);
         }
         .card-movies-main:hover .cover-m-2 {
-            transform: rotate(-1deg) scale(1.06);
+            transform: rotate(0deg) scale(1.06);
         }
         .card-movies-main:hover .cover-m-3 {
-            transform: rotate(4deg) translate(-6px, 3px) scale(1.04);
+            transform: rotate(2deg) scale(1.05);
         }
         .card-movies-main:hover .cover-m-4 {
-            transform: rotate(-6deg) translate(4px, 5px) scale(1.04);
+            transform: rotate(-3deg) scale(1.05);
         }
 
         .card-plats { grid-column: span 1; grid-row: span 1; }
@@ -569,7 +576,7 @@
             position: absolute;
             top: -10px;
             right: -10px;
-            font-size: 110px;
+            font-size: clamp(70px, 7vw, 100px);
             opacity: 0.05;
             transform: rotate(-10deg);
             transition: all 0.5s ease;
@@ -581,32 +588,32 @@
         .card-challenges { grid-column: span 1; grid-row: span 1; }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: clamp(0.92rem, 1.1vw, 1.15rem);
             font-weight: 800;
-            margin-bottom: 10px;
+            margin-bottom: clamp(4px, 0.8vh, 8px);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             z-index: 2;
         }
         
-        .card-games .card-title { font-size: 2rem; }
+        .card-games .card-title { font-size: clamp(1.2rem, 1.5vw, 1.65rem); }
 
         .card-desc {
-            font-size: 0.95rem;
+            font-size: clamp(0.72rem, 0.8vw, 0.82rem);
             color: var(--text-muted);
-            line-height: 1.5;
+            line-height: 1.35;
             z-index: 2;
         }
 
         /* Stats internal */
-        .stat-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .stat-list { display: flex; flex-direction: column; gap: clamp(4px, 0.6vh, 8px); margin-top: clamp(6px, 0.8vh, 10px); }
         .stat-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: rgba(255, 255, 255, 0.03);
-            padding: 10px 14px;
+            padding: clamp(4px, 0.6vh, 8px) clamp(8px, 1vw, 12px);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.06);
             text-decoration: none;
@@ -632,20 +639,20 @@
             transform: translateX(4px);
         }
         .stat-label {
-            font-size: 0.9rem;
+            font-size: clamp(0.74rem, 0.85vw, 0.86rem);
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         .stat-val-wrapper {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         .stat-item .val {
             font-weight: 800;
-            font-size: 1.15rem;
+            font-size: clamp(0.92rem, 1.05vw, 1.1rem);
             color: var(--accent-cyan);
             display: inline-block;
             transition: transform 0.25s ease, color 0.25s ease;
@@ -654,7 +661,7 @@
             color: var(--accent-blood);
         }
         .stat-arrow {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             line-height: 1;
             color: var(--text-muted);
             opacity: 0.4;
@@ -670,8 +677,8 @@
         }
         .live-dot {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--accent-cyan);
             box-shadow: 0 0 8px var(--accent-cyan);
@@ -692,15 +699,15 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--text-main);
             font-family: inherit;
-            font-size: 0.9rem;
-            padding: 15px;
+            font-size: clamp(0.72rem, 0.82vw, 0.84rem);
+            padding: clamp(6px, 1vh, 10px);
             box-sizing: border-box;
             resize: none;
             outline: none;
-            margin-top: 15px;
+            margin-top: clamp(6px, 0.8vh, 10px);
             transition: border-color 0.3s;
         }
         body.light-mode .quick-note-area {
@@ -711,17 +718,28 @@
         .quick-note-area:focus { border-color: var(--accent-purple); }
 
         /* Responsive */
-        @media (max-width: 1200px) {
+        @media (max-width: 1150px) {
             .bento-grid {
                 grid-template-columns: repeat(2, 1fr);
                 grid-template-rows: auto;
+                gap: 16px;
             }
             .bento-col-showcase {
                 grid-column: span 2;
                 grid-row: auto;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+            .card-showcase {
+                min-height: 240px;
+                padding: 22px 24px;
+            }
+            .showcase-content {
+                max-width: 58%;
             }
             .card-discover {
-                grid-column: span 2;
+                grid-column: span 1;
             }
             .card-plats, .card-challenges, .card-stats, .card-notes {
                 grid-column: span 1;
@@ -754,6 +772,8 @@
             .bento-col-showcase {
                 grid-column: span 1 !important;
                 grid-row: auto !important;
+                display: flex !important;
+                flex-direction: column !important;
                 gap: 14px !important;
             }
             .bento-card {
@@ -763,15 +783,16 @@
                 min-height: auto !important;
             }
             .card-showcase {
-                min-height: 220px !important;
+                min-height: 200px !important;
                 padding: 20px 18px !important;
             }
             .showcase-content {
-                max-width: 75% !important;
+                max-width: 100% !important;
+                z-index: 5 !important;
             }
             .showcase-covers-wrapper {
-                width: 60% !important;
-                opacity: 0.45 !important;
+                width: 48% !important;
+                opacity: 0.28 !important;
             }
         }
         @media (max-width: 480px) {
@@ -866,6 +887,7 @@
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
+            overflow: hidden;
         }
         .header-user-meta {
             display: flex;
@@ -1173,6 +1195,7 @@
             font-weight: 800;
             font-size: 0.95rem;
             color: #fff;
+            overflow: hidden;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
@@ -1387,6 +1410,398 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        /* ─── TICKER AO VIVO (GEEK RADAR) ─── */
+        .live-ticker-container {
+            margin-bottom: 25px;
+        }
+        .live-ticker-wrap {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(8, 14, 26, 0.9));
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(10px);
+        }
+        body.light-mode .live-ticker-wrap {
+            background: linear-gradient(90deg, rgba(230, 235, 245, 0.95), rgba(215, 222, 235, 0.9));
+            border-color: rgba(197, 27, 41, 0.25);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .ticker-tag {
+            background: linear-gradient(135deg, #ff0055, #c51b29);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            padding: 10px 14px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 2px 0 10px rgba(255, 0, 85, 0.4);
+            z-index: 2;
+        }
+        .ticker-marquee-track {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 8px 12px;
+        }
+        .ticker-marquee-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            white-space: nowrap;
+            animation: marqueeTicker 45s linear infinite;
+        }
+        .ticker-marquee-track:hover .ticker-marquee-content {
+            animation-play-state: paused;
+        }
+        @keyframes marqueeTicker {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+        .ticker-item:hover {
+            color: var(--accent-cyan);
+            text-decoration: underline;
+        }
+        body.light-mode .ticker-item:hover {
+            color: #c51b29;
+        }
+        .ticker-dot {
+            color: #00f0ff;
+        }
+        body.light-mode .ticker-dot {
+            color: #c51b29;
+        }
+        .ticker-time {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-left: 4px;
+        }
+        .ticker-sep {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+        }
+        body.light-mode .ticker-sep {
+            color: rgba(0, 0, 0, 0.2);
+        }
+
+        /* ─── SEÇÕES DO RADAR GEEK & NOTÍCIAS DIÁRIAS ─── */
+        .geek-radar-section, .geek-trending-section {
+            margin-top: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px var(--card-shadow);
+        }
+        .live-pulse-dot {
+            display: inline-block;
+            animation: pulseDotAnim 1.8s infinite;
+        }
+        @keyframes pulseDotAnim {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        /* GRID DE NOTÍCIAS */
+        .geek-news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .news-card {
+            background: rgba(13, 17, 27, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+        }
+        body.light-mode .news-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.15);
+        }
+        body.light-mode .news-card:hover {
+            border-color: #c51b29;
+            box-shadow: 0 10px 25px rgba(197, 27, 41, 0.15);
+        }
+        .news-thumb-wrapper {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: #0a0e17;
+        }
+        .news-thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .news-card:hover .news-thumb-img {
+            transform: scale(1.05);
+        }
+        .news-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #fff;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+        .badge-game { background: rgba(0, 240, 255, 0.85); color: #07090f; }
+        .badge-cinema { background: rgba(157, 78, 221, 0.9); }
+        .badge-launch { background: rgba(255, 0, 85, 0.9); }
+        .news-time-chip {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .news-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .news-title {
+            margin: 0 0 10px 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+        .news-title a {
+            color: var(--text-main);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .news-title a:hover {
+            color: var(--accent-cyan);
+        }
+        body.light-mode .news-title a:hover {
+            color: #c51b29;
+        }
+        .news-desc {
+            margin: 0 0 16px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            flex: 1;
+        }
+        .news-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 12px;
+            margin-top: auto;
+        }
+        .news-author {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .news-read-btn {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: gap 0.2s ease;
+        }
+        .news-read-btn:hover {
+            gap: 8px;
+        }
+        body.light-mode .news-read-btn {
+            color: #c51b29;
+        }
+
+        /* GRID DE TENDÊNCIAS DO DIA */
+        .trending-today-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .trend-card {
+            background: rgba(13, 17, 27, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        body.light-mode .trend-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        .trend-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 8px 20px rgba(0, 240, 255, 0.15);
+        }
+        body.light-mode .trend-card:hover {
+            border-color: #c51b29;
+            box-shadow: 0 8px 20px rgba(197, 27, 41, 0.15);
+        }
+        .trend-cover-wrap {
+            position: relative;
+            width: 100%;
+            height: 135px;
+            overflow: hidden;
+        }
+        .trend-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .trend-card:hover .trend-cover-img {
+            transform: scale(1.05);
+        }
+        .trend-rank-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #07090f;
+            font-size: 0.75rem;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        .trend-score-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00f0ff;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        body.light-mode .trend-score-badge {
+            color: #c51b29;
+            border-color: rgba(197, 27, 41, 0.3);
+        }
+        .trend-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .trend-title {
+            margin: 0 0 6px 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .trend-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .trend-action-btn {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .trend-action-btn:hover {
+            background: var(--accent-cyan);
+            color: #07090f;
+        }
+        body.light-mode .trend-action-btn {
+            background: rgba(197, 27, 41, 0.08);
+            border-color: #c51b29;
+            color: #c51b29;
+        }
+        body.light-mode .trend-action-btn:hover {
+            background: #c51b29;
+            color: #fff;
+        }
+
+        /* SKELETON LOADERS */
+        .news-skeleton-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .news-skeleton-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.06) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: feedShimmer 1.5s infinite;
+        }
+        .news-skeleton-img { height: 180px; background: rgba(255,255,255,0.05); }
+        .news-skeleton-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .news-skeleton-line { height: 14px; background: rgba(255,255,255,0.07); border-radius: 4px; }
     </style>
     <link rel="stylesheet" href="css/responsive-global.css">
 </head>
@@ -1459,10 +1874,14 @@
 
     <!-- MAIN DASHBOARD -->
     <main class="main-content">
+
+        <!-- RADAR & LETREIRO DE NOTÍCIAS GEEK AO VIVO -->
+        <div id="liveGeekTickerHome" class="live-ticker-container"></div>
+
         <header class="header-section" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
             <div>
                 <h1 class="greeting" id="dashboardGreeting">Olá, Jogador! 👋</h1>
-                <div class="subtitle">Seu QG de críticas e conquistas</div>
+                <div class="subtitle">Seu portal diário de notícias, lançamentos em tempo real e críticas geek & gamer</div>
             </div>
             <div id="authHeaderAction">
                 <a href="conta_login.html" id="btnAuthHeader" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:12px; background:rgba(0,240,255,0.08); border:1px solid var(--accent-cyan); color:var(--accent-cyan); text-decoration:none; font-weight:700; font-size:0.88rem; transition:all 0.25s ease; box-shadow:0 0 15px rgba(0,240,255,0.15);">
@@ -1578,6 +1997,55 @@
             <div class="bento-card card-notes">
                 <div class="card-title" style="font-size: 1rem;">📝 Notas</div>
                 <textarea id="quickNotes" class="quick-note-area" placeholder="Lembretes de metas..."></textarea>
+            </div>
+        </section>
+
+        <!-- ══════ SEÇÃO: RADAR GEEK & GAMER - NOTÍCIAS DIÁRIAS EM TEMPO REAL ══════ -->
+        <section class="geek-radar-section" id="geekRadarSection">
+            <div class="feed-header-bar">
+                <div class="feed-title-wrap">
+                    <div class="feed-main-title">
+                        <span class="live-pulse-dot">🔴</span> RADAR GEEK & GAMER EM TEMPO REAL
+                    </div>
+                    <div class="feed-subtitle">
+                        Notícias diárias, anúncios de novos jogos, lançamentos e bastidores do cinema atualizados ao vivo
+                    </div>
+                </div>
+                <div class="feed-filters-wrap">
+                    <button class="feed-filter-btn active" data-news-filter="todos" onclick="filtrarNoticiasHome('todos')">🌐 Todas</button>
+                    <button class="feed-filter-btn" data-news-filter="Games" onclick="filtrarNoticiasHome('Games')">🎮 Games</button>
+                    <button class="feed-filter-btn" data-news-filter="Cinema & TV" onclick="filtrarNoticiasHome('Cinema & TV')">🎬 Cinema & Séries</button>
+                    <button class="feed-filter-btn" data-news-filter="Lançamentos" onclick="filtrarNoticiasHome('Lançamentos')">🚀 Lançamentos</button>
+                    <button class="feed-refresh-btn" onclick="recarregarNoticiasHome()" title="Atualizar notícias agora">
+                        <span id="newsRefreshIcon">🔄</span> Atualizar Radar
+                    </button>
+                </div>
+            </div>
+
+            <div class="geek-news-grid" id="homeGeekNewsGrid">
+                <!-- Renderizado dinamicamente via GeekNewsManager -->
+            </div>
+        </section>
+
+        <!-- ══════ SEÇÃO: EM ALTA HOJE NO MUNDO GEEK & GAMER (TEMPO REAL) ══════ -->
+        <section class="geek-trending-section" id="geekTrendingSection">
+            <div class="feed-header-bar">
+                <div class="feed-title-wrap">
+                    <div class="feed-main-title">
+                        <span>🔥</span> EM ALTA HOJE NO MUNDO GEEK & GAMER
+                    </div>
+                    <div class="feed-subtitle">
+                        Os títulos mais jogados, comentados e assistidos do dia em tempo real
+                    </div>
+                </div>
+                <div class="feed-filters-wrap">
+                    <button class="feed-filter-btn active" id="btnTrendTabGames" onclick="alternarAbaTendencias('jogos')">🎮 Jogos em Alta</button>
+                    <button class="feed-filter-btn" id="btnTrendTabMovies" onclick="alternarAbaTendencias('filmes')">🍿 Filmes & Séries (TMDB Ao Vivo)</button>
+                </div>
+            </div>
+
+            <div class="trending-today-grid" id="homeTrendingTodayGrid">
+                <!-- Renderizado dinamicamente via JS -->
             </div>
         </section>
 
@@ -2144,10 +2612,17 @@
                 if (greeting) {
                     greeting.innerHTML = `Olá, <span style="color:var(--accent-cyan); text-shadow:0 0 15px rgba(0,240,255,0.4);">${currentUser}</span>! 👋`;
                 }
+                const userAvatar = typeof window.getUsuarioAvatarAtual === 'function' 
+                    ? window.getUsuarioAvatarAtual() 
+                    : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+                const avatarHtml = typeof window.renderizarAvatarHtml === 'function' 
+                    ? window.renderizarAvatarHtml(userAvatar, '🎮') 
+                    : `<span>${userAvatar}</span>`;
+
                 authContainer.innerHTML = `
                     <div class="header-auth-container">
                         <a href="conta_login.html?tab=perfil" class="user-profile-header-pill" title="Acessar Meu Perfil Gamer">
-                            <div class="header-avatar-circle">🎮</div>
+                            <div class="header-avatar-circle">${avatarHtml}</div>
                             <div class="header-user-meta">
                                 <span class="header-user-name">${currentUser}</span>
                                 <span class="header-user-status">🟢 Online • Ver Perfil</span>
@@ -2190,11 +2665,11 @@
         }
 
         // Verifica erros de confirmação de e-mail no hash (ex: link expirado)
-        if (window.location.hash.includes('error_description')) {
+        if (window.location.hash.includes('error_description') || window.location.hash.includes('otp_expired')) {
             const params = new URLSearchParams(window.location.hash.substring(1));
-            const erroMsg = params.get('error_description') || 'Link de autenticação expirado ou inválido.';
+            const erroMsg = params.get('error_description') || 'Link de confirmação expirado ou inválido.';
             setTimeout(() => {
-                exibirToast(`⚠️ <b>Atenção:</b> ${erroMsg}`);
+                exibirToast(`⚠️ <b>Link expirado:</b> ${erroMsg} <a href="conta_login.html?tab=login&expired=1" style="color:var(--accent-cyan); text-decoration:underline; font-weight:700; margin-left:8px;">Reenviar novo link</a>`);
             }, 1000);
         }
 
@@ -2398,6 +2873,10 @@
                 const isOwner = currentUser !== 'visitante' && (item.autor || '').toLowerCase() === currentUser;
                 const canDelete = isAdmin || isOwner;
 
+                const currentAvatar = typeof window.getUsuarioAvatarAtual === 'function' ? window.getUsuarioAvatarAtual() : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+                const finalAvatar = isOwner ? currentAvatar : (item.avatar || (item.autor || 'J').charAt(0).toUpperCase());
+                const avatarHtml = typeof window.renderizarAvatarHtml === 'function' ? window.renderizarAvatarHtml(finalAvatar, (item.autor || 'J').charAt(0).toUpperCase()) : `<span>${finalAvatar}</span>`;
+
                 return `
                     <div class="feed-card" id="${uniqueCardId}">
                         <div class="feed-card-banner">
@@ -2410,7 +2889,7 @@
                         <div class="feed-card-body">
                             <div class="feed-user-row">
                                 <div class="feed-user-meta" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}', '${item.userId || ''}')" title="Ver perfil e catálogo deste jogador">
-                                    <div class="feed-user-avatar">${(item.autor || 'J').charAt(0).toUpperCase()}</div>
+                                    <div class="feed-user-avatar">${avatarHtml}</div>
                                     <div class="feed-user-name">
                                         <span>${item.autor}</span>
                                         ${isAuthorAdmin ? '<span style="background:linear-gradient(135deg,#ffd700,#ff8c00);color:#07090f;font-size:0.68rem;padding:2px 6px;border-radius:6px;font-weight:800;">👑 ADMIN</span>' : ''}
@@ -2621,9 +3100,160 @@
             if (typeof carregarEstatisticas === 'function') carregarEstatisticas();
         });
 
+        /* ════════════════════════════════════════════════════════
+           RADAR GEEK & NOTÍCIAS DIÁRIAS (TEMPO REAL)
+        ════════════════════════════════════════════════════════ */
+        let _noticiaCategoriaAtual = 'todos';
+        let _tendenciaAbaAtual = 'jogos';
+
+        function inicializarRadarGeekHome() {
+            if (window.OvercriticGeekNews) {
+                window.OvercriticGeekNews.renderizarTicker('liveGeekTickerHome');
+                window.OvercriticGeekNews.renderizarGrid({
+                    containerId: 'homeGeekNewsGrid',
+                    categoria: _noticiaCategoriaAtual,
+                    limite: 6
+                });
+            }
+            carregarTendenciasDoDiaHome();
+        }
+
+        function filtrarNoticiasHome(categoria) {
+            _noticiaCategoriaAtual = categoria;
+            document.querySelectorAll('[data-news-filter]').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-news-filter') === categoria);
+            });
+            if (window.OvercriticGeekNews) {
+                window.OvercriticGeekNews.renderizarGrid({
+                    containerId: 'homeGeekNewsGrid',
+                    categoria: categoria,
+                    limite: 6
+                });
+            }
+        }
+
+        async function recarregarNoticiasHome() {
+            const icon = document.getElementById('newsRefreshIcon');
+            if (icon) icon.style.animation = 'spin 0.8s linear infinite';
+            try {
+                sessionStorage.removeItem('overcritic_geek_news_v2');
+                sessionStorage.removeItem('overcritic_geek_news_time');
+                if (window.OvercriticGeekNews) {
+                    await window.OvercriticGeekNews.renderizarGrid({
+                        containerId: 'homeGeekNewsGrid',
+                        categoria: _noticiaCategoriaAtual,
+                        limite: 6
+                    });
+                }
+                showToast.success('Radar de notícias sincronizado com a web!');
+            } finally {
+                if (icon) icon.style.animation = '';
+            }
+        }
+
+        /* ════════════════════════════════════════════════════════
+           EM ALTA HOJE NO MUNDO GEEK & GAMER (TEMPO REAL)
+        ════════════════════════════════════════════════════════ */
+        function alternarAbaTendencias(aba) {
+            _tendenciaAbaAtual = aba;
+            const btnGames = document.getElementById('btnTrendTabGames');
+            const btnMovies = document.getElementById('btnTrendTabMovies');
+            if (btnGames) btnGames.classList.toggle('active', aba === 'jogos');
+            if (btnMovies) btnMovies.classList.toggle('active', aba === 'filmes');
+            carregarTendenciasDoDiaHome();
+        }
+
+        async function carregarTendenciasDoDiaHome() {
+            const grid = document.getElementById('homeTrendingTodayGrid');
+            if (!grid) return;
+
+            if (_tendenciaAbaAtual === 'jogos') {
+                const topJogosHoje = [
+                    { rank: 1, title: "Black Myth: Wukong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg", meta: "Ação RPG / Souls", score: "Steam: 96%", badge: "🔥 #1 NO MUNDO", url: "adicionar_jogos.html?titulo=Black%20Myth%3A%20Wukong&genero=Ação%20RPG" },
+                    { rank: 2, title: "Astro Bot", thumb: "https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg", meta: "Plataforma / PS5", score: "Metacritic 94", badge: "🏆 GOTY 2024", url: "adicionar_jogos.html?titulo=Astro%20Bot&plataforma=PlayStation%205" },
+                    { rank: 3, title: "Silent Hill 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2124490/header.jpg", meta: "Terror Psicológico", score: "Extremamente Positivo", badge: "REMAKE 2024", url: "adicionar_jogos.html?titulo=Silent%20Hill%202&genero=Terror" },
+                    { rank: 4, title: "Helldivers 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg", meta: "Tiro Co-op / Ação", score: "Metacritic 82", badge: "CO-OP POPULAR", url: "adicionar_jogos.html?titulo=Helldivers%202&genero=Tiro" },
+                    { rank: 5, title: "Metaphor: ReFantazio", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2620600/header.jpg", meta: "JRPG / Fantasia", score: "Metacritic 94", badge: "GOTY NOMINEE", url: "adicionar_jogos.html?titulo=Metaphor%3A%20ReFantazio&genero=RPG" },
+                    { rank: 6, title: "Dragon Age: The Veilguard", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1845910/header.jpg", meta: "RPG Épico", score: "Bioware", badge: "LANÇAMENTO", url: "adicionar_jogos.html?titulo=Dragon%20Age%3A%20The%20Veilguard&genero=RPG" },
+                    { rank: 7, title: "Warhammer 40k: Space Marine 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2183900/header.jpg", meta: "Ação Brutal", score: "Muito Positivo", badge: "EM ALTA", url: "adicionar_jogos.html?titulo=Warhammer%2040%2C000%3A%20Space%20Marine%202" },
+                    { rank: 8, title: "Elden Ring", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg", meta: "Soulslike", score: "Metacritic 96", badge: "OBRA-PRIMA", url: "adicionar_jogos.html?titulo=Elden%20Ring&genero=Souls" }
+                ];
+
+                grid.innerHTML = topJogosHoje.map(j => `
+                    <div class="trend-card">
+                        <div class="trend-cover-wrap">
+                            <img src="${j.thumb}" alt="${j.title}" class="trend-cover-img" loading="lazy">
+                            <span class="trend-rank-badge">#${j.rank}</span>
+                            <span class="trend-score-badge">${j.score}</span>
+                        </div>
+                        <div class="trend-info">
+                            <h4 class="trend-title">${j.title}</h4>
+                            <div class="trend-meta">
+                                <span>${j.meta}</span>
+                                <span style="color:var(--accent-cyan); font-weight:700;">${j.badge}</span>
+                            </div>
+                            <a href="${j.url}" class="trend-action-btn">✍️ Avaliar este Jogo</a>
+                        </div>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            // Para Filmes e Séries: Busca tendências do dia via TMDB API
+            grid.innerHTML = Array(8).fill(0).map(() => `
+                <div class="trend-card" style="height:210px; background:rgba(255,255,255,0.02);"></div>
+            `).join('');
+
+            try {
+                const res = await fetch('https://api.themoviedb.org/3/trending/all/day?api_key=8265bd1679663a7ea12ac168da84d2e8&language=pt-BR');
+                if (!res.ok) throw new Error('Falha TMDB');
+                const data = await res.json();
+                const itens = (data.results || []).slice(0, 8);
+
+                grid.innerHTML = itens.map((item, idx) => {
+                    const isTv = Boolean(item.name);
+                    const titulo = isTv ? (item.name || item.original_name) : (item.title || item.original_title);
+                    const poster = item.backdrop_path 
+                        ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}` 
+                        : (item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg');
+                    const nota = item.vote_average ? item.vote_average.toFixed(1) : '8.0';
+                    const tipo = isTv ? '📺 Série' : '🎬 Filme';
+                    const encodedTitulo = encodeURIComponent(titulo);
+                    const encodedCapa = encodeURIComponent(item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : poster);
+
+                    return `
+                        <div class="trend-card">
+                            <div class="trend-cover-wrap">
+                                <img src="${poster}" alt="${titulo}" class="trend-cover-img" loading="lazy">
+                                <span class="trend-rank-badge">#${idx + 1}</span>
+                                <span class="trend-score-badge">⭐ ${nota}</span>
+                            </div>
+                            <div class="trend-info">
+                                <h4 class="trend-title">${titulo}</h4>
+                                <div class="trend-meta">
+                                    <span>${tipo}</span>
+                                    <span style="color:var(--accent-purple); font-weight:700;">🍿 HOJE EM ALTA</span>
+                                </div>
+                                <a href="adicionar_midias.html?titulo=${encodedTitulo}&capa=${encodedCapa}&tipo=${isTv ? 'Série' : 'Filme'}" class="trend-action-btn">✍️ Avaliar Obra</a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.warn('[Home] TMDB tendências fallback:', err);
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 25px; color: var(--text-muted);">
+                        Carregando tendências do cinema... <a href="descobrir_titulos.html" style="color:var(--accent-cyan);">Ver catálogo completo ➔</a>
+                    </div>
+                `;
+            }
+        }
+
         atualizarCapasDinamicas();
         atualizarEstadoAuthHeader();
-        window.addEventListener('pageshow', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); });
+        inicializarRadarGeekHome();
+        window.addEventListener('pageshow', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); inicializarRadarGeekHome(); });
         window.addEventListener('storage', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); });
         setInterval(carregarFeedComunitario, 30000);
     </script>

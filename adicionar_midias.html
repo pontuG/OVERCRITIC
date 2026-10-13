@@ -1,5 +1,8 @@
 <!DOCTYPE html>
+
+
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +36,7 @@
         /* --- MODO CLARO (Cinza Titânio Fosco & Vermelho Sangue) --- */
         body.light-mode {
             --bg-color: #d2d7e0;
-            --accent-cyan: #c51b29; 
+            --accent-cyan: #c51b29;
             --accent-purple: #800f1c;
             --glass-bg: rgba(224, 228, 236, 0.88);
             --glass-border: rgba(0, 0, 0, 0.12);
@@ -43,8 +46,8 @@
             --card-shadow: rgba(0, 0, 0, 0.08);
             --card-hover-shadow: rgba(197, 27, 41, 0.2);
             background: radial-gradient(circle at 15% 50%, rgba(128, 15, 28, 0.05), transparent 40%),
-                        radial-gradient(circle at 85% 30%, rgba(197, 27, 41, 0.05), transparent 40%),
-                        var(--bg-color);
+                radial-gradient(circle at 85% 30%, rgba(197, 27, 41, 0.05), transparent 40%),
+                var(--bg-color);
         }
 
         body.light-mode input[type="text"],
@@ -55,6 +58,7 @@
             border-color: rgba(0, 0, 0, 0.16);
             color: var(--text-main);
         }
+
         body.light-mode input:focus,
         body.light-mode select:focus,
         body.light-mode textarea:focus {
@@ -62,113 +66,139 @@
             box-shadow: 0 0 15px rgba(197, 27, 41, 0.22);
             background: #f2f5fa;
         }
+
         body.light-mode select option {
             background: #eaedf4;
             color: #0e121a;
         }
+
         body.light-mode select optgroup {
             background: #dfe4ec;
             color: var(--accent-cyan);
         }
+
         body.light-mode .suggestions-dropdown {
             background: #eaedf4;
             border-color: rgba(0, 0, 0, 0.14);
             box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
         }
+
         body.light-mode .suggestion-item:hover {
             background: rgba(197, 27, 41, 0.1);
         }
+
         body.light-mode .nav-item:hover,
         body.light-mode .nav-item.active {
             background: rgba(197, 27, 41, 0.12);
             box-shadow: 0 0 10px rgba(197, 27, 41, 0.2);
             color: var(--accent-cyan);
         }
+
         body.light-mode .brand-icon img {
             box-shadow: 0 0 15px rgba(197, 27, 41, 0.4);
             border-color: rgba(197, 27, 41, 0.4);
         }
+
         body.light-mode .brand-icon:hover img {
             box-shadow: 0 0 25px rgba(197, 27, 41, 0.7), 0 0 10px rgba(128, 15, 28, 0.5);
             border-color: var(--accent-cyan);
         }
+
         body.light-mode .btn-primary {
             color: #ffffff;
             box-shadow: 0 4px 18px rgba(197, 27, 41, 0.35);
         }
+
         body.light-mode .btn-secondary {
             background: #eaedf4;
             color: var(--text-main);
             border: 1px solid rgba(0, 0, 0, 0.15);
         }
+
         body.light-mode .btn-secondary:hover {
             border-color: var(--accent-cyan);
             color: var(--accent-cyan);
             background: rgba(197, 27, 41, 0.08);
         }
+
         body.light-mode .review-card {
             background: #e0e4ec;
             border-color: rgba(0, 0, 0, 0.12);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
         }
+
         body.light-mode .review-card:hover {
             border-color: rgba(197, 27, 41, 0.4);
             box-shadow: 0 14px 32px rgba(0, 0, 0, 0.1), 0 0 15px rgba(197, 27, 41, 0.15);
         }
+
         body.light-mode .card-overlay {
             background: linear-gradient(180deg, rgba(210, 215, 224, 0) 0%, #e0e4ec 95%);
         }
+
         body.light-mode .card-scores-row {
             background: #d7dce5;
             border-color: rgba(0, 0, 0, 0.08);
         }
+
         body.light-mode .card-tag {
             background: #d7dce5;
             color: #334155;
             border-color: rgba(0, 0, 0, 0.1);
         }
+
         body.light-mode .btn-card-action {
             background: #eaedf4;
             color: #0e121a;
             border-color: rgba(0, 0, 0, 0.12);
         }
+
         body.light-mode .btn-card-action:hover {
             background: rgba(197, 27, 41, 0.1);
             color: var(--accent-cyan);
             border-color: rgba(197, 27, 41, 0.3);
         }
+
         body.light-mode .badge-type {
             background: rgba(224, 228, 236, 0.95);
             color: var(--accent-cyan);
             border-color: rgba(197, 27, 41, 0.35);
         }
+
         body.light-mode .api-media-item {
             background: #e0e4ec;
             border-color: rgba(0, 0, 0, 0.08);
         }
+
         body.light-mode .api-media-item:hover {
             border-color: rgba(197, 27, 41, 0.35);
             box-shadow: 0 6px 18px rgba(197, 27, 41, 0.12);
         }
+
         body.light-mode .api-pill {
             background: #d7dce5;
             color: #334155;
         }
+
         body.light-mode .btn-mini-evaluate {
             color: #ffffff;
         }
+
         body.light-mode .modal-content {
             background: #e0e4ec;
             border-color: rgba(0, 0, 0, 0.14);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
             color: var(--text-main);
         }
+
         body.light-mode .stat-item {
             background: #e0e4ec;
             border-color: rgba(0, 0, 0, 0.08);
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -180,8 +210,8 @@
             display: flex;
             overflow-x: hidden;
             background: radial-gradient(circle at 15% 50%, rgba(157, 78, 221, 0.15), transparent 40%),
-                        radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.15), transparent 40%),
-                        var(--bg-color);
+                radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.15), transparent 40%),
+                var(--bg-color);
         }
 
         /* ═══════════════════════════════════
@@ -212,9 +242,11 @@
             gap: 6px;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
         .brand-icon:hover {
             transform: scale(1.1);
         }
+
         .brand-icon img {
             width: 46px;
             height: 46px;
@@ -224,11 +256,18 @@
             object-fit: cover;
             transition: all 0.3s ease;
         }
+
         .brand-icon:hover img {
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 10px rgba(157, 78, 221, 0.6);
             border-color: var(--accent-cyan);
         }
-        .brand-icon span { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--accent-cyan); }
+
+        .brand-icon span {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+        }
 
         .nav-links {
             display: flex;
@@ -254,12 +293,15 @@
             cursor: pointer;
             font-size: 1.2rem;
         }
-        .nav-item:hover, .nav-item.active {
+
+        .nav-item:hover,
+        .nav-item.active {
             background: rgba(0, 240, 255, 0.1);
             color: var(--accent-cyan);
             border: 1px solid rgba(0, 240, 255, 0.2);
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
         }
+
         .nav-item::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -276,10 +318,13 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
-        .nav-item:hover::after { opacity: 1; }
+
+        .nav-item:hover::after {
+            opacity: 1;
+        }
 
         .sidebar-bottom {
             margin-top: auto;
@@ -310,8 +355,8 @@
             width: calc(100% - var(--sidebar-width));
         }
 
-        .header-section { 
-            margin-bottom: 30px; 
+        .header-section {
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
@@ -352,6 +397,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+
         .api-config-badge:hover {
             background: rgba(0, 240, 255, 0.15);
             border-color: var(--accent-cyan);
@@ -371,6 +417,7 @@
             box-shadow: 0 8px 32px var(--card-shadow);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         .glass-card:hover {
             border-color: rgba(0, 240, 255, 0.15);
         }
@@ -466,7 +513,9 @@
             outline: none;
         }
 
-        input:focus, select:focus, textarea:focus {
+        input:focus,
+        select:focus,
+        textarea:focus {
             border-color: var(--accent-cyan);
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
             background: rgba(255, 255, 255, 0.07);
@@ -503,7 +552,7 @@
             max-height: 280px;
             overflow-y: auto;
             z-index: 200;
-            box-shadow: 0 12px 36px rgba(0,0,0,0.8);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8);
             display: none;
             margin-top: 6px;
         }
@@ -517,9 +566,11 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             transition: all 0.2s ease;
         }
+
         .suggestion-item:hover {
             background: rgba(0, 240, 255, 0.1);
         }
+
         .suggestion-thumb {
             width: 42px;
             height: 60px;
@@ -529,12 +580,14 @@
             flex-shrink: 0;
             background: #000;
         }
+
         .suggestion-info {
             display: flex;
             flex-direction: column;
             gap: 3px;
             overflow: hidden;
         }
+
         .suggestion-title {
             font-size: 0.9rem;
             font-weight: 700;
@@ -543,6 +596,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .suggestion-meta {
             font-size: 0.75rem;
             color: var(--text-muted);
@@ -610,6 +664,7 @@
             justify-content: center;
             gap: 8px;
         }
+
         .btn-primary:hover {
             transform: scale(1.02);
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
@@ -626,6 +681,7 @@
             font-size: 0.85rem;
             transition: all 0.25s ease;
         }
+
         .btn-secondary:hover {
             background: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.2);
@@ -699,6 +755,7 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
+
         .api-tabs-bar::-webkit-scrollbar {
             display: none;
         }
@@ -717,10 +774,12 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
+
         .api-tab-btn:hover {
             color: var(--text-main);
             background: rgba(255, 255, 255, 0.04);
         }
+
         .api-tab-btn.active {
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
             color: var(--accent-cyan);
@@ -747,6 +806,7 @@
             gap: 12px;
             transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
         .api-media-item:hover {
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(0, 240, 255, 0.3);
@@ -819,6 +879,7 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
+
         .btn-mini-evaluate:hover {
             background: var(--accent-cyan);
             color: #000;
@@ -874,6 +935,7 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
         }
+
         .review-card:hover {
             transform: translateY(-6px);
             border-color: rgba(0, 240, 255, 0.3);
@@ -893,6 +955,7 @@
             object-fit: cover;
             transition: transform 0.5s ease;
         }
+
         .review-card:hover .card-poster {
             transform: scale(1.05);
         }
@@ -900,7 +963,7 @@
         .card-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(7, 9, 15, 0.95) 95%);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(7, 9, 15, 0.95) 95%);
         }
 
         .badge-type {
@@ -929,10 +992,30 @@
             z-index: 2;
             backdrop-filter: blur(8px);
         }
-        .status-assistido { background: rgba(0, 255, 128, 0.2); color: #00ff80; border: 1px solid rgba(0, 255, 128, 0.3); }
-        .status-assistindo { background: rgba(0, 240, 255, 0.2); color: var(--accent-cyan); border: 1px solid rgba(0, 240, 255, 0.3); }
-        .status-lista { background: rgba(157, 78, 221, 0.2); color: #d094ff; border: 1px solid rgba(157, 78, 221, 0.3); }
-        .status-abandonado { background: rgba(255, 68, 68, 0.2); color: #ff6b6b; border: 1px solid rgba(255, 68, 68, 0.3); }
+
+        .status-assistido {
+            background: rgba(0, 255, 128, 0.2);
+            color: #00ff80;
+            border: 1px solid rgba(0, 255, 128, 0.3);
+        }
+
+        .status-assistindo {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .status-lista {
+            background: rgba(157, 78, 221, 0.2);
+            color: #d094ff;
+            border: 1px solid rgba(157, 78, 221, 0.3);
+        }
+
+        .status-abandonado {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
 
         .card-body {
             padding: 18px 20px;
@@ -973,6 +1056,7 @@
             align-items: baseline;
             gap: 4px;
         }
+
         .my-score-val {
             font-size: 1.4rem;
             font-weight: 800;
@@ -1036,11 +1120,13 @@
             color: var(--text-main);
             transition: all 0.2s ease;
         }
+
         .btn-card-action:hover {
             background: rgba(0, 240, 255, 0.1);
             color: var(--accent-cyan);
             border-color: rgba(0, 240, 255, 0.3);
         }
+
         .btn-card-delete:hover {
             background: rgba(255, 68, 68, 0.15);
             color: #ff6b6b;
@@ -1064,6 +1150,7 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
+
         .modal-overlay.active {
             opacity: 1;
             pointer-events: auto;
@@ -1078,7 +1165,7 @@
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 240, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.15);
         }
 
         .modal-close-btn {
@@ -1099,6 +1186,7 @@
             font-size: 1.2rem;
             transition: all 0.2s ease;
         }
+
         .modal-close-btn:hover {
             background: rgba(255, 68, 68, 0.4);
             border-color: #ff4444;
@@ -1120,7 +1208,7 @@
             color: #fff;
             font-weight: 600;
             font-size: 0.9rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 240, 255, 0.3);
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -1129,6 +1217,7 @@
             align-items: center;
             gap: 10px;
         }
+
         .toast.active {
             transform: translateY(0);
             opacity: 1;
@@ -1148,11 +1237,18 @@
 
         /* RESPONSIVIDADE */
         @media (max-width: 1200px) {
-            .dashboard-top-grid { grid-template-columns: 1fr; }
+            .dashboard-top-grid {
+                grid-template-columns: 1fr;
+            }
         }
+
         @media (max-width: 768px) {
+
             /* Sidebar desktop ocultada no celular em prol do Mobile Drawer */
-            .sidebar, .mobile-bottom-nav, .sidebar-bottom, .theme-toggle-container {
+            .sidebar,
+            .mobile-bottom-nav,
+            .sidebar-bottom,
+            .theme-toggle-container {
                 display: none !important;
             }
 
@@ -1169,6 +1265,7 @@
                 align-items: flex-start !important;
                 gap: 12px !important;
             }
+
             .greeting {
                 font-size: 1.4rem !important;
             }
@@ -1178,25 +1275,33 @@
                 border-radius: 16px !important;
                 max-width: 100% !important;
             }
-            .form-row, .form-row-3 { grid-template-columns: 1fr !important; gap: 12px !important; }
-            
+
+            .form-row,
+            .form-row-3 {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+
             /* Busca TMDB */
             .search-box {
                 padding: 14px !important;
                 border-radius: 14px !important;
                 max-width: 100% !important;
             }
-            .search-box > .form-group > div[style*="display: flex"],
+
+            .search-box>.form-group>div[style*="display: flex"],
             .search-box div[style*="display: flex"] {
                 display: flex !important;
                 gap: 8px !important;
                 width: 100% !important;
             }
+
             .search-box input {
                 flex: 1 1 auto !important;
                 min-width: 0 !important;
                 width: 100% !important;
             }
+
             .search-box button {
                 flex-shrink: 0 !important;
                 padding: 10px 14px !important;
@@ -1214,6 +1319,7 @@
                 width: 100% !important;
                 margin: 0 auto !important;
             }
+
             .poster-box-wrapper {
                 position: relative !important;
                 width: 125px !important;
@@ -1224,6 +1330,7 @@
                 justify-content: center !important;
                 flex-shrink: 0 !important;
             }
+
             .cover-preview {
                 width: 125px !important;
                 height: 180px !important;
@@ -1233,10 +1340,12 @@
                 border-radius: 14px !important;
                 object-fit: cover !important;
             }
+
             .cover-preview:not([src]),
             .cover-preview[src=""] {
                 display: none !important;
             }
+
             .cover-preview-placeholder {
                 width: 125px !important;
                 height: 180px !important;
@@ -1249,6 +1358,7 @@
                 justify-content: center !important;
                 align-items: center !important;
             }
+
             .cover-preview-info {
                 width: 100% !important;
                 display: flex !important;
@@ -1262,14 +1372,19 @@
                 gap: 10px !important;
                 width: 100% !important;
             }
+
             .filter-selects {
                 flex-direction: column !important;
                 width: 100% !important;
             }
+
             .filter-selects select {
                 width: 100% !important;
             }
-            .reviews-grid { grid-template-columns: 1fr !important; }
+
+            .reviews-grid {
+                grid-template-columns: 1fr !important;
+            }
 
             .modal-content {
                 padding: 18px 14px !important;
@@ -1278,6 +1393,7 @@
                 max-height: 92vh !important;
                 border-radius: 16px !important;
             }
+
             .modal-close-btn {
                 top: 12px !important;
                 right: 12px !important;
@@ -1286,18 +1402,22 @@
                 font-size: 1rem !important;
             }
         }
+
         @media (max-width: 480px) {
             .main-content {
                 padding: 10px 8px calc(76px + env(safe-area-inset-bottom, 0px)) 8px !important;
             }
+
             .section-title {
                 font-size: 1.15rem !important;
             }
-            .search-box > .form-group > div[style*="display: flex"],
+
+            .search-box>.form-group>div[style*="display: flex"],
             .search-box div[style*="display: flex"] {
                 flex-direction: column !important;
                 gap: 8px !important;
             }
+
             .search-box button {
                 width: 100% !important;
             }
@@ -1305,6 +1425,7 @@
     </style>
     <link rel="stylesheet" href="css/responsive-global.css">
 </head>
+
 <body>
     <script>
         if (localStorage.getItem('overcritic_theme') === 'light') {
@@ -1333,9 +1454,11 @@
         </nav>
 
         <div class="sidebar-bottom">
-            <button id="themeToggleBtn" class="nav-item" data-tooltip="Modo Claro/Escuro" style="margin-bottom: 8px;">🌓</button>
+            <button id="themeToggleBtn" class="nav-item" data-tooltip="Modo Claro/Escuro"
+                style="margin-bottom: 8px;">🌓</button>
             <button id="loginBtn" class="nav-item" data-tooltip="Fazer Login / Criar Conta">🔑</button>
-            <div class="sidebar-user" id="currentUser" style="cursor: pointer;" title="Acessar Perfil" onclick="window.location.href='conta_login.html?tab=perfil'">VISITANTE</div>
+            <div class="sidebar-user" id="currentUser" style="cursor: pointer;" title="Acessar Perfil"
+                onclick="window.location.href='conta_login.html?tab=perfil'">VISITANTE</div>
         </div>
     </aside>
 
@@ -1355,13 +1478,16 @@
 
         <!-- ABAS DE NAVEGAÇÃO MOBILE (CADASTRO / CATÁLOGO / TENDÊNCIAS) -->
         <div class="mobile-section-tabs" id="mobileMediaTabs">
-            <button type="button" class="mobile-section-tab active" id="mTabBtnMediaCadastrar" onclick="alternarSecaoMobile('cadastrar')">
+            <button type="button" class="mobile-section-tab active" id="mTabBtnMediaCadastrar"
+                onclick="alternarSecaoMobile('cadastrar')">
                 <span>📝</span> Cadastrar
             </button>
-            <button type="button" class="mobile-section-tab" id="mTabBtnMediaCatalogo" onclick="alternarSecaoMobile('catalogo')">
+            <button type="button" class="mobile-section-tab" id="mTabBtnMediaCatalogo"
+                onclick="alternarSecaoMobile('catalogo')">
                 <span>🎬</span> Meu Catálogo
             </button>
-            <button type="button" class="mobile-section-tab" id="mTabBtnMediaTendencias" onclick="alternarSecaoMobile('tendencias')">
+            <button type="button" class="mobile-section-tab" id="mTabBtnMediaTendencias"
+                onclick="alternarSecaoMobile('tendencias')">
                 <span>🔥</span> Tendências
             </button>
         </div>
@@ -1382,8 +1508,11 @@
                         <div class="form-group" style="position: relative;">
                             <label>🔍 Importar dados da internet (TMDB)</label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" id="apiSearchInput" placeholder="Ex: Interestelar, Breaking Bad, Attack on Titan, Duna..." style="flex: 1;" autocomplete="off">
-                                <button type="button" class="btn-primary" id="btnAutoPreencher" onclick="buscarDadosInternet()">BUSCAR</button>
+                                <input type="text" id="apiSearchInput"
+                                    placeholder="Ex: Interestelar, Breaking Bad, Attack on Titan, Duna..."
+                                    style="flex: 1;" autocomplete="off">
+                                <button type="button" class="btn-primary" id="btnAutoPreencher"
+                                    onclick="buscarDadosInternet()">BUSCAR</button>
                             </div>
                             <div id="suggestionsDropdown" class="suggestions-dropdown"></div>
                             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">
@@ -1395,7 +1524,8 @@
                     <!-- PREVIEW DE CAPA / PÔSTER -->
                     <div class="cover-preview-container">
                         <div class="poster-box-wrapper">
-                            <img id="coverPreview" class="cover-preview" src="" alt="Pôster Oficial" style="display: none;">
+                            <img id="coverPreview" class="cover-preview" src="" alt="Pôster Oficial"
+                                style="display: none;">
                             <div id="coverPlaceholder" class="cover-preview-placeholder">
                                 <span style="font-size: 2rem;">🎬</span>
                                 <span>Pôster Oficial da Obra</span>
@@ -1435,7 +1565,8 @@
                         </div>
                         <div class="form-group">
                             <label>Média TMDB / Crítica</label>
-                            <input type="text" id="internetRating" readonly placeholder="Importado da internet" style="color: var(--accent-cyan); font-weight: 700;">
+                            <input type="text" id="internetRating" readonly placeholder="Importado da internet"
+                                style="color: var(--accent-cyan); font-weight: 700;">
                         </div>
                     </div>
 
@@ -1443,7 +1574,8 @@
                         <div class="form-group">
                             <label style="display: flex; justify-content: space-between; align-items: center;">
                                 <span>Onde Assistiu</span>
-                                <span id="platformAvailabilityBadge" style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; display: none;"></span>
+                                <span id="platformAvailabilityBadge"
+                                    style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; display: none;"></span>
                             </label>
                             <select id="mediaPlatform">
                                 <option value="Cinema">🍿 Cinema</option>
@@ -1477,7 +1609,8 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Sua Nota Pessoal (0 a 10)</label>
-                            <input type="number" id="myRating" min="0" max="10" step="0.5" required placeholder="Ex: 9.5">
+                            <input type="number" id="myRating" min="0" max="10" step="0.5" required
+                                placeholder="Ex: 9.5">
                         </div>
                         <div class="form-group">
                             <label>Tags / Palavras-chave</label>
@@ -1487,7 +1620,8 @@
 
                     <div class="form-group">
                         <label>Sua Resenha / Opinião Pessoal</label>
-                        <textarea id="mediaReview" placeholder="Escreva o que você achou da direção, atuações, enredo, fotografia e impacto emocional..."></textarea>
+                        <textarea id="mediaReview"
+                            placeholder="Escreva o que você achou da direção, atuações, enredo, fotografia e impacto emocional..."></textarea>
                     </div>
 
                     <div class="form-actions">
@@ -1499,7 +1633,7 @@
 
             <!-- COLUNA DIREITA: STATS + TRENDING TMDB -->
             <div class="right-column" id="rightColumnCardContainer">
-                
+
                 <!-- PAINEL SUPERIOR: ESTATÍSTICAS -->
                 <div class="glass-card">
                     <h2 class="section-title">📊 Resumo do Cinéfilo</h2>
@@ -1519,7 +1653,9 @@
                             <div class="stat-label">Obras Concluídas</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-num" id="statFavorito" style="font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+                            <div class="stat-num" id="statFavorito"
+                                style="font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                -</div>
                             <div class="stat-label">Top Avaliado</div>
                         </div>
                     </div>
@@ -1527,20 +1663,27 @@
 
                 <!-- PAINEL INFERIOR: EM ALTA & TENDÊNCIAS TMDB -->
                 <div class="glass-card api-media-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <h2 class="section-title" style="margin: 0;">🔥 Em Alta & Tendências</h2>
                         <div style="display: flex; gap: 6px; align-items: center;">
-                            <a href="descobrir_titulos.html" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Abrir Central de Descoberta Completa">🍿 Abrir Hub</a>
-                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="carregarTendencias()" title="Atualizar dados">🔄</button>
+                            <a href="descobrir_titulos.html" class="btn-secondary"
+                                style="padding: 4px 10px; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                                title="Abrir Central de Descoberta Completa">🍿 Abrir Hub</a>
+                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;"
+                                onclick="carregarTendencias()" title="Atualizar dados">🔄</button>
                         </div>
                     </div>
                     <div class="section-divider"></div>
 
                     <!-- ABAS DE NAVEGAÇÃO DA API -->
                     <div class="api-tabs-bar">
-                        <button class="api-tab-btn active" id="tabTrendingMovies" onclick="mudarAbaApi('movies')">🎬 Filmes</button>
-                        <button class="api-tab-btn" id="tabTrendingSeries" onclick="mudarAbaApi('series')">📺 Séries</button>
-                        <button class="api-tab-btn" id="tabTrendingAnime" onclick="mudarAbaApi('anime')">⛩️ Animes</button>
+                        <button class="api-tab-btn active" id="tabTrendingMovies" onclick="mudarAbaApi('movies')">🎬
+                            Filmes</button>
+                        <button class="api-tab-btn" id="tabTrendingSeries" onclick="mudarAbaApi('series')">📺
+                            Séries</button>
+                        <button class="api-tab-btn" id="tabTrendingAnime" onclick="mudarAbaApi('anime')">⛩️
+                            Animes</button>
                         <button class="api-tab-btn" id="tabTopRated" onclick="mudarAbaApi('top')">⭐ Aclamados</button>
                     </div>
 
@@ -1558,7 +1701,9 @@
         <div id="reviewsCatalogContainer">
             <div class="filter-section">
                 <div class="filter-search">
-                    <input type="text" id="filterSearchInput" placeholder="🔍 Filtrar suas críticas por título ou tags..." oninput="filtrarReviews()" style="width: 100%;">
+                    <input type="text" id="filterSearchInput"
+                        placeholder="🔍 Filtrar suas críticas por título ou tags..." oninput="filtrarReviews()"
+                        style="width: 100%;">
                 </div>
                 <div class="filter-selects">
                     <select id="filterCategory" onchange="filtrarReviews()">
@@ -1608,7 +1753,8 @@
             <button class="modal-close-btn" onclick="fecharConfigModal()">✕</button>
             <h3 style="margin-top: 0; color: var(--accent-cyan);">⚙️ Configuração da API TMDB</h3>
             <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
-                O sistema já inclui uma conexão padrão pronta para uso. Caso queira utilizar a sua própria chave gratuita do <strong>The Movie Database</strong> (v3 API key):
+                O sistema já inclui uma conexão padrão pronta para uso. Caso queira utilizar a sua própria chave
+                gratuita do <strong>The Movie Database</strong> (v3 API key):
             </p>
             <div class="form-group" style="margin-top: 15px;">
                 <label>Sua Chave de API (v3)</label>
@@ -1792,7 +1938,7 @@
                                 mediaType = match.media_type;
                             }
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 }
             }
 
@@ -1909,7 +2055,7 @@
         const searchInput = document.getElementById('apiSearchInput');
         const dropdown = document.getElementById('suggestionsDropdown');
 
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(debounceTimer);
             const query = this.value.trim();
             if (query.length < 2) {
@@ -1923,7 +2069,7 @@
         });
 
         // Fecha dropdown ao clicar fora
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.style.display = 'none';
             }
@@ -1953,7 +2099,7 @@
                     const title = isTv ? (item.name || item.original_name) : (item.title || item.original_title);
                     const releaseDate = isTv ? (item.first_air_date || '') : (item.release_date || '');
                     const year = releaseDate ? releaseDate.substring(0, 4) : 'N/D';
-                    
+
                     // Identifica se é anime
                     const isAnime = item.genre_ids?.includes(16) && (item.origin_country?.includes('JP') || item.original_language === 'ja');
                     const tipoLabel = isAnime ? '⛩️ Anime' : (isTv ? '📺 Série' : '🎬 Filme');
@@ -2243,7 +2389,7 @@
         function mapMidiaParaSupabase(m) {
             const currentUid = localStorage.getItem('overcritic_user_id') || null;
             const currentAuthor = localStorage.getItem('overcritic_currentUser') || 'Anônimo';
-            
+
             // Converte id para numérico caso seja media_123456789
             let idNum = m.id;
             if (typeof idNum === 'string') {
@@ -2334,7 +2480,7 @@
                     .map(mapSupabaseParaMidia);
                 const mapa = new Map();
                 midiasNuvem.forEach(m => mapa.set(String(m.id), m));
-                
+
                 const locais = obterReviews();
                 locais.forEach(m => {
                     const chave = String(m.id).replace(/\D/g, '');
@@ -2349,7 +2495,7 @@
                 atualizarEstatisticas();
                 filtrarReviews();
                 console.log('⚡ [Supabase] ' + listaConsolidada.length + ' mídias do usuário sincronizadas!');
-            } catch(e) {
+            } catch (e) {
                 console.warn('Erro ao conectar com Supabase Midias:', e);
             }
         }
@@ -2507,10 +2653,10 @@
             document.getElementById('mediaGenres').value = item.genres || '';
             document.getElementById('mediaKeywords').value = item.keywords || '';
             document.getElementById('internetRating').value = item.internetRating || '';
-            
+
             const platformSelect = document.getElementById('mediaPlatform');
             const targetPlatform = item.platform || 'Cinema';
-            
+
             // Garante que o valor salvo exista no select
             let found = false;
             for (let opt of platformSelect.options) {
@@ -2591,7 +2737,7 @@
         }
 
         // Listener para expandir todas as plataformas quando o usuário clica em "Exibir todas"
-        document.getElementById('mediaPlatform').addEventListener('change', function() {
+        document.getElementById('mediaPlatform').addEventListener('change', function () {
             if (this.value === '__SHOW_ALL__') {
                 restaurarTodasPlataformas();
             }
@@ -2610,7 +2756,7 @@
 
             // Filtro por texto
             if (query) {
-                reviews = reviews.filter(r => 
+                reviews = reviews.filter(r =>
                     r.title.toLowerCase().includes(query) ||
                     (r.genres && r.genres.toLowerCase().includes(query)) ||
                     (r.keywords && r.keywords.toLowerCase().includes(query))
@@ -2662,7 +2808,7 @@
             salvarReviewsNoStorage(reviews);
             if (window.sbClient) {
                 const numId = Number(String(id).replace(/\D/g, '')) || id;
-                window.sbClient.from('reviews_midias').update({ likes: item.likes }).eq('id', numId).then(() => {});
+                window.sbClient.from('reviews_midias').update({ likes: item.likes }).eq('id', numId).then(() => { });
             }
         }
 
@@ -2693,7 +2839,7 @@
                 const autorNome = r.autor || 'Anônimo';
                 const isOwner = (r.userId && r.userId === currentUid) || (autorNome.toLowerCase() === currentUser && currentUser !== 'visitante');
                 const canManage = isOwner || isAdmin;
-                
+
                 const likes = Array.isArray(r.likes) ? r.likes : [];
                 const hasLiked = currentUser !== 'visitante' && likes.some(u => String(u).toLowerCase() === currentUser);
 
@@ -2786,6 +2932,7 @@
         function abrirModalDetalhes(id) {
             const reviews = obterReviews();
             const item = reviews.find(r => r.id === id);
+
             if (!item) return;
 
             const modal = document.getElementById('mediaDetailModal');
@@ -3069,4 +3216,5 @@
         });
     </script>
 </body>
+
 </html>

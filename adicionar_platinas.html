@@ -16,6 +16,7 @@
     <script src="js/notifications.js"></script>
     <script src="js/trofeusDatabase.js"></script>
     <script src="js/version.js"></script>
+    <script src="js/avatarManager.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -663,6 +664,7 @@
             font-weight: 800;
             color: #fff;
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            overflow: hidden;
         }
 
         .platina-username {
@@ -1536,8 +1538,8 @@
         @media (max-width: 768px) {
             .main-content {
                 margin-left: 0 !important;
-                margin-bottom: 66px !important;
-                padding: 14px 12px calc(80px + env(safe-area-inset-bottom, 0px)) 12px !important;
+                margin-bottom: 0 !important;
+                padding: 66px 12px 35px 12px !important;
                 width: 100% !important;
                 max-width: 100% !important;
             }
@@ -2742,6 +2744,10 @@
             const isAdmin = typeof window.isAdminUser === 'function' ? window.isAdminUser() : false;
             const canDelete = isMinhaLista || isOwner || isAdmin;
 
+            const currentAvatar = typeof window.getUsuarioAvatarAtual === 'function' ? window.getUsuarioAvatarAtual() : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+            const finalAvatar = isOwner ? currentAvatar : (item.avatar || (item.user || 'P').charAt(0).toUpperCase());
+            const avatarHtml = typeof window.renderizarAvatarHtml === 'function' ? window.renderizarAvatarHtml(finalAvatar, (item.user || 'P').charAt(0).toUpperCase()) : `<span>${finalAvatar}</span>`;
+
             return `
                 <div class="platina-card ${is100 ? 'is-100' : ''}">
                     <div class="platina-cover-wrap">
@@ -2756,7 +2762,7 @@
 
                     <div class="platina-body">
                         <div class="platina-user-row">
-                            <div class="platina-avatar" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.user}')">${(item.user || 'P').charAt(0).toUpperCase()}</div>
+                            <div class="platina-avatar" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.user}')">${avatarHtml}</div>
                             <span class="platina-username" style="cursor:pointer; text-decoration:underline; text-decoration-color:transparent; transition:all 0.2s;" onmouseover="this.style.textDecorationColor='var(--accent-cyan)'" onmouseout="this.style.textDecorationColor='transparent'" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.user}')">${item.user}</span>
                             <span class="platina-date">${item.date || 'Recente'}</span>
                         </div>

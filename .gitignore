@@ -1,0 +1,17 @@
+# .NET / C# Build Outputs
+backend/**/bin/
+backend/**/obj/
+**/bin/
+**/obj/
+
+# Visual Studio & VS Code Caches
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs & Scripts Temporários
+*.log
+scratch/

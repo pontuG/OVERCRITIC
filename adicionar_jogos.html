@@ -16,6 +16,7 @@
     <script src="js/gamerProfile.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/version.js"></script>
+    <script src="js/avatarManager.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -814,6 +815,7 @@
             font-weight: 700;
             color: #fff;
             flex-shrink: 0;
+            overflow: hidden;
         }
 
         .qf-meta {
@@ -2492,13 +2494,14 @@
                 // Sincroniza também no feed de avaliações rápidas
                 try {
                     let quickList = obterAvaliacoesRapidas();
-                    const avatarEmojis = ['⚡', '🎮', '🔥', '👑', '🐉', '⚔️', '👾', '🚀'];
-                    const emojiRandom = avatarEmojis[Math.floor(Math.random() * avatarEmojis.length)];
+                    const userAvatar = typeof window.getUsuarioAvatarAtual === 'function' 
+                        ? window.getUsuarioAvatarAtual() 
+                        : (localStorage.getItem('overcritic_user_avatar') || '🎮');
                     
                     const novoQuick = {
                         id: Date.now(),
                         autor: currentUser,
-                        avatar: emojiRandom,
+                        avatar: userAvatar,
                         titulo: dadosJogo.titulo,
                         nota: dadosJogo.minhaNota,
                         tag: obterTagPorNota(dadosJogo.minhaNota),
@@ -2850,16 +2853,25 @@
                 return;
             }
 
+            const currentUserLower = (localStorage.getItem('overcritic_currentUser') || '').toLowerCase();
+            const currentAvatar = typeof window.getUsuarioAvatarAtual === 'function' ? window.getUsuarioAvatarAtual() : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+
             lista.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'quick-feed-item';
                 const escapedTitle = (item.titulo || '').replace(/'/g, "\\'");
+                const itemUserLower = (item.autor || '').toLowerCase();
+                const avatarFinal = (itemUserLower && itemUserLower === currentUserLower) ? currentAvatar : (item.avatar || '🎮');
+                const avatarHtml = typeof window.renderizarAvatarHtml === 'function' 
+                    ? window.renderizarAvatarHtml(avatarFinal, '🎮') 
+                    : `<span>${avatarFinal || '🎮'}</span>`;
+
                 div.innerHTML = `
                     <div class="qf-top">
                         <div class="qf-user-info">
-                            <div class="qf-avatar">${item.avatar || '🎮'}</div>
+                            <div class="qf-avatar" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}')">${avatarHtml}</div>
                             <div class="qf-meta">
-                                <span class="qf-name">${item.autor}</span>
+                                <span class="qf-name" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}')">${item.autor}</span>
                                 <span class="qf-time">${item.tempo || 'Recentemente'}</span>
                             </div>
                         </div>

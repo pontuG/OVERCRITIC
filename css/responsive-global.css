@@ -526,32 +526,32 @@ body.light-mode .version-btn-ok {
 }
 
 /* ── TELAS DE LAPTOPS & RESOLUÇÕES MÉDIAS (Telas 1080p com escala 125%/150% ou 1366x768) ──
-   Elimina a necessidade de dar zoom de 80%, fazendo tudo caber nativamente a 100% de zoom */
+   Elimina a necessidade de dar zoom de 67% ou 80%, fazendo tudo caber nativamente a 100% de zoom */
 @media (max-width: 1536px), (max-height: 880px) and (min-width: 769px) {
     .main-content {
-        padding: 16px 26px 45px 26px !important;
-        gap: 14px !important;
+        padding: clamp(10px, 1.5vh, 20px) clamp(16px, 2vw, 32px) !important;
+        gap: clamp(8px, 1.2vh, 14px) !important;
         max-width: 100% !important;
     }
 
     /* Cabeçalhos Hero Compactos */
     .header-section, .trophies-hero, .support-hero, .discovery-hero {
-        padding: 14px 22px !important;
-        margin-bottom: 12px !important;
+        padding: clamp(8px, 1.2vh, 14px) clamp(14px, 1.6vw, 20px) !important;
+        margin-bottom: clamp(6px, 1vh, 12px) !important;
         border-radius: 16px !important;
     }
     .hero-badge, .hero-tag {
         font-size: 0.68rem !important;
         padding: 2px 8px !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
     }
     .greeting, .hero-title {
-        font-size: 1.55rem !important;
-        margin-bottom: 3px !important;
+        font-size: clamp(1.25rem, 1.8vw, 1.6rem) !important;
+        margin-bottom: 2px !important;
     }
     .subtitle, .hero-desc {
-        font-size: 0.8rem !important;
-        line-height: 1.35 !important;
+        font-size: clamp(0.7rem, 0.85vw, 0.82rem) !important;
+        line-height: 1.3 !important;
     }
 
     /* Estatísticas do Topo */
@@ -626,25 +626,141 @@ body.light-mode .version-btn-ok {
         font-size: 0.7rem !important;
     }
 
-    /* Bento Grid (Início) */
+    /* Bento Grid Universal para Laptops & Desktops (>= 1150px) */
     .bento-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 14px !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+        gap: clamp(8px, 1.2vh, 14px) !important;
     }
     .bento-col-showcase {
         grid-column: span 2 !important;
-        grid-row: auto !important;
+        grid-row: span 3 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: clamp(8px, 1.2vh, 14px) !important;
+        height: 100% !important;
+    }
+    .card-showcase {
+        flex: 1 !important;
+        min-height: 0 !important;
+        padding: clamp(10px, 1.4vh, 18px) clamp(14px, 1.6vw, 20px) !important;
+    }
+    .card-showcase .card-title {
+        font-size: clamp(1.1rem, 1.35vw, 1.45rem) !important;
+    }
+    .card-showcase .card-desc {
+        font-size: clamp(0.7rem, 0.8vw, 0.8rem) !important;
+        line-height: 1.3 !important;
+    }
+    .showcase-action {
+        margin-top: clamp(4px, 0.8vh, 8px) !important;
+        padding: 4px 10px !important;
+        font-size: clamp(0.7rem, 0.78vw, 0.78rem) !important;
+    }
+    .showcase-content {
+        max-width: 52% !important;
     }
     .card-discover {
-        grid-column: span 2 !important;
+        grid-column: span 1 !important;
+    }
+    .card-plats, .card-challenges, .card-stats, .card-notes {
+        grid-column: span 1 !important;
     }
     .bento-card {
-        padding: 16px 18px !important;
+        padding: clamp(10px, 1.2vh, 16px) !important;
+        min-height: 0 !important;
+    }
+    .card-title {
+        font-size: clamp(0.88rem, 1vw, 1.05rem) !important;
+        margin-bottom: 4px !important;
+    }
+    .card-desc {
+        font-size: clamp(0.7rem, 0.78vw, 0.78rem) !important;
+        line-height: 1.3 !important;
+    }
+    .stat-list {
+        gap: clamp(3px, 0.5vh, 6px) !important;
+        margin-top: clamp(4px, 0.6vh, 8px) !important;
+    }
+    .stat-item {
+        padding: clamp(3px, 0.4vh, 6px) clamp(6px, 0.8vw, 10px) !important;
+        font-size: clamp(0.72rem, 0.8vw, 0.8rem) !important;
+    }
+    .stat-item .val {
+        font-size: clamp(0.88rem, 1vw, 1.05rem) !important;
+    }
+    .quick-note-area {
+        padding: clamp(5px, 0.8vh, 8px) !important;
+        margin-top: clamp(4px, 0.6vh, 8px) !important;
+        font-size: clamp(0.72rem, 0.8vw, 0.8rem) !important;
+    }
+
+    /* Posições seguras universais para as capas em realce (sem cortes pelas bordas) */
+    .showcase-covers-wrapper {
+        right: 0 !important;
+        width: 48% !important;
+    }
+    .covers-games .cover-g-1 {
+        width: clamp(96px, 8.5vw, 128px) !important;
+        height: clamp(54px, 4.8vw, 72px) !important;
+        right: clamp(12px, 1.5vw, 22px) !important;
+        top: clamp(12px, 1.5vh, 20px) !important;
+        transform: rotate(4deg) !important;
+    }
+    .covers-games .cover-g-2 {
+        width: clamp(105px, 9.5vw, 138px) !important;
+        height: clamp(58px, 5.4vw, 78px) !important;
+        right: clamp(60px, 6vw, 84px) !important;
+        top: clamp(34px, 4vh, 52px) !important;
+        transform: rotate(-4deg) !important;
+    }
+    .covers-games .cover-g-3 {
+        width: clamp(96px, 8.5vw, 128px) !important;
+        height: clamp(54px, 4.8vw, 72px) !important;
+        right: clamp(16px, 1.8vw, 24px) !important;
+        bottom: clamp(12px, 1.5vh, 18px) !important;
+        transform: rotate(3deg) !important;
+    }
+    .covers-games .cover-g-4 {
+        width: clamp(90px, 8vw, 122px) !important;
+        height: clamp(50px, 4.6vw, 68px) !important;
+        right: clamp(85px, 8vw, 125px) !important;
+        bottom: clamp(20px, 2.2vh, 30px) !important;
+        transform: rotate(-6deg) !important;
+    }
+    .covers-movies .cover-m-1 {
+        width: clamp(56px, 5.2vw, 76px) !important;
+        height: clamp(84px, 7.8vw, 114px) !important;
+        right: clamp(14px, 1.8vw, 22px) !important;
+        top: clamp(12px, 1.5vh, 18px) !important;
+        transform: rotate(4deg) !important;
+    }
+    .covers-movies .cover-m-2 {
+        width: clamp(62px, 5.8vw, 84px) !important;
+        height: clamp(92px, 8.6vw, 126px) !important;
+        right: clamp(52px, 5.5vw, 76px) !important;
+        top: clamp(22px, 2.5vh, 32px) !important;
+        transform: rotate(-3deg) !important;
+    }
+    .covers-movies .cover-m-3 {
+        width: clamp(56px, 5.2vw, 76px) !important;
+        height: clamp(84px, 7.8vw, 114px) !important;
+        right: clamp(95px, 9vw, 132px) !important;
+        top: clamp(30px, 3.5vh, 44px) !important;
+        transform: rotate(4deg) !important;
+    }
+    .covers-movies .cover-m-4 {
+        width: clamp(52px, 4.8vw, 72px) !important;
+        height: clamp(78px, 7.2vw, 108px) !important;
+        right: clamp(28px, 3vw, 40px) !important;
+        bottom: clamp(10px, 1.2vh, 16px) !important;
+        transform: rotate(-5deg) !important;
     }
 
     /* Dashboard Top Grid (adicionar_jogos & adicionar_midias) */
     .dashboard-top-grid {
-        gap: 16px !important;
+        grid-template-columns: 1.25fr 1fr !important;
+        gap: 18px !important;
         margin-bottom: 20px !important;
     }
 
@@ -654,18 +770,143 @@ body.light-mode .version-btn-ok {
     }
 }
 
-@media (max-width: 1180px) {
-    /* Em telas abaixo de 1180px, empilha as colunas duplas para dar espaço aos inputs */
+/* ── MODO ULTRA-RESPONSIVO PARA LAPTOPS & TELAS DE QUALQUER ALTURA (≤ 850px) ──
+   Garante que a 100% de zoom o dashboard caiba 100% na viewport sem corte vertical */
+@media (max-height: 850px) and (min-width: 769px) {
+    .main-content {
+        padding: clamp(6px, 1.2vh, 12px) clamp(16px, 2vw, 28px) !important;
+        gap: 8px !important;
+    }
+    .live-ticker-container {
+        margin-bottom: 6px !important;
+    }
+    .header-section {
+        margin-bottom: 6px !important;
+        padding: 6px 14px !important;
+    }
+    .greeting {
+        font-size: 1.35rem !important;
+    }
+    .subtitle {
+        font-size: 0.74rem !important;
+        margin-top: 2px !important;
+    }
+    .bento-grid {
+        grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+    .bento-col-showcase {
+        gap: 8px !important;
+        height: 100% !important;
+    }
+    .card-showcase {
+        min-height: 0 !important;
+        padding: 10px 14px !important;
+    }
+    .card-showcase .card-title {
+        font-size: 1.15rem !important;
+    }
+    .card-showcase .card-desc {
+        font-size: 0.72rem !important;
+        line-height: 1.3 !important;
+    }
+    .showcase-action {
+        margin-top: 4px !important;
+        padding: 3px 10px !important;
+        font-size: 0.72rem !important;
+    }
+    .bento-card {
+        padding: 8px 12px !important;
+        min-height: 0 !important;
+    }
+    .card-title {
+        font-size: 0.92rem !important;
+        margin-bottom: 4px !important;
+    }
+    .card-desc {
+        font-size: 0.7rem !important;
+        line-height: 1.3 !important;
+    }
+    .stat-list {
+        gap: 3px !important;
+        margin-top: 4px !important;
+    }
+    .stat-item {
+        padding: 3px 8px !important;
+        font-size: 0.72rem !important;
+    }
+    .stat-item .val {
+        font-size: 0.92rem !important;
+    }
+    .quick-note-area {
+        padding: 5px 8px !important;
+        margin-top: 4px !important;
+        font-size: 0.72rem !important;
+    }
+    .covers-games .cover-g-1, .covers-games .cover-g-2, .covers-games .cover-g-3, .covers-games .cover-g-4 {
+        transform: scale(0.85) !important;
+        transform-origin: right center !important;
+    }
+    .covers-movies .cover-m-1, .covers-movies .cover-m-2, .covers-movies .cover-m-3, .covers-movies .cover-m-4 {
+        transform: scale(0.85) !important;
+        transform-origin: right center !important;
+    }
+}
+
+/* ── TELAS INTERMEDIÁRIAS (769px a 1149px: Tablets em Modo Paisagem & Laptops Compactos) ── */
+@media (max-width: 1149px) and (min-width: 769px) {
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: auto !important;
+        gap: 14px !important;
+    }
+    .bento-col-showcase {
+        grid-column: span 2 !important;
+        grid-row: auto !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 14px !important;
+    }
+    .card-showcase {
+        min-height: 230px !important;
+        padding: 20px !important;
+    }
+    .showcase-content {
+        max-width: 58% !important;
+    }
+    .card-discover {
+        grid-column: span 1 !important;
+    }
+    .card-plats, .card-challenges, .card-stats, .card-notes {
+        grid-column: span 1 !important;
+    }
     .dashboard-top-grid {
         grid-template-columns: 1fr !important;
     }
-    
     .form-grid-layout {
         grid-template-columns: 1fr !important;
     }
+}
 
-    .form-card, .info-card, .glass-card {
-        padding: 18px !important;
+@media (max-width: 1024px) {
+    .categories-bar-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+    .category-tabs {
+        width: 100% !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+    }
+    .category-tabs::-webkit-scrollbar {
+        display: none !important;
+    }
+    .cat-tab-btn {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
     }
 }
 

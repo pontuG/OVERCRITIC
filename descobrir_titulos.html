@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>OVERCRITIC - Descubra Novos Filmes, Séries & Animes</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -14,6 +15,8 @@
     <script src="supabaseClient.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/version.js"></script>
+    <script src="js/avatarManager.js"></script>
+    <script src="js/geekNewsManager.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -989,7 +992,7 @@
             border: 1px solid var(--accent-cyan);
             border-radius: 22px;
             width: 100%;
-            max-width: 640px;
+            max-width: 760px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
@@ -1002,6 +1005,220 @@
             background: #ffffff;
             border-color: var(--accent-cyan);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ── SEÇÃO DO TRAILER YOUTUBE ── */
+        .modal-trailer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .modal-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-section-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trailer-quality-badge {
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        body.light-mode .trailer-quality-badge {
+            background: rgba(197, 27, 41, 0.12);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .modal-trailer-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-trailer-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .trailer-loading-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .trailer-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spinTrailer 0.8s linear infinite;
+        }
+
+        @keyframes spinTrailer {
+            to { transform: rotate(360deg); }
+        }
+
+        .trailer-action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 2px;
+        }
+
+        .btn-yt-external {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #ff4d4d;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: rgba(255, 0, 0, 0.08);
+            border: 1px solid rgba(255, 0, 0, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-yt-external:hover {
+            background: rgba(255, 0, 0, 0.18);
+            transform: translateY(-1px);
+        }
+
+        /* ── CARD CINEMATOGRÁFICO DE REPRODUÇÃO DIRETA (ZERO ERRO 153) ── */
+        .cinema-player-card {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-decoration: none;
+        }
+
+        .cinema-player-card:hover {
+            transform: scale(1.008);
+            box-shadow: inset 0 0 60px rgba(0, 240, 255, 0.25);
+        }
+
+        .cinema-play-btn-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-align: center;
+            padding: 22px 28px;
+            background: rgba(13, 17, 27, 0.88);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.25);
+            transition: all 0.3s ease;
+            max-width: 90%;
+        }
+
+        .cinema-player-card:hover .cinema-play-btn-wrap {
+            transform: scale(1.05);
+            border-color: #ff0000;
+            box-shadow: 0 14px 40px rgba(255, 0, 0, 0.45);
+        }
+
+        .cinema-play-icon {
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 24px;
+            padding-left: 4px;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.7);
+            transition: transform 0.3s ease;
+        }
+
+        .cinema-player-card:hover .cinema-play-icon {
+            transform: scale(1.12);
+        }
+
+        .cinema-play-text {
+            color: #fff;
+            font-weight: 900;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .cinema-play-sub {
+            color: var(--accent-cyan);
+            font-size: 0.76rem;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .cinema-source-tag {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(0, 0, 0, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
         }
 
         .btn-close-modal {
@@ -1232,11 +1449,126 @@
                 font-size: 0.84rem !important;
             }
 
+            .categories-bar-card, .platforms-bar-card {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                padding: 10px 12px !important;
+                gap: 10px !important;
+            }
+            .category-tabs, .plat-chips-group {
+                overflow-x: auto !important;
+                flex-wrap: nowrap !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+                width: 100% !important;
+                padding-bottom: 2px !important;
+            }
+            .category-tabs::-webkit-scrollbar, .plat-chips-group::-webkit-scrollbar {
+                display: none !important;
+            }
+            .cat-tab-btn, .plat-chip-btn {
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+            }
+            .results-badge {
+                align-self: flex-start !important;
+            }
+
             .btn-action-eval,
             .btn-action-watch {
                 font-size: 0.7rem !important;
-                padding: 6px 4px !important;
             }
+        }
+
+        /* ─── TICKER DE NOTÍCIAS AO VIVO (GEEK RADAR) ─── */
+        .live-ticker-container {
+            margin-bottom: 24px;
+        }
+        .live-ticker-wrap {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(8, 14, 26, 0.9));
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(10px);
+        }
+        body.light-mode .live-ticker-wrap {
+            background: linear-gradient(90deg, rgba(230, 235, 245, 0.95), rgba(215, 222, 235, 0.9));
+            border-color: rgba(197, 27, 41, 0.25);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .ticker-tag {
+            background: linear-gradient(135deg, #ff0055, #c51b29);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            padding: 10px 14px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 2px 0 10px rgba(255, 0, 85, 0.4);
+            z-index: 2;
+        }
+        .ticker-marquee-track {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 8px 12px;
+        }
+        .ticker-marquee-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            white-space: nowrap;
+            animation: marqueeTicker 45s linear infinite;
+        }
+        .ticker-marquee-track:hover .ticker-marquee-content {
+            animation-play-state: paused;
+        }
+        @keyframes marqueeTicker {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+        .ticker-item:hover {
+            color: var(--accent-cyan);
+            text-decoration: underline;
+        }
+        body.light-mode .ticker-item:hover {
+            color: #c51b29;
+        }
+        .ticker-dot {
+            color: #00f0ff;
+        }
+        body.light-mode .ticker-dot {
+            color: #c51b29;
+        }
+        .ticker-time {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-left: 4px;
+        }
+        .ticker-sep {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+        }
+        body.light-mode .ticker-sep {
+            color: rgba(0, 0, 0, 0.2);
         }
     </style>
     <link rel="stylesheet" href="css/responsive-global.css">
@@ -1277,6 +1609,9 @@
 
     <!-- ══════ CONTEÚDO PRINCIPAL ══════ -->
     <main class="main-content">
+
+        <!-- RADAR & LETREIRO DE NOTÍCIAS GEEK AO VIVO -->
+        <div id="liveGeekTickerTitulos" class="live-ticker-container"></div>
 
         <!-- CABEÇALHO HERO -->
         <header class="discovery-hero">
@@ -1390,6 +1725,24 @@
             </div>
 
             <div class="modal-watch-body">
+                <!-- 🎬 TRAILER OFICIAL DO YOUTUBE -->
+                <div class="modal-trailer-section">
+                    <div class="modal-section-header">
+                        <div class="section-title-wrap">
+                            <span class="section-icon">🎬</span>
+                            <h4 class="modal-section-title">Trailer Oficial & Teaser (YouTube)</h4>
+                        </div>
+                        <span id="watchTrailerBadge" class="trailer-quality-badge">YOUTUBE HD</span>
+                    </div>
+                    <div class="modal-trailer-container" id="watchTrailerContainer">
+                        <div class="trailer-loading-placeholder">
+                            <div class="trailer-spinner"></div>
+                            <span>Carregando trailer oficial... ⏳</span>
+                        </div>
+                    </div>
+                    <div id="watchTrailerActions" class="trailer-action-bar"></div>
+                </div>
+
                 <div>
                     <h4 class="modal-synopsis-title">📖 Sinopse da Obra:</h4>
                     <p id="watchModalOverview" class="modal-synopsis-text">Carregando detalhes...</p>
@@ -1876,6 +2229,10 @@
             configurarBuscaComSugestoes();
             verificarTemaELogin();
             mudarCategoria('trending');
+
+            if (window.OvercriticGeekNews && typeof window.OvercriticGeekNews.renderizarTicker === 'function') {
+                window.OvercriticGeekNews.renderizarTicker('liveGeekTickerTitulos');
+            }
         });
 
         function atualizarUIUsuario() {
@@ -1990,8 +2347,8 @@
             try {
                 let endpointBuilder = null;
                 if (cat === 'trending') {
-                    // Tendências reais e dinâmicas da semana (o que está mais bombando de verdade)
-                    endpointBuilder = (key) => `https://api.themoviedb.org/3/trending/all/week?api_key=${key}&language=pt-BR&page=${paginaAtual}`;
+                    // Tendências reais e dinâmicas DO DIA (o que está mais bombando hoje nos cinemas e streamings)
+                    endpointBuilder = (key) => `https://api.themoviedb.org/3/trending/all/day?api_key=${key}&language=pt-BR&page=${paginaAtual}`;
                 } else if (cat === 'releases') {
                     // Filmes em cartaz e lançamentos reais nos cinemas brasileiros
                     endpointBuilder = (key) => `https://api.themoviedb.org/3/movie/now_playing?api_key=${key}&language=pt-BR&region=BR&page=${paginaAtual}`;
@@ -2391,7 +2748,7 @@
                 const provBadges = (obra.providers || []).slice(0, 2).map(p => `<span class="provider-badge">${p}</span>`).join('');
 
                 card.innerHTML = `
-                    <div class="title-card-media">
+                    <div class="title-card-media" style="cursor: pointer;" onclick="abrirModalWatch(${index})" title="Ver trailer e detalhes de ${safeTitle}">
                         <img src="${obra.poster}" class="title-card-img" alt="${safeTitle}" onerror="tratarErroCapa(this, '${safeTitle}')" loading="lazy">
                         <div class="title-card-overlay"></div>
                         <span class="badge-type">${obra.type}</span>
@@ -2399,7 +2756,7 @@
                         ${obra.badge ? `<span class="badge-highlight">${obra.badge}</span>` : ''}
                     </div>
                     <div class="title-card-body">
-                        <h3 class="title-card-title" title="${safeTitle}">${safeTitle}</h3>
+                        <h3 class="title-card-title" style="cursor: pointer;" onclick="abrirModalWatch(${index})" title="Ver trailer e detalhes de ${safeTitle}">${safeTitle}</h3>
                         <div class="title-card-platforms">
                             ${provBadges}
                         </div>
@@ -2411,8 +2768,8 @@
                             <a href="adicionar_midias.html?titulo=${encodedTitle}&capa=${encodedPoster}&tipo=${encodedType}&genero=${encodedGenre}&ano=${encodedYear}&nota=${encodedScore}" class="btn-action-eval" title="Criar análise desta obra">
                                 ✍️ Avaliar
                             </a>
-                            <button type="button" class="btn-action-watch" onclick="abrirModalWatch(${index})" title="Ver onde assistir no Brasil e detalhes">
-                                📺 Onde Assistir
+                            <button type="button" class="btn-action-watch" onclick="abrirModalWatch(${index})" title="Assistir ao trailer no YouTube e ver onde assistir no Brasil">
+                                🎬 Trailer & Onde Assistir
                             </button>
                         </div>
                     </div>
@@ -2421,10 +2778,11 @@
             });
         }
 
-        /* MODAL ONDE ASSISTIR & SINOPSE */
+        /* MODAL ONDE ASSISTIR, TRAILER YOUTUBE & SINOPSE */
         async function abrirModalWatch(index) {
             const obra = window.titulosAtuaisNaTela[index];
             if (!obra) return;
+            window.obraModalWatchIndex = index;
 
             const modal = document.getElementById('watchModal');
             const titleEl = document.getElementById('watchModalTitle');
@@ -2436,6 +2794,11 @@
             const overviewEl = document.getElementById('watchModalOverview');
             const listEl = document.getElementById('watchLinksList');
             const evalBtn = document.getElementById('watchModalEvalBtn');
+            const trailerContainer = document.getElementById('watchTrailerContainer');
+            const trailerBadge = document.getElementById('watchTrailerBadge');
+            const trailerActions = document.getElementById('watchTrailerActions');
+
+            const safeTitle = (obra.title || 'Título').replace(/[<>&"']/g, '');
 
             if (titleEl) titleEl.textContent = obra.title;
             if (coverEl) {
@@ -2459,9 +2822,102 @@
                 evalBtn.href = `adicionar_midias.html?titulo=${encodedTitle}&capa=${encodedPoster}&tipo=${encodedType}&genero=${encodedGenre}&ano=${encodedYear}&nota=${encodedScore}`;
             }
 
+            // Exibir loading no player de trailer
+            if (trailerBadge) trailerBadge.textContent = 'BUSCANDO HD';
+            if (trailerContainer) {
+                trailerContainer.innerHTML = `
+                    <div class="trailer-loading-placeholder">
+                        <div class="trailer-spinner"></div>
+                        <span>Carregando trailer oficial no YouTube... ⏳</span>
+                    </div>
+                `;
+            }
+            if (trailerActions) trailerActions.innerHTML = '';
+
             // Consulta provedores reais TMDB exclusivos para o Brasil (BR)
             listEl.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--accent-cyan); font-size: 0.9rem;">Buscando streamings oficiais no Brasil... ⏳</div>`;
             if (modal) modal.style.display = 'flex';
+
+            // Carregamento assíncrono do trailer oficial do YouTube (TMDB /videos)
+            (async () => {
+                let trailerKey = null;
+                let trailerName = '';
+
+                if (obra.id) {
+                    try {
+                        const apiKey = getTmdbApiKey();
+                        const type = obra.media_type || (obra.type === 'Série' || obra.type === 'Anime' ? 'tv' : 'movie');
+
+                        // 1. Tenta trailers dublados/legendados em Português do Brasil (pt-BR)
+                        const resPt = await fetch(`https://api.themoviedb.org/3/${type}/${obra.id}/videos?api_key=${apiKey}&language=pt-BR`);
+                        if (resPt.ok) {
+                            const dataPt = await resPt.json();
+                            const vidsPt = dataPt.results || [];
+                            const ytTrailerPt = vidsPt.find(v => v.site === 'YouTube' && v.type === 'Trailer') ||
+                                                vidsPt.find(v => v.site === 'YouTube' && v.type === 'Teaser') ||
+                                                vidsPt.find(v => v.site === 'YouTube');
+                            if (ytTrailerPt && ytTrailerPt.key) {
+                                trailerKey = ytTrailerPt.key;
+                                trailerName = ytTrailerPt.name || 'Trailer Oficial';
+                                if (trailerBadge) trailerBadge.textContent = 'OFICIAL DUBLADO/LEG.';
+                            }
+                        }
+
+                        // 2. Se não houver versão pt-BR, busca trailer oficial internacional (en-US)
+                        if (!trailerKey) {
+                            const resEn = await fetch(`https://api.themoviedb.org/3/${type}/${obra.id}/videos?api_key=${apiKey}&language=en-US`);
+                            if (resEn.ok) {
+                                const dataEn = await resEn.json();
+                                const vidsEn = dataEn.results || [];
+                                const ytTrailerEn = vidsEn.find(v => v.site === 'YouTube' && v.type === 'Trailer') ||
+                                                    vidsEn.find(v => v.site === 'YouTube' && v.type === 'Teaser') ||
+                                                    vidsEn.find(v => v.site === 'YouTube');
+                                if (ytTrailerEn && ytTrailerEn.key) {
+                                    trailerKey = ytTrailerEn.key;
+                                    trailerName = ytTrailerEn.name || 'Trailer Oficial';
+                                    if (trailerBadge) trailerBadge.textContent = 'OFICIAL YOUTUBE';
+                                }
+                            }
+                        }
+                    } catch (errTrailer) {
+                        console.warn('Erro ao consultar trailer TMDB:', errTrailer);
+                    }
+                }
+
+                if (trailerContainer) {
+                    const ytUrl = trailerKey 
+                        ? `https://www.youtube.com/watch?v=${trailerKey}` 
+                        : `https://www.youtube.com/results?search_query=${encodeURIComponent(obra.title + ' trailer oficial legendado dublado')}`;
+                    const bgThumb = trailerKey 
+                        ? `https://img.youtube.com/vi/${trailerKey}/hqdefault.jpg` 
+                        : (obra.poster || '');
+
+                    trailerContainer.innerHTML = `
+                        <div class="cinema-player-card" onclick="abrirPlayerFlutuante('${ytUrl}')" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('${bgThumb}'); cursor: pointer;" title="Clique para reproduzir em Janela Flutuante 1080p/4K">
+                            <div class="cinema-play-btn-wrap">
+                                <div class="cinema-play-icon">▶</div>
+                                <div class="cinema-play-text">ASSISTIR TRAILER OFICIAL NO YOUTUBE</div>
+                                <div class="cinema-play-sub">Clique para reproduzir em Janela Flutuante 1080p/4K Oficial • Sem Erro 153</div>
+                            </div>
+                            <div class="cinema-source-tag">${trailerKey ? 'Vídeo Oficial Direto ↗' : 'YouTube Oficial ↗'}</div>
+                        </div>
+                    `;
+                    if (trailerBadge) trailerBadge.textContent = trailerKey ? 'TRAILER OFICIAL 4K' : 'YOUTUBE 4K DIRECT';
+                    if (trailerActions) {
+                        trailerActions.innerHTML = `
+                            <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="btn-yt-external" title="Abrir vídeo oficial diretamente no YouTube">
+                                <span>▶️ Abrir Trailer no YouTube</span> ↗
+                            </a>
+                            <button type="button" class="btn-yt-external" style="cursor: pointer;" onclick="abrirPlayerFlutuante('${ytUrl}')">
+                                <span>🖥️ Janela Flutuante</span>
+                            </button>
+                            <button type="button" class="btn-yt-external" style="color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(0,240,255,0.08); cursor: pointer;" onclick="renderizarIframeTrailer('${trailerKey || ''}', '${safeTitle}', '${bgThumb}')">
+                                <span>🔄 Player Embutido</span>
+                            </button>
+                        `;
+                    }
+                }
+            })();
 
             let brData = null;
 
@@ -2612,12 +3068,98 @@
             listEl.innerHTML = htmlLinks;
         }
 
+        function renderizarIframeTrailer(key, title, bgThumb = '') {
+            const trailerContainer = document.getElementById('watchTrailerContainer');
+            const trailerActions = document.getElementById('watchTrailerActions');
+            const trailerBadge = document.getElementById('watchTrailerBadge');
+            if (!trailerContainer) return;
+
+            const safeT = (title || 'Título').replace(/[<>&"']/g, '');
+            const ytUrl = key 
+                ? `https://www.youtube.com/watch?v=${key}` 
+                : `https://www.youtube.com/results?search_query=${encodeURIComponent(safeT + ' trailer oficial legendado dublado')}`;
+
+            if (key) {
+                const embedUrl = `https://www.youtube.com/embed/${key}?autoplay=1&rel=0&enablejsapi=1`;
+                trailerContainer.innerHTML = `
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                        <iframe 
+                            src="${embedUrl}" 
+                            title="${safeT} - Trailer Oficial" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen
+                            style="width: 100%; height: 320px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                        </iframe>
+                        <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.78rem; color: #cbd5e1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1rem;">💡</span>
+                                <span>Se o YouTube exibir <strong>Erro 153</strong> (bloqueio do YouTube em arquivos locais file:/// ou trailers +18), assista na Janela Flutuante:</span>
+                            </div>
+                            <button type="button" class="btn-yt-external" style="padding: 5px 12px; font-size: 0.75rem; white-space: nowrap; margin: 0; background: var(--accent-cyan); color: #0b0f19; font-weight: 700; cursor: pointer;" onclick="abrirPlayerFlutuante('${ytUrl}')">
+                                🖥️ Abrir Flutuante
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                trailerContainer.innerHTML = `
+                    <div class="cinema-player-card" onclick="abrirPlayerFlutuante('${ytUrl}')" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('${bgThumb}'); cursor: pointer;" title="Assistir no YouTube">
+                        <div class="cinema-play-btn-wrap">
+                            <div class="cinema-play-icon">▶</div>
+                            <div class="cinema-play-text">ASSISTIR TRAILER OFICIAL NO YOUTUBE</div>
+                            <div class="cinema-play-sub">Clique para reproduzir em alta resolução oficial • Sem Erro 153</div>
+                        </div>
+                        <div class="cinema-source-tag">YouTube Oficial ↗</div>
+                    </div>
+                `;
+            }
+
+            if (trailerBadge) trailerBadge.textContent = key ? 'OFICIAL YOUTUBE' : 'TRAILER OFICIAL';
+            if (trailerActions) {
+                trailerActions.innerHTML = `
+                    <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="btn-yt-external" title="Abrir vídeo oficial diretamente no YouTube">
+                        <span>▶️ Abrir no YouTube</span> ↗
+                    </a>
+                    <button type="button" class="btn-yt-external" style="cursor: pointer;" onclick="abrirPlayerFlutuante('${ytUrl}')">
+                        <span>🖥️ Janela Flutuante</span>
+                    </button>
+                    <button type="button" class="btn-yt-external" style="color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(0,240,255,0.08); cursor: pointer;" onclick="abrirModalWatch(window.obraModalWatchIndex)">
+                        <span>🔙 Cinema Card</span>
+                    </button>
+                `;
+            }
+        }
+
+        /* Abertura Inteligente de Player Flutuante sem Erro 153 */
+        function abrirPlayerFlutuante(url) {
+            if (!url) return;
+            const w = 1040;
+            const h = 585;
+            const left = Math.max(0, Math.floor((window.screen.availWidth - w) / 2));
+            const top = Math.max(0, Math.floor((window.screen.availHeight - h) / 2));
+            const popup = window.open(
+                url, 
+                'OvercriticMoviePlayer', 
+                `width=${w},height=${h},top=${top},left=${left},scrollbars=no,resizable=yes,status=no,toolbar=no,menubar=no,location=no`
+            );
+            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+                window.open(url, '_blank');
+            } else {
+                popup.focus();
+            }
+        }
+
         function fecharModalWatch(e) {
             if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('btn-close-modal')) {
                 return;
             }
             const modal = document.getElementById('watchModal');
             if (modal) modal.style.display = 'none';
+
+            // Para imediatamente a reprodução do trailer no YouTube
+            const trailerContainer = document.getElementById('watchTrailerContainer');
+            if (trailerContainer) trailerContainer.innerHTML = '';
         }
 
         document.addEventListener('keydown', (e) => {

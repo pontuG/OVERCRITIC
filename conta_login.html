@@ -16,6 +16,7 @@
     <script src="js/apiClient.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/version.js"></script>
+    <script src="js/avatarManager.js"></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -342,18 +343,60 @@
             display: none;
             text-align: center;
         }
+        .profile-avatar-container {
+            position: relative;
+            width: 104px;
+            height: 104px;
+            margin: 0 auto 20px auto;
+        }
         .profile-avatar-large {
-            width: 100px;
-            height: 100px;
+            width: 104px;
+            height: 104px;
             border-radius: 28px;
             background: linear-gradient(135deg, rgba(0,240,255,0.2), rgba(157,78,221,0.2));
             border: 2px solid var(--accent-cyan);
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
-            margin: 0 auto 20px auto;
+            margin: 0;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .profile-avatar-large:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 45px rgba(0, 240, 255, 0.6);
+            border-color: #fff;
+        }
+        .btn-avatar-edit-floating {
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--accent-cyan, #00f0ff);
+            border: 2px solid #07090f;
+            color: #07090f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+            transition: all 0.25s ease;
+            z-index: 10;
+        }
+        .btn-avatar-edit-floating:hover {
+            transform: scale(1.15);
+            background: #fff;
+        }
+        body.light-mode .btn-avatar-edit-floating {
+            background: #c51b29;
+            color: #fff;
+            border-color: #eef1f6;
         }
         .profile-name {
             font-size: 1.6rem;
@@ -526,7 +569,10 @@
             <div id="profileTabContent" style="display: none;">
                 <!-- Perfil Autenticado -->
                 <div id="profileActiveView" class="profile-view" style="display: none;">
-                    <div class="profile-avatar-large" id="profAvatar">🎮</div>
+                    <div class="profile-avatar-container">
+                        <div class="profile-avatar-large" id="profAvatar" onclick="window.abrirModalSeletorAvatar()" title="Clique para trocar sua foto ou avatar de perfil">🎮</div>
+                        <button type="button" class="btn-avatar-edit-floating" onclick="window.abrirModalSeletorAvatar()" title="Alterar Foto ou Ícone">📷</button>
+                    </div>
                     <h2 class="profile-name" id="profName">Jogador</h2>
                     <div class="profile-email" id="profEmail">jogador@email.com</div>
                     <div class="profile-badge-status" id="profStatusBadge">
@@ -625,9 +671,20 @@
                         <input type="password" id="regPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">CONFIRME SUA SENHA</label>
+                        <label class="form-label">CONFIRME A SENHA</label>
                         <input type="password" id="regConfirmPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
                     </div>
+                    <div class="form-group" style="text-align: center; margin-top: 15px; margin-bottom: 22px;">
+                        <label class="form-label" style="display: block; text-align: center; margin-bottom: 10px;">FOTO OU ÍCONE DE PERFIL</label>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 14px;">
+                            <div id="regAvatarPreview" class="profile-avatar-preview" onclick="window.abrirModalSeletorAvatar(selecionarAvatarRegistro)" title="Clique para escolher foto ou ícone" style="width: 62px; height: 62px; border-radius: 18px; background: linear-gradient(135deg, rgba(0,240,255,0.2), rgba(157,78,221,0.2)); border: 2px solid var(--accent-cyan); display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; overflow: hidden; box-shadow: 0 0 20px rgba(0,240,255,0.3); transition: transform 0.2s ease;">🎮</div>
+                            <button type="button" class="btn-avatar-select-reg" onclick="window.abrirModalSeletorAvatar(selecionarAvatarRegistro)" style="background: rgba(0,240,255,0.08); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 12px; padding: 10px 18px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease;">
+                                <span>📷</span> Escolher Foto / Ícone
+                            </button>
+                        </div>
+                        <input type="hidden" id="regSelectedAvatar" value="🎮">
+                    </div>
+
                     <button type="submit" id="btnRegSubmit" class="btn-submit">CRIAR CONTA & ENVIAR CONFIRMAÇÃO</button>
 
                     <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted);">
@@ -734,12 +791,26 @@
                     btnAdmin.style.display = isAdmin ? 'inline-flex' : 'none';
                 }
 
+                if (window.atualizarAvataresVisiveisNaPagina) {
+                    window.atualizarAvataresVisiveisNaPagina();
+                }
+
                 carregarEstatisticasPerfil();
             } else {
                 activeView.style.display = 'none';
                 guestView.style.display = 'block';
             }
         }
+
+        function selecionarAvatarRegistro(avatar) {
+            const inputHidden = document.getElementById('regSelectedAvatar');
+            const preview = document.getElementById('regAvatarPreview');
+            if (inputHidden) inputHidden.value = avatar;
+            if (preview && window.renderizarAvatarHtml) {
+                preview.innerHTML = window.renderizarAvatarHtml(avatar);
+            }
+        }
+        window.selecionarAvatarRegistro = selecionarAvatarRegistro;
 
         function renderizarVisualLogin() {
             const activeCard = document.getElementById('loginAlreadyActiveView');
@@ -778,6 +849,23 @@
             // Verifica parâmetro de URL (ex: conta_login.html?tab=perfil)
             const urlParams = new URLSearchParams(window.location.search);
             const tabParam = urlParams.get('tab');
+            const hash = window.location.hash;
+
+            // Detecta se o usuário veio de um link expirado do Gmail/Supabase
+            if (hash.includes('otp_expired') || hash.includes('invalid') || urlParams.get('expired') === '1') {
+                alternarTab('login');
+                mostrarAlerta(`
+                    <div style="font-size: 1.05rem; margin-bottom: 6px;">⚠️ <b>O link de confirmação expirou!</b></div>
+                    O link enviado para o seu e-mail expirou por tempo ou já foi utilizado.<br>
+                    Digite seu e-mail no formulário abaixo e clique no botão para receber um novo link no Gmail:<br>
+                    <div style="margin-top: 10px;">
+                        <button type="button" onclick="reenviarEmailConfirmacao()" class="btn-submit" style="width: auto; padding: 9px 18px; background: linear-gradient(135deg, #00f0ff, #9d4edd); color: #000; font-weight: 800;">
+                            📩 REENVIAR NOVO LINK AGORA
+                        </button>
+                    </div>
+                `, 'warning');
+                return;
+            }
 
             if (!window.sbClient) {
                 console.warn('Supabase Client não inicializado.');
@@ -796,6 +884,14 @@
                     localStorage.setItem('overcritic_user', username);
                     localStorage.setItem('overcritic_user_email', session.user.email);
                     localStorage.setItem('overcritic_user_id', session.user.id);
+
+                    const metaAvatar = session.user.user_metadata?.avatar_url;
+                    if (metaAvatar) {
+                        localStorage.setItem('overcritic_user_avatar', metaAvatar);
+                    }
+                    if (window.atualizarAvataresVisiveisNaPagina) {
+                        window.atualizarAvataresVisiveisNaPagina();
+                    }
 
                     const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
                     localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
@@ -831,6 +927,69 @@
             } catch (e) {}
         }
 
+        // FUNÇÃO PARA REENVIAR E-MAIL DE CONFIRMAÇÃO
+        async function reenviarEmailConfirmacao(emailAlvo) {
+            const email = (emailAlvo || document.getElementById('loginEmail')?.value || document.getElementById('regEmail')?.value || '').trim();
+            if (!email || !email.includes('@')) {
+                mostrarAlerta('⚠️ Por favor, digite seu e-mail no campo correspondente para podermos reenviar a confirmação.', 'warning');
+                return;
+            }
+
+            if (!window.sbClient) {
+                mostrarAlerta('❌ Erro: Conexão com o Supabase não encontrada.', 'error');
+                return;
+            }
+
+            const btnReenviar = document.getElementById('btnReenviarEmail') || document.getElementById('btnReenviarEmailLogin');
+            if (btnReenviar) {
+                btnReenviar.disabled = true;
+                btnReenviar.innerText = 'REENVIANDO...';
+            }
+
+            try {
+                const redirectUrl = window.location.origin.includes('github.io')
+                    ? 'https://pontug.github.io/OVERCRITIC/'
+                    : `${window.location.origin}/`;
+
+                const { data, error } = await window.sbClient.auth.resend({
+                    type: 'signup',
+                    email: email,
+                    options: {
+                        emailRedirectTo: redirectUrl
+                    }
+                });
+
+                if (error) {
+                    if (error.status === 429 || error.message.toLowerCase().includes('rate limit') || error.message.toLowerCase().includes('over_email_send_rate_limit')) {
+                        mostrarAlerta(`
+                            ⏳ <b>Limite temporário atingido:</b><br>
+                            O servidor de e-mail limita o envio de links repetidos para evitar spam.<br>
+                            Por favor, aguarde alguns minutos antes de solicitar novamente. Verifique também a pasta de <b>Spam</b> ou <b>Lixo Eletrônico</b> do Gmail para <b>${email}</b>.
+                        `, 'warning');
+                    } else {
+                        mostrarAlerta(`❌ <b>Não foi possível reenviar:</b> ${error.message}`, 'error');
+                    }
+                } else {
+                    mostrarAlerta(`
+                        <div style="font-size: 1.1rem; margin-bottom: 8px;">📩 <b>Novo link enviado com sucesso!</b></div>
+                        Enviamos um novo link de ativação para <b>${email}</b>.<br>
+                        Abra o seu Gmail (verifique também a pasta de <b>Spam / Lixeira</b>) e clique no link para ativar sua conta.<br><br>
+                        <div style="font-size: 0.82rem; background: rgba(0,240,255,0.08); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">
+                            💡 <b>Dica:</b> O e-mail pode levar até 1 ou 2 minutos para aparecer na sua caixa de entrada.
+                        </div>
+                    `, 'success');
+                }
+            } catch (err) {
+                mostrarAlerta(`Erro inesperado ao reenviar: ${err.message}`, 'error');
+            } finally {
+                if (btnReenviar) {
+                    btnReenviar.disabled = false;
+                    btnReenviar.innerText = '📩 REENVIAR NOVO LINK DE CONFIRMAÇÃO';
+                }
+            }
+        }
+        window.reenviarEmailConfirmacao = reenviarEmailConfirmacao;
+
         // CADASTRO
         async function realizarCadastro(e) {
             e.preventDefault();
@@ -839,7 +998,8 @@
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPassword').value;
-            const confirmPass = document.getElementById('regConfirmPassword').value;
+            const confirmPassInput = document.getElementById('regConfirmPassword');
+            const confirmPass = confirmPassInput ? confirmPassInput.value : pass;
             const btn = document.getElementById('btnRegSubmit');
 
             if (pass !== confirmPass) {
@@ -852,6 +1012,7 @@
                 return;
             }
 
+            const avatarEscolhido = document.getElementById('regSelectedAvatar')?.value || '🎮';
             btn.disabled = true;
             btn.innerText = 'CRIANDO CONTA...';
 
@@ -866,20 +1027,44 @@
                     password: pass,
                     options: {
                         data: {
-                            username: username
+                            username: username,
+                            avatar_url: avatarEscolhido
                         },
                         emailRedirectTo: redirectUrl
                     }
                 });
 
                 if (error) {
+                    if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('already exists')) {
+                        mostrarAlerta(`
+                            <div style="font-size: 1.05rem; margin-bottom: 6px;">⚠️ <b>Este e-mail já possui cadastro!</b></div>
+                            O endereço <b>${email}</b> já está registrado.<br>
+                            Se você não recebeu o e-mail ou o link anterior expirou, clique abaixo para reenviar um novo link de ativação:<br>
+                            <button type="button" id="btnReenviarEmail" onclick="reenviarEmailConfirmacao('${email}')" class="btn-submit" style="margin-top: 10px; width: auto; padding: 9px 18px; background: linear-gradient(135deg, #00f0ff, #9d4edd); color: #000; font-weight: 800;">
+                                📩 REENVIAR NOVO LINK DE CONFIRMAÇÃO
+                            </button>
+                        `, 'warning');
+                        return;
+                    }
                     mostrarAlerta(`❌ <b>Falha no cadastro:</b> ${error.message}`, 'error');
+                } else if (data && data.user && data.user.identities && data.user.identities.length === 0) {
+                    // Supabase retorna identities: [] quando email já existe e proteção de enumeração está ativa
+                    mostrarAlerta(`
+                        <div style="font-size: 1.05rem; margin-bottom: 6px;">⚠️ <b>Cadastro já iniciado para este e-mail!</b></div>
+                        O endereço <b>${email}</b> já está registrado aguardando confirmação.<br>
+                        Se o link anterior expirou ou não chegou no Gmail, clique no botão abaixo para receber um novo link:<br>
+                        <button type="button" id="btnReenviarEmail" onclick="reenviarEmailConfirmacao('${email}')" class="btn-submit" style="margin-top: 10px; width: auto; padding: 9px 18px; background: linear-gradient(135deg, #00f0ff, #9d4edd); color: #000; font-weight: 800;">
+                            📩 REENVIAR NOVO LINK DE CONFIRMAÇÃO
+                        </button>
+                    `, 'warning');
                 } else if (data && data.session) {
                     // Confirmação de e-mail desativada no Supabase: entra imediatamente!
                     usuarioAtualSessao = data.user;
                     localStorage.setItem('overcritic_currentUser', username);
                     localStorage.setItem('overcritic_user', username);
                     localStorage.setItem('overcritic_user_email', email);
+                    localStorage.setItem('overcritic_user_avatar', avatarEscolhido);
+                    if (window.atualizarAvataresVisiveisNaPagina) window.atualizarAvataresVisiveisNaPagina(avatarEscolhido);
                     mostrarAlerta(`🎉 <b>Conta criada com sucesso, ${username}!</b> Conectando ao seu perfil...`, 'success');
                     setTimeout(() => {
                         alternarTab('profile');
@@ -891,7 +1076,7 @@
                         Enviamos um e-mail de confirmação para <b>${email}</b>.<br>
                         Abra sua caixa de entrada e clique no link de ativação.<br><br>
                         <div style="font-size: 0.8rem; background: rgba(0,240,255,0.08); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">
-                            💡 <b>Dica:</b> Se o link no e-mail disser "expirado", o antivírus do seu e-mail pode ter confirmado o link automaticamente. Tente fazer o login direto na aba <b>ENTRAR</b>!
+                            💡 <b>Dica:</b> Se o link não chegar em 2 minutos ou se expirar, você pode solicitar o reenvio a qualquer momento nesta página.
                         </div>
                     `, 'success');
                 }
@@ -929,8 +1114,12 @@
                 if (error) {
                     if (error.message.toLowerCase().includes('email not confirmed')) {
                         mostrarAlerta(`
-                            ⚠️ <b>E-mail ainda não confirmado!</b><br>
-                            Você precisa clicar no link de confirmação enviado para <b>${email}</b> antes de poder entrar no sistema.
+                            <div style="font-size: 1.05rem; margin-bottom: 6px;">⚠️ <b>E-mail ainda não confirmado!</b></div>
+                            Você precisa clicar no link de confirmação enviado para <b>${email}</b> antes de poder entrar.<br>
+                            Não recebeu o e-mail ou o link expirou?<br>
+                            <button type="button" id="btnReenviarEmailLogin" onclick="reenviarEmailConfirmacao('${email}')" class="btn-submit" style="margin-top: 10px; width: auto; padding: 9px 18px; background: linear-gradient(135deg, #00f0ff, #9d4edd); color: #000; font-weight: 800;">
+                                📩 REENVIAR NOVO LINK DE CONFIRMAÇÃO
+                            </button>
                         `, 'warning');
                     } else {
                         mostrarAlerta(`❌ <b>Erro ao entrar:</b> E-mail ou senha incorretos (${error.message}).`, 'error');
@@ -942,6 +1131,14 @@
                     localStorage.setItem('overcritic_user', username);
                     localStorage.setItem('overcritic_user_email', email);
                     localStorage.setItem('overcritic_user_id', data.user.id);
+
+                    const metaAvatar = data.user.user_metadata?.avatar_url;
+                    if (metaAvatar) {
+                        localStorage.setItem('overcritic_user_avatar', metaAvatar);
+                    }
+                    if (window.atualizarAvataresVisiveisNaPagina) {
+                        window.atualizarAvataresVisiveisNaPagina();
+                    }
 
                     const isAdmin = window.isAdminUser ? window.isAdminUser(data.user) : false;
                     localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');

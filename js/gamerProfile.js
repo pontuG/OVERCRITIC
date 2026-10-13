@@ -83,6 +83,7 @@
                 font-weight: 800;
                 color: #fff;
                 flex-shrink: 0;
+                overflow: hidden;
             }
             .gp-names {
                 display: flex;
@@ -456,7 +457,30 @@
         const overlay = document.getElementById('gamerProfileOverlay');
 
         usernameEl.textContent = cleanName;
-        avatarEl.textContent = cleanName.charAt(0).toUpperCase() || '🎮';
+        
+        const currentUserLower = (localStorage.getItem('overcritic_currentUser') || '').toLowerCase();
+        let avatarGamer = '🎮';
+        if (cleanName.toLowerCase() === currentUserLower) {
+            avatarGamer = typeof window.getUsuarioAvatarAtual === 'function' 
+                ? window.getUsuarioAvatarAtual() 
+                : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+            avatarEl.style.cursor = 'pointer';
+            avatarEl.title = 'Clique para alterar seu avatar gamer';
+            avatarEl.onclick = function() {
+                if (window.abrirModalSeletorAvatar) window.abrirModalSeletorAvatar();
+            };
+        } else {
+            avatarGamer = cleanName.charAt(0).toUpperCase() || '🎮';
+            avatarEl.style.cursor = 'default';
+            avatarEl.title = '';
+            avatarEl.onclick = null;
+        }
+
+        if (typeof window.renderizarAvatarHtml === 'function') {
+            avatarEl.innerHTML = window.renderizarAvatarHtml(avatarGamer, cleanName.charAt(0).toUpperCase() || '🎮');
+        } else {
+            avatarEl.textContent = cleanName.charAt(0).toUpperCase() || '🎮';
+        }
 
         // Verifica se o usuário é Admin
         const isAdmin = (window.isAdminUser && window.isAdminUser({ id: targetUserId, email: cleanName }))
