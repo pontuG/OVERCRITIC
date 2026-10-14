@@ -9,15 +9,26 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.2",
+    version: "26.10.3",
     year: "2026",
     month: "10",
-    build: 2,
+    build: 3,
     releaseDate: "14/10/2026",
     status: "Versão Estável",
-    codename: "RAWG Games API & Metacritic Universal",
+    codename: "Otimização Ultra-Fluida 60FPS, Tema Branco Puro & Fix do Header",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.3",
+            date: "14/10/2026",
+            title: "Otimização Ultra-Fluida 60FPS, Tema Branco Puro & Correção da Saudação",
+            highlights: [
+                "Correção definitiva da frase de abertura na Home: resolução do bug de texto apagado/transparente na transição de abas e retorno pelo histórico (bfcache)",
+                "Tema Branco Puro & Moderno: substituição do cinza fosco desbotado por branco cristalino (#ffffff / #f8fafc) com toques de azul safira elétrico (#0284c7) e roxo tecnológico (#7c3aed)",
+                "Compatibilidade com extensões de modo escuro (Dark Reader): inclusão das diretivas oficiais <meta name='darkreader-lock'> e <meta name='color-scheme' content='dark light'> impedindo que o navegador escureça ou suje o tema claro",
+                "Otimização extrema de performance a 60 FPS: desativação do loop de partículas pesadas em canvas de tela cheia, suavização de blur gaussiano, adição de aceleração de hardware GPU (translateZ) e eliminação de polling excessivo de timers a cada 2.5s"
+            ]
+        },
         {
             version: "26.10.2",
             date: "14/10/2026",

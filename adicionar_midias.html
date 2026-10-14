@@ -6,6 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark light">
+    <meta name="darkreader-lock">
     <title>OVERCRITIC - Filmes, Séries & Animes</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -33,20 +35,20 @@
             --card-hover-shadow: rgba(0, 0, 0, 0.4);
         }
 
-        /* --- MODO CLARO (Cinza Titânio Fosco & Vermelho Sangue) --- */
+        /* --- TEMA BRANCO PURO & TECNOLÓGICO (WHITE MODE PREMIUM) --- */
         body.light-mode {
-            --bg-color: #d2d7e0;
-            --accent-cyan: #c51b29;
-            --accent-purple: #800f1c;
-            --glass-bg: rgba(224, 228, 236, 0.88);
-            --glass-border: rgba(0, 0, 0, 0.12);
-            --text-main: #0e121a;
-            --text-muted: #525f73;
-            --sidebar-bg: rgba(214, 219, 228, 0.92);
-            --card-shadow: rgba(0, 0, 0, 0.08);
-            --card-hover-shadow: rgba(197, 27, 41, 0.2);
-            background: radial-gradient(circle at 15% 50%, rgba(128, 15, 28, 0.05), transparent 40%),
-                radial-gradient(circle at 85% 30%, rgba(197, 27, 41, 0.05), transparent 40%),
+            --bg-color: #f8fafc;
+            --accent-cyan: #0284c7;
+            --accent-purple: #7c3aed;
+            --glass-bg: #ffffff;
+            --glass-border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --sidebar-bg: #ffffff;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 12px 30px rgba(2, 132, 199, 0.15);
+            background: radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.03), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.04), transparent 40%),
                 var(--bg-color);
         }
 
@@ -1223,16 +1225,10 @@
             opacity: 1;
         }
 
-        /* CANVAS BACKGROUND */
+        /* CANVAS BACKGROUND (Desativado em prol de aceleração por CSS pura) */
         #bgParticlesCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
+            display: none !important;
             pointer-events: none;
-            opacity: 0.6;
         }
 
         /* RESPONSIVIDADE */
@@ -3127,8 +3123,7 @@
         // INICIALIZAÇÃO
         // ═══════════════════════════════════
         window.addEventListener('DOMContentLoaded', () => {
-            resizeBgCanvas();
-            animateParticles();
+            // Background estático/CSS puro para máxima fluidez a 60 FPS
             atualizarEstatisticas();
             filtrarReviews();
             carregarTendencias();

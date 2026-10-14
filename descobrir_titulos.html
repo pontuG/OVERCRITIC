@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="color-scheme" content="dark light">
+    <meta name="darkreader-lock">
     <title>OVERCRITIC - Descubra Novos Filmes, Séries & Animes</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -30,15 +32,16 @@
             --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
+        /* --- TEMA BRANCO PURO & TECNOLÓGICO (WHITE MODE PREMIUM) --- */
         body.light-mode {
-            --bg-color: #d2d6df;
-            --accent-cyan: #c51b29;
-            --accent-purple: #800f1c;
+            --bg-color: #f8fafc;
+            --accent-cyan: #0284c7;
+            --accent-purple: #7c3aed;
             --accent-gold: #d97706;
-            --card-bg: rgba(220, 224, 232, 0.85);
-            --glass-border: rgba(0, 0, 0, 0.16);
-            --text-main: #0e121a;
-            --text-muted: #4a5568;
+            --card-bg: #ffffff;
+            --glass-border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
         }
 
         * {
@@ -63,8 +66,8 @@
 
         body.light-mode {
             background-image:
-                radial-gradient(circle at 15% 20%, rgba(197, 27, 41, 0.04) 0%, transparent 40%),
-                radial-gradient(circle at 85% 75%, rgba(128, 15, 28, 0.04) 0%, transparent 40%);
+                radial-gradient(circle at 15% 20%, rgba(2, 132, 199, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(124, 58, 237, 0.04) 0%, transparent 40%);
         }
 
         /* ═══════════════════════════════════
@@ -86,8 +89,8 @@
         }
 
         body.light-mode .sidebar {
-            background: #d8dde6;
-            border-right: 1px solid rgba(0, 0, 0, 0.15);
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
         }
 
         .brand-icon {
