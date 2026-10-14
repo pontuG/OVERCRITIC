@@ -9,15 +9,27 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.3",
+    version: "26.10.4",
     year: "2026",
     month: "10",
-    build: 3,
+    build: 4,
     releaseDate: "14/10/2026",
     status: "Versão Estável",
-    codename: "Otimização Ultra-Fluida 60FPS, Tema Branco Puro & Fix do Header",
+    codename: "OVERCRITIC PWA: Aplicativo Oficial, Modo Standalone & Cache Resiliente",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.4",
+            date: "14/10/2026",
+            title: "Transformação PWA Oficial: Aplicativo Instalável, Modo Standalone & Cache Resiliente",
+            highlights: [
+                "Transformação completa do OVERCRITIC em Aplicativo Progressivo (PWA) instalável em Windows, Mac, Android e iOS",
+                "Execução em modo Standalone: janela própria sem bordas ou barras de navegador, comportando-se exatamente como um aplicativo nativo",
+                "Engine de Service Worker (sw.js) com estratégias inteligentes de cache: abertura instantânea em 0ms (Stale-While-Revalidate) e navegação offline",
+                "Gerenciador PWA (js/pwaManager.js) com botão nativo de instalação '📲 Instalar App', atalhos rápidos e modal explicativo para iPhone/iPad",
+                "Manifesto de Aplicativo (manifest.json) completo com ícones de alta resolução, atalhos diretos para Jogos, Filmes e Platinas"
+            ]
+        },
         {
             version: "26.10.3",
             date: "14/10/2026",

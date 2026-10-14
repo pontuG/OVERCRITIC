@@ -1,0 +1,66 @@
+{
+  "name": "OVERCRITIC - Críticas, Notícias & Platinas",
+  "short_name": "OVERCRITIC",
+  "description": "Seu portal diário de notícias, lançamentos em tempo real e críticas geek & gamer",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07090f",
+  "theme_color": "#07090f",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "categories": [
+    "entertainment",
+    "games",
+    "news"
+  ],
+  "icons": [
+    {
+      "src": "assets/overcritic_icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/overcritic_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Críticas de Jogos",
+      "short_name": "Jogos",
+      "description": "Acesse e cadastre análises de games",
+      "url": "./adicionar_jogos.html",
+      "icons": [{ "src": "assets/overcritic_icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Descobrir Jogos",
+      "short_name": "Descobrir",
+      "description": "Lançamentos e sucessos da Steam/Consoles",
+      "url": "./descobrir_jogos.html",
+      "icons": [{ "src": "assets/overcritic_icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Filmes & Séries",
+      "short_name": "Cinema",
+      "description": "Cadastre e avalie produções audiovisuais",
+      "url": "./adicionar_midias.html",
+      "icons": [{ "src": "assets/overcritic_icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Platinas & Troféus",
+      "short_name": "Platinas",
+      "description": "Gerenciador de 100% e troféus conquistados",
+      "url": "./adicionar_platinas.html",
+      "icons": [{ "src": "assets/overcritic_icon.png", "sizes": "192x192" }]
+    }
+  ]
+}
