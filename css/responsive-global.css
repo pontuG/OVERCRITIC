@@ -961,6 +961,53 @@ body.light-mode .version-btn-ok {
    ── 6. DISPOSITIVOS MÓVEIS (<= 768px): SMARTPHONES & TELAS ESTREITAS ──
 ═════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+    /* ── MOTOR DE ULTRA PERFORMANCE MOBILE (60-120 FPS NO REDMI 13C / MALI-G52) ── */
+    /* 1. Desativa universalmente filtros de gaussian blur em tempo real que sufocam a GPU móvel */
+    *, *::before, *::after {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    /* 2. Aceleração de hardware e rolagem fluida */
+    html, body {
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* 3. Content-visibility auto: descarta completamente nós fora do viewport */
+    .game-card, 
+    .title-card, 
+    .news-card, 
+    .review-card, 
+    .bento-card, 
+    .feed-card,
+    .quick-item {
+        content-visibility: auto !important;
+        contain-intrinsic-size: 260px !important;
+        contain: paint layout !important;
+        transform: translateZ(0) !important;
+        backface-visibility: hidden !important;
+    }
+
+    /* 4. Sombras leves de 1 camada para não travar a GPU Mali */
+    .game-card, 
+    .title-card, 
+    .news-card, 
+    .review-card, 
+    .bento-card, 
+    .glass-card, 
+    .form-card,
+    .info-card {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* 5. Previne micro-travamentos causados pelo hover em telas de toque */
+    .game-card:hover,
+    .title-card:hover,
+    .news-card:hover,
+    .bento-card:hover {
+        transform: none !important;
+    }
+
     /* Oculta completamente a sidebar desktop e a barra inferior antiga no mobile */
     .sidebar,
     .mobile-bottom-nav,
@@ -977,23 +1024,22 @@ body.light-mode .version-btn-ok {
         right: 0 !important;
         width: 100% !important;
         height: 52px !important;
-        background: rgba(8, 12, 20, 0.92) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
-        border-bottom: 1px solid rgba(0, 240, 255, 0.2) !important;
+        background: #090d16 !important;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.25) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
         padding: 0 14px !important;
         z-index: 99990 !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6) !important;
         box-sizing: border-box !important;
+        transform: translateZ(0) !important;
     }
 
     body.light-mode .mobile-top-bar {
-        background: rgba(240, 244, 252, 0.95) !important;
+        background: #ffffff !important;
         border-bottom-color: rgba(197, 27, 41, 0.2) !important;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
     }
 
     /* Botão Hamburger (Puxar Aba Lateral) */
@@ -1117,7 +1163,7 @@ body.light-mode .version-btn-ok {
         color: #0e121a !important;
     }
 
-    /* ── 2. BACKDROP DO MENU LATERAL ── */
+    /* ── 2. BACKDROP DO MENU LATERAL (ULTRA-LEVE) ── */
     .mobile-drawer-backdrop {
         position: fixed !important;
         top: 0 !important;
@@ -1125,13 +1171,11 @@ body.light-mode .version-btn-ok {
         width: 100vw !important;
         height: 100vh !important;
         height: 100dvh !important;
-        background: rgba(4, 6, 12, 0.72) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
+        background: rgba(4, 6, 12, 0.78) !important;
         z-index: 99996 !important;
         opacity: 0 !important;
         visibility: hidden !important;
-        transition: opacity 0.28s ease, visibility 0.28s ease !important;
+        transition: opacity 0.24s ease, visibility 0.24s ease !important;
     }
 
     .mobile-drawer-backdrop.active {
@@ -1139,7 +1183,7 @@ body.light-mode .version-btn-ok {
         visibility: visible !important;
     }
 
-    /* ── 3. ABA LATERAL MÓVEL DESLIZANTE (DRAWER) ── */
+    /* ── 3. ABA LATERAL MÓVEL DESLIZANTE (DRAWER 60 FPS) ── */
     .mobile-drawer {
         position: fixed !important;
         top: 0 !important;
@@ -1148,30 +1192,29 @@ body.light-mode .version-btn-ok {
         max-width: 86vw !important;
         height: 100vh !important;
         height: 100dvh !important;
-        background: rgba(12, 16, 26, 0.98) !important;
-        backdrop-filter: blur(25px) !important;
-        -webkit-backdrop-filter: blur(25px) !important;
+        background: #0d111b !important;
         border-right: 1px solid rgba(0, 240, 255, 0.25) !important;
-        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.8) !important;
+        box-shadow: 10px 0 35px rgba(0, 0, 0, 0.8) !important;
         z-index: 99997 !important;
         display: flex !important;
         flex-direction: column !important;
-        transform: translateX(-105%) !important;
-        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transform: translateX(-105%) translateZ(0) !important;
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         padding: 0 !important;
         box-sizing: border-box !important;
+        will-change: transform !important;
     }
 
     .mobile-drawer.active {
-        transform: translateX(0) !important;
+        transform: translateX(0) translateZ(0) !important;
     }
 
     body.light-mode .mobile-drawer {
-        background: rgba(246, 249, 255, 0.98) !important;
+        background: #ffffff !important;
         border-right-color: rgba(197, 27, 41, 0.25) !important;
-        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 10px 0 35px rgba(0, 0, 0, 0.2) !important;
     }
 
     /* Cabeçalho do Drawer */
@@ -1687,22 +1730,20 @@ body.light-mode .version-btn-ok {
     /* ── 9. ABAS DE SEÇÕES PARA TELAS DE CADASTRO (JOGOS E MÍDIAS) ── */
     .mobile-section-tabs {
         display: flex !important;
-        background: rgba(0, 0, 0, 0.35) !important;
-        backdrop-filter: blur(14px) !important;
-        -webkit-backdrop-filter: blur(14px) !important;
-        border: 1px solid var(--glass-border) !important;
+        background: #0d1222 !important;
+        border: 1px solid rgba(0, 240, 255, 0.25) !important;
         border-radius: 14px !important;
         padding: 4px !important;
         margin-bottom: 18px !important;
         gap: 4px !important;
         width: 100% !important;
         box-sizing: border-box !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
     }
     body.light-mode .mobile-section-tabs {
-        background: rgba(255, 255, 255, 0.7) !important;
+        background: #e2e8f0 !important;
         border-color: rgba(0, 0, 0, 0.12) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
     }
 
     .mobile-section-tab {

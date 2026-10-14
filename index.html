@@ -804,6 +804,43 @@
                 grid-row: span 1 !important;
                 padding: 20px 16px !important;
                 min-height: auto !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: #0d1222 !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+                content-visibility: auto !important;
+                contain-intrinsic-size: 200px !important;
+            }
+            body.light-mode .bento-card {
+                background: #ffffff !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            }
+            .news-card {
+                background: #0d1222 !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+                content-visibility: auto !important;
+                contain-intrinsic-size: 260px !important;
+                contain: paint layout !important;
+                transform: translateZ(0) !important;
+                backface-visibility: hidden !important;
+            }
+            body.light-mode .news-card {
+                background: #ffffff !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            }
+            .news-card:hover {
+                transform: none !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+            }
+            .news-badge, .news-time-chip {
+                backdrop-filter: none !important;
+                background: rgba(10, 14, 24, 0.92) !important;
+            }
+            .live-ticker-wrap {
+                backdrop-filter: none !important;
+                background: #0a0f1d !important;
             }
             .card-showcase {
                 min-height: 200px !important;

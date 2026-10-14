@@ -3,7 +3,7 @@
  * Fornece carregamento instantâneo, funcionamento offline e cache resiliente.
  */
 
-const CACHE_NAME = 'overcritic-pwa-v26.10.4';
+const CACHE_NAME = 'overcritic-pwa-v26.10.5';
 
 const APP_SHELL = [
   './',
@@ -92,22 +92,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navegação HTML: Network First com Fallback para Cache
+  // Navegação HTML: Cache First com Revalidação Silenciosa em Background (Zero-Latency App Launch)
   if (req.mode === 'navigate' || req.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
-      fetch(req)
-        .then((networkRes) => {
-          const resClone = networkRes.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
-          return networkRes;
-        })
-        .catch(() => {
-          return caches.match(req).then((cachedRes) => {
-            if (cachedRes) return cachedRes;
-            // Fallback padrão se não encontrar a página específica
+      caches.match(req).then((cachedRes) => {
+        const fetchPromise = fetch(req)
+          .then((networkRes) => {
+            if (networkRes && networkRes.status === 200) {
+              const resClone = networkRes.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+            }
+            return networkRes;
+          })
+          .catch(() => {
             return caches.match('./index.html');
           });
-        })
+
+        // Se já está no cache local do celular, ENTREGA IMEDIATAMENTE (< 50ms)!
+        // Elimina o travamento de 12 segundos na splash screen ao abrir o aplicativo.
+        return cachedRes || fetchPromise;
+      })
     );
     return;
   }

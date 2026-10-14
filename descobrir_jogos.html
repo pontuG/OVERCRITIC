@@ -1494,6 +1494,30 @@
             .games-grid {
                 grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
                 gap: 10px !important;
+                contain: paint !important;
+            }
+            .game-card {
+                background: #0d1222 !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+                content-visibility: auto !important;
+                contain-intrinsic-size: 240px !important;
+                contain: paint layout !important;
+                transform: translateZ(0) !important;
+                backface-visibility: hidden !important;
+            }
+            body.light-mode .game-card {
+                background: #ffffff !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            }
+            .game-card:hover {
+                transform: none !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+            }
+            .badge-score {
+                backdrop-filter: none !important;
+                background: rgba(10, 14, 24, 0.92) !important;
             }
             .game-card-media {
                 height: 105px !important;
@@ -3509,7 +3533,7 @@
 
                 card.innerHTML = `
                     <div class="game-card-media" style="cursor: pointer;" onclick="abrirModalLojas(${index})" title="Ver trailer oficial e detalhes de ${safeTitle}">
-                        <img src="${thumbUrl}" class="game-card-img" alt="${safeTitle}" onerror="tratarErroCapa(this, '${safeTitle}')" loading="lazy" referrerpolicy="no-referrer">
+                        <img src="${thumbUrl}" class="game-card-img" alt="${safeTitle}" onerror="tratarErroCapa(this, '${safeTitle}')" loading="lazy" decoding="async" referrerpolicy="no-referrer">
                         ${jogo.badge ? `<span class="badge-deal">${jogo.badge}</span>` : ''}
                         ${jogo.score ? `<span class="badge-score">${jogo.score}</span>` : ''}
                     </div>

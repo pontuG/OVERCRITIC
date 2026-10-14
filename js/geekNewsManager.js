@@ -261,7 +261,7 @@
                 return `
                     <article class="news-card">
                         <div class="news-thumb-wrapper">
-                            <img src="${noticia.thumbnail}" alt="${safeTitle}" class="news-thumb-img" loading="lazy" onerror="this.src='https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg'">
+                            <img src="${noticia.thumbnail}" alt="${safeTitle}" class="news-thumb-img" loading="lazy" decoding="async" onerror="this.src='https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg'">
                             <span class="news-badge ${catClass}">${noticia.badge}</span>
                             <span class="news-time-chip">${noticia.tempoFormatado}</span>
                         </div>
