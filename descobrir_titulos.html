@@ -974,17 +974,30 @@
         /* ═══════════════════════════════════
            MODAL ONDE ASSISTIR / DETALHES
         ═══════════════════════════════════ */
+        html.modal-open-scroll-locked,
+        body.modal-open-scroll-locked {
+            overflow: hidden !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            touch-action: none !important;
+            overscroll-behavior: contain !important;
+        }
+
         .modal-backdrop-watch {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
             animation: fadeIn 0.25s ease-out;
+            overscroll-behavior: contain;
         }
 
         .modal-dialog-watch {
@@ -999,6 +1012,7 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 240, 255, 0.2);
             display: flex;
             flex-direction: column;
+            overscroll-behavior: contain;
         }
 
         body.light-mode .modal-dialog-watch {
@@ -1771,7 +1785,8 @@
             "15d2ea6d0dc1d476efbca3eba2b9bbfb"
         ];
         let currentTmdbKeyIndex = 0;
-        const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+        const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342";
+        const TMDB_IMAGE_HD = "https://image.tmdb.org/t/p/w500";
 
         function getTmdbApiKey() {
             const userKey = localStorage.getItem('OVERCRITIC_TMDB_USER_KEY');
@@ -2005,25 +2020,29 @@
 
         async function enriquecerProvedoresEmBackground(titulos) {
             if (!titulos || !titulos.length) return;
+            const alvos = titulos.slice(0, 8);
             let houveMudanca = false;
 
-            const promises = titulos.map(async (t) => {
-                if (!t.id) return;
-                const reais = await obterProvedoresReaisBr(t.id, t.media_type);
-                if (reais && reais.length > 0) {
-                    const provsAtuais = t.providers || [];
-                    const preservaCinema = provsAtuais.includes('Cinema');
-                    const novosProvs = preservaCinema ? Array.from(new Set(['Cinema', ...reais])) : reais;
+            for (const t of alvos) {
+                if (!t.id) continue;
+                // Se já tem streamings locais pré-calculados e não é cinema, não precisa gastar cota
+                if (t.providers && t.providers.length >= 2 && !t.providers.includes('Cinema')) continue;
+                try {
+                    const reais = await obterProvedoresReaisBr(t.id, t.media_type);
+                    if (reais && reais.length > 0) {
+                        const provsAtuais = t.providers || [];
+                        const preservaCinema = provsAtuais.includes('Cinema');
+                        const novosProvs = preservaCinema ? Array.from(new Set(['Cinema', ...reais])) : reais;
 
-                    const saoIguais = novosProvs.length === provsAtuais.length && novosProvs.every(p => provsAtuais.includes(p));
-                    if (!saoIguais) {
-                        t.providers = novosProvs;
-                        houveMudanca = true;
+                        const saoIguais = novosProvs.length === provsAtuais.length && novosProvs.every(p => provsAtuais.includes(p));
+                        if (!saoIguais) {
+                            t.providers = novosProvs;
+                            houveMudanca = true;
+                        }
                     }
-                }
-            });
+                } catch (e) {}
+            }
 
-            await Promise.allSettled(promises);
             if (houveMudanca) {
                 filtrarTitulosNaTela();
             }
@@ -2324,22 +2343,39 @@
             return meta.providers;
         }
 
-        /* CARREGAMENTO DE DADOS VIA API TMDB COM AUTO-ATUALIZAÇÃO DINÂMICA */
+        /* CARREGAMENTO DE DADOS VIA API TMDB COM RENDERIZAÇÃO INSTANTÂNEA CACHE-FIRST (0ms) */
         async function carregarCatalogo(cat, carregarMais = false) {
             const grid = document.getElementById('titlesGrid');
             const btnMais = document.getElementById('btnLoadMore');
 
+            // 1. ESTRATÉGIA CACHE-FIRST: Renderiza na hora (0ms) com dados locais/cache sem congelar a tela
             if (!carregarMais) {
-                grid.innerHTML = Array(8).fill(0).map(() => `
-                    <div class="skeleton-card">
-                        <div class="skeleton-media"></div>
-                        <div class="skeleton-body">
-                            <div class="skeleton-line" style="width: 80%;"></div>
-                            <div class="skeleton-line" style="width: 50%;"></div>
-                            <div class="skeleton-line" style="width: 90%; margin-top: auto;"></div>
+                let dadosIniciais = cacheTitulos[cat];
+                if (!dadosIniciais || dadosIniciais.length === 0) {
+                    try {
+                        const sCache = sessionStorage.getItem('oc_cache_titles_' + cat);
+                        if (sCache) dadosIniciais = JSON.parse(sCache);
+                    } catch (e) {}
+                }
+                if (!dadosIniciais || dadosIniciais.length === 0) {
+                    dadosIniciais = (CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending || []).map(item => ({ ...item }));
+                }
+
+                if (dadosIniciais && dadosIniciais.length > 0) {
+                    cacheTitulos[cat] = dadosIniciais;
+                    filtrarTitulosNaTela(); // Exibição instantânea!
+                } else {
+                    grid.innerHTML = Array(8).fill(0).map(() => `
+                        <div class="skeleton-card">
+                            <div class="skeleton-media"></div>
+                            <div class="skeleton-body">
+                                <div class="skeleton-line" style="width: 80%;"></div>
+                                <div class="skeleton-line" style="width: 50%;"></div>
+                                <div class="skeleton-line" style="width: 90%; margin-top: auto;"></div>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
             }
 
             if (btnMais) btnMais.disabled = true;
@@ -2418,16 +2454,19 @@
                     });
                     cacheTitulos[cat] = existentes;
                 } else {
-                    // Exibe 100% dos títulos reais retornados pela API (sem injetar itens fixos no topo)
+                    // Exibe 100% dos títulos reais retornados pela API atualizada
                     cacheTitulos[cat] = novosTitulos;
+                    try {
+                        sessionStorage.setItem('oc_cache_titles_' + cat, JSON.stringify(novosTitulos.slice(0, 40)));
+                    } catch (e) {}
                 }
 
                 filtrarTitulosNaTela();
                 enriquecerProvedoresEmBackground(novosTitulos);
 
             } catch (err) {
-                console.warn('[Descobrir] TMDB em contingência. Carregando catálogo oficial integrado:', err);
-                if (!carregarMais) {
+                console.warn('[Descobrir] TMDB em contingência. Mantendo catálogo oficial integrado:', err);
+                if (!carregarMais && (!cacheTitulos[cat] || cacheTitulos[cat].length === 0)) {
                     cacheTitulos[cat] = (CATALOGO_ESTENDIDO[cat] || CATALOGO_ESTENDIDO.trending).map(item => ({ ...item }));
                     filtrarTitulosNaTela();
                 }
@@ -2838,6 +2877,10 @@
             listEl.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--accent-cyan); font-size: 0.9rem;">Buscando streamings oficiais no Brasil... ⏳</div>`;
             if (modal) modal.style.display = 'flex';
 
+            // Trava completamente a rolagem de fundo (html e body)
+            document.documentElement.classList.add('modal-open-scroll-locked');
+            document.body.classList.add('modal-open-scroll-locked');
+
             // Carregamento assíncrono do trailer oficial do YouTube (TMDB /videos)
             (async () => {
                 let trailerKey = null;
@@ -3156,6 +3199,10 @@
             }
             const modal = document.getElementById('watchModal');
             if (modal) modal.style.display = 'none';
+
+            // Destrava a rolagem do documento
+            document.documentElement.classList.remove('modal-open-scroll-locked');
+            document.body.classList.remove('modal-open-scroll-locked');
 
             // Para imediatamente a reprodução do trailer no YouTube
             const trailerContainer = document.getElementById('watchTrailerContainer');

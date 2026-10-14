@@ -2,7 +2,7 @@
 // Desenvolvido para Overcritic com 100% de integridade, objetivos reais e listas completas.
 
 (function () {
-    const COVER_SPIDERMAN_2 = 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80';
+    const COVER_SPIDERMAN_2 = 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg';
     const COVER_SPIDERMAN_1 = 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg';
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -12,294 +12,294 @@
         {
             name: 'Dedicado',
             desc: 'Colete todos os 42 troféus e prove ser o maior protetor de Nova York como Peter Parker e Miles Morales.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '22.8%',
             type: 'platina'
         },
         {
             name: 'Superior',
             desc: 'Conclua 100% de todas as atividades, ninhos de simbionte e esconderijos em todos os distritos de Nova York.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '28.1%',
             type: 'gold'
         },
         {
             name: 'Curar o Mundo',
             desc: 'Conclua a história principal derrotando Venom e salvando Nova York da infestação de simbiontes.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '44.5%',
             type: 'gold'
         },
         {
             name: 'Ao Máximo',
             desc: 'Compre todas as melhorias de dispositivos tecnológicos de combate disponíveis.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '33.2%',
             type: 'silver'
         },
         {
             name: 'Equipado até os Dentes',
             desc: 'Adquira todos os trajes disponíveis para Peter Parker e Miles Morales.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '29.8%',
             type: 'silver'
         },
         {
             name: 'Por Trás das Máscaras',
             desc: 'Conclua "A Escolha Final" vencendo todos os desafios de ilusão do Mystério.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '31.4%',
             type: 'silver'
         },
         {
             name: 'Espetacular',
             desc: 'Alcance o nível máximo de jogador (Nível 60) dominando o combate pela cidade.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '42.1%',
             type: 'silver'
         },
         {
             name: 'Coletor de Dados',
             desc: 'Conclua a missão "Alvo Identificado" decodificando todos os drones e esconderijos dos Alvos não Identificados.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '35.6%',
             type: 'silver'
         },
         {
             name: 'Hora Escarlate',
             desc: 'Conclua a missão "Foi Sem Querer" e desmantele a seita fanática do Culto da Chama com Yuri Watanabe.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '41.2%',
             type: 'silver'
         },
         {
             name: 'Exterminador',
             desc: 'Destrua todos os Ninhos de Simbionte espalhados pelos distritos de Nova York.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '36.8%',
             type: 'silver'
         },
         {
             name: 'Grãos de Areia',
             desc: 'Reúna todas as lembranças fragmentadas de Flint Marko quebrando os Cristais de Areia espalhados.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '47.9%',
             type: 'silver'
         },
         {
             name: 'Deixe-nos em Paz',
             desc: 'Conclua "Não Tenha Medo", sobrevivendo aos ataques brutais no clímax da campanha.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '48.3%',
             type: 'silver'
         },
         {
             name: 'A Grande Caçada',
             desc: 'Conclua "Tudo Pode Ser Quebrado" e enfrente os perigos das tropas de elite de Kraven.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '53.7%',
             type: 'silver'
         },
         {
             name: 'Buscar e Destruir',
             desc: 'Localize, invada e destrua todas as Bases dos Caçadores de Kraven por Nova York.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '38.0%',
             type: 'silver'
         },
         {
             name: 'Amigão da Vizinhança',
             desc: 'Conclua todos os pedidos de ajuda enviados pelos moradores no aplicativo ASAST.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '37.5%',
             type: 'silver'
         },
         {
             name: 'Remédio',
             desc: 'Conclua com sucesso a missão principal da narrativa "Ele Escolheu Você".',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '61.2%',
             type: 'silver'
         },
         {
             name: 'Sobrecarga',
             desc: 'Como Miles Morales, derrote 100 inimigos com golpes de Bioeletricidade Evoluída (choque azul).',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '49.3%',
             type: 'silver'
         },
         {
             name: 'Fundamental',
             desc: 'Conclua todos os experimentos científicos e biológicos da Fundação Emily-May (FEM).',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '34.9%',
             type: 'silver'
         },
         {
             name: 'Evoluído',
             desc: 'Como Peter Parker, derrote 100 inimigos utilizando os golpes vorazes do Simbionte.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '46.5%',
             type: 'silver'
         },
         {
             name: 'Armado e Perigoso',
             desc: 'Derrote 100 inimigos ativando os membros mecânicos das Patas de Aranha de Peter.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '43.1%',
             type: 'silver'
         },
         {
             name: 'Outro Caminho',
             desc: 'Conclua a missão da campanha principal "Não Pare".',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '78.4%',
             type: 'bronze'
         },
         {
             name: 'Carga Máxima',
             desc: 'Compre todas as melhorias da árvore de tecnologia de trajes compartilhada dos Aranhas.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '38.7%',
             type: 'bronze'
         },
         {
             name: 'Orgulho do Brooklyn',
             desc: 'Conclua a história "Um Presente" solucionando todos os mistérios da Brooklyn Visions.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '42.6%',
             type: 'bronze'
         },
         {
             name: 'Minha Comunidade',
             desc: 'Conclua "Hard Bop" e ajude o Museu Cultural de Música do Harlem a preservar sua herança.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '40.5%',
             type: 'bronze'
         },
         {
             name: 'Eu Desisto',
             desc: 'Durante o prólogo de abertura, suba no corpo do Sandman e vença a missão "Tensão na Superfície".',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '94.2%',
             type: 'bronze'
         },
         {
             name: 'Protocolos Sem Fio',
             desc: 'Colete todos os 42 robôs-aranha colecionáveis (Spider-Bots) e atenda a chamada dimensional.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '33.7%',
             type: 'bronze'
         },
         {
             name: 'No Estilo',
             desc: 'Desbloqueie e equipe qualquer variante de cor/estilo de traje pela primeira vez.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '89.1%',
             type: 'bronze'
         },
         {
             name: 'Corda Bamba',
             desc: 'Derrube 25 inimigos silenciosamente enquanto estiver caminhando sobre a Linha de Teia.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '56.4%',
             type: 'bronze'
         },
         {
             name: 'Arrebentando na Onda',
             desc: 'Realize 30 manobras acrobáticas consecutivas no ar antes de tocar no solo.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '62.8%',
             type: 'bronze'
         },
         {
             name: 'Sobrecarga de Miles',
             desc: 'Ative a transformação de Fúria / Surto de Simbionte 25 vezes nos combates.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '48.0%',
             type: 'bronze'
         },
         {
             name: 'Home Run!',
             desc: 'Corra pelas quatro bases no campo de beisebol do Big Apple Stadium.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '51.3%',
             type: 'bronze'
         },
         {
             name: 'Deixa Rolar',
             desc: 'Como Miles, suba até a torre da igreja no Financial District e recupere o troféu de ciências com Phin.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '46.2%',
             type: 'bronze'
         },
         {
             name: 'Você Sabe o Que Fazer',
             desc: 'Como Peter Parker, visite o túmulo da Tia May no cemitério do Harlem e preste sua homenagem.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '55.7%',
             type: 'bronze'
         },
         {
             name: 'Voando Baixo',
             desc: 'Plane utilizando apenas as Asas de Teia do Financial District até Astoria sem encostar no chão.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '36.4%',
             type: 'bronze'
         },
         {
             name: 'Plaft!',
             desc: 'Tente executar acrobacias no ar e caia de cara no chão ao aterrissar sem abrir a teia.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '68.9%',
             type: 'bronze'
         },
         {
             name: 'Uma Nova Aventura',
             desc: 'Ajude o velho Howard a conduzir seu bando de pombos pelo rio até um lar verde seguro.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '58.6%',
             type: 'bronze'
         },
         {
             name: 'Engenhoso',
             desc: 'Acumule um total de 10.000 Peças de Tecnologia coletadas em atividades e baús.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '64.3%',
             type: 'bronze'
         },
         {
             name: 'Co-Assinatura',
             desc: 'Fotografe todas as fotos solicitadas pela população no aplicativo Foto da Cidade.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '44.1%',
             type: 'bronze'
         },
         {
             name: 'Você Vai Precisar de Ajuda',
             desc: 'Complete a missão introdutória do jogo enfrentando o Homem-Areia.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '92.5%',
             type: 'bronze'
         },
         {
             name: 'Nova York, Nova York',
             desc: 'Conclua todas as Oportunidades de Fotos registrando os pontos marcantes de Manhattan.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '43.8%',
             type: 'bronze'
         },
         {
             name: 'Antídoto',
             desc: 'Derrote um simbionte enquanto ele estiver enfraquecido pelo status Anti-Venom.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '47.1%',
             type: 'bronze'
         },
         {
             name: 'Um Novo Traje',
             desc: 'Obtenha o icônico e sombrio Traje Preto durante a narrativa principal.',
-            icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&auto=format&fit=crop&q=80',
+            icon: COVER_SPIDERMAN_2,
             percent: '74.5%',
             type: 'bronze'
         }

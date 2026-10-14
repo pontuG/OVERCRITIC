@@ -2036,13 +2036,134 @@
         });
 
         /* ═══════════════════════════════════
+           CATÁLOGO DE CAPAS OFICIAIS DE JOGOS & MOTOR INTELIGENTE
+        ═══════════════════════════════════ */
+        const MAPA_CAPAS_OFICIAIS_JOGOS = {
+            'astro bot': 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
+            "marvel's spider-man 2": 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg',
+            'spider-man 2': 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg',
+            "marvel's spider-man": 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg',
+            'spider-man remastered': 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg',
+            "marvel's spider-man: miles morales": 'https://cdn.akamai.steamstatic.com/steam/apps/1817190/header.jpg',
+            'spider-man miles morales': 'https://cdn.akamai.steamstatic.com/steam/apps/1817190/header.jpg',
+            'bloodborne': 'https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg',
+            'elden ring': 'https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg',
+            'elden ring: shadow of the erdtree': 'https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg',
+            'shadow of the erdtree': 'https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg',
+            'ghost of tsushima': 'https://cdn.akamai.steamstatic.com/steam/apps/2215430/header.jpg',
+            'ghost of tsushima director\'s cut': 'https://cdn.akamai.steamstatic.com/steam/apps/2215430/header.jpg',
+            'god of war ragnarök': 'https://cdn.akamai.steamstatic.com/steam/apps/2322010/header.jpg',
+            'god of war ragnarok': 'https://cdn.akamai.steamstatic.com/steam/apps/2322010/header.jpg',
+            'god of war': 'https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg',
+            'black myth: wukong': 'https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg',
+            'black myth wukong': 'https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg',
+            'cyberpunk 2077': 'https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg',
+            'baldur\'s gate 3': 'https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg',
+            'baldurs gate 3': 'https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg',
+            'sekiro: shadows die twice': 'https://cdn.akamai.steamstatic.com/steam/apps/814380/header.jpg',
+            'sekiro': 'https://cdn.akamai.steamstatic.com/steam/apps/814380/header.jpg',
+            'the last of us part i': 'https://cdn.akamai.steamstatic.com/steam/apps/1888930/header.jpg',
+            'the last of us part 1': 'https://cdn.akamai.steamstatic.com/steam/apps/1888930/header.jpg',
+            'the last of us part ii': 'https://upload.wikimedia.org/wikipedia/en/4/4f/TLOU_P2_Box_Art_2.png',
+            'the last of us part 2': 'https://upload.wikimedia.org/wikipedia/en/4/4f/TLOU_P2_Box_Art_2.png',
+            'dark souls iii': 'https://cdn.akamai.steamstatic.com/steam/apps/374320/header.jpg',
+            'dark souls 3': 'https://cdn.akamai.steamstatic.com/steam/apps/374320/header.jpg',
+            'dark souls: remastered': 'https://cdn.akamai.steamstatic.com/steam/apps/570940/header.jpg',
+            'dark souls': 'https://cdn.akamai.steamstatic.com/steam/apps/570940/header.jpg',
+            'hollow knight': 'https://cdn.akamai.steamstatic.com/steam/apps/367520/header.jpg',
+            'stray': 'https://cdn.akamai.steamstatic.com/steam/apps/1332010/header.jpg',
+            'ratchet & clank: rift apart': 'https://cdn.akamai.steamstatic.com/steam/apps/1895880/header.jpg',
+            'ratchet & clank': 'https://cdn.akamai.steamstatic.com/steam/apps/1895880/header.jpg',
+            'red dead redemption 2': 'https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg',
+            'rdr2': 'https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg',
+            'the witcher 3: wild hunt': 'https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg',
+            'the witcher 3': 'https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg',
+            'horizon forbidden west': 'https://cdn.akamai.steamstatic.com/steam/apps/2420110/header.jpg',
+            'horizon zero dawn': 'https://cdn.akamai.steamstatic.com/steam/apps/1151640/header.jpg',
+            'resident evil 4': 'https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg',
+            'silent hill 2': 'https://cdn.akamai.steamstatic.com/steam/apps/2124490/header.jpg',
+            'demon\'s souls': 'https://upload.wikimedia.org/wikipedia/en/9/91/Demon%27s_Souls_Cover_Art.jpg',
+            'death stranding': 'https://cdn.akamai.steamstatic.com/steam/apps/1850570/header.jpg',
+            'monster hunter: world': 'https://cdn.akamai.steamstatic.com/steam/apps/582010/header.jpg',
+            'lies of p': 'https://cdn.akamai.steamstatic.com/steam/apps/1627720/header.jpg',
+            'grand theft auto v': 'https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg',
+            'gta v': 'https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg',
+            'cuphead': 'https://cdn.akamai.steamstatic.com/steam/apps/268910/header.jpg',
+            'celeste': 'https://cdn.akamai.steamstatic.com/steam/apps/504230/header.jpg',
+            'hades': 'https://cdn.akamai.steamstatic.com/steam/apps/1145360/header.jpg',
+            'hades ii': 'https://cdn.akamai.steamstatic.com/steam/apps/1145350/header.jpg',
+            'stellar blade': 'https://upload.wikimedia.org/wikipedia/en/7/75/Stellar_Blade_cover_art.jpg',
+            'wolfenstein ii': 'https://cdn.akamai.steamstatic.com/steam/apps/612880/header.jpg',
+            'alan wake 2': 'https://upload.wikimedia.org/wikipedia/en/e/ed/Alan_Wake_2_box_art.jpg'
+        };
+
+        function resolverCapaOficialJogo(titulo, capaAtual = '') {
+            if (!titulo) return capaAtual || gerarFallbackCapaPlatina('JOGO');
+            const tLower = titulo.toLowerCase().trim();
+            const ehGenerica = !capaAtual || capaAtual.includes('unsplash.com') || capaAtual.includes('placeholder');
+
+            // 1. Busca direta no mapa
+            if (MAPA_CAPAS_OFICIAIS_JOGOS[tLower]) {
+                return MAPA_CAPAS_OFICIAIS_JOGOS[tLower];
+            }
+
+            // 2. Busca por aproximação
+            for (const key in MAPA_CAPAS_OFICIAIS_JOGOS) {
+                if (tLower.includes(key) || key.includes(tLower)) {
+                    return MAPA_CAPAS_OFICIAIS_JOGOS[key];
+                }
+            }
+
+            // 3. Se era uma foto genérica do Unsplash e não achou, gera capa bonita SVG
+            if (ehGenerica) {
+                return gerarFallbackCapaPlatina(titulo);
+            }
+
+            return capaAtual;
+        }
+
+        function gerarFallbackCapaPlatina(titulo) {
+            const seguro = (titulo || 'JOGO').substring(0, 24).replace(/[<>&"']/g, '');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340">
+                <defs>
+                    <linearGradient id="gPlat" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#080c14"/>
+                        <stop offset="50%" stop-color="#111827"/>
+                        <stop offset="100%" stop-color="#1f293d"/>
+                    </linearGradient>
+                </defs>
+                <rect width="600" height="340" fill="url(#gPlat)"/>
+                <rect x="6" y="6" width="588" height="328" fill="none" stroke="rgba(0, 240, 255, 0.4)" stroke-width="2" rx="14"/>
+                <text x="50%" y="42%" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="54">🏆</text>
+                <text x="50%" y="62%" text-anchor="middle" fill="#00f0ff" font-family="'Inter', sans-serif" font-weight="800" font-size="22">${seguro}</text>
+                <text x="50%" y="74%" text-anchor="middle" fill="#ffd166" font-family="'Inter', sans-serif" font-weight="700" font-size="13">OVERCRITIC PLATINUM</text>
+            </svg>`;
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+
+        function tratarErroCapaPlatina(img, titulo) {
+            img.onerror = null;
+            const oficial = resolverCapaOficialJogo(titulo);
+            if (img.src !== oficial) {
+                img.src = oficial;
+            } else {
+                img.src = gerarFallbackCapaPlatina(titulo);
+            }
+        }
+
+        window.MAPA_CAPAS_OFICIAIS_JOGOS = MAPA_CAPAS_OFICIAIS_JOGOS;
+        window.resolverCapaOficialJogo = resolverCapaOficialJogo;
+        window.gerarFallbackCapaPlatina = gerarFallbackCapaPlatina;
+        window.tratarErroCapaPlatina = tratarErroCapaPlatina;
+
+        /* ═══════════════════════════════════
            CATÁLOGO: MAIS PLATINADOS & DIFICULDADES
         ═══════════════════════════════════ */
         const TOP_MAIS_PLATINADOS = [
             {
                 rank: 1,
                 title: 'Astro Bot',
-                cover: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
+                cover: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
                 platform: 'PlayStation 5',
                 difficultyCategory: 'facil',
                 difficultyLabel: '3/10 - Tranquila 🌿',
@@ -2055,7 +2176,7 @@
             {
                 rank: 2,
                 title: 'Marvel\'s Spider-Man 2',
-                cover: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80',
+                cover: 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg',
                 platform: 'PlayStation 5',
                 difficultyCategory: 'facil',
                 difficultyLabel: '3/10 - Tranquila 🌿',
@@ -2133,7 +2254,7 @@
             {
                 rank: 8,
                 title: 'Bloodborne',
-                cover: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80',
+                cover: 'https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg',
                 platform: 'PlayStation 4/5',
                 difficultyCategory: 'dificil',
                 difficultyLabel: '8/10 - Difícil 💀',
@@ -2195,7 +2316,7 @@
             {
                 id: 'plat_seed_2',
                 title: 'Astro Bot',
-                cover: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
+                cover: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
                 user: 'PixelHunter',
                 platform: 'PlayStation 5',
                 progress: 100,
@@ -2282,11 +2403,17 @@
                 feed = SEED_FEED; 
             }
 
-            // Normalização e migração de parabéns para garantir 1 por usuário e remover duplicatas antigas
+            // Normalização de capas oficiais (corrige registros antigos com Unsplash) e migração de aplausos
             let alterou = false;
             const currentUser = obterUsuarioAtual();
 
             feed.forEach(item => {
+                if (item && item.title) {
+                    if (!item.cover || item.cover.includes('unsplash.com')) {
+                        item.cover = resolverCapaOficialJogo(item.title, item.cover);
+                        alterou = true;
+                    }
+                }
                 if (!Array.isArray(item.applaudedBy)) {
                     item.applaudedBy = [];
                     // Se não for seed e já possuía aplausos registrados em testes anteriores
@@ -2491,7 +2618,7 @@
                     <div class="podium-card ${cardClass}">
                         <div class="podium-rank-badge ${badgeClass}">${rankText}</div>
                         <div class="podium-cover-wrap">
-                            <img src="${jogo.cover}" alt="${jogo.title}" class="podium-cover">
+                            <img src="${jogo.cover}" alt="${jogo.title}" class="podium-cover" onerror="tratarErroCapaPlatina(this, '${jogo.title}')">
                         </div>
                         <div class="podium-info">
                             <div class="podium-title">${jogo.title}</div>
@@ -2533,7 +2660,7 @@
                         <td class="rank-pos">#${jogo.rank}</td>
                         <td>
                             <div class="rank-game-cell">
-                                <img src="${jogo.cover}" alt="cover" class="rank-game-cover">
+                                <img src="${jogo.cover}" alt="cover" class="rank-game-cover" onerror="tratarErroCapaPlatina(this, '${jogo.title}')">
                                 <div>
                                     <div class="rank-game-name">${jogo.title}</div>
                                     <div style="font-size: 0.74rem; color: var(--text-muted);">${jogo.platform}</div>
@@ -2727,7 +2854,7 @@
             const badgeTexto = is100 ? '🏆 100% PLATINADO' : `⏳ ${item.progress}% EM BUSCA`;
             const badgeClass = is100 ? 'gold-platina' : '';
 
-            const coverUrl = item.cover || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80';
+            const coverUrl = resolverCapaOficialJogo(item.title, item.cover);
 
             // Dificuldade com cor apropriada
             let badgeDiffClass = 'diff-badge-moderada';
@@ -2751,7 +2878,7 @@
             return `
                 <div class="platina-card ${is100 ? 'is-100' : ''}">
                     <div class="platina-cover-wrap">
-                        <img src="${coverUrl}" alt="${item.title}" class="platina-cover" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80'">
+                        <img src="${coverUrl}" alt="${item.title}" class="platina-cover" onerror="tratarErroCapaPlatina(this, '${item.title}')">
                         <div class="platina-badge-top">
                             ${badgeTexto}
                         </div>
@@ -3056,6 +3183,7 @@
                 cover = `https://cdn.akamai.steamstatic.com/steam/apps/${game.steamAppID}/header.jpg`;
             } else {
                 jogoSelecionadoSteamAppID = null;
+                cover = resolverCapaOficialJogo(game.external, game.thumb);
             }
 
             document.getElementById('platinaCoverUrl').value = cover;
@@ -3079,7 +3207,7 @@
             previewTitle.textContent = game.external;
             previewSub.textContent = matchCurado 
                 ? `${totalConquistas} Conquistas Oficiais • Catálogo Verificado` 
-                : (game.steamAppID ? `ID Steam Oficial: ${game.steamAppID} • ${totalConquistas} Conquistas Oficiais` : 'Capa carregada');
+                : (game.steamAppID ? `ID Steam Oficial: ${game.steamAppID} • ${totalConquistas} Conquistas Oficiais` : 'Capa Oficial Carregada');
             previewBox.style.display = 'flex';
         }
 
@@ -3091,8 +3219,9 @@
 
         function puxarParaCadastroDireto(titulo, capa, dificuldade) {
             alternarAba('cadastrar');
+            const capaOficial = resolverCapaOficialJogo(titulo, capa);
             document.getElementById('platinaTitle').value = titulo;
-            document.getElementById('platinaCoverUrl').value = capa;
+            document.getElementById('platinaCoverUrl').value = capaOficial;
             document.getElementById('gameSearchApiInput').value = titulo;
 
             const matchCurado = encontrarJogoNoBanco(titulo, null);
@@ -3109,7 +3238,7 @@
             const previewTitle = document.getElementById('previewTitleText');
             const previewSub = document.getElementById('previewSubText');
 
-            previewImg.src = capa;
+            previewImg.src = capaOficial;
             previewTitle.textContent = titulo;
             previewSub.textContent = `Carregado do Top Platinados • ${total} Conquistas • ${dificuldade}`;
             previewBox.style.display = 'flex';
@@ -3133,8 +3262,8 @@
 
             if (!title) return showToast.warning('Por favor, informe o nome do jogo.');
 
-            if (!cover) {
-                cover = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80';
+            if (!cover || cover.includes('unsplash.com')) {
+                cover = resolverCapaOficialJogo(title);
             }
 
             // Identifica categoria de dificuldade
@@ -3277,13 +3406,13 @@
             },
             'spiderman_2': (window.OvercriticTrofeusDB && window.OvercriticTrofeusDB.CATALOGO_MESTRE['spiderman_2']) ? window.OvercriticTrofeusDB.CATALOGO_MESTRE['spiderman_2'] : {
                 title: "Marvel's Spider-Man 2",
-                cover: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80',
+                cover: 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg',
                 total: 42,
                 achievements: [
-                    { name: 'Dedicado', desc: 'Colete todos os 42 troféus e prove ser o maior protetor de Nova York como Peter Parker e Miles Morales.', icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80', percent: '22.8%', type: 'platina' },
-                    { name: 'Curar o Mundo', desc: 'Conclua a história principal derrotando Venom e salvando Nova York da infestação de simbiontes.', icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80', percent: '44.5%', type: 'gold' },
-                    { name: 'Superior', desc: 'Conclua 100% de todas as atividades, ninhos de simbionte e esconderijos em todos os distritos de Nova York.', icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80', percent: '28.1%', type: 'gold' },
-                    { name: 'Voando Baixo', desc: 'Plane utilizando apenas as asas de teia do Distrito Financeiro até Astoria sem pousar no solo.', icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80', percent: '36.4%', type: 'silver' }
+                    { name: 'Dedicado', desc: 'Colete todos os 42 troféus e prove ser o maior protetor de Nova York como Peter Parker e Miles Morales.', icon: 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg', percent: '22.8%', type: 'platina' },
+                    { name: 'Curar o Mundo', desc: 'Conclua a história principal derrotando Venom e salvando Nova York da infestação de simbiontes.', icon: 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg', percent: '44.5%', type: 'gold' },
+                    { name: 'Superior', desc: 'Conclua 100% de todas as atividades, ninhos de simbionte e esconderijos em todos os distritos de Nova York.', icon: 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg', percent: '28.1%', type: 'gold' },
+                    { name: 'Voando Baixo', desc: 'Plane utilizando apenas as asas de teia do Distrito Financeiro até Astoria sem pousar no solo.', icon: 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg', percent: '36.4%', type: 'silver' }
                 ]
             },
             '1817070': (window.OvercriticTrofeusDB && window.OvercriticTrofeusDB.CATALOGO_MESTRE['1817070']) ? window.OvercriticTrofeusDB.CATALOGO_MESTRE['1817070'] : {
@@ -3298,12 +3427,12 @@
             },
             'astro_bot_ps5': { // Astro Bot
                 title: 'Astro Bot',
-                cover: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
+                cover: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
                 total: 44,
                 achievements: [
-                    { name: 'Astro-nômico', desc: 'Resgate todos os 300 bots VIP e conquiste todos os 44 troféus da nave estelar.', icon: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80', percent: '38.2%', type: 'platina' },
-                    { name: 'Memória Recuperada', desc: 'Derrote os chefes principais e restaure todos os componentes perdidos da nave-mãe.', icon: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80', percent: '62.1%', type: 'gold' },
-                    { name: 'Colecionador de Ouro', desc: 'Destranque todas as figuras lendárias no Laboratório de Gatcha utilizando moedas estelares.', icon: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80', percent: '45.0%', type: 'silver' }
+                    { name: 'Astro-nômico', desc: 'Resgate todos os 300 bots VIP e conquiste todos os 44 troféus da nave estelar.', icon: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg', percent: '38.2%', type: 'platina' },
+                    { name: 'Memória Recuperada', desc: 'Derrote os chefes principais e restaure todos os componentes perdidos da nave-mãe.', icon: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg', percent: '62.1%', type: 'gold' },
+                    { name: 'Colecionador de Ouro', desc: 'Destranque todas as figuras lendárias no Laboratório de Gatcha utilizando moedas estelares.', icon: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg', percent: '45.0%', type: 'silver' }
                 ]
             },
             '2215430': { // Ghost of Tsushima
@@ -3399,13 +3528,13 @@
             },
             'bloodborne_ps4': { // Bloodborne
                 title: 'Bloodborne',
-                cover: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80',
+                cover: 'https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg',
                 total: 34,
                 achievements: [
-                    { name: 'Bloodborne', desc: 'Conquiste todos os 34 troféus e liberte-se do eterno Pesadelo de Yharnam.', icon: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80', percent: '6.8%', type: 'platina' },
-                    { name: 'Início da Infância', desc: 'Consuma 3 Terços de Cordão Umbilical e derrote a Presença da Lua para ascender além da humanidade.', icon: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80', percent: '16.2%', type: 'gold' },
-                    { name: 'Yharnam, Rainha Pthumeriana', desc: 'Derrote a Rainha Yharnam no nível mais profundo do Cálice de Pthumeru Ihyll.', icon: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80', percent: '12.4%', type: 'gold' },
-                    { name: 'Essência do Caçador', desc: 'Colete todas as 26 armas de truque e armas de fogo dos caçadores de feras.', icon: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80', percent: '17.5%', type: 'silver' }
+                    { name: 'Bloodborne', desc: 'Conquiste todos os 34 troféus e liberte-se do eterno Pesadelo de Yharnam.', icon: 'https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg', percent: '6.8%', type: 'platina' },
+                    { name: 'Início da Infância', desc: 'Consuma 3 Terços de Cordão Umbilical e derrote a Presença da Lua para ascender além da humanidade.', icon: 'https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg', percent: '16.2%', type: 'gold' },
+                    { name: 'Yharnam, Rainha Pthumeriana', desc: 'Derrote a Rainha Yharnam no nível mais profundo do Cálice de Pthumeru Ihyll.', icon: 'https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg', percent: '12.4%', type: 'gold' },
+                    { name: 'Essência do Caçador', desc: 'Colete todas as 26 armas de truque e armas de fogo dos caçadores de feras.', icon: 'https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg', percent: '17.5%', type: 'silver' }
                 ]
             },
             '1888930': { // The Last of Us Part 1

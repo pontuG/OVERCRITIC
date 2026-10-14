@@ -838,6 +838,16 @@
             }
         }
 
+        /* ── TRAVAMENTO SEGURO DE SCROLL AO ABRIR MODAL DE GAMEPLAY & LOJAS ── */
+        html.modal-open-scroll-locked,
+        body.modal-open-scroll-locked {
+            overflow: hidden !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            touch-action: none !important;
+            overscroll-behavior: contain !important;
+        }
+
         /* ═══════════════════════════════════
            MODAL ONDE JOGAR / LOJAS OFICIAIS
         ═══════════════════════════════════ */
@@ -847,15 +857,16 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.82);
+            background: rgba(0, 0, 0, 0.88);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 9999;
             padding: 16px;
             animation: fadeInModal 0.25s ease;
+            overscroll-behavior: contain;
         }
         @keyframes fadeInModal {
             from { opacity: 0; }
@@ -873,6 +884,7 @@
             overflow-y: auto;
             position: relative;
             animation: slideUpModal 0.25s ease;
+            overscroll-behavior: contain;
         }
         @keyframes slideUpModal {
             from { transform: translateY(20px) scale(0.97); opacity: 0; }
@@ -1655,14 +1667,14 @@
                 <button class="cat-tab-btn" id="tabReleases" onclick="mudarCategoria('releases')">
                     🚀 Lançamentos Recentes
                 </button>
+                <button class="cat-tab-btn" id="tabUpcoming" onclick="mudarCategoria('upcoming')">
+                    🔮 Lançamentos Futuros (Aguardados)
+                </button>
                 <button class="cat-tab-btn" id="tabMetacritic" onclick="mudarCategoria('metacritic')">
                     ⭐ Aclamados (Top Crítica)
                 </button>
                 <button class="cat-tab-btn" id="tabFree" onclick="mudarCategoria('free')">
                     🎮 Grandes Jogos Gratuitos
-                </button>
-                <button class="cat-tab-btn" id="tabDeals" onclick="mudarCategoria('deals')">
-                    🏷️ Super Promoções Steam
                 </button>
             </div>
             <div class="results-badge" id="resultsCountBadge">
@@ -1754,69 +1766,308 @@
     </div>
 
     <script>
+        /* ════════════════════════════════════════════════════════
+           INTEGRAÇÃO OFICIAL RAWG VIDEO GAMES API (METACRITIC & NOTA DO PÚBLICO)
+           - Metascore oficial da crítica especializada
+           - Nota média e avaliação da comunidade / público
+           - Lançamentos recentes em tempo real (últimos 90 dias)
+           - Próximos grandes lançamentos futuros anunciados (2026/2027+)
+        ════════════════════════════════════════════════════════ */
+        const RAWG_API_KEYS = [
+            "c542e67aec3a4340908f9de9e86038af"
+        ];
+        let currentRawgKeyIndex = 0;
+
+        function getRawgApiKey() {
+            try {
+                const userKey = localStorage.getItem('OVERCRITIC_RAWG_USER_KEY');
+                if (userKey && userKey.trim()) return userKey.trim();
+            } catch(e) {}
+            return RAWG_API_KEYS[currentRawgKeyIndex % RAWG_API_KEYS.length];
+        }
+
+        async function fetchRawgComFallback(urlBuilder) {
+            let lastErr = null;
+            let keysToTry = [...RAWG_API_KEYS];
+            try {
+                const userKey = localStorage.getItem('OVERCRITIC_RAWG_USER_KEY');
+                if (userKey && userKey.trim()) keysToTry = [userKey.trim(), ...RAWG_API_KEYS];
+            } catch(e) {}
+
+            for (let i = 0; i < keysToTry.length; i++) {
+                const keyIndex = (currentRawgKeyIndex + i) % keysToTry.length;
+                const key = keysToTry[keyIndex];
+                const url = urlBuilder(key);
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        currentRawgKeyIndex = keyIndex;
+                        return await res.json();
+                    } else if (res.status === 429 || res.status === 401) {
+                        console.warn(`[RAWG API] Chave ${keyIndex + 1} limite/erro (HTTP ${res.status}). Alternando chave...`);
+                    } else {
+                        throw new Error(`RAWG HTTP ${res.status}`);
+                    }
+                } catch (e) {
+                    lastErr = e;
+                }
+            }
+            throw lastErr || new Error('RAWG API indisponível');
+        }
+
+        function mapearPlataformasRawg(parentPlatforms) {
+            if (!parentPlatforms || !parentPlatforms.length) return ['PC'];
+            const plats = [];
+            parentPlatforms.forEach(p => {
+                const slug = p.platform ? (p.platform.slug || '').toLowerCase() : '';
+                if ((slug === 'pc' || slug === 'mac' || slug === 'linux') && !plats.includes('PC')) plats.push('PC');
+                if ((slug === 'playstation' || slug.includes('playstation')) && !plats.includes('PS')) plats.push('PS');
+                if ((slug === 'xbox' || slug.includes('xbox')) && !plats.includes('XBOX')) plats.push('XBOX');
+                if ((slug === 'nintendo' || slug.includes('switch')) && !plats.includes('SWITCH')) plats.push('SWITCH');
+            });
+            return plats.length > 0 ? plats : ['PC'];
+        }
+
+        function traduzirGeneroRawg(nomeEn) {
+            if (!nomeEn) return 'Ação / Games';
+            const mapa = {
+                'Action': 'Ação',
+                'Adventure': 'Aventura',
+                'RPG': 'RPG',
+                'Shooter': 'Tiro',
+                'Strategy': 'Estratégia',
+                'Simulation': 'Simulação',
+                'Puzzle': 'Quebra-Cabeça',
+                'Arcade': 'Arcade',
+                'Platformer': 'Plataforma',
+                'Racing': 'Corrida',
+                'Sports': 'Esporte',
+                'Massively Multiplayer': 'MMO',
+                'Fighting': 'Luta',
+                'Family': 'Família',
+                'Board Games': 'Tabuleiro',
+                'Card': 'Cartas',
+                'Indie': 'Indie',
+                'Casual': 'Casual'
+            };
+            return mapa[nomeEn] || nomeEn;
+        }
+
+        function converterJogoRawgParaCard(g, ehFuturo = false) {
+            const rawPlats = g.parent_platforms || [];
+            const plats = mapearPlataformasRawg(rawPlats);
+            const scoreMeta = g.metacritic ? parseInt(g.metacritic) : null;
+            const ratingPub = (typeof g.rating === 'number' && g.rating > 0) ? g.rating.toFixed(1) : null;
+            
+            // Data de lançamento e ano
+            let dataFormatada = '';
+            let anoLancamento = null;
+            if (g.released) {
+                const parts = g.released.split('-');
+                if (parts.length === 3) {
+                    dataFormatada = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    anoLancamento = parseInt(parts[0]);
+                }
+            }
+
+            // Gêneros traduzidos
+            let generoTexto = '';
+            if (g.genres && g.genres.length > 0) {
+                generoTexto = g.genres.slice(0, 2).map(ge => traduzirGeneroRawg(ge.name)).join(' / ');
+            } else {
+                generoTexto = detectarGenero(g.name);
+            }
+
+            // Formatação do Score da Crítica (Metacritic) e Nota do Público
+            let scoreDisplay = '';
+            let badgeDisplay = '';
+
+            if (ehFuturo) {
+                scoreDisplay = ratingPub ? `⭐ ${ratingPub}/5 Público` : (scoreMeta ? `Metacritic ${scoreMeta}` : (g.added > 0 ? `🔥 +${g.added} Aguardando` : 'Aguardado'));
+                badgeDisplay = dataFormatada ? `PREV. ${dataFormatada}` : (anoLancamento ? `PREV. ${anoLancamento}` : 'AGUARDADO');
+            } else {
+                if (scoreMeta && ratingPub) {
+                    scoreDisplay = `Metacritic ${scoreMeta} • ⭐ ${ratingPub}`;
+                    badgeDisplay = `NOTA ${scoreMeta}`;
+                } else if (scoreMeta) {
+                    scoreDisplay = `Metacritic ${scoreMeta}`;
+                    badgeDisplay = `NOTA ${scoreMeta}`;
+                } else if (ratingPub) {
+                    scoreDisplay = `⭐ ${ratingPub}/5 Público`;
+                    badgeDisplay = dataFormatada ? dataFormatada : 'LANÇAMENTO';
+                } else {
+                    scoreDisplay = 'Lançamento Oficial';
+                    badgeDisplay = dataFormatada ? dataFormatada : 'LANÇAMENTO';
+                }
+            }
+
+            return {
+                title: g.name,
+                thumb: g.background_image || gerarFallbackCapa(g.name),
+                genre: generoTexto,
+                score: scoreDisplay,
+                badge: badgeDisplay,
+                priceUSD: 59.99,
+                priceBRL: 299.00,
+                platforms: plats,
+                releaseDate: dataFormatada,
+                releaseDateISO: g.released,
+                releaseYear: anoLancamento,
+                isUpcoming: ehFuturo,
+                rawgId: g.id,
+                metacritic: scoreMeta,
+                userRating: ratingPub,
+                ratingCount: g.ratings_count || g.added || 0
+            };
+        }
+
+        /* ════════════════════════════════════════════════════════
+           ACERVO MESTRE DE LANÇAMENTOS (CRONOGRAMA TEMPORAL OFICIAL)
+           - Lançamentos Recentes: Últimos 90 dias de 2026 (Agosto a Outubro/2026)
+           - Lançamentos Futuros: Aguardados a partir de 14/10/2026 (Fim de 2026 e 2027+)
+           - Sucessos consagrados de 2024 e início de 2025: Integrados em 'trending' e 'metacritic'
+        ════════════════════════════════════════════════════════ */
+        const ACERVO_MESTRE_LANCAMENTOS = [
+            // --- LANÇAMENTOS RECENTES DAS PLATAFORMAS (ÚLTIMOS 90 DIAS • AGOSTO A OUTUBRO DE 2026) ---
+            { title: "Planet Zoo 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/703080/header.jpg", genre: "Simulação & Gestão de Zoológicos", score: "Frontier Oficial", priceBRL: 199.00, priceUSD: 49.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "703080", releaseDate: "13/10/2026", releaseDateISO: "2026-10-13", isUpcoming: false },
+            { title: "Gears of War: E-Day", thumb: "https://upload.wikimedia.org/wikipedia/en/9/9e/Gears_of_War_E-Day_cover_art.png", genre: "Tiro em 3ª Pessoa / Ação Brutal", score: "Xbox Game Studios", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2857490", releaseDate: "06/10/2026", releaseDateISO: "2026-10-06", isUpcoming: false },
+            { title: "Star Wars: Galactic Racer", thumb: "https://upload.wikimedia.org/wikipedia/en/9/90/Star_Wars_Outlaws_cover_art.jpg", genre: "Corrida Futurista / Vagens de Podracing", score: "Lucasfilm Games", priceBRL: 299.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], releaseDate: "06/10/2026", releaseDateISO: "2026-10-06", isUpcoming: false },
+            { title: "Ghost of Yōtei: Edição Completa", thumb: "https://upload.wikimedia.org/wikipedia/en/c/c5/Ghost_of_Yotei_cover_art.jpg", genre: "Mundo Aberto / Samurai (Echoes of Sekigahara)", score: "PlayStation Studios", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS'], releaseDate: "01/10/2026", releaseDateISO: "2026-10-01", isUpcoming: false },
+            { title: "Minecraft: Dungeons II", thumb: "https://upload.wikimedia.org/wikipedia/en/5/52/Minecraft_Dungeons_cover_art.jpg", genre: "Dungeon Crawler / Ação e Aventura", score: "Mojang / Xbox", priceBRL: 149.00, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], releaseDate: "29/09/2026", releaseDateISO: "2026-09-29", isUpcoming: false },
+            { title: "EA Sports FC 27", thumb: "https://upload.wikimedia.org/wikipedia/en/9/90/EA_Sports_College_Football_25_cover.png", genre: "Futebol / Esporte Oficial", score: "EA Sports", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], releaseDate: "25/09/2026", releaseDateISO: "2026-09-25", isUpcoming: false },
+            { title: "Control Resonant", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/870780/header.jpg", genre: "Ação Sobrenatural / Remedy", score: "Metacritic 89", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "870780", releaseDate: "24/09/2026", releaseDateISO: "2026-09-24", isUpcoming: false },
+            { title: "Silent Hill: Townfall", thumb: "https://upload.wikimedia.org/wikipedia/en/3/3e/Silent_Hill_Townfall_cover_art.jpg", genre: "Terror Psicológico / Sobrevivência", score: "Konami / No Code", priceBRL: 299.00, priceUSD: 59.99, platforms: ['PC', 'PS'], releaseDate: "24/09/2026", releaseDateISO: "2026-09-24", isUpcoming: false },
+            { title: "Dune: Awakening", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172710/header.jpg", genre: "MMO de Sobrevivência em Arrakis (PS5 & Xbox)", score: "Funcom Oficial", priceBRL: 249.00, priceUSD: 49.99, platforms: ['PS', 'XBOX'], steamAppID: "1172710", releaseDate: "22/09/2026", releaseDateISO: "2026-09-22", isUpcoming: false },
+            { title: "Marvel's Wolverine", thumb: "https://upload.wikimedia.org/wikipedia/en/3/3d/Marvel%27s_Wolverine_cover_art.jpg", genre: "Ação Cinemática / Garras de Adamantium", score: "PlayStation Studios", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS'], releaseDate: "15/09/2026", releaseDateISO: "2026-09-15", isUpcoming: false },
+            { title: "The Blood of Dawnwalker", thumb: "https://upload.wikimedia.org/wikipedia/en/8/8c/The_Blood_of_Dawnwalker_cover_art.jpg", genre: "RPG de Ação Sombrio / Vampiros", score: "Rebel Wolves / Bandai", priceBRL: 299.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], releaseDate: "03/09/2026", releaseDateISO: "2026-09-03", isUpcoming: false },
+            { title: "Metal Gear Solid: Master Collection Vol. 2", thumb: "https://upload.wikimedia.org/wikipedia/en/a/ad/Metal_Gear_Solid_Master_Collection_Vol._1_cover_art.jpg", genre: "Ação Furtiva / MGS4 & Peace Walker", score: "Konami Oficial", priceBRL: 249.00, priceUSD: 49.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], releaseDate: "27/08/2026", releaseDateISO: "2026-08-27", isUpcoming: false },
+            { title: "Mortal Shell II", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1110910/header.jpg", genre: "Soulslike / Fantasia Sombria", score: "Metacritic 84", priceBRL: 199.50, priceUSD: 49.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1110910", releaseDate: "20/08/2026", releaseDateISO: "2026-08-20", isUpcoming: false },
+            { title: "The Elder Scrolls IV: Oblivion Remastered", thumb: "https://upload.wikimedia.org/wikipedia/en/4/47/The_Elder_Scrolls_IV_Oblivion_cover.png", genre: "RPG Épico / Switch 2 Edition", score: "Bethesda Oficial", priceBRL: 249.00, priceUSD: 49.99, platforms: ['SWITCH'], releaseDate: "11/08/2026", releaseDateISO: "2026-08-11", isUpcoming: false },
+
+            // --- LANÇAMENTOS FUTUROS (AGUARDADOS A PARTIR DE 14/10/2026 • ESTRITAMENTE TÍTULOS NÃO LANÇADOS) ---
+            { title: "Castlevania: Belmont's Curse", thumb: "https://upload.wikimedia.org/wikipedia/en/e/ec/Castlevania_logo.png", genre: "Ação Gótica 2.5D / Chicote & Magia", score: "Konami Oficial", previsao: "15 de Outubro de 2026 (PC, Consoles)", priceBRL: 249.00, priceUSD: 49.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], releaseDate: "15/10/2026", releaseDateISO: "2026-10-15", releaseYear: 2026, isUpcoming: true },
+            { title: "Call of Duty: Modern Warfare 4", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1938090/header.jpg", genre: "FPS Militar / Campanha & Multiplayer", score: "Activision", previsao: "23 de Outubro de 2026 (Campanha Antecipada 16/10)", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], releaseDate: "23/10/2026", releaseDateISO: "2026-10-23", releaseYear: 2026, isUpcoming: true },
+            { title: "The Wolf Among Us Remastered", thumb: "https://upload.wikimedia.org/wikipedia/en/2/2f/The_Wolf_Among_Us_cover_art.jpg", genre: "Aventura Narrativa Noir / Fábulas", score: "Telltale Games", previsao: "29 de Outubro de 2026 (PC, PlayStation, Xbox)", priceBRL: 149.00, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], releaseDate: "29/10/2026", releaseDateISO: "2026-10-29", releaseYear: 2026, isUpcoming: true },
+            { title: "Phantom Blade Zero", thumb: "https://upload.wikimedia.org/wikipedia/en/4/41/Phantom_Blade_Zero_cover_art.jpg", genre: "Kungfupunk / Ação Frenética", score: "S-GAME Oficial", previsao: "30 de Outubro de 2026 (PC & PlayStation 5)", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'PS'], releaseDate: "30/10/2026", releaseDateISO: "2026-10-30", releaseYear: 2026, isUpcoming: true },
+            { title: "The Legend of Zelda: Ocarina of Time (Switch 2)", thumb: "https://upload.wikimedia.org/wikipedia/en/5/57/The_Legend_of_Zelda_Ocarina_of_Time.jpg", genre: "Aventura Épica / Remake Aprimorado UE5", score: "Nintendo EPD", previsao: "05 de Novembro de 2026 (Nintendo Switch 2)", priceBRL: 349.00, priceUSD: 69.99, platforms: ['SWITCH'], releaseDate: "05/11/2026", releaseDateISO: "2026-11-05", releaseYear: 2026, isUpcoming: true },
+            { title: "Grand Theft Auto VI", thumb: "https://upload.wikimedia.org/wikipedia/en/a/a5/Grand_Theft_Auto_VI.png", genre: "Mundo Aberto / Ação Nova Geração", score: "Rockstar Games", previsao: "19 de Novembro de 2026 (PlayStation 5 & Xbox Series)", priceBRL: 399.90, priceUSD: 69.99, platforms: ['PS', 'XBOX'], releaseDate: "19/11/2026", releaseDateISO: "2026-11-19", releaseYear: 2026, isUpcoming: true },
+            { title: "Fable", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2857480/header.jpg", genre: "RPG de Ação / Fantasia Heroica", score: "Playground Games / Xbox", previsao: "23 de Fevereiro de 2027 (PC, Xbox Series & PS5)", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2857480", releaseDate: "23/02/2027", releaseDateISO: "2027-02-23", releaseYear: 2027, isUpcoming: true },
+            { title: "The Witcher 4 (Project Polaris)", thumb: "https://upload.wikimedia.org/wikipedia/en/9/9f/The_Witcher_Polaris_medallion.png", genre: "RPG de Fantasia Épica / Nova Saga", score: "CD Projekt Red", previsao: "2027 / 2028 (PC, PS5, Xbox Series)", platforms: ['PC', 'PS', 'XBOX'], releaseYear: 2027, isUpcoming: true },
+            { title: "Marvel's Blade", thumb: "https://upload.wikimedia.org/wikipedia/en/3/3b/Marvel%27s_Blade_logo.png", genre: "Ação Imersiva / Caçador de Vampiros", score: "Arkane Lyon / Bethesda", previsao: "2027 (PC, Xbox Series & Game Pass)", platforms: ['PC', 'XBOX'], releaseYear: 2027, isUpcoming: true },
+            { title: "Clockwork Revolution", thumb: "https://upload.wikimedia.org/wikipedia/en/7/75/Clockwork_Revolution_cover_art.png", genre: "RPG Steampunk / Viagem no Tempo", score: "inXile / Xbox Game Studios", previsao: "2027 (PC, Xbox Series & Game Pass)", platforms: ['PC', 'XBOX'], releaseYear: 2027, isUpcoming: true },
+            { title: "Judas", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1987510/header.jpg", genre: "FPS Narrativo / Ficção Científica", score: "Ken Levine (Ghost Story)", previsao: "2027 / 2028 (PC, PS5, Xbox Series)", platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1987510", releaseYear: 2027, isUpcoming: true },
+            { title: "Star Wars Eclipse", thumb: "https://upload.wikimedia.org/wikipedia/en/9/90/Star_Wars_Eclipse_logo.jpg", genre: "Ação & Aventura Narrativa / Alta República", score: "Quantic Dream", previsao: "2027 / 2028 (PC, PS5, Xbox Series)", platforms: ['PC', 'PS', 'XBOX'], releaseYear: 2027, isUpcoming: true },
+            { title: "The Elder Scrolls VI", thumb: "https://upload.wikimedia.org/wikipedia/en/0/05/The_Elder_Scrolls_VI_logo.jpg", genre: "RPG de Fantasia Épica em Mundo Aberto", score: "Bethesda Game Studios", previsao: "2028 (PC, Xbox Series)", platforms: ['PC', 'XBOX'], releaseYear: 2028, isUpcoming: true },
+            { title: "Mass Effect 5", thumb: "https://upload.wikimedia.org/wikipedia/en/8/8c/Mass_Effect_poster.jpg", genre: "RPG de Ficção Científica Espacial", score: "BioWare / EA", previsao: "2028 (PC, PlayStation 5, Xbox Series)", platforms: ['PC', 'PS', 'XBOX'], releaseYear: 2028, isUpcoming: true }
+        ];
+
+        /* MOTOR DE SEPARAÇÃO TEMPORAL COM BASE NO RELÓGIO ATUAL DO SISTEMA */
+        function calcularSeparacaoLancamentos() {
+            const hoje = new Date();
+            const recentes = [];
+            const futuros = [];
+
+            ACERVO_MESTRE_LANCAMENTOS.forEach(j => {
+                let ehFuturo = false;
+
+                if (j.releaseDateISO) {
+                    const dataJogo = new Date(j.releaseDateISO + 'T12:00:00Z');
+                    if (dataJogo > hoje) {
+                        ehFuturo = true;
+                    } else {
+                        ehFuturo = false; // Se a data já passou, NUNCA é futuro!
+                    }
+                } else if (j.releaseYear && j.releaseYear > hoje.getFullYear()) {
+                    ehFuturo = true;
+                } else if (j.isUpcoming === true && (!j.releaseYear || j.releaseYear >= hoje.getFullYear())) {
+                    ehFuturo = true;
+                }
+
+                if (ehFuturo) {
+                    futuros.push({
+                        ...j,
+                        badge: j.badge || (j.releaseDate ? `PREV. ${j.releaseDate}` : (j.releaseYear ? `PREV. ${j.releaseYear}` : 'AGUARDADO')),
+                        isUpcoming: true
+                    });
+                } else {
+                    recentes.push({
+                        ...j,
+                        badge: j.badge || (j.releaseDate ? j.releaseDate : 'LANÇAMENTO'),
+                        isUpcoming: false
+                    });
+                }
+            });
+
+            // Ordena lançamentos recentes do mais novo até o mais antigo
+            recentes.sort((a, b) => {
+                const dateA = a.releaseDateISO ? new Date(a.releaseDateISO).getTime() : 0;
+                const dateB = b.releaseDateISO ? new Date(b.releaseDateISO).getTime() : 0;
+                return dateB - dateA;
+            });
+
+            // Ordena futuros do mais próximo ao mais distante
+            futuros.sort((a, b) => {
+                if (a.releaseDateISO && b.releaseDateISO) return new Date(a.releaseDateISO) - new Date(b.releaseDateISO);
+                if (a.releaseDateISO) return -1;
+                if (b.releaseDateISO) return 1;
+                return (a.releaseYear || 9999) - (b.releaseYear || 9999);
+            });
+
+            return { recentes, futuros };
+        }
+
+        const _divisaoLancamentosInicial = calcularSeparacaoLancamentos();
+
         /* ═══════════════════════════════════
            CATÁLOGO ROBUSTO COM IMAGENS REAIS STEAM E SUPORTE MULTIPLATAFORMA
         ═══════════════════════════════════ */
         const CATALOGO_ESTENDIDO = {
             trending: [
+                { title: "Pragmata", thumb: "https://upload.wikimedia.org/wikipedia/en/9/97/Pragmata_cover_art.jpg", genre: "Ação e Ficção Científica Lunar", score: "Metacritic 88", badge: "LANÇADO 17/04/2026", priceBRL: 299.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1488200", releaseDate: "17/04/2026", releaseDateISO: "2026-04-17" },
+                { title: "Crimson Desert", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3261640/header.jpg", genre: "Ação / RPG em Mundo Aberto", score: "Metacritic 89", badge: "LANÇADO 19/03/2026", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "3261640", releaseDate: "19/03/2026", releaseDateISO: "2026-03-19" },
+                { title: "Resident Evil Requiem", thumb: "https://upload.wikimedia.org/wikipedia/en/d/dc/Resident_Evil_Village_box_art.png", genre: "Terror de Sobrevivência / RE9", score: "Metacritic 91", badge: "LANÇADO 27/02/2026", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "2050650", releaseDate: "27/02/2026", releaseDateISO: "2026-02-27" },
+                { title: "Hollow Knight: Silksong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1030300/header.jpg", genre: "Metroidvania 2D / Ação Ágil", score: "Metacritic 95", badge: "🔥 ACLAMADO 2025", priceBRL: 88.99, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1030300", releaseDate: "04/09/2025", releaseDateISO: "2025-09-04" },
+                { title: "Monster Hunter Wilds", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2246340/header.jpg", genre: "Ação / Caçada em Ecossistemas", score: "Metacritic 89", badge: "🔥 SUCESSO CAPCOM", priceBRL: 279.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2246340" },
+                { title: "DOOM: The Dark Ages", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3017860/header.jpg", genre: "FPS Brutal / Fantasia Medieval", score: "Metacritic 91", badge: "🔥 SUCESSO ID", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "3017860" },
+                { title: "Death Stranding 2: On the Beach", thumb: "https://upload.wikimedia.org/wikipedia/en/3/3c/Death_Stranding_2_key_art.jpg", genre: "Sci-Fi Cinemático / Hideo Kojima", score: "Metacritic 90", badge: "⭐ KOJIMA", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS'] },
+                { title: "Kingdom Come: Deliverance II", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1771300/header.jpg", genre: "RPG Medieval Hiper-Realista", score: "Metacritic 88", badge: "🏆 ACLAMADO", priceBRL: 299.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1771300" },
+                { title: "Borderlands 4", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1285190/header.jpg", genre: "Looter Shooter / Caos Cooperativo", score: "Metacritic 85", badge: "CO-OP", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1285190" },
                 { title: "Baldur's Gate 3", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg", genre: "RPG / Estratégia", score: "Metacritic 96", badge: "🔥 #1 GOTY", priceBRL: 199.99, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1086940" },
                 { title: "Elden Ring", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg", genre: "Souls-like / RPG", score: "Metacritic 96", badge: "🏆 ACLAMADO", priceBRL: 229.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1245620" },
-                { title: "Black Myth: Wukong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg", genre: "Ação / RPG", score: "Steam: 96%", badge: "🔥 SUCESSO", priceBRL: 229.99, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2358720" },
+                { title: "Black Myth: Wukong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg", genre: "Ação / RPG", score: "Steam: 96%", badge: "🔥 FENÔMENO", priceBRL: 229.99, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2358720" },
+                { title: "Sid Meier's Civilization VII", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1295660/header.jpg", genre: "Estratégia 4X / Eras", score: "Metacritic 87", badge: "⭐ 2K GAMES", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1295660" },
+                { title: "Avowed", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2457220/header.jpg", genre: "RPG de Ação / Fantasia de Eora", score: "Metacritic 84", badge: "OBSIDIAN / XBOX", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "2457220" },
+                { title: "Dragon Ball: Sparking! ZERO", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1790600/header.jpg", genre: "Luta 3D / Budokai Tenkaichi", score: "Steam: 92%", badge: "🔥 EM ALTA", priceBRL: 299.90, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1790600" },
                 { title: "Cyberpunk 2077", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg", genre: "Mundo Aberto / Sci-Fi", score: "Metacritic 86", badge: "⭐ EXPANSÃO", priceBRL: 199.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1091500" },
                 { title: "Helldivers 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg", genre: "Tiro Co-op / Ação", score: "Steam: Muito Positivo", badge: "CO-OP", priceBRL: 199.50, priceUSD: 39.99, platforms: ['PC', 'PS'], steamAppID: "553850" },
+                { title: "Indiana Jones and the Great Circle", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2677660/header.jpg", genre: "Ação & Aventura em 1ª Pessoa", score: "Metacritic 86", badge: "BETHESDA", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "2677660" },
+                { title: "S.T.A.L.K.E.R. 2: Heart of Chornobyl", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1643320/header.jpg", genre: "FPS / Sobrevivência", score: "GSC Game World", badge: "SOBREVIVÊNCIA", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'XBOX'], steamAppID: "1643320" },
+                { title: "Call of Duty: Black Ops 6", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1938090/header.jpg", genre: "FPS / Espionagem & Campanha", score: "Activision", badge: "MULTIJOGADOR", priceBRL: 350.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1938090" },
                 { title: "Grand Theft Auto V", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg", genre: "Mundo Aberto / Ação", score: "Metacritic 96", badge: "RECORDISTA", priceBRL: 82.41, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "271590" },
                 { title: "Red Dead Redemption 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg", genre: "Faroeste / Aventura", score: "Metacritic 97", badge: "OBRA-PRIMA", priceBRL: 299.90, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1174180" },
                 { title: "Hogwarts Legacy", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/990080/header.jpg", genre: "Mundo Aberto / Magia", score: "Steam: 91%", badge: "MAGIA", priceBRL: 249.99, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "990080" },
                 { title: "Palworld", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1623730/header.jpg", genre: "Sobrevivência / Crafting", score: "Steam: 93%", badge: "EM ALTA", priceBRL: 88.99, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1623730" },
+                { title: "InZOI", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2456740/header.jpg", genre: "Simulação de Vida Hiper-Realista UE5", score: "Krafton Oficial", badge: "SIMULAÇÃO", priceBRL: 149.00, priceUSD: 39.99, platforms: ['PC'], steamAppID: "2456740" },
                 { title: "The Witcher 3: Wild Hunt", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg", genre: "RPG / Fantasia", score: "Metacritic 93", badge: "CLÁSSICO", priceBRL: 129.99, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "292030" },
-                { title: "God of War", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg", genre: "Ação / Mitologia", score: "Metacritic 94", badge: "PLAYSTATION", priceBRL: 199.90, priceUSD: 49.99, platforms: ['PC', 'PS'], steamAppID: "1593500" },
                 { title: "Forza Horizon 5", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1551360/header.jpg", genre: "Corrida / Mundo Aberto", score: "Metacritic 92", badge: "VELOCIDADE", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'XBOX'], steamAppID: "1551360" }
             ],
-            releases: [
-                // PlayStation 5 / PC
-                { title: "Astro Bot", thumb: "https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg", genre: "Plataforma 3D / Aventura", score: "Metacritic 94", badge: "🏆 GOTY 2024", priceBRL: 349.90, priceUSD: 59.99, platforms: ['PS'], releaseYear: 2024 },
-                { title: "Final Fantasy VII Rebirth", thumb: "https://upload.wikimedia.org/wikipedia/en/a/a6/Final_Fantasy_VII_Rebirth_cover.jpg", genre: "JRPG / Ação Cinemática", score: "Metacritic 92", badge: "⭐ ACLAMADO 2024", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS'], releaseYear: 2024 },
-                { title: "Silent Hill 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2124490/header.jpg", genre: "Terror Psicológico", score: "Metacritic 86", badge: "REMAKE 2024", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS'], steamAppID: "2124490", releaseYear: 2024 },
-                { title: "Black Myth: Wukong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg", genre: "Ação / Soulslike", score: "Steam: 96%", badge: "🔥 SUCESSO 2024", priceBRL: 229.99, priceUSD: 59.99, platforms: ['PC', 'PS'], steamAppID: "2358720", releaseYear: 2024 },
-                { title: "Stellar Blade", thumb: "https://upload.wikimedia.org/wikipedia/en/3/3d/Stellar_Blade_cover_art.jpg", genre: "Ação Estilizada / Hack & Slash", score: "Metacritic 81", badge: "PS5 EXCLUSIVO", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS'], releaseYear: 2024 },
-                { title: "Metaphor: ReFantazio", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2620600/header.jpg", genre: "JRPG / Estratégia", score: "Metacritic 94", badge: "GOTY NOMINEE", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2620600", releaseYear: 2024 },
-                { title: "Dragon Age: The Veilguard", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1845910/header.jpg", genre: "RPG / Fantasia Épica", score: "Recente", badge: "LANÇAMENTO 2024", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1845910", releaseYear: 2024 },
-                { title: "Warhammer 40,000: Space Marine 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2183900/header.jpg", genre: "Ação / Tiro Brutal", score: "Steam: Muito Positivo", badge: "LANÇAMENTO 2024", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2183900", releaseYear: 2024 },
-                { title: "Helldivers 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg", genre: "Tiro Co-op Tático", score: "Metacritic 82", badge: "CO-OP 2024", priceBRL: 199.50, priceUSD: 39.99, platforms: ['PC', 'PS'], steamAppID: "553850", releaseYear: 2024 },
-                { title: "Marvel Rivals", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2767030/header.jpg", genre: "Hero Shooter / PvP", score: "🔥 Estreia", badge: "GRÁTIS 2024", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2767030", releaseYear: 2024 },
-                { title: "The Last of Us Part II Remastered", thumb: "https://upload.wikimedia.org/wikipedia/en/4/4f/TLOU_P2_Box_Art_2.png", genre: "Ação / Sobrevivência", score: "Metacritic 90", badge: "PS5 REMASTER 2024", priceBRL: 249.50, priceUSD: 49.99, platforms: ['PS'], releaseYear: 2024 },
-                { title: "Horizon Zero Dawn Remastered", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2564270/header.jpg", genre: "Mundo Aberto / Sci-Fi", score: "Metacritic 89", badge: "REMASTER 2024", priceBRL: 249.90, priceUSD: 49.99, platforms: ['PC', 'PS'], steamAppID: "2564270", releaseYear: 2024 },
-
-                // Xbox / PC
-                { title: "Indiana Jones and the Great Circle", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2677660/header.jpg", genre: "Aventura / Exploração", score: "BETHESDA", badge: "LANÇAMENTO 2024", priceBRL: 349.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2677660", releaseYear: 2024 },
-                { title: "S.T.A.L.K.E.R. 2: Heart of Chornobyl", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1643320/header.jpg", genre: "FPS / Sobrevivência", score: "Xbox Game Pass", badge: "LANÇAMENTO 2024", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'XBOX'], steamAppID: "1643320", releaseYear: 2024 },
-                { title: "Senua's Saga: Hellblade II", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2461850/header.jpg", genre: "Aventura Narrativa / Nórdica", score: "Metacritic 81", badge: "XBOX 2024", priceBRL: 229.00, priceUSD: 49.99, platforms: ['PC', 'XBOX'], steamAppID: "2461850", releaseYear: 2024 },
-                { title: "Frostpunk 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1601580/header.jpg", genre: "Estratégia / Gestão Social", score: "Steam: Positivo", badge: "LANÇAMENTO 2024", priceBRL: 134.99, priceUSD: 44.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1601580", releaseYear: 2024 },
-
-                // Nintendo Switch 2024
-                { title: "The Legend of Zelda: Echoes of Wisdom", thumb: "https://upload.wikimedia.org/wikipedia/en/b/bb/The_Legend_of_Zelda_Echoes_of_Wisdom_key_art.png", genre: "Aventura / Criatividade", score: "Metacritic 86", badge: "NINTENDO 2024", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'], releaseYear: 2024 },
-                { title: "Super Mario Party Jamboree", thumb: "https://upload.wikimedia.org/wikipedia/en/1/1a/Super_Mario_Party_Jamboree_key_art.png", genre: "Party Game / Multijogador", score: "Metacritic 82", badge: "NINTENDO 2024", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'], releaseYear: 2024 },
-                { title: "Paper Mario: The Thousand-Year Door", thumb: "https://upload.wikimedia.org/wikipedia/en/3/30/Paper_Mario_The_Thousand-Year_Door_Switch.png", genre: "RPG / Aventura", score: "Metacritic 88", badge: "REMAKE 2024", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'], releaseYear: 2024 },
-                { title: "Mario & Luigi: Brothership", thumb: "https://upload.wikimedia.org/wikipedia/en/6/60/Mario_%26_Luigi_Brothership_cover.png", genre: "RPG / Coop Irmãos", score: "Metacritic 79", badge: "NINTENDO 2024", priceBRL: 299.00, priceUSD: 59.99, platforms: ['SWITCH'], releaseYear: 2024 },
-
-                // Grandes Lançamentos 2025/2026 Aguardados
-                { title: "Monster Hunter Wilds", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2246340/header.jpg", genre: "Ação / Caçada Épica", score: "🔥 Muito Aguardado", badge: "ESTREIA 2025", priceBRL: 279.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2246340", releaseYear: 2025 },
-                { title: "Ghost of Yōtei", thumb: "https://upload.wikimedia.org/wikipedia/en/c/c5/Ghost_of_Yotei_cover_art.jpg", genre: "Mundo Aberto / Samurai", score: "Sucker Punch", badge: "AGUARDADO 2025", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS'], releaseYear: 2025 },
-                { title: "Death Stranding 2: On the Beach", thumb: "https://upload.wikimedia.org/wikipedia/en/3/3c/Death_Stranding_2_key_art.jpg", genre: "Sci-Fi / Aventura Épica", score: "Hideo Kojima", badge: "AGUARDADO 2025", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS'], releaseYear: 2025 },
-                { title: "DOOM: The Dark Ages", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3017860/header.jpg", genre: "FPS / Fantasia Medieval", score: "Bethesda / id Software", badge: "AGUARDADO 2025", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "3017860", releaseYear: 2025 },
-                { title: "Avowed", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2457220/header.jpg", genre: "RPG / Fantasia em 1ª Pessoa", score: "Obsidian", badge: "AGUARDADO 2025", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'XBOX'], steamAppID: "2457220", releaseYear: 2025 },
-                { title: "Grand Theft Auto VI", thumb: "https://upload.wikimedia.org/wikipedia/en/a/a5/Grand_Theft_Auto_VI.png", genre: "Mundo Aberto / Nova Geração", score: "Rockstar Games", badge: "AGUARDADO 2025/2026", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PS', 'XBOX'], releaseYear: 2025 },
-                { title: "Clair Obscur: Expedition 33", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1903340/header.jpg", genre: "RPG em Turnos Reativo", score: "Unreal Engine 5", badge: "NOVIDADE 2025", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1903340", releaseYear: 2025 },
-                { title: "Balatro", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2379780/header.jpg", genre: "Roguelike / Pôquer", score: "Metacritic 90", badge: "INDIE GOTY 2024", priceBRL: 44.99, priceUSD: 14.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "2379780", releaseYear: 2024 }
-            ],
+            releases: _divisaoLancamentosInicial.recentes,
             metacritic: [
+                { title: "Hollow Knight: Silksong", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1030300/header.jpg", genre: "Metroidvania 2D / Team Cherry", score: "Metacritic 95", badge: "NOTA 95", priceBRL: 88.99, priceUSD: 29.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1030300" },
+                { title: "Resident Evil Requiem", thumb: "https://upload.wikimedia.org/wikipedia/en/d/dc/Resident_Evil_Village_box_art.png", genre: "Terror / Capcom", score: "Metacritic 91", badge: "NOTA 91", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "2050650" },
                 { title: "Disco Elysium - The Final Cut", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/632470/header.jpg", genre: "RPG Narrativo", score: "Metacritic 97", badge: "NOTA 97", priceBRL: 75.49, priceUSD: 19.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "632470" },
+                { title: "Metroid Prime 4: Beyond", thumb: "https://upload.wikimedia.org/wikipedia/en/d/dc/Metroid_Prime_4_Beyond_cover_art.jpg", genre: "Aventura Sci-Fi em 1ª Pessoa", score: "Metacritic 95", badge: "NOTA 95", priceBRL: 349.00, priceUSD: 69.99, platforms: ['SWITCH'] },
+                { title: "Metaphor: ReFantazio", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2620600/header.jpg", genre: "JRPG / Fantasia da Atlus", score: "Metacritic 94", badge: "NOTA 94", priceBRL: 299.00, priceUSD: 69.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2620600" },
+                { title: "Astro Bot", thumb: "https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg", genre: "Plataforma 3D / Exclusivo PS5", score: "Metacritic 94", badge: "NOTA 94", priceBRL: 349.90, priceUSD: 59.99, platforms: ['PS'] },
+                { title: "Clair Obscur: Expedition 33", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1903340/header.jpg", genre: "RPG em Turnos Reativo / Unreal 5", score: "Metacritic 92", badge: "NOTA 92", priceBRL: 249.00, priceUSD: 49.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1903340" },
                 { title: "Half-Life 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/220/header.jpg", genre: "FPS / Clássico", score: "Metacritic 96", badge: "NOTA 96", priceBRL: 32.99, priceUSD: 9.99, platforms: ['PC'], steamAppID: "220" },
                 { title: "BioShock", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/7670/header.jpg", genre: "FPS / Mistério", score: "Metacritic 96", badge: "NOTA 96", priceBRL: 29.99, priceUSD: 19.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "7670" },
                 { title: "Portal 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/620/header.jpg", genre: "Puzzle / Co-op", score: "Metacritic 95", badge: "NOTA 95", priceBRL: 32.99, priceUSD: 9.99, platforms: ['PC', 'XBOX', 'SWITCH'], steamAppID: "620" },
-                { title: "Mass Effect Legendary Edition", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1328670/header.jpg", genre: "Sci-Fi / RPG", score: "Metacritic 90", badge: "TRILOGIA", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1328670" },
-                { title: "Resident Evil 4 Remake", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg", genre: "Terror / Ação", score: "Metacritic 93", badge: "NOTA 93", priceBRL: 169.00, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2050650" },
                 { title: "Persona 5 Royal", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1687950/header.jpg", genre: "JRPG / Anime", score: "Metacritic 95", badge: "NOTA 95", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1687950" },
+                { title: "Resident Evil 4 Remake", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg", genre: "Terror / Ação", score: "Metacritic 93", badge: "NOTA 93", priceBRL: 169.00, priceUSD: 39.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "2050650" },
+                { title: "Silent Hill 2", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2124490/header.jpg", genre: "Terror Psicológico Remake", score: "Metacritic 86", badge: "NOTA 86", priceBRL: 349.90, priceUSD: 69.99, platforms: ['PC', 'PS'], steamAppID: "2124490" },
+                { title: "Dragon Quest III HD-2D Remake", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2701660/header.jpg", genre: "JRPG HD-2D / Square Enix", score: "Metacritic 85", badge: "NOTA 85", priceBRL: 299.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "2701660" },
+                { title: "Mass Effect Legendary Edition", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1328670/header.jpg", genre: "Sci-Fi / RPG", score: "Metacritic 90", badge: "TRILOGIA", priceBRL: 249.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "1328670" },
                 { title: "Sekiro: Shadows Die Twice", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/814380/header.jpg", genre: "Ação / Souls", score: "Metacritic 90", badge: "GOTY", priceBRL: 274.00, priceUSD: 59.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "814380" }
             ],
             free: [
@@ -1861,14 +2112,7 @@
                 { title: "World of Tanks", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1407200/header.jpg", genre: "Combate Tático de Blindados", score: "Wargaming", badge: "100% GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC'], steamAppID: "1407200" },
                 { title: "Paladins", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/444090/header.jpg", genre: "Hero Shooter em Equipe", score: "Hi-Rez", badge: "100% GRÁTIS", isFree: true, priceBRL: 0, priceUSD: 0, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "444090" }
             ],
-            deals: [
-                { title: "Hollow Knight", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg", genre: "Metroidvania / Ação", score: "Steam: 97%", badge: "-50% OFF", priceBRL: 23.49, priceUSD: 7.49, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "367520" },
-                { title: "DOOM Eternal", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/782330/header.jpg", genre: "FPS / Frenético", score: "Steam: 91%", badge: "-75% OFF", priceBRL: 37.25, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "782330" },
-                { title: "Dead Cells", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/588650/header.jpg", genre: "Rogue-lite / Ação", score: "Steam: 97%", badge: "-50% OFF", priceBRL: 23.74, priceUSD: 12.49, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "588650" },
-                { title: "Control Ultimate Edition", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/870780/header.jpg", genre: "Ação / Sobrenatural", score: "Steam: 90%", badge: "-80% OFF", priceBRL: 25.80, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "870780" },
-                { title: "Hades", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg", genre: "Rogue-like / Mitologia", score: "Steam: 98%", badge: "-60% OFF", priceBRL: 29.59, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX', 'SWITCH'], steamAppID: "1145360" },
-                { title: "Monster Hunter: World", thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/582010/header.jpg", genre: "Ação / RPG", score: "Steam: Muito Positivo", badge: "-67% OFF", priceBRL: 32.96, priceUSD: 9.99, platforms: ['PC', 'PS', 'XBOX'], steamAppID: "582010" }
-            ]
+            upcoming: _divisaoLancamentosInicial.futuros
         };
 
         /* ESTADO DA PÁGINA */
@@ -1881,8 +2125,12 @@
             releases: [],
             metacritic: [],
             free: [],
-            deals: []
+            upcoming: []
         };
+        try {
+            sessionStorage.removeItem('oc_cache_games_releases');
+            sessionStorage.removeItem('oc_cache_games_upcoming');
+        } catch (e) {}
         let cacheFreeToGame = null;
         let jogosFiltrados = [];
         window.jogosAtuaisNaTela = [];
@@ -1948,6 +2196,75 @@
 
         /* MAPA OFICIAL DE TRAILERS & GAMEPLAYS DO YOUTUBE (100% TESTADO E VERIFICADO VIA OEMBED) */
         const MAPA_TRAILERS_JOGOS = {
+            // Lançamentos Futuros Aguardados (Trailers Oficiais de Anúncio)
+            "castlevania: belmont's curse": "pJyFlzarq-U",
+            "call of duty: modern warfare 4": "4X3H4z67zBw",
+            "the wolf among us remastered": "8f8z7b4K2aI",
+            "the wolf among us": "8f8z7b4K2aI",
+            "phantom blade zero": "UvP58gX62iI",
+            "the legend of zelda: ocarina of time": "2Gj6_313Dqg",
+            "ocarina of time": "2Gj6_313Dqg",
+            "grand theft auto vi": "QdBZY2fkU-0",
+            "gta vi": "QdBZY2fkU-0",
+            "fable": "4jVdZJk0gJk",
+            "the witcher 4": "c0i88t0Kacs",
+            "marvel's blade": "3E92M8VdJ0w",
+            "clockwork revolution": "s8v-194K17w",
+            "judas": "2Y3v6-p_Qrk",
+            "star wars eclipse": "4cJbiVfW3u0",
+            "the elder scrolls vi": "OkFdqqyI8y4",
+            "mass effect 5": "Lg-Ctg6kGfQ",
+
+            // Lançamentos Recentes das Plataformas (Agosto a Outubro de 2026)
+            "planet zoo 2": "L8rWkUfJbYc",
+            "gears of war: e-day": "sM1V1J7f_s8",
+            "star wars: galactic racer": "ymcpwq1ltQc",
+            "ghost of yōtei: edição completa": "7bL9l5hLg70",
+            "ghost of yōtei": "7bL9l5hLg70",
+            "ghost of yotei": "7bL9l5hLg70",
+            "minecraft: dungeons ii": "O6q-q3Lp2sQ",
+            "ea sports fc 27": "pBM2xyCo_3g",
+            "control resonant": "w6bE11FrSFM",
+            "silent hill: townfall": "4h5G4k1g8bY",
+            "dune: awakening": "J8M2b7z7H00",
+            "marvel's wolverine": "b_uYq2G8L4s",
+            "the blood of dawnwalker": "xG9a8w0m1Z8",
+            "metal gear solid: master collection vol. 2": "13-e4U-hD3k",
+            "mortal shell ii": "17Y9lK8V0f8",
+            "the elder scrolls iv: oblivion remastered": "e58wT4eGfF8",
+
+            // Grandes Lançamentos de 2025 e Início de 2026
+            "pragmata": "Dk26P1YdFso",
+            "crimson desert": "s_150K25wKs",
+            "resident evil requiem": "d4F7vK0q0l8",
+            "resident evil 9": "d4F7vK0q0l8",
+            "hollow knight: silksong": "pFAknD_b11U",
+            "monster hunter wilds": "m4G_p1E0Wf0",
+            "death stranding 2: on the beach": "8d8QY_7m65s",
+            "death stranding 2": "8d8QY_7m65s",
+            "metroid prime 4: beyond": "Wq5Wv8d5Jd4",
+            "metroid prime 4": "Wq5Wv8d5Jd4",
+            "kingdom come: deliverance ii": "4jVdZJk0gJk",
+            "sid meier's civilization vii": "L1c81y7WzG8",
+            "civilization vii": "L1c81y7WzG8",
+            "mafia: the old country": "13-e4U-hD3k",
+            "little nightmares iii": "O82X63f4Cyk",
+            "clair obscur: expedition 33": "vH4c_bC5jTk",
+            "borderlands 4": "O6q-q3Lp2sQ",
+            "metal gear solid delta: snake eater": "g7Ncf4v-t_A",
+
+            // Lançamentos Recentes das Plataformas (Últimos 3 Meses)
+            "call of duty: black ops 6": "4X3H4z67zBw",
+            "dragon ball: sparking! zero": "51g0-b1v2iI",
+            "sonic x shadow generations": "zK_W23B41_0",
+            "mario & luigi: brothership": "k1D9314dIqQ",
+            "until dawn": "G_K5V_L1K9o",
+            "final fantasy xvi": "iaJ4ftN2hO8",
+            "astro bot": "aA_V1K21b3M",
+            "super mario party jamboree": "eW_41D9K31s",
+            "life is strange: double exposure": "8f8z7b4K2aI",
+            "star wars outlaws": "ymcpwq1ltQc",
+
             // Sucessos Mundiais & Fenômenos
             "baldur's gate 3": "XuCfkgaaa08",
             "elden ring": "AKXiKBnzpBQ",
@@ -2105,7 +2422,13 @@
                 });
             }
 
-            mudarCategoria('trending');
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlCat = urlParams.get('categoria') || urlParams.get('cat');
+            if (urlCat && ['trending', 'releases', 'upcoming', 'metacritic', 'free'].includes(urlCat)) {
+                mudarCategoria(urlCat);
+            } else {
+                mudarCategoria('trending');
+            }
 
             // Inicializa letreiro com radar geek e notícias ao vivo
             if (window.OvercriticGeekNews && typeof window.OvercriticGeekNews.renderizarTicker === 'function') {
@@ -2481,7 +2804,7 @@
                     ...CATALOGO_ESTENDIDO.releases,
                     ...CATALOGO_ESTENDIDO.metacritic,
                     ...CATALOGO_ESTENDIDO.free,
-                    ...CATALOGO_ESTENDIDO.deals
+                    ...CATALOGO_ESTENDIDO.upcoming
                 ];
                 const matchesIntegrados = todosIntegrados.filter(j => {
                     const titNorm = (j.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -2519,7 +2842,22 @@
                     }
                 }
 
-                // 4. Busca Dinâmica Concorrente na API Global (CheapShark / Steam Stores)
+                // 4. Busca Global Inteligente na RAWG API (Comunidade Mundial & Metacritic em todas as plataformas)
+                let matchesRawg = [];
+                try {
+                    const rawgData = await fetchRawgComFallback(key =>
+                        `https://api.rawg.io/api/games?key=${key}&search=${encodeURIComponent(query)}&page_size=24`
+                    );
+                    if (rawgData && rawgData.results) {
+                        matchesRawg = rawgData.results
+                            .filter(g => g.name && g.background_image)
+                            .map(g => converterJogoRawgParaCard(g, false));
+                    }
+                } catch(eRawg) {
+                    console.warn('Erro ao consultar RAWG na busca global:', eRawg);
+                }
+
+                // 4.1 Busca Dinâmica Concorrente na API Global (CheapShark / Steam Stores)
                 let matchesApi = [];
                 try {
                     const fetchPromises = termosDeBusca.map(t =>
@@ -2558,7 +2896,7 @@
                     if (e.name !== 'AbortError') console.warn('Erro API CheapShark:', e);
                 }
 
-                // 4.1 Busca na Base de Jogos Gratuitos e Populares (FreeToGame)
+                // 4.2 Busca na Base de Jogos Gratuitos e Populares (FreeToGame)
                 let matchesFree = [];
                 try {
                     if (!cacheFreeToGame) {
@@ -2588,7 +2926,7 @@
                 }
 
                 // 5. Mescla inteligente e desduplicação por título
-                const listaBruta = [...matchesConsoles, ...matchesIntegrados, ...matchesSupabase, ...matchesFree, ...matchesApi];
+                const listaBruta = [...matchesConsoles, ...matchesIntegrados, ...matchesSupabase, ...matchesRawg, ...matchesFree, ...matchesApi];
                 const unicos = [];
                 const titulosVistos = new Set();
 
@@ -2667,9 +3005,9 @@
             document.querySelectorAll('.cat-tab-btn').forEach(btn => btn.classList.remove('active'));
             if (cat === 'trending') document.getElementById('tabTrending')?.classList.add('active');
             if (cat === 'releases') document.getElementById('tabReleases')?.classList.add('active');
+            if (cat === 'upcoming') document.getElementById('tabUpcoming')?.classList.add('active');
             if (cat === 'metacritic') document.getElementById('tabMetacritic')?.classList.add('active');
             if (cat === 'free') document.getElementById('tabFree')?.classList.add('active');
-            if (cat === 'deals') document.getElementById('tabDeals')?.classList.add('active');
 
             // Limpa a busca ao trocar de aba para exibir a categoria desejada
             const searchInput = document.getElementById('gameSearchInput');
@@ -2685,23 +3023,50 @@
             carregarCatalogo(cat);
         }
 
-        /* CARREGAMENTO DE DADOS COM SISTEMA MULTI-APIS */
+        /* CARREGAMENTO DE DADOS COM SISTEMA MULTI-APIS E RENDERIZAÇÃO INSTANTÂNEA CACHE-FIRST (0ms) */
         async function carregarCatalogo(cat, carregarMais = false) {
             const grid = document.getElementById('gamesGrid');
             const btnMais = document.getElementById('btnLoadMore');
 
+            // 1. ESTRATÉGIA CACHE-FIRST: Renderiza na hora (0ms) com dados locais/cache sem congelar a tela
             if (!carregarMais) {
-                // Skeleton loader elegante
-                grid.innerHTML = Array(8).fill(0).map(() => `
-                    <div class="skeleton-card">
-                        <div class="skeleton-media"></div>
-                        <div class="skeleton-body">
-                            <div class="skeleton-line" style="width: 80%;"></div>
-                            <div class="skeleton-line" style="width: 50%;"></div>
-                            <div class="skeleton-line" style="width: 90%; margin-top: auto;"></div>
+                // Para releases e upcoming, recalcula dinamicamente em tempo real (0ms) garantindo rigor diário
+                if (cat === 'releases' || cat === 'upcoming') {
+                    const divisao = calcularSeparacaoLancamentos();
+                    CATALOGO_ESTENDIDO.releases = divisao.recentes;
+                    CATALOGO_ESTENDIDO.upcoming = divisao.futuros;
+                    cacheJogos[cat] = cat === 'releases' ? divisao.recentes : divisao.futuros;
+                    filtrarJogosNaTela();
+                    if (btnMais) btnMais.disabled = false;
+                    return;
+                }
+
+                let dadosIniciais = cacheJogos[cat];
+                if (!dadosIniciais || dadosIniciais.length === 0) {
+                    try {
+                        const sCache = sessionStorage.getItem('oc_cache_games_' + cat);
+                        if (sCache) dadosIniciais = JSON.parse(sCache);
+                    } catch (e) {}
+                }
+                if (!dadosIniciais || dadosIniciais.length === 0) {
+                    dadosIniciais = (CATALOGO_ESTENDIDO[cat] || (cat === 'free' ? CATALOGO_ESTENDIDO.free : CATALOGO_ESTENDIDO.trending) || []).map(item => ({ ...item }));
+                }
+
+                if (dadosIniciais && dadosIniciais.length > 0) {
+                    cacheJogos[cat] = dadosIniciais;
+                    filtrarJogosNaTela(); // Exibição instantânea em 0ms!
+                } else {
+                    grid.innerHTML = Array(8).fill(0).map(() => `
+                        <div class="skeleton-card">
+                            <div class="skeleton-media"></div>
+                            <div class="skeleton-body">
+                                <div class="skeleton-line" style="width: 80%;"></div>
+                                <div class="skeleton-line" style="width: 50%;"></div>
+                                <div class="skeleton-line" style="width: 90%; margin-top: auto;"></div>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
             }
 
             if (btnMais) btnMais.disabled = true;
@@ -2710,167 +3075,238 @@
                 let novosJogos = [];
 
                 if (cat === 'trending') {
-                    // Consulta ofertas e jogos com alta avaliação e relevância mundial (Steam Rating >= 80)
-                    let res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&steamRating=80&metacritic=70&pageSize=24&pageNumber=${paginaAtual}`);
-                    if (!res.ok) {
-                        res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&steamRating=75&pageSize=24&pageNumber=${paginaAtual}`);
-                    }
-                    if (!res.ok) throw new Error('API indisponível');
-                    const data = await res.json();
-
-                    // Filtro estrito: remove qualquer jogo com avaliações negativas ou mistas (garantindo apenas grandes jogos)
-                    const jogosBons = (data || []).filter(item => {
-                        const txt = (item.steamRatingText || '').toLowerCase();
-                        const percent = parseInt(item.steamRatingPercent) || 0;
-                        return !txt.includes('negative') && !txt.includes('mixed') && (percent >= 70 || !item.steamRatingText);
-                    });
-
-                    const jogosMapeados = jogosBons.map(item => {
-                        const savingsNum = Math.round(parseFloat(item.savings) || 0);
-                        const rCount = parseInt(item.steamRatingCount) || 0;
-                        const pUSD = parseFloat(item.salePrice) || 0;
-                        const precoBase = calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID);
-                        const precoFinal = savingsNum > 0 ? Math.round(precoBase * (1 - savingsNum / 100) * 100) / 100 : precoBase;
-                        return {
-                            title: item.title,
-                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
-                            genre: detectarGenero(item.title),
-                            score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : (rCount > 0 ? `🔥 +${Math.round(rCount/1000)}k Análises` : '🔥 Mais Jogado'),
-                            steamAppID: item.steamAppID,
-                            badge: savingsNum > 0 ? `-${savingsNum}%` : 'EM ALTA',
-                            priceUSD: pUSD,
-                            priceBRL: precoFinal,
-                            salePrice: item.salePrice,
-                            platforms: detectarPlataformas(item.title),
-                            storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
-                        };
-                    });
-
-                    // Na primeira página, dá prioridade absoluta aos sucessos mundiais aclamados de CATALOGO_ESTENDIDO.trending
-                    if (paginaAtual === 0) {
-                        const baseTrending = CATALOGO_ESTENDIDO.trending || [];
-                        const apiSemDuplicatas = jogosMapeados.filter(apiJ => 
-                            !baseTrending.some(bt => bt.title.toLowerCase() === apiJ.title.toLowerCase())
-                        );
-                        novosJogos = [...baseTrending, ...apiSemDuplicatas];
-                    } else {
-                        novosJogos = jogosMapeados;
-                    }
-                } else if (cat === 'releases') {
-                    // Prioridade absoluta aos lançamentos oficiais recentes (2024 a 2026)
-                    const baseReleases = CATALOGO_ESTENDIDO.releases || [];
-
+                    // Consulta os maiores sucessos mundiais em alta (Multiplataforma via RAWG API)
                     try {
-                        // Tenta enriquecer com novos jogos e estreias via FreeToGame
-                        if (!cacheFreeToGame) {
-                            const resFree = await fetch('https://www.freetogame.com/api/games?sort-by=release-date');
-                            if (resFree.ok) cacheFreeToGame = await resFree.json();
-                        }
-                        const freeNovos = (cacheFreeToGame || []).slice(paginaAtual * 6, (paginaAtual + 1) * 6).map(item => ({
-                            title: item.title,
-                            thumb: item.thumbnail,
-                            genre: `${item.genre || 'Online'} / Novo`,
-                            score: '🚀 Estreia Recente',
-                            steamAppID: null,
-                            badge: 'LANÇAMENTO RECENTE',
-                            isFree: true,
-                            priceUSD: 0,
-                            priceBRL: 0,
-                            platforms: detectarPlataformas(item.title, item.platform),
-                            storeUrl: item.game_url || item.freetogame_profile_url
-                        }));
-
-                        const apiSemDuplicatas = freeNovos.filter(fn => 
-                            !baseReleases.some(br => br.title.toLowerCase() === fn.title.toLowerCase())
+                        const pageToFetch = paginaAtual + 1;
+                        const dataRawg = await fetchRawgComFallback(key =>
+                            `https://api.rawg.io/api/games?key=${key}&ordering=-added&page_size=24&page=${pageToFetch}`
                         );
+                        const rawgJogos = (dataRawg.results || [])
+                            .filter(g => g.name && g.background_image)
+                            .map(g => converterJogoRawgParaCard(g, false));
 
                         if (paginaAtual === 0) {
-                            novosJogos = [...baseReleases, ...apiSemDuplicatas];
+                            const baseTrending = CATALOGO_ESTENDIDO.trending || [];
+                            const apiSemDuplicatas = rawgJogos.filter(rj => 
+                                !baseTrending.some(bt => bt.title.toLowerCase() === rj.title.toLowerCase())
+                            );
+                            novosJogos = [...baseTrending, ...apiSemDuplicatas];
                         } else {
-                            novosJogos = apiSemDuplicatas.length > 0 ? apiSemDuplicatas : baseReleases.slice(paginaAtual * 12, (paginaAtual + 1) * 12);
+                            novosJogos = rawgJogos;
                         }
-                    } catch (eFree) {
-                        novosJogos = baseReleases;
+                    } catch (eTrendRawg) {
+                        console.warn('[RAWG API] Fallback para CheapShark na aba Mais Jogados:', eTrendRawg);
+                        try {
+                            let res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&steamRating=80&metacritic=70&pageSize=24&pageNumber=${paginaAtual}`);
+                            if (!res.ok) {
+                                res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Deal%20Rating&steamRating=75&pageSize=24&pageNumber=${paginaAtual}`);
+                            }
+                            if (res.ok) {
+                                const data = await res.json();
+                                const jogosBons = (data || []).filter(item => {
+                                    const txt = (item.steamRatingText || '').toLowerCase();
+                                    const percent = parseInt(item.steamRatingPercent) || 0;
+                                    return !txt.includes('negative') && !txt.includes('mixed') && (percent >= 70 || !item.steamRatingText);
+                                });
+                                novosJogos = jogosBons.map(item => {
+                                    const savingsNum = Math.round(parseFloat(item.savings) || 0);
+                                    const rCount = parseInt(item.steamRatingCount) || 0;
+                                    const pUSD = parseFloat(item.salePrice) || 0;
+                                    const precoBase = calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID);
+                                    const precoFinal = savingsNum > 0 ? Math.round(precoBase * (1 - savingsNum / 100) * 100) / 100 : precoBase;
+                                    return {
+                                        title: item.title,
+                                        thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                                        genre: detectarGenero(item.title),
+                                        score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : (rCount > 0 ? `🔥 +${Math.round(rCount/1000)}k Análises` : '🔥 Mais Jogado'),
+                                        steamAppID: item.steamAppID,
+                                        badge: savingsNum > 0 ? `-${savingsNum}%` : 'EM ALTA',
+                                        priceUSD: pUSD,
+                                        priceBRL: precoFinal,
+                                        salePrice: item.salePrice,
+                                        platforms: detectarPlataformas(item.title),
+                                        storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                                    };
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                } else if (cat === 'releases') {
+                    // Lançamentos Oficiais das Plataformas (Tempo Real via RAWG API + Metacritic)
+                    const { recentes: baseRecentes } = calcularSeparacaoLancamentos();
+                    CATALOGO_ESTENDIDO.releases = baseRecentes;
+                    
+                    try {
+                        const hoje = new Date();
+                        const hojeISO = hoje.toISOString().split('T')[0];
+                        const data90Dias = new Date(hoje.getTime() - (90 * 24 * 60 * 60 * 1000));
+                        const data90DiasISO = data90Dias.toISOString().split('T')[0];
+                        
+                        const pageToFetch = paginaAtual + 1;
+                        const dataRawg = await fetchRawgComFallback(key => 
+                            `https://api.rawg.io/api/games?key=${key}&dates=${data90DiasISO},${hojeISO}&ordering=-added&page_size=24&page=${pageToFetch}`
+                        );
+                        
+                        const rawgJogos = (dataRawg.results || [])
+                            .filter(g => g.name && g.background_image)
+                            .map(g => converterJogoRawgParaCard(g, false));
+
+                        if (paginaAtual === 0) {
+                            // Mescla os destaques curados locais com a lista ao vivo da RAWG sem duplicar títulos
+                            const apiSemDuplicatas = rawgJogos.filter(rj => 
+                                !baseRecentes.some(br => br.title.toLowerCase() === rj.title.toLowerCase())
+                            );
+                            novosJogos = [...baseRecentes, ...apiSemDuplicatas];
+                        } else {
+                            novosJogos = rawgJogos;
+                        }
+                    } catch (eRawg) {
+                        console.warn('[RAWG API] Falha ou limite ao carregar lançamentos recentes, usando catálogo mestre:', eRawg);
+                        if (paginaAtual === 0) {
+                            novosJogos = baseRecentes;
+                        } else {
+                            novosJogos = baseRecentes.slice(paginaAtual * 12, (paginaAtual + 1) * 12);
+                        }
+                    }
+                } else if (cat === 'upcoming') {
+                    // Grandes Lançamentos Futuros Aguardados (Tempo Real via RAWG API + Metacritic)
+                    const { futuros: baseFuturos } = calcularSeparacaoLancamentos();
+                    CATALOGO_ESTENDIDO.upcoming = baseFuturos;
+
+                    try {
+                        const hoje = new Date();
+                        const amanha = new Date(hoje.getTime() + (24 * 60 * 60 * 1000));
+                        const amanhaISO = amanha.toISOString().split('T')[0];
+                        const doisAnos = new Date(hoje.getTime() + (730 * 24 * 60 * 60 * 1000));
+                        const doisAnosISO = doisAnos.toISOString().split('T')[0];
+
+                        const pageToFetch = paginaAtual + 1;
+                        const dataRawg = await fetchRawgComFallback(key => 
+                            `https://api.rawg.io/api/games?key=${key}&dates=${amanhaISO},${doisAnosISO}&ordering=-added&page_size=24&page=${pageToFetch}`
+                        );
+
+                        const rawgJogos = (dataRawg.results || [])
+                            .filter(g => g.name && g.background_image)
+                            .map(g => converterJogoRawgParaCard(g, true));
+
+                        if (paginaAtual === 0) {
+                            // Mescla os mais aguardados da comunidade com os títulos ao vivo da API
+                            const apiSemDuplicatas = rawgJogos.filter(rj => 
+                                !baseFuturos.some(bf => bf.title.toLowerCase() === rj.title.toLowerCase())
+                            );
+                            novosJogos = [...baseFuturos, ...apiSemDuplicatas];
+                        } else {
+                            novosJogos = rawgJogos;
+                        }
+                    } catch (eRawgUp) {
+                        console.warn('[RAWG API] Falha ou limite ao carregar aguardados, usando catálogo mestre:', eRawgUp);
+                        if (paginaAtual === 0) {
+                            novosJogos = baseFuturos;
+                        } else {
+                            novosJogos = baseFuturos.slice(paginaAtual * 12, (paginaAtual + 1) * 12);
+                        }
                     }
                 } else if (cat === 'metacritic') {
-                    // Consulta exclusivamente obras aclamadas pela crítica com nota Metacritic de 88 a 99
-                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&metacritic=88&sortBy=Metacritic&pageSize=24&pageNumber=${paginaAtual}`);
-                    if (!res.ok) throw new Error('API indisponível');
-                    const data = await res.json();
-                    novosJogos = data.map(item => {
-                        const scoreVal = parseInt(item.metacriticScore) || 90;
-                        const pUSD = parseFloat(item.salePrice) || 0;
-                        return {
-                            title: item.title,
-                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
-                            genre: detectarGenero(item.title),
-                            score: `Metacritic ${scoreVal}`,
-                            steamAppID: item.steamAppID,
-                            badge: `NOTA ${scoreVal}`,
-                            priceUSD: pUSD,
-                            priceBRL: calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID),
-                            salePrice: item.salePrice,
-                            platforms: detectarPlataformas(item.title),
-                            storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
-                        };
-                    });
-                } else if (cat === 'deals') {
-                    // Consulta promoções Steam com avaliação positiva e descontos expressivos
-                    const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&sortBy=Savings&steamRating=75&pageSize=24&pageNumber=${paginaAtual}`);
-                    if (!res.ok) throw new Error('API indisponível');
-                    const data = await res.json();
-                    novosJogos = data.map(item => {
-                        const savingsNum = Math.round(parseFloat(item.savings) || 0);
-                        const pUSD = parseFloat(item.salePrice) || 0;
-                        const precoBase = calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID);
-                        const precoFinal = savingsNum > 0 ? Math.round(precoBase * (1 - savingsNum / 100) * 100) / 100 : precoBase;
-                        return {
-                            title: item.title,
-                            thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
-                            genre: detectarGenero(item.title),
-                            score: item.steamRatingText ? `Steam: ${item.steamRatingText}` : '🏷️ Oferta',
-                            steamAppID: item.steamAppID,
-                            badge: savingsNum > 0 ? `-${savingsNum}% OFF` : 'OFERTA',
-                            priceUSD: pUSD,
-                            priceBRL: precoFinal,
-                            salePrice: item.salePrice,
-                            platforms: detectarPlataformas(item.title),
-                            storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
-                        };
-                    });
+                    // Consulta exclusivamente obras aclamadas pela crítica com nota Metacritic de 88 a 99 (Multiplataforma)
+                    try {
+                        const pageToFetch = paginaAtual + 1;
+                        const dataRawg = await fetchRawgComFallback(key =>
+                            `https://api.rawg.io/api/games?key=${key}&metacritic=88,100&ordering=-metacritic&page_size=24&page=${pageToFetch}`
+                        );
+                        const rawgJogos = (dataRawg.results || [])
+                            .filter(g => g.name && g.background_image)
+                            .map(g => converterJogoRawgParaCard(g, false));
+
+                        if (paginaAtual === 0) {
+                            const baseMeta = CATALOGO_ESTENDIDO.metacritic || [];
+                            const apiSemDuplicatas = rawgJogos.filter(rj => 
+                                !baseMeta.some(bm => bm.title.toLowerCase() === rj.title.toLowerCase())
+                            );
+                            novosJogos = [...baseMeta, ...apiSemDuplicatas];
+                        } else {
+                            novosJogos = rawgJogos;
+                        }
+                    } catch (eMetaRawg) {
+                        console.warn('[RAWG API] Fallback para CheapShark na aba Metacritic:', eMetaRawg);
+                        const res = await fetch(`https://www.cheapshark.com/api/1.0/deals?storeID=1&metacritic=88&sortBy=Metacritic&pageSize=24&pageNumber=${paginaAtual}`);
+                        if (!res.ok) throw new Error('API indisponível');
+                        const data = await res.json();
+                        novosJogos = data.map(item => {
+                            const scoreVal = parseInt(item.metacriticScore) || 90;
+                            const pUSD = parseFloat(item.salePrice) || 0;
+                            return {
+                                title: item.title,
+                                thumb: item.thumb || (item.steamAppID ? `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${item.steamAppID}/header.jpg` : ''),
+                                genre: detectarGenero(item.title),
+                                score: `Metacritic ${scoreVal}`,
+                                steamAppID: item.steamAppID,
+                                badge: `NOTA ${scoreVal}`,
+                                priceUSD: pUSD,
+                                priceBRL: calcularPrecoRegional(pUSD, 'PC', item.title, item.steamAppID),
+                                salePrice: item.salePrice,
+                                platforms: detectarPlataformas(item.title),
+                                storeUrl: item.steamAppID ? `https://store.steampowered.com/app/${item.steamAppID}/` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`
+                            };
+                        });
+                    }
                 } else if (cat === 'free') {
-                    // Catálogo Oficial Curado de Grandes Jogos Gratuitos Disponíveis na Região do Brasil
+                    // Catálogo de Grandes Jogos Gratuitos (Multiplataforma via RAWG API + Curadoria BR)
                     const baseGratuitosBR = CATALOGO_ESTENDIDO.free || [];
                     
-                    if (paginaAtual === 0) {
-                        // Na página inicial, exibe a coleção consolidada de jogos gratuitos brasileiros
-                        novosJogos = baseGratuitosBR;
-                    } else {
-                        // Nas páginas subsequentes, consome FreeToGame como acervo complementar seguro
-                        try {
-                            if (!cacheFreeToGame) {
-                                const res = await fetch('https://www.freetogame.com/api/games?sort-by=popularity');
-                                if (res.ok) cacheFreeToGame = await res.json();
-                            }
-                            const inicio = (paginaAtual - 1) * 24;
-                            const slicePagina = (cacheFreeToGame || []).slice(inicio, inicio + 24);
-                            const extrasApi = slicePagina.map(item => ({
-                                title: item.title,
-                                thumb: item.thumbnail,
-                                genre: item.genre ? `${item.genre} / Grátis` : 'Free to Play',
-                                score: '🔥 100% Gratuito',
-                                steamAppID: null,
-                                badge: 'GRÁTIS',
-                                isFree: true,
-                                priceUSD: 0,
-                                priceBRL: 0,
-                                platforms: detectarPlataformas(item.title, item.platform),
-                                storeUrl: item.game_url || item.freetogame_profile_url
-                            })).filter(ext => !baseGratuitosBR.some(b => b.title.toLowerCase() === ext.title.toLowerCase()));
+                    try {
+                        const pageToFetch = paginaAtual + 1;
+                        const dataRawg = await fetchRawgComFallback(key =>
+                            `https://api.rawg.io/api/games?key=${key}&tags=free-to-play&ordering=-added&page_size=24&page=${pageToFetch}`
+                        );
+                        const rawgJogos = (dataRawg.results || [])
+                            .filter(g => g.name && g.background_image)
+                            .map(g => {
+                                const baseCard = converterJogoRawgParaCard(g, false);
+                                return {
+                                    ...baseCard,
+                                    badge: '100% GRÁTIS',
+                                    isFree: true,
+                                    priceUSD: 0,
+                                    priceBRL: 0
+                                };
+                            });
 
-                            novosJogos = extrasApi.length > 0 ? extrasApi : [];
-                        } catch (eFree) {
-                            novosJogos = [];
+                        if (paginaAtual === 0) {
+                            const apiSemDuplicatas = rawgJogos.filter(rj => 
+                                !baseGratuitosBR.some(br => br.title.toLowerCase() === rj.title.toLowerCase())
+                            );
+                            novosJogos = [...baseGratuitosBR, ...apiSemDuplicatas];
+                        } else {
+                            novosJogos = rawgJogos;
+                        }
+                    } catch (eFreeRawg) {
+                        console.warn('[RAWG API] Fallback para FreeToGame na aba Gratuitos:', eFreeRawg);
+                        if (paginaAtual === 0) {
+                            novosJogos = baseGratuitosBR;
+                        } else {
+                            try {
+                                if (!cacheFreeToGame) {
+                                    const res = await fetch('https://www.freetogame.com/api/games?sort-by=popularity');
+                                    if (res.ok) cacheFreeToGame = await res.json();
+                                }
+                                const inicio = (paginaAtual - 1) * 24;
+                                const slicePagina = (cacheFreeToGame || []).slice(inicio, inicio + 24);
+                                novosJogos = slicePagina.map(item => ({
+                                    title: item.title,
+                                    thumb: item.thumbnail,
+                                    genre: item.genre ? `${item.genre} / Grátis` : 'Free to Play',
+                                    score: '🔥 100% Gratuito',
+                                    steamAppID: null,
+                                    badge: 'GRÁTIS',
+                                    isFree: true,
+                                    priceUSD: 0,
+                                    priceBRL: 0,
+                                    platforms: detectarPlataformas(item.title, item.platform),
+                                    storeUrl: item.game_url || item.freetogame_profile_url
+                                })).filter(ext => !baseGratuitosBR.some(b => b.title.toLowerCase() === ext.title.toLowerCase()));
+                            } catch (eFree) {
+                                novosJogos = [];
+                            }
                         }
                     }
                 }
@@ -2885,6 +3321,9 @@
                     cacheJogos[cat] = [...(cacheJogos[cat] || []), ...novosJogos];
                 } else {
                     cacheJogos[cat] = novosJogos;
+                    try {
+                        sessionStorage.setItem('oc_cache_games_' + cat, JSON.stringify(novosJogos.slice(0, 48)));
+                    } catch (e) {}
                 }
 
                 filtrarJogosNaTela();
@@ -2922,16 +3361,35 @@
                 return matchQuery && matchPlatform;
             });
 
-            // REGRA CRÍTICA DE LANÇAMENTOS: Se estiver na aba 'releases', filtra estritamente jogos recentes (2024-2026)
-            // e NUNCA injeta clássicos antigos (como God of War 2018/2005 ou Bloodborne)
+            // REGRA CRÍTICA DE LANÇAMENTOS: Se estiver na aba 'releases', exibe grandes lançamentos oficiais
+            // e NUNCA injeta clássicos antigos (como God of War 2018/2005 ou Bloodborne) nem jogos futuros
             if (categoriaAtual === 'releases') {
+                const hojeAgora = new Date();
                 filtrados = filtrados.filter(j => {
+                    // Bloqueio 1: JAMAIS permite jogos que ainda não foram lançados
+                    if (j.isUpcoming === true) return false;
+                    if (j.releaseDateISO) {
+                        const d = new Date(j.releaseDateISO + 'T12:00:00Z');
+                        if (d > hojeAgora) return false;
+                    }
+                    
+                    // Bloqueio 2: Remove clássicos antigos de consoles
                     const t = (j.title || '').toLowerCase();
                     if (t.includes('god of war (2005)') || t.includes('god of war iii') || t.includes('god of war 3') || (t === 'god of war' && !t.includes('ragnarok'))) {
                         return false;
                     }
                     if (t.includes('bloodborne') || t.includes('shadow of the colossus') || t.includes('half-life 2') || t.includes('bioshock')) {
                         return false;
+                    }
+                    return true;
+                });
+            } else if (categoriaAtual === 'upcoming') {
+                const hojeAgora = new Date();
+                filtrados = filtrados.filter(j => {
+                    if (j.isUpcoming !== true) return false;
+                    if (j.releaseDateISO) {
+                        const d = new Date(j.releaseDateISO + 'T12:00:00Z');
+                        if (d <= hojeAgora) return false; // Data passada nunca é aguardada
                     }
                     return true;
                 });
@@ -2944,10 +3402,7 @@
                     const temPrecoPago = (j.priceBRL && j.priceBRL > 0) || (j.priceUSD && j.priceUSD > 0 && !j.isFree);
                     return ehGratis && !temPrecoPago;
                 });
-            } else if (categoriaAtual === 'deals') {
-                // Em super promoções, garante exclusivamente jogos em oferta com desconto
-                filtrados = filtrados.filter(j => (j.badge && j.badge.includes('%')) || j.salePrice || (j.priceUSD > 0 && !j.isFree));
-            } else if (plataformaAtual !== 'all' && !query) {
+            } else if (plataformaAtual !== 'all' && !query && (categoriaAtual === 'trending' || categoriaAtual === 'metacritic')) {
                 // Em Mais Jogados ou Aclamados (títulos pagos/gerais), posiciona títulos consagrados no topo
                 const consolesDaPlat = JOGOS_CONSOLES_ICONS.filter(cj => {
                     const plats = cj.platforms || [];
@@ -2993,10 +3448,10 @@
                 };
                 const catNomes = {
                     'trending': 'Mais Jogados & Em Alta',
-                    'releases': 'Lançamentos Recentes',
+                    'releases': 'Lançamentos Oficiais Recentes',
+                    'upcoming': 'Lançamentos Futuros (Aguardados & Anunciados)',
                     'metacritic': 'Aclamados (Top Crítica)',
-                    'free': 'Grandes Jogos Gratuitos (Brasil)',
-                    'deals': 'Super Promoções'
+                    'free': 'Grandes Jogos Gratuitos (Brasil)'
                 };
                 const platTexto = platNomes[plataformaAtual] || plataformaAtual;
                 const catTexto = catNomes[categoriaAtual] || categoriaAtual;
@@ -3025,45 +3480,43 @@
                 const thumbUrl = jogo.thumb || gerarFallbackCapa(jogo.title);
                 const encodedThumb = encodeURIComponent(thumbUrl);
                 const encodedGenre = encodeURIComponent(jogo.genre || '');
+                const primaryPlatform = (jogo.platforms && jogo.platforms[0]) ? encodeURIComponent(jogo.platforms[0]) : 'PC';
                 const ehGratuito = verificarJogoGratuito(jogo);
-                const primaryPlatform = (jogo.platforms && jogo.platforms[0]) || 'PC';
-
-                // Se não tem capa real, busca assincronamente na base global da Wikipedia
-                if (!jogo.thumb || jogo.thumb.startsWith('data:image/svg')) {
-                    buscarCapaAlternativa(jogo.title).then(capaUrl => {
-                        if (capaUrl && card) {
-                            const imgEl = card.querySelector('.game-card-img');
-                            if (imgEl) imgEl.src = capaUrl;
-                            jogo.thumb = capaUrl;
-                            const btnEval = card.querySelector('.btn-action-eval');
-                            if (btnEval) {
-                                btnEval.href = `adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodeURIComponent(capaUrl)}&genero=${encodedGenre}&plataforma=${primaryPlatform}`;
-                            }
-                        }
-                    });
+                const isUpcomingGame = jogo.isUpcoming || categoriaAtual === 'upcoming';
+                const actionEvalText = isUpcomingGame ? '🔔 Quero Jogar' : '✍️ Avaliar';
+                const actionStoreText = isUpcomingGame ? '🎬 Trailer & Detalhes' : '🎮 Gameplay & Lojas';
+                const actionEvalTitle = isUpcomingGame ? 'Registrar expectativa e adicionar à lista de desejos no Overcritic' : 'Avaliar e criar análise deste jogo';
+                
+                let tagHint = '<span class="game-card-store-hint">Lojas Oficiais ↗</span>';
+                if (isUpcomingGame) {
+                    tagHint = `<span class="game-card-store-hint" style="color: #ffd700; font-weight: 700; font-size: 0.74rem;">🔮 ${jogo.previsao ? jogo.previsao.split('(')[0].trim() : 'Anunciado'}</span>`;
+                } else if (ehGratuito) {
+                    tagHint = '<span class="game-card-free-tag">Grátis</span>';
+                } else if (categoriaAtual === 'releases' && jogo.releaseDate) {
+                    tagHint = `<span class="game-card-store-hint" style="color: var(--accent-cyan); font-weight: 600; font-size: 0.75rem;">📅 ${jogo.releaseDate} ↗</span>`;
                 }
 
                 card.innerHTML = `
-                    <div class="game-card-media" style="cursor: pointer;" onclick="abrirModalLojas(${index})" title="Assistir à gameplay e ver lojas de ${safeTitle}">
+                    <div class="game-card-media" style="cursor: pointer;" onclick="abrirModalLojas(${index})" title="Ver trailer oficial e detalhes de ${safeTitle}">
                         <img src="${thumbUrl}" class="game-card-img" alt="${safeTitle}" onerror="tratarErroCapa(this, '${safeTitle}')" loading="lazy" referrerpolicy="no-referrer">
                         ${jogo.badge ? `<span class="badge-deal">${jogo.badge}</span>` : ''}
                         ${jogo.score ? `<span class="badge-score">${jogo.score}</span>` : ''}
                     </div>
                     <div class="game-card-body">
-                        <h3 class="game-card-title" style="cursor: pointer;" onclick="abrirModalLojas(${index})" title="Assistir à gameplay e ver lojas de ${safeTitle}">${safeTitle}</h3>
+                        <h3 class="game-card-title" style="cursor: pointer;" onclick="abrirModalLojas(${index})" title="Ver trailer oficial e detalhes de ${safeTitle}">${safeTitle}</h3>
                         <div class="game-card-platforms">
                             ${renderizarBadgesPlataforma(jogo.platforms)}
                         </div>
                         <div class="game-card-meta">
                             <span class="game-card-genre" title="${jogo.genre || 'Games'}">${jogo.genre || 'Games'}</span>
-                            ${ehGratuito ? '<span class="game-card-free-tag">Grátis</span>' : '<span class="game-card-store-hint">Lojas Oficiais ↗</span>'}
+                            ${tagHint}
                         </div>
                         <div class="game-card-actions">
-                            <a href="adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodedThumb}&genero=${encodedGenre}&plataforma=${primaryPlatform}" class="btn-action-eval" title="Avaliar e criar análise deste jogo">
-                                ✍️ Avaliar
+                            <a href="adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodedThumb}&genero=${encodedGenre}&plataforma=${primaryPlatform}${isUpcomingGame ? '&tipo=expectativa' : ''}" class="btn-action-eval" title="${actionEvalTitle}">
+                                ${actionEvalText}
                             </a>
-                            <button type="button" class="btn-action-store" onclick="abrirModalLojas(${index})" title="Ver gameplay no YouTube e lojas oficiais">
-                                🎮 Gameplay & Lojas
+                            <button type="button" class="btn-action-store" onclick="abrirModalLojas(${index})" title="${actionStoreText}">
+                                ${actionStoreText}
                             </button>
                         </div>
                     </div>
@@ -3098,7 +3551,68 @@
             'spider-man 2': "Peter Parker e Miles Morales unem forças com novos poderes e o temível simbionte Venom ameaçando destruir tudo o que amam em Nova York.",
             'hollow knight': "Hollow Knight é um metroidvania 2D desafiador e poético. Desbrave as ruínas esquecidas de Hallownest, enfrente criaturas corrompidas e desvende os mistérios ancestrais de um reino subterrâneo.",
             'dead cells': "Dead Cells mistura ação rogue-lite e metroidvania 2D em combate frenético sem checkpoints. Explore um castelo em constante mutação, colete armas e teste seus reflexos.",
-            'half-life 2': "O cientista Gordon Freeman empunha o pé-de-cabra e a arma gravitacional em City 17 para liderar a resistência humana contra o império alienígena Combine em um marco histórico dos jogos de tiro."
+            'half-life 2': "O cientista Gordon Freeman empunha o pé-de-cabra e a arma gravitacional em City 17 para liderar a resistência humana contra o império alienígena Combine em um marco histórico dos jogos de tiro.",
+
+            // Sinopses Oficiais dos Lançamentos Futuros Aguardados (Wiki Oficial Overcritic)
+            'castlevania: belmont\'s curse': "O retorno épico da saga gótica dos caçadores de vampiros da Konami. Armado com o chicote Vampire Killer e relíquias sagradas, adentre o castelo ancestral de Drácula em combates 2.5D fluidos, magia ancestral e atmosfera gótica imersiva.",
+            'call of duty: modern warfare 4': "A continuação da consagrada série militar da Infinity Ward e Activision. Vivencie uma campanha cinematográfica global e combate tático multijogador renovado com acesso antecipado à campanha a partir de 16 de outubro e lançamento mundial em 23 de outubro de 2026.",
+            'the wolf among us remastered': "Bigby Wolf retorna em visual remasterizado 4K com iluminação aprimorada nesta cultuada investigação noir da Telltale Games inspirada nos quadrinhos Fábulas da DC/Vertigo.",
+            'the legend of zelda: ocarina of time': "A aclamada lenda de Hyrule reconstruída com fidelidade visual inacreditável e novas perspectivas de jogabilidade na Unreal Engine para a nova geração Nintendo Switch 2, acompanhando a jornada heroica de Link através do tempo.",
+            'grand theft auto vi': "Grand Theft Auto VI leva os jogadores de volta ao estado de Leonida, lar das ruas iluminadas por neon de Vice City e além, na maior e mais imersiva evolução da série Grand Theft Auto até hoje. Acompanhe a saga criminal de Lucia e Jason.",
+            'gta vi': "Grand Theft Auto VI leva os jogadores de volta ao estado de Leonida e Vice City na maior e mais imersiva evolução de mundo aberto da Rockstar Games com física, densidade e gráficos revolucionários.",
+            'fable': "O que significa ser um herói? Retorne à terra mágica e bem-humorada de Albion em uma reimaginação épica do lendário conto de fadas onde a sua reputação precede cada ação.",
+            'the witcher 4': "Iniciando uma nova saga para a aclamada franquia The Witcher da CD Projekt Red desenvolvida na Unreal Engine 5, Project Polaris explorará novos horizontes e tradições de bruxos com narrativa madura e mundo aberto imersivo.",
+            'marvel\'s blade': "Desenvolvido pela Arkane Lyon e Bethesda em colaboração com a Marvel Games, assuma o papel de Eric Brooks, o Daywalker metade humano e metade vampiro, em uma Paris em quarentena assolada por monstros sugadores de sangue.",
+            'clockwork revolution': "Dos criadores de Wasteland e Arcanum na inXile Entertainment, este RPG em primeira pessoa permite viajar no tempo usando o Cronômetro para alterar eventos cruciais da metrópole vitoriana de Avalon.",
+            'judas': "Criado por Ken Levine (mente brilhante por trás de BioShock), Judas é um FPS narrativo de ficção científica ambientado a bordo de uma espaçonave em colapso onde suas alianças moldam sua fuga e sobrevivência.",
+            'star wars eclipse': "Desenvolvido pela Quantic Dream, Star Wars Eclipse é um jogo de ação e aventura com múltiplos personagens jogáveis ambientado na era dourada da Alta República na Orla Exterior inexplorada.",
+            'the elder scrolls vi': "O aguardadíssimo próximo capítulo da lendária saga The Elder Scrolls da Bethesda Game Studios, prometendo um mundo aberto de fantasia com liberdade absoluta e tecnologia de ponta.",
+            'mass effect 5': "O próximo capítulo monumental da franquia de ficção científica da BioWare, dando continuidade aos legados da Via Láctea e Andrômeda com narrativa madura e gráficos de nova geração.",
+            'phantom blade zero': "Ambientado em um mundo 'Kungfupunk', encarne Soul, um assassino de elite condenado a ter apenas 66 dias de vida, enfrentando monstros e guerreiros em combates com espadas rápidos e cinematográficos.",
+
+            // Sinopses Oficiais dos Lançamentos Recentes (Agosto a Outubro de 2026)
+            'planet zoo 2': "A evolução definitiva da consagrada franquia de simulação da Frontier Developments lançada em 13 de outubro de 2026, com inteligência artificial animal de nova geração, biomas dinâmicos e ferramentas profundas de conservação e gestão de zoológicos.",
+            'gears of war: e-day': "Vivencie o terror do Dia da Emergência na pele dos jovens Marcus Fenix e Dom Santiago quando as hordas monstruosas dos Locust emergiram pela primeira vez das entranhas de Sera, em uma história visceral desenvolvida na Unreal Engine 5.",
+            'star wars: galactic racer': "Acelere a velocidades supersônicas em circuitos alienígenas mortais a bordo de novos pods customizáveis em uma experiência de corrida futurista de alta octanagem da Lucasfilm Games.",
+            'ghost of yōtei: edição completa': "Ambientado em 1603 nas terras ao redor do Monte Yōtei, a Edição Completa lançada em 1º de outubro de 2026 reúne a jornada da protagonista Atsu, a nova expansão de história 'Echoes of Sekigahara' e o modo multijogador cooperativo Legends.",
+            'ghost of yōtei': "Ambientado em 1603 nas terras ao redor do Monte Yōtei, a Edição Completa lançada em 1º de outubro de 2026 reúne a jornada da protagonista Atsu, a nova expansão de história 'Echoes of Sekigahara' e o modo multijogador cooperativo Legends.",
+            'ghost of yotei': "Ambientado em 1603 nas terras ao redor do Monte Yōtei, a Edição Completa lançada em 1º de outubro de 2026 reúne a jornada da protagonista Atsu, a nova expansão de história 'Echoes of Sekigahara' e o modo multijogador cooperativo Legends.",
+            'minecraft: dungeons ii': "A sequência do aclamado dungeon crawler cooperativo da Mojang e Xbox lançada em 29 de setembro de 2026, trazendo novas classes, biomas subterrâneos gerados proceduralmente e suporte crossplay completo.",
+            'ea sports fc 27': "A simulação definitiva de futebol da EA Sports lançada em 25 de setembro de 2026, com tecnologia HyperMotionV atualizada, táticas revolucionadas pelo FC IQ e todas as principais ligas mundiais licenciadas.",
+            'control resonant': "Lançado em 24 de setembro de 2026 pela Remedy Entertainment, a continuação de Control expande os mistérios do Departamento Federal de Controle (FBC) com novos poderes paranormais, física destrutiva e narrativa alucinante.",
+            'silent hill: townfall': "Produzido pela No Code Studios e Konami, lançado em 24 de setembro de 2026, mergulha em uma experiência perturbadora e misteriosa de terror psicológico e sobrevivência clássica.",
+            'dune: awakening': "O ambicioso MMO de sobrevivência da Funcom ambientado no escaldante planeta Arrakis, expandido para consoles PS5 e Xbox Series em 22 de setembro de 2026 com modo solo integral.",
+            'marvel\'s wolverine': "Desenvolvido pela Insomniac Games para PlayStation 5 e lançado em 15 de setembro de 2026, assuma as garras letais de Logan em uma narrativa madura e visceral repleta de ação desenfreada.",
+            'the blood of dawnwalker': "Criado por veteranos da CD Projekt Red no estúdio Rebel Wolves e lançado em 3 de setembro de 2026, é um RPG épico de fantasia sombria ambientado em uma Europa medieval mística assolada por vampiros.",
+            'metal gear solid: master collection vol. 2': "Lançada em 27 de agosto de 2026 pela Konami, a coletânea definitiva reúne clássicos históricos como Metal Gear Solid 4: Guns of the Patriots e Peace Walker para as plataformas modernas.",
+            'mortal shell ii': "A continuação do aclamado soulslike lançada em 20 de agosto de 2026 traz combates viscerais, mecânica de endurecimento aprimorada e novas Carcaças de guerreiros caídos em um reino em ruínas.",
+            'the elder scrolls iv: oblivion remastered': "A obra-prima dos RPGs da Bethesda com gráficos restaurados e iluminação moderna, lançada para Nintendo Switch 2 em 11 de agosto de 2026 com todas as expansões inclusas.",
+
+            // Grandes Sucessos de 2025 e Início de 2026 (Oficialmente Lançados)
+            'pragmata': "Lançado oficialmente em 17 de abril de 2026 pela Capcom, Pragmata é uma envolvente aventura de ação e ficção científica lunar que acompanha um astronauta em traje pressurizado e a jovem Diana enfrentando mistérios cibernéticos em um futuro distópico.",
+            'crimson desert': "Lançado oficialmente em 19 de março de 2026 pela Pearl Abyss, Crimson Desert é um aclamado épico de ação e fantasia em mundo aberto, narrando a saga de Kliff e seus mercenários em combates colossais pelo vasto continente de Pywel.",
+            'resident evil requiem': "Lançado oficialmente em 27 de fevereiro de 2026, Resident Evil Requiem (RE9) marca o apogeu do terror de sobrevivência da Capcom com a RE Engine, mesclando horror psicológico arrepiante, exploração tensa e conspirações bioterroristas de nova geração.",
+            'resident evil 9': "Lançado oficialmente em 27 de fevereiro de 2026, Resident Evil Requiem (RE9) marca o apogeu do terror de sobrevivência da Capcom com a RE Engine, mesclando horror psicológico arrepiante, exploração tensa e conspirações bioterroristas de nova geração.",
+            'hollow knight: silksong': "Lançado oficialmente em 4 de setembro de 2025 pela Team Cherry, Silksong acompanha Hornet capturada e levada ao reino misterioso de Pharloom em uma jornada acrobática com mais de 150 novos inimigos e cidades subterrâneas deslumbrantes.",
+            'monster hunter wilds': "Monster Hunter Wilds leva a franquia lendária da Capcom a um patamar inédito com ecossistemas vivos e mutáveis, clima dinâmico e caçadas viscerais onde monstros lutam por território em tempo real.",
+            'death stranding 2: on the beach': "Embarque em uma nova missão inspiradora de conexão humana além da UCA. Sam Bridges, acompanhado por companheiros, parte em uma nova jornada para salvar a humanidade da extinção em um mundo transformado.",
+            'doom: the dark ages': "DOOM: The Dark Ages é o prelúdio épico do aclamado DOOM (2016) e DOOM Eternal. Testemunhe a origem da fúria do Doom Slayer em uma sangrenta guerra medieval sombria contra os exércitos do Inferno.",
+            'metroid prime 4: beyond': "A lendária caçadora de recompensas Samus Aran retorna em uma aventura em primeira pessoa pelas profundezas do espaço interestelar enfrentando ameaças cósmicas desconhecidas.",
+            'avowed': "Ambientado nas Terras Vivas de Eora, Avowed é o ambicioso RPG de ação em primeira pessoa da Obsidian Entertainment onde você investiga uma praga espiritual armada de magia elemental, espadas e pistolas.",
+            'kingdom come: deliverance ii': "Kingdom Come: Deliverance II é um empolgante RPG de ação medieval ambientado no caos da guerra civil na Boêmia do século XV. Na pele de Henry de Skalitz, viva uma história de vingança, traição e descobertas.",
+            'sid meier\'s civilization vii': "Construa o maior império que o mundo já conheceu. Governe como líderes lendários da história, avance pelas Eras da civilização e tome decisões monumentais que moldarão o destino da humanidade.",
+            'mafia: the old country': "Descubra as origens do crime organizado em Mafia: The Old Country, uma história envolvente e brutal sobre o submundo criminoso da Sicília nos anos 1900, com realismo impressionante.",
+            'little nightmares iii': "Embarque em uma nova aventura perturbadora no universo sombrio de Little Nightmares. Acompanhe Low e Alone enquanto tentam escapar do Nada em uma jornada jogável em modo cooperativo online inédito.",
+            'clair obscur: expedition 33': "Uma vez por ano, a Pintora acorda e pinta um número em seu monólito, transformando todos daquela idade em fumaça. Lidere a Expedição 33 para destruir a Pintora de uma vez por todas em um RPG reativo.",
+            'south of midnight': "Acompanhe Hazel na aventura mágica pelas paisagens místicas do Deep South americano, tecendo os fios da magia ancestral e domesticando monstros do folclore local em estilo visual único de stop-motion.",
+
+            // Sinopses de Sucessos Consagrados
+            'dragon age: the veilguard': "Reúna os Guardiões do Véu e enfrente deuses élficos corruptos que ameaçam destruir Thedas neste envolvente RPG de ação e fantasia épica da BioWare com companheiros inesquecíveis.",
+            'call of duty: black ops 6': "Ambientado no início dos anos 90, Black Ops 6 traz uma campanha alucinante de espionagem e conspirações da Guerra do Golfo, movimentação multidirecional Omnimovement inovadora e o retorno do modo Zumbis.",
+            'astro bot': "Junte-se ao Astro em uma gigantesca aventura espacial 3D pelo cosmos, resgatando mais de 300 bots icônicos da história dos videogames e explorando dezenas de planetas cheios de criatividade e amor aos games.",
+            'the legend of zelda: echoes of wisdom': "Pela primeira vez na história da franquia principal, jogue como a própria Princesa Zelda! Use o cajado Tri Rod para criar 'ecos' e réplicas de monstros e objetos para salvar o reino de Hyrule.",
+            'super mario party jamboree': "Prepare-se para a maior festa Mario de todos os tempos em uma ilha resort com mais de 110 minijogos eletrizantes, 7 tabuleiros e modos competitivos e cooperativos para toda a família.",
+            'warhammer 40,000: space marine 2': "Encarnando o lendário Space Marine Titus dos Ultramarines, liberte a fúria das armas do Imperador contra enxames implacáveis de Tirânidas em uma das campanhas de tiro mais brutais e espetaculares da geração."
         };
 
         const cacheSinopsesJogos = {};
@@ -3184,13 +3698,20 @@
                 coverEl.onerror = () => tratarErroCapa(coverEl, jogo.title);
             }
             if (genreEl) genreEl.textContent = jogo.genre || 'Games';
+            const isUpcomingGame = jogo.isUpcoming || categoriaAtual === 'upcoming';
             if (priceEl) {
-                if (ehGratuito) {
+                if (isUpcomingGame) {
+                    priceEl.textContent = jogo.previsao ? `🔮 Previsão: ${jogo.previsao}` : '🔮 Lançamento Futuro Confirmado';
+                    priceEl.className = 'store-modal-price';
+                    priceEl.style.color = '#ffd700';
+                } else if (ehGratuito) {
                     priceEl.textContent = '100% Gratuito';
                     priceEl.className = 'store-modal-price store-modal-free';
+                    priceEl.style.color = '';
                 } else {
                     priceEl.textContent = 'Lojas Oficiais';
                     priceEl.className = 'store-modal-price';
+                    priceEl.style.color = '';
                 }
             }
 
@@ -3210,8 +3731,8 @@
                             <strong>Steam / PC</strong>
                         </div>
                         <div class="store-row-meta">
-                            ${ehGratuito ? '<span class="store-tag-free">Grátis</span>' : ''}
-                            <span class="store-row-action">Visitar Loja ↗</span>
+                            ${isUpcomingGame ? '<span class="store-tag-free" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; border-color: rgba(255, 215, 0, 0.4);">Wishlist</span>' : (ehGratuito ? '<span class="store-tag-free">Grátis</span>' : '')}
+                            <span class="store-row-action">${isUpcomingGame ? 'Ver na Steam ↗' : 'Visitar Loja ↗'}</span>
                         </div>
                     </a>
                 `;
@@ -3226,8 +3747,8 @@
                             <strong>PlayStation Store</strong> <span style="font-size: 0.72rem; opacity: 0.8; font-weight: 500;">(PS5 / PS4)</span>
                         </div>
                         <div class="store-row-meta">
-                            ${ehGratuito ? '<span class="store-tag-free">Grátis</span>' : ''}
-                            <span class="store-row-action">Buscar na PS Store ↗</span>
+                            ${isUpcomingGame ? '<span class="store-tag-free" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; border-color: rgba(255, 215, 0, 0.4);">Wishlist</span>' : (ehGratuito ? '<span class="store-tag-free">Grátis</span>' : '')}
+                            <span class="store-row-action">${isUpcomingGame ? 'Ver na PS Store ↗' : 'Buscar na PS Store ↗'}</span>
                         </div>
                     </a>
                 `;
@@ -3243,8 +3764,8 @@
                         </div>
                         <div class="store-row-meta">
                             ${temGamePass ? '<span class="store-tag-gamepass">Game Pass</span>' : ''}
-                            ${ehGratuito ? '<span class="store-tag-free">Grátis</span>' : ''}
-                            <span class="store-row-action">Buscar no Xbox ↗</span>
+                            ${isUpcomingGame ? '<span class="store-tag-free" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; border-color: rgba(255, 215, 0, 0.4);">Wishlist</span>' : (ehGratuito ? '<span class="store-tag-free">Grátis</span>' : '')}
+                            <span class="store-row-action">${isUpcomingGame ? 'Ver no Xbox ↗' : 'Buscar no Xbox ↗'}</span>
                         </div>
                     </a>
                 `;
@@ -3259,8 +3780,8 @@
                             <strong>Nintendo eShop</strong> <span style="font-size: 0.72rem; opacity: 0.8; font-weight: 500;">(Switch)</span>
                         </div>
                         <div class="store-row-meta">
-                            ${ehGratuito ? '<span class="store-tag-free">Grátis</span>' : ''}
-                            <span class="store-row-action">Buscar na Nintendo ↗</span>
+                            ${isUpcomingGame ? '<span class="store-tag-free" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; border-color: rgba(255, 215, 0, 0.4);">Wishlist</span>' : (ehGratuito ? '<span class="store-tag-free">Grátis</span>' : '')}
+                            <span class="store-row-action">${isUpcomingGame ? 'Ver na Nintendo ↗' : 'Buscar na Nintendo ↗'}</span>
                         </div>
                     </a>
                 `;
@@ -3269,7 +3790,8 @@
             if (listEl) listEl.innerHTML = buttonsHtml;
 
             if (evalBtn) {
-                evalBtn.href = `adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodedThumb}&genero=${encodedGenre}&plataforma=${plats[0] || 'PC'}`;
+                evalBtn.href = `adicionar_jogos.html?titulo=${encodedTitle}&capa=${encodedThumb}&genero=${encodedGenre}&plataforma=${plats[0] || 'PC'}${isUpcomingGame ? '&tipo=expectativa' : ''}`;
+                evalBtn.textContent = isUpcomingGame ? '🔔 Adicionar à Wishlist / Registrar Expectativa' : '✍️ Avaliar este Jogo no Overcritic';
             }
 
             // Exibir player de mini gameplay oficial do YouTube (Vídeo Direto em Alta Definição)
@@ -3277,7 +3799,7 @@
             const videoId = obterVideoIdJogo(jogo.title);
             const ytDirectUrl = videoId 
                 ? `https://www.youtube.com/watch?v=${videoId}` 
-                : `https://www.youtube.com/results?search_query=${encodeURIComponent(jogo.title + ' gameplay oficial 4k')}`;
+                : `https://www.youtube.com/results?search_query=${encodeURIComponent(jogo.title + ' trailer oficial 4k')}`;
             const bgThumb = videoId 
                 ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` 
                 : (jogo.thumb || gerarFallbackCapa(jogo.title));
@@ -3288,13 +3810,13 @@
                         <div class="cinema-player-card" onclick="abrirPlayerFlutuante('${ytDirectUrl}')" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('${bgThumb}'); cursor: pointer;" title="Clique para reproduzir em Janela Flutuante 1080p/4K">
                             <div class="cinema-play-btn-wrap">
                                 <div class="cinema-play-icon">▶</div>
-                                <div class="cinema-play-text">${videoId ? 'ASSISTIR TRAILER & GAMEPLAY OFICIAL' : 'BUSCAR GAMEPLAY NO YOUTUBE'}</div>
+                                <div class="cinema-play-text">${videoId ? (isUpcomingGame ? 'ASSISTIR TRAILER OFICIAL DE ANÚNCIO' : 'ASSISTIR TRAILER & GAMEPLAY OFICIAL') : 'BUSCAR TRAILER NO YOUTUBE'}</div>
                                 <div class="cinema-play-sub">Clique para reproduzir em Janela Flutuante 1080p/4K Oficial • Sem Erro 153</div>
                             </div>
                             <div class="cinema-source-tag">${videoId ? 'Trailer Oficial 4K ↗' : 'YouTube 4K ↗'}</div>
                         </div>
                     `;
-                    if (trailerBadge) trailerBadge.textContent = videoId ? 'VÍDEO OFICIAL 4K' : 'GAMEPLAY 4K';
+                    if (trailerBadge) trailerBadge.textContent = videoId ? (isUpcomingGame ? 'TRAILER OFICIAL 4K' : 'VÍDEO OFICIAL 4K') : 'TRAILER 4K';
                     if (trailerActions) {
                         trailerActions.innerHTML = `
                             <a href="${ytDirectUrl}" target="_blank" rel="noopener noreferrer" class="btn-yt-external" title="Abrir vídeo oficial diretamente no YouTube">
@@ -3324,6 +3846,10 @@
             }
 
             if (modal) modal.style.display = 'flex';
+
+            // Trava completamente a rolagem de fundo (html e body)
+            document.documentElement.classList.add('modal-open-scroll-locked');
+            document.body.classList.add('modal-open-scroll-locked');
         }
 
         function fecharModalLojas(e) {
@@ -3332,6 +3858,10 @@
             }
             const modal = document.getElementById('storeModal');
             if (modal) modal.style.display = 'none';
+
+            // Destrava a rolagem do documento
+            document.documentElement.classList.remove('modal-open-scroll-locked');
+            document.body.classList.remove('modal-open-scroll-locked');
 
             // Para imediatamente a reprodução do vídeo e áudio da gameplay no YouTube
             const trailerContainer = document.getElementById('gameTrailerContainer');

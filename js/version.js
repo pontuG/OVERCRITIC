@@ -9,15 +9,26 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.1",
+    version: "26.10.2",
     year: "2026",
     month: "10",
-    build: 1,
-    releaseDate: "13/10/2026",
+    build: 2,
+    releaseDate: "14/10/2026",
     status: "Versão Estável",
-    codename: "Responsividade Universal & Jogos Gratuitos Brasil",
+    codename: "RAWG Games API & Metacritic Universal",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.2",
+            date: "14/10/2026",
+            title: "Integração Global RAWG API: Metacritic Oficial, Nota do Público & Busca Universal",
+            highlights: [
+                "Integração universal da RAWG Video Games API em todas as abas de Descobrir Jogos (Mais Jogados, Lançamentos Recentes, Futuros Aguardados, Aclamados Metacritic e Grandes Jogos Gratuitos)",
+                "Exibição simultânea do Metascore oficial da crítica especializada e da nota do público/comunidade em tempo real",
+                "Busca global instantânea no campo de pesquisa cobrindo qualquer jogo do mundo em todas as plataformas (PC, PlayStation, Xbox e Switch)",
+                "Resiliência absoluta com pool de chaves de contingência, rotação automática e fallback sem latência para catálogos locais curados"
+            ]
+        },
         {
             version: "26.10.1",
             date: "13/10/2026",
@@ -115,7 +126,8 @@ function abrirChangelogModal() {
     }
     if (modal) {
         modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        document.documentElement.classList.add('modal-open-scroll-locked');
+        document.body.classList.add('modal-open-scroll-locked');
     }
 }
 
@@ -126,7 +138,8 @@ function fecharChangelogModal() {
     const modal = document.getElementById('overcriticChangelogModal');
     if (modal) {
         modal.classList.remove('active');
-        document.body.style.overflow = '';
+        document.documentElement.classList.remove('modal-open-scroll-locked');
+        document.body.classList.remove('modal-open-scroll-locked');
     }
 }
 

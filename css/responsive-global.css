@@ -30,6 +30,16 @@ body {
     padding: 0;
 }
 
+/* ── TRAVAMENTO SEGURO DE SCROLL AO ABRIR MODAIS / TRAILERS / GAMEPLAY ── */
+html.modal-open-scroll-locked,
+body.modal-open-scroll-locked {
+    overflow: hidden !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+    touch-action: none !important;
+    overscroll-behavior: contain !important;
+}
+
 /* Imagens, vídeos e elementos embutidos nunca vazam da viewport */
 img, video, iframe, canvas {
     max-width: 100%;

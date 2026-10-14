@@ -406,11 +406,18 @@
                 container.innerHTML = `<div class="gp-empty-state">🏆 Nenhuma platina registrada por este jogador ainda.</div>`;
                 return;
             }
-            container.innerHTML = `<div class="gp-grid">` + list.map(p => `
+            container.innerHTML = `<div class="gp-grid">` + list.map(p => {
+                const gameTitle = p.title || p.titulo || 'Jogo';
+                const resolvedCover = (typeof window !== 'undefined' && typeof window.resolverCapaOficialJogo === 'function')
+                    ? window.resolverCapaOficialJogo(gameTitle, p.cover || p.cover_url)
+                    : (p.cover && !p.cover.includes('unsplash.com') ? p.cover : (p.cover_url && !p.cover_url.includes('unsplash.com') ? p.cover_url : ''));
+                const fallbackSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240"><rect width="400" height="240" fill="#0d1117"/><text x="50%" y="45%" text-anchor="middle" font-size="40">🏆</text><text x="50%" y="70%" text-anchor="middle" fill="#00f0ff" font-family="sans-serif" font-weight="bold" font-size="16">' + gameTitle.substring(0, 20).replace(/[<>&"']/g, '') + '</text></svg>')}`;
+                const finalCover = resolvedCover || fallbackSvg;
+                return `
                 <div class="gp-item-card">
-                    <img class="gp-item-cover" src="${p.cover || p.cover_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&q=80'}" alt="${p.title || p.titulo}" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&q=80'">
+                    <img class="gp-item-cover" src="${finalCover}" alt="${gameTitle}" onerror="this.onerror=null; this.src='${fallbackSvg}'">
                     <div class="gp-item-body">
-                        <div class="gp-item-title" title="${p.title || p.titulo}">${p.title || p.titulo}</div>
+                        <div class="gp-item-title" title="${gameTitle}">${gameTitle}</div>
                         <div class="gp-item-meta">
                             <span>🎯 ${p.difficulty || p.dificuldade || 'Moderada'}</span>
                             <span style="color:#ffd700; font-weight:bold;">🏆 ${p.progress || p.nota || '100'}%</span>
@@ -421,7 +428,7 @@
                         </div>
                     </div>
                 </div>
-            `).join('') + `</div>`;
+            `;}).join('') + `</div>`;
         } else if (aba === 'midias') {
             const list = _dadosUsuarioAtual.midias;
             if (!list.length) {

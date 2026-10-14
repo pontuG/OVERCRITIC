@@ -2991,11 +2991,15 @@
             `;
 
             modal.classList.add('active');
+            document.documentElement.classList.add('modal-open-scroll-locked');
+            document.body.classList.add('modal-open-scroll-locked');
         }
 
         function fecharModalDetalhes(e) {
             if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close-btn')) return;
             document.getElementById('mediaDetailModal').classList.remove('active');
+            document.documentElement.classList.remove('modal-open-scroll-locked');
+            document.body.classList.remove('modal-open-scroll-locked');
         }
 
         // ═══════════════════════════════════
@@ -3005,11 +3009,15 @@
             const current = localStorage.getItem('OVERCRITIC_TMDB_USER_KEY') || '';
             document.getElementById('tmdbKeyInput').value = current;
             document.getElementById('configModal').classList.add('active');
+            document.documentElement.classList.add('modal-open-scroll-locked');
+            document.body.classList.add('modal-open-scroll-locked');
         }
 
         function fecharConfigModal(e) {
             if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close-btn')) return;
             document.getElementById('configModal').classList.remove('active');
+            document.documentElement.classList.remove('modal-open-scroll-locked');
+            document.body.classList.remove('modal-open-scroll-locked');
         }
 
         function salvarChaveTmdb() {

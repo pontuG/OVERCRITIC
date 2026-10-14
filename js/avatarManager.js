@@ -657,13 +657,15 @@
         alternarSubtabAvatar('presets');
 
         overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        document.documentElement.classList.add('modal-open-scroll-locked');
+        document.body.classList.add('modal-open-scroll-locked');
     }
 
     function fecharModalSeletorAvatar() {
         const overlay = document.getElementById('overcriticAvatarModalOverlay');
         if (overlay) overlay.classList.remove('active');
-        document.body.style.overflow = '';
+        document.documentElement.classList.remove('modal-open-scroll-locked');
+        document.body.classList.remove('modal-open-scroll-locked');
     }
 
     function alternarSubtabAvatar(tab) {
