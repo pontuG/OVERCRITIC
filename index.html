@@ -593,8 +593,309 @@
             transform: rotate(-3deg) scale(1.05);
         }
 
-        .card-plats { grid-column: span 1; grid-row: span 1; }
-        .card-discover { grid-column: span 1; grid-row: span 1; position: relative; overflow: hidden; }
+        .card-plats, .card-discover, .card-challenges, .card-stats, .card-notes {
+            grid-column: span 1;
+            grid-row: span 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card-discover-games {
+            background: linear-gradient(145deg, rgba(0, 240, 255, 0.08) 0%, rgba(13, 17, 27, 0.85) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+        }
+        .card-discover-games:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.18);
+            transform: translateY(-3px);
+        }
+        body.light-mode .card-discover-games {
+            background: linear-gradient(145deg, #f0f9ff 0%, #ffffff 100%);
+            border-color: rgba(2, 132, 199, 0.25);
+        }
+        body.light-mode .card-discover-games:hover {
+            border-color: #0284c7;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.15);
+        }
+
+        .card-discover-movies {
+            background: linear-gradient(145deg, rgba(157, 78, 221, 0.1) 0%, rgba(13, 17, 27, 0.85) 100%);
+            border: 1px solid rgba(157, 78, 221, 0.25);
+        }
+        .card-discover-movies:hover {
+            border-color: var(--accent-purple);
+            box-shadow: 0 10px 25px rgba(157, 78, 221, 0.2);
+            transform: translateY(-3px);
+        }
+        body.light-mode .card-discover-movies {
+            background: linear-gradient(145deg, #faf5ff 0%, #ffffff 100%);
+            border-color: rgba(124, 58, 237, 0.25);
+        }
+        body.light-mode .card-discover-movies:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.15);
+        }
+
+        .card-plats {
+            background: linear-gradient(145deg, rgba(255, 209, 102, 0.08) 0%, rgba(13, 17, 27, 0.85) 100%);
+            border: 1px solid rgba(255, 209, 102, 0.22);
+        }
+        .card-plats:hover {
+            border-color: #ffd166;
+            box-shadow: 0 10px 25px rgba(255, 209, 102, 0.18);
+            transform: translateY(-3px);
+        }
+        body.light-mode .card-plats {
+            background: linear-gradient(145deg, #fffbeb 0%, #ffffff 100%);
+            border-color: rgba(217, 119, 6, 0.25);
+        }
+        body.light-mode .card-plats:hover {
+            border-color: #b45309;
+            box-shadow: 0 10px 25px rgba(217, 119, 6, 0.15);
+        }
+
+        .card-challenges {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.08) 0%, rgba(13, 17, 27, 0.85) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.22);
+        }
+        .card-challenges:hover {
+            border-color: #10b981;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.18);
+            transform: translateY(-3px);
+        }
+        body.light-mode .card-challenges {
+            background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        body.light-mode .card-challenges:hover {
+            border-color: #059669;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+        }
+
+        .card-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+            z-index: 2;
+        }
+
+        .bento-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        .bento-badge .badge-icon {
+            font-size: 0.85rem;
+        }
+
+        .bento-badge.badge-games {
+            background: rgba(0, 240, 255, 0.12);
+            color: var(--accent-cyan, #00f0ff);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+        body.light-mode .bento-badge.badge-games {
+            background: rgba(2, 132, 199, 0.1);
+            color: #0284c7;
+            border-color: rgba(2, 132, 199, 0.3);
+        }
+
+        .bento-badge.badge-movies {
+            background: rgba(157, 78, 221, 0.14);
+            color: #d8b4fe;
+            border: 1px solid rgba(157, 78, 221, 0.35);
+        }
+        body.light-mode .bento-badge.badge-movies {
+            background: rgba(124, 58, 237, 0.1);
+            color: #7c3aed;
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .bento-badge.badge-plats {
+            background: rgba(255, 209, 102, 0.12);
+            color: #ffd166;
+            border: 1px solid rgba(255, 209, 102, 0.3);
+        }
+        body.light-mode .bento-badge.badge-plats {
+            background: rgba(217, 119, 6, 0.1);
+            color: #b45309;
+            border-color: rgba(217, 119, 6, 0.3);
+        }
+
+        .bento-badge.badge-support {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        body.light-mode .bento-badge.badge-support {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .card-live-indicator, .card-status-pill, .card-tier-pill {
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* Platform & Tag Pills */
+        .card-platform-pills {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin: 6px 0 10px 0;
+            z-index: 2;
+        }
+        .pill-plat, .pill-diff, .pill-support {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+        }
+        body.light-mode .pill-plat, 
+        body.light-mode .pill-diff, 
+        body.light-mode .pill-support {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .pill-diff.pill-easy { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+        .pill-diff.pill-med { color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+        .pill-diff.pill-hard { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+        .pill-diff.pill-insane { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
+
+        /* Botões de Ação Temáticos */
+        .bento-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            margin-top: auto;
+            padding: 7px 12px;
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .bento-action-btn .action-arrow {
+            transition: transform 0.25s ease;
+            font-size: 0.95rem;
+        }
+        .bento-card:hover .bento-action-btn .action-arrow {
+            transform: translateX(4px);
+        }
+
+        .action-btn-games {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            color: var(--accent-cyan);
+        }
+        .bento-card:hover .action-btn-games {
+            background: rgba(0, 240, 255, 0.18);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.25);
+        }
+        body.light-mode .action-btn-games {
+            background: rgba(2, 132, 199, 0.08);
+            border-color: rgba(2, 132, 199, 0.3);
+            color: #0284c7;
+        }
+        body.light-mode .bento-card:hover .action-btn-games {
+            background: rgba(2, 132, 199, 0.15);
+            border-color: #0284c7;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.18);
+        }
+
+        .action-btn-movies {
+            background: rgba(157, 78, 221, 0.1);
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            color: #d8b4fe;
+        }
+        .bento-card:hover .action-btn-movies {
+            background: rgba(157, 78, 221, 0.2);
+            border-color: var(--accent-purple);
+            box-shadow: 0 4px 15px rgba(157, 78, 221, 0.25);
+        }
+        body.light-mode .action-btn-movies {
+            background: rgba(124, 58, 237, 0.08);
+            border-color: rgba(124, 58, 237, 0.3);
+            color: #7c3aed;
+        }
+        body.light-mode .bento-card:hover .action-btn-movies {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: #7c3aed;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.18);
+        }
+
+        .action-btn-plats {
+            background: rgba(255, 209, 102, 0.08);
+            border: 1px solid rgba(255, 209, 102, 0.25);
+            color: #ffd166;
+        }
+        .bento-card:hover .action-btn-plats {
+            background: rgba(255, 209, 102, 0.18);
+            border-color: #ffd166;
+            box-shadow: 0 4px 15px rgba(255, 209, 102, 0.25);
+        }
+        body.light-mode .action-btn-plats {
+            background: rgba(217, 119, 6, 0.08);
+            border-color: rgba(217, 119, 6, 0.3);
+            color: #b45309;
+        }
+        body.light-mode .bento-card:hover .action-btn-plats {
+            background: rgba(217, 119, 6, 0.15);
+            border-color: #b45309;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.18);
+        }
+
+        .action-btn-support {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: #34d399;
+        }
+        .bento-card:hover .action-btn-support {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+        }
+        body.light-mode .action-btn-support {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #059669;
+        }
+        body.light-mode .bento-card:hover .action-btn-support {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #059669;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.18);
+        }
+
         .card-discover .card-bg-icon {
             position: absolute;
             top: -10px;
@@ -604,11 +905,10 @@
             transform: rotate(-10deg);
             transition: all 0.5s ease;
         }
-        body.light-mode .card-discover .card-bg-icon { opacity: 0.1; }
+        body.light-mode .card-discover .card-bg-icon { opacity: 0.08; }
         .card-discover:hover .card-bg-icon { transform: rotate(0deg) scale(1.1); opacity: 0.1; color: var(--accent-cyan); }
         .card-stats { grid-column: span 1; grid-row: span 1; }
         .card-notes { grid-column: span 1; grid-row: span 1; }
-        .card-challenges { grid-column: span 1; grid-row: span 1; }
 
         .card-title {
             font-size: clamp(0.92rem, 1.1vw, 1.15rem);
@@ -802,7 +1102,7 @@
             .bento-card {
                 grid-column: span 1 !important;
                 grid-row: span 1 !important;
-                padding: 20px 16px !important;
+                padding: 18px 16px !important;
                 min-height: auto !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
@@ -811,10 +1111,18 @@
                 content-visibility: auto !important;
                 contain-intrinsic-size: 200px !important;
             }
+            .card-discover-games { background: #0c1524 !important; border-color: rgba(0, 240, 255, 0.3) !important; }
+            .card-discover-movies { background: #130d24 !important; border-color: rgba(157, 78, 221, 0.3) !important; }
+            .card-plats { background: #1a160d !important; border-color: rgba(255, 209, 102, 0.3) !important; }
+            .card-challenges { background: #0c1a15 !important; border-color: rgba(16, 185, 129, 0.3) !important; }
             body.light-mode .bento-card {
                 background: #ffffff !important;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
             }
+            body.light-mode .card-discover-games { background: #f0f9ff !important; border-color: rgba(2, 132, 199, 0.25) !important; }
+            body.light-mode .card-discover-movies { background: #faf5ff !important; border-color: rgba(124, 58, 237, 0.25) !important; }
+            body.light-mode .card-plats { background: #fffbeb !important; border-color: rgba(217, 119, 6, 0.25) !important; }
+            body.light-mode .card-challenges { background: #f0fdf4 !important; border-color: rgba(16, 185, 129, 0.25) !important; }
             .news-card {
                 background: #0d1222 !important;
                 backdrop-filter: none !important;
@@ -841,6 +1149,12 @@
             .live-ticker-wrap {
                 backdrop-filter: none !important;
                 background: #0a0f1d !important;
+                border-color: rgba(0, 240, 255, 0.25) !important;
+            }
+            body.light-mode .live-ticker-wrap {
+                background: #ffffff !important;
+                border-color: #cbd5e1 !important;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
             }
             .card-showcase {
                 min-height: 200px !important;
@@ -1532,7 +1846,7 @@
             100% { transform: translateX(-50%); }
         }
         .ticker-item {
-            color: var(--text-main);
+            color: #e2e8f0;
             text-decoration: none;
             font-size: 0.84rem;
             font-weight: 500;
@@ -1541,30 +1855,42 @@
             gap: 6px;
             transition: color 0.2s ease;
         }
+        .ticker-item strong {
+            color: var(--accent-cyan, #00f0ff);
+        }
         .ticker-item:hover {
             color: var(--accent-cyan);
             text-decoration: underline;
         }
+        body.light-mode .ticker-item {
+            color: #0f172a !important;
+        }
+        body.light-mode .ticker-item strong {
+            color: #0284c7 !important;
+        }
         body.light-mode .ticker-item:hover {
-            color: #0284c7;
+            color: #0369a1 !important;
         }
         .ticker-dot {
             color: #00f0ff;
         }
         body.light-mode .ticker-dot {
-            color: #0284c7;
+            color: #0284c7 !important;
         }
         .ticker-time {
             color: var(--text-muted);
             font-size: 0.75rem;
             margin-left: 4px;
         }
+        body.light-mode .ticker-time {
+            color: #64748b !important;
+        }
         .ticker-sep {
             color: rgba(255, 255, 255, 0.2);
             font-size: 0.9rem;
         }
         body.light-mode .ticker-sep {
-            color: rgba(0, 0, 0, 0.2);
+            color: #cbd5e1 !important;
         }
 
         /* ─── SEÇÕES DO RADAR GEEK & NOTÍCIAS DIÁRIAS ─── */
@@ -2007,29 +2333,82 @@
             </div>
 
             <!-- DISCOVER GAMES -->
-            <a href="descobrir_jogos.html" class="bento-card card-discover" title="Descobrir Novos Jogos">
-                <span class="card-bg-icon">🪐</span>
-                <div class="card-title">🪐 Descobrir Jogos</div>
-                <div class="card-desc">Explore sucessos da Steam, lançamentos mundiais e super promoções.</div>
+            <a href="descobrir_jogos.html" class="bento-card card-discover card-discover-games" title="Descobrir Novos Jogos na Steam e Consoles">
+                <div class="card-top-row">
+                    <div class="bento-badge badge-games"><span class="badge-icon">🪐</span> CATÁLOGO GAMER</div>
+                    <span class="card-live-indicator">LIVE</span>
+                </div>
+                <div class="card-title">Descobrir Jogos</div>
+                <div class="card-desc">Lançamentos mundiais, promoções Steam, notas Metacritic e novidades em todas as plataformas.</div>
+                <div class="card-platform-pills">
+                    <span class="pill-plat">Steam</span>
+                    <span class="pill-plat">PS5</span>
+                    <span class="pill-plat">Xbox</span>
+                    <span class="pill-plat">Switch</span>
+                </div>
+                <div class="bento-action-btn action-btn-games">
+                    <span>Explorar Catálogo Gamer</span>
+                    <span class="action-arrow">→</span>
+                </div>
             </a>
 
             <!-- DISCOVER TITLES -->
-            <a href="descobrir_titulos.html" class="bento-card card-discover" title="Descobrir Filmes, Séries & Animes" style="background: linear-gradient(135deg, rgba(157, 78, 221, 0.08) 0%, var(--glass-bg) 70%);">
-                <span class="card-bg-icon">🍿</span>
-                <div class="card-title">🍿 Descobrir Títulos</div>
-                <div class="card-desc">Lançamentos do cinema, tendências de streamings e obras aclamadas.</div>
+            <a href="descobrir_titulos.html" class="bento-card card-discover card-discover-movies" title="Descobrir Filmes, Séries & Animes">
+                <div class="card-top-row">
+                    <div class="bento-badge badge-movies"><span class="badge-icon">🍿</span> CINEMA & STREAMING</div>
+                    <span class="card-live-indicator">TMDB</span>
+                </div>
+                <div class="card-title">Descobrir Obras</div>
+                <div class="card-desc">Tendências do cinema mundial, sucessos em streamings, animes aclamados e sinopses completas.</div>
+                <div class="card-platform-pills">
+                    <span class="pill-plat">Cinema</span>
+                    <span class="pill-plat">Netflix</span>
+                    <span class="pill-plat">Prime</span>
+                    <span class="pill-plat">Disney+</span>
+                </div>
+                <div class="bento-action-btn action-btn-movies">
+                    <span>Explorar Filmes & Séries</span>
+                    <span class="action-arrow">→</span>
+                </div>
             </a>
 
             <!-- PLATINUMS -->
-            <a href="adicionar_platinas.html" class="bento-card card-plats">
-                <div class="card-title">🏆 Platinas</div>
-                <div class="card-desc">Gerencie troféus conquistados e acompanhe seu progresso de 100% em cada título.</div>
+            <a href="adicionar_platinas.html" class="bento-card card-plats" title="Gerenciador de Platinas e Conquistas 100%">
+                <div class="card-top-row">
+                    <div class="bento-badge badge-plats"><span class="badge-icon">🏆</span> 100% GAMER</div>
+                    <span class="card-tier-pill">Conquistas</span>
+                </div>
+                <div class="card-title">Platinas & Troféus</div>
+                <div class="card-desc">Gerencie seus troféus conquistados e acompanhe o progresso rumo ao 100% em cada jogo zerado.</div>
+                <div class="card-platform-pills">
+                    <span class="pill-diff pill-easy">Fácil</span>
+                    <span class="pill-diff pill-med">Média</span>
+                    <span class="pill-diff pill-hard">Difícil</span>
+                    <span class="pill-diff pill-insane">Insana</span>
+                </div>
+                <div class="bento-action-btn action-btn-plats">
+                    <span>Ver Minhas Platinas</span>
+                    <span class="action-arrow">→</span>
+                </div>
             </a>
 
             <!-- SUPPORT & SUGGESTIONS -->
-            <a href="suporte_overcritic.html" class="bento-card card-challenges">
-                <div class="card-title">💡 Suporte & Sugestões</div>
+            <a href="suporte_overcritic.html" class="bento-card card-challenges" title="Canal Direto de Suporte & Ideias">
+                <div class="card-top-row">
+                    <div class="bento-badge badge-support"><span class="badge-icon">💡</span> AJUDA & FEEDBACK</div>
+                    <span class="card-status-pill">🟢 Ativo</span>
+                </div>
+                <div class="card-title">Suporte & Sugestões</div>
                 <div class="card-desc">Canal direto com o Administrador: envie ideias de melhorias, reporte bugs ou tire dúvidas do sistema.</div>
+                <div class="card-platform-pills">
+                    <span class="pill-support">Feedback</span>
+                    <span class="pill-support">Reportar Bug</span>
+                    <span class="pill-support">Dúvidas</span>
+                </div>
+                <div class="bento-action-btn action-btn-support">
+                    <span>Central de Suporte</span>
+                    <span class="action-arrow">→</span>
+                </div>
             </a>
 
             <!-- STATS -->

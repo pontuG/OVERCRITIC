@@ -1,6 +1,6 @@
 /**
  * OVERCRITIC - Gerenciador Universal de PWA (Instalação, Cache & Modo Standalone)
- * v26.10.5
+ * v26.10.6
  */
 
 (function () {

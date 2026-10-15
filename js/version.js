@@ -9,15 +9,27 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.5",
+    version: "26.10.6",
     year: "2026",
     month: "10",
-    build: 5,
-    releaseDate: "14/10/2026",
+    build: 6,
+    releaseDate: "15/10/2026",
     status: "Versão Estável",
-    codename: "Mobile Turbo Engine: Abertura Instantânea & Scroll 60 FPS (Redmi 13C / Mali-G52)",
+    codename: "Android Flawless: Radar White-Mode, Bento Cards Vivos & Player 16:9 Responsivo",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.6",
+            date: "15/10/2026",
+            title: "Android Flawless: Radar White-Mode, Bento Cards Vivos & Player 16:9 Responsivo",
+            highlights: [
+                "Correção do Radar ao Vivo (Letreiro Geek) no tema branco: contraste 100% legível com fundo branco puro (#ffffff), manchetes em azul escuro e textos em grafite",
+                "Revitalização temática dos Bento Cards na Home: novos badges brilhantes, tags de plataformas (Steam, PS5, Netflix, etc.) e botões de ação dedicados com micro-animações",
+                "Player de Vídeo/Trailer 100% responsivo e centralizado no celular: eliminação da barra preta superior e do corte de tela com layout 16:9 absoluto sem distorção",
+                "Separação das ações externas e aviso de janela flutuante para a barra inferior, garantindo exibição de vídeo cinematográfica limpa no Android e PC",
+                "Atualização do Service Worker (sw.js v26.10.6) para invalidar caches antigos e propagar as novas melhorias instantaneamente aos dispositivos"
+            ]
+        },
         {
             version: "26.10.5",
             date: "14/10/2026",

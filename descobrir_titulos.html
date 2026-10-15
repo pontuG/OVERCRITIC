@@ -1078,26 +1078,28 @@
         }
 
         .modal-trailer-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #000;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.12);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative !important;
+            width: 100% !important;
+            aspect-ratio: 16 / 9 !important;
+            border-radius: 14px !important;
+            overflow: hidden !important;
+            background: #000000 !important;
+            border: 1px solid rgba(0, 240, 255, 0.35) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .modal-trailer-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            border-radius: 14px !important;
+            object-fit: cover !important;
         }
 
         .trailer-loading-placeholder {
@@ -3160,25 +3162,14 @@
             if (key) {
                 const embedUrl = `https://www.youtube.com/embed/${key}?autoplay=1&rel=0&enablejsapi=1`;
                 trailerContainer.innerHTML = `
-                    <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
-                        <iframe 
-                            src="${embedUrl}" 
-                            title="${safeT} - Trailer Oficial" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen
-                            style="width: 100%; height: 320px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                        </iframe>
-                        <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.78rem; color: #cbd5e1;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 1rem;">💡</span>
-                                <span>Se o YouTube exibir <strong>Erro 153</strong> (bloqueio do YouTube em arquivos locais file:/// ou trailers +18), assista na Janela Flutuante:</span>
-                            </div>
-                            <button type="button" class="btn-yt-external" style="padding: 5px 12px; font-size: 0.75rem; white-space: nowrap; margin: 0; background: var(--accent-cyan); color: #0b0f19; font-weight: 700; cursor: pointer;" onclick="abrirPlayerFlutuante('${ytUrl}')">
-                                🖥️ Abrir Flutuante
-                            </button>
-                        </div>
-                    </div>
+                    <iframe 
+                        src="${embedUrl}" 
+                        title="${safeT} - Trailer Oficial" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;">
+                    </iframe>
                 `;
             } else {
                 trailerContainer.innerHTML = `
@@ -3196,15 +3187,28 @@
             if (trailerBadge) trailerBadge.textContent = key ? 'OFICIAL YOUTUBE' : 'TRAILER OFICIAL';
             if (trailerActions) {
                 trailerActions.innerHTML = `
-                    <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="btn-yt-external" title="Abrir vídeo oficial diretamente no YouTube">
-                        <span>▶️ Abrir no YouTube</span> ↗
-                    </a>
-                    <button type="button" class="btn-yt-external" style="cursor: pointer;" onclick="abrirPlayerFlutuante('${ytUrl}')">
-                        <span>🖥️ Janela Flutuante</span>
-                    </button>
-                    <button type="button" class="btn-yt-external" style="color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(0,240,255,0.08); cursor: pointer;" onclick="abrirModalWatch(window.obraModalWatchIndex)">
-                        <span>🔙 Cinema Card</span>
-                    </button>
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
+                            <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="btn-yt-external" title="Abrir vídeo oficial diretamente no YouTube">
+                                <span>▶️ Abrir no YouTube</span> ↗
+                            </a>
+                            <button type="button" class="btn-yt-external" style="cursor: pointer;" onclick="abrirPlayerFlutuante('${ytUrl}')">
+                                <span>🖥️ Janela Flutuante</span>
+                            </button>
+                            <button type="button" class="btn-yt-external" style="color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(0,240,255,0.08); cursor: pointer;" onclick="abrirModalWatch(window.obraModalWatchIndex)">
+                                <span>🔙 Cinema Card</span>
+                            </button>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.74rem; color: #cbd5e1;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span>💡</span>
+                                <span>Se o YouTube bloquear o vídeo no celular, assista na <strong>Janela Flutuante</strong>:</span>
+                            </div>
+                            <button type="button" class="btn-yt-external" style="padding: 4px 10px; font-size: 0.72rem; white-space: nowrap; margin: 0; background: var(--accent-cyan); color: #0b0f19; font-weight: 700; cursor: pointer;" onclick="abrirPlayerFlutuante('${ytUrl}')">
+                                Abrir Flutuante
+                            </button>
+                        </div>
+                    </div>
                 `;
             }
         }
