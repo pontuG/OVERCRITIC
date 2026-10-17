@@ -20,13 +20,30 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Season Reset v26.10.7: Zeramento Geral Imediato (Preserva Usuários e Sessões) -->
+    <script>
+        (function() {
+            var RESET_KEY = 'overcritic_season_reset_v26_10_7_run_v2';
+            if (localStorage.getItem(RESET_KEY) !== 'concluido') {
+                var keysParaZerar = [
+                    'overcritic_reviews', 'overcritic_jogos', 'overclock_jogos',
+                    'OVERCRITIC_MIDIAS', 'overcritic_midias',
+                    'overcritic_minhas_platinas', 'overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'platinasSalvas',
+                    'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
+                ];
+                keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.setItem(RESET_KEY, 'concluido');
+            }
+        })();
+    </script>
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js"></script>
-    <script src="js/gamerProfile.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/version.js"></script>
-    <script src="js/pwaManager.js" defer></script>
+    <script src="supabaseClient.js?v=26.10.7_clean"></script>
+    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
+    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
+    <script src="js/notifications.js?v=26.10.7_clean"></script>
+    <script src="js/version.js?v=26.10.7_clean"></script>
+    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1622,9 +1639,15 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Sua Resenha / Opinião Pessoal</label>
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Sua Resenha / Opinião Pessoal</span>
+                            <span id="mediaReviewQualityBadge" style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); transition: all 0.25s ease;">⚡ Nota Rápida: +100 XP</span>
+                        </label>
                         <textarea id="mediaReview"
                             placeholder="Escreva o que você achou da direção, atuações, enredo, fotografia e impacto emocional..."></textarea>
+                        <div id="mediaReviewQualityHint" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                            💡 <em>Dica: Escreva uma resenha autêntica de 80+ caracteres para ganhar +50 XP, ou 200+ para Crítica Completa (+100 XP).</em>
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -2503,17 +2526,35 @@
             }
         }
 
-        async function salvarMidiaNoSupabase(midia) {
+        async function salvarMidiaNoSupabase(midia, isEdicao = false) {
             if (!window.sbClient) return;
             try {
                 const payload = mapMidiaParaSupabase(midia);
-                const { error } = await window.sbClient
-                    .from('reviews_midias')
-                    .upsert(payload, { onConflict: 'id' });
-                if (error) {
-                    console.warn('⚠️ [Supabase] Erro ao salvar mídia:', error.message);
+                let error = null;
+
+                if (isEdicao && payload.id) {
+                    const resUpdate = await window.sbClient
+                        .from('reviews_midias')
+                        .update(payload)
+                        .eq('id', payload.id);
+                    if (resUpdate.error) {
+                        console.warn('⚠️ [Supabase] Falha no update direto de mídia, tentando upsert:', resUpdate.error.message);
+                        const resUpsert = await window.sbClient
+                            .from('reviews_midias')
+                            .upsert(payload, { onConflict: 'id' });
+                        error = resUpsert.error;
+                    }
                 } else {
-                    console.log('☁️ [Supabase] Mídia persistida na nuvem com sucesso!');
+                    const resUpsert = await window.sbClient
+                        .from('reviews_midias')
+                        .upsert(payload, { onConflict: 'id' });
+                    error = resUpsert.error;
+                }
+
+                if (error) {
+                    console.warn('⚠️ [Supabase] Erro ao salvar/alterar mídia:', error.message);
+                } else {
+                    console.log(`☁️ [Supabase] Mídia (${isEdicao ? 'ALTERAÇÃO' : 'CADASTRO'}) persistida no banco com sucesso! ID:`, payload.id);
                 }
             } catch (err) {
                 console.warn('Erro na requisição Supabase:', err);
@@ -2600,6 +2641,10 @@
             let reviews = obterReviews();
             let itemFinal = null;
 
+            if (window.removerExclusaoGlobal) {
+                window.removerExclusaoGlobal('midia', editingId || null, title, currentAuthor);
+            }
+
             if (editingId) {
                 // Atualização
                 const index = reviews.findIndex(r => String(r.id) === String(editingId));
@@ -2631,7 +2676,12 @@
             }
 
             salvarReviewsNoStorage(reviews);
-            if (itemFinal) salvarMidiaNoSupabase(itemFinal);
+            if (itemFinal) salvarMidiaNoSupabase(itemFinal, !!editingId);
+
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.recalcularEstatisticasGlobais === 'function') {
+                window.OvercriticGamification.recalcularEstatisticasGlobais();
+            }
+
             limparFormulario();
             if (window.innerWidth <= 768 && typeof alternarSecaoMobile === 'function') {
                 alternarSecaoMobile('catalogo');
@@ -2690,6 +2740,7 @@
             }
 
             document.getElementById('btnSalvar').innerText = '🔄 ATUALIZAR CRÍTICA';
+            if (window._atualizarBadgeQualidadeMidia) window._atualizarBadgeQualidadeMidia();
             document.getElementById('formCardContainer').scrollIntoView({ behavior: 'smooth' });
             mostrarToast('Carregado para edição', '✏️');
         }
@@ -2737,6 +2788,7 @@
             document.getElementById('coverPlaceholder').style.display = 'flex';
             document.getElementById('btnSalvar').innerText = '💾 SALVAR CRÍTICA';
             restaurarTodasPlataformas();
+            if (window._atualizarBadgeQualidadeMidia) window._atualizarBadgeQualidadeMidia();
         }
 
         // Listener para expandir todas as plataformas quando o usuário clica em "Exibir todas"
@@ -3126,10 +3178,34 @@
             });
         }
 
+        function configurarMonitorQualidadeReview() {
+            const reviewInput = document.getElementById('mediaReview');
+            const badge = document.getElementById('mediaReviewQualityBadge');
+            const hint = document.getElementById('mediaReviewQualityHint');
+            if (!reviewInput || !badge) return;
+
+            function atualizar() {
+                if (!window.OvercriticGamification || typeof window.OvercriticGamification.avaliarQualidadeReview !== 'function') return;
+                const info = window.OvercriticGamification.avaliarQualidadeReview(reviewInput.value);
+                badge.textContent = `${info.icone} ${info.label}: +${info.xp} XP`;
+                badge.style.color = info.cor;
+                badge.style.borderColor = info.cor;
+                badge.style.background = `${info.cor}18`;
+                if (hint) {
+                    hint.innerHTML = `💡 <em>${info.motivo}</em>`;
+                }
+            }
+
+            reviewInput.addEventListener('input', atualizar);
+            window._atualizarBadgeQualidadeMidia = atualizar;
+            atualizar();
+        }
+
         // ═══════════════════════════════════
         // INICIALIZAÇÃO
         // ═══════════════════════════════════
         window.addEventListener('DOMContentLoaded', () => {
+            configurarMonitorQualidadeReview();
             // Background estático/CSS puro para máxima fluidez a 60 FPS
             atualizarEstatisticas();
             filtrarReviews();

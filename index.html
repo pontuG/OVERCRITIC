@@ -17,16 +17,33 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Season Reset v26.10.7: Zeramento Geral Imediato (Preserva Usuários e Sessões) -->
+    <script>
+        (function() {
+            var RESET_KEY = 'overcritic_season_reset_v26_10_7_run_v2';
+            if (localStorage.getItem(RESET_KEY) !== 'concluido') {
+                var keysParaZerar = [
+                    'overcritic_reviews', 'overcritic_jogos', 'overclock_jogos',
+                    'OVERCRITIC_MIDIAS', 'overcritic_midias',
+                    'overcritic_minhas_platinas', 'overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'platinasSalvas',
+                    'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
+                ];
+                keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.setItem(RESET_KEY, 'concluido');
+            }
+        })();
+    </script>
     <!-- Conexão com Supabase e Backend C# -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js"></script>
-    <script src="js/apiClient.js"></script>
-    <script src="js/gamerProfile.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/version.js"></script>
-    <script src="js/avatarManager.js"></script>
-    <script src="js/geekNewsManager.js"></script>
-    <script src="js/pwaManager.js" defer></script>
+    <script src="supabaseClient.js?v=26.10.7_clean"></script>
+    <script src="js/apiClient.js?v=26.10.7_clean"></script>
+    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
+    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
+    <script src="js/notifications.js?v=26.10.7_clean"></script>
+    <script src="js/version.js?v=26.10.7_clean"></script>
+    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
+    <script src="js/geekNewsManager.js?v=26.10.7_clean"></script>
+    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1016,6 +1033,113 @@
             50% { opacity: 0.35; transform: scale(0.8); }
         }
 
+        /* ════════════════════════════════════════════════════════
+           BOTÕES GAMER CARD & TIER LIST (RESUMO RÁPIDO - HOME)
+        ════════════════════════════════════════════════════════ */
+        .home-gamification-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .og-btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.4px;
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            -webkit-user-select: none;
+            border: 1px solid transparent;
+        }
+        .og-btn-action .btn-icon {
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.25s ease;
+        }
+        .og-btn-action:hover .btn-icon {
+            transform: scale(1.22) rotate(6deg);
+        }
+
+        /* Gamer Card: Ciano Neon & Roxo Cyberpunk */
+        .og-btn-card {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.16) 0%, rgba(157, 78, 221, 0.24) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            color: #00f0ff;
+            box-shadow: 0 2px 10px rgba(0, 240, 255, 0.15), inset 0 0 12px rgba(0, 240, 255, 0.08);
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.45);
+        }
+        .og-btn-card:hover {
+            background: linear-gradient(135deg, #00f0ff 0%, #9d4edd 100%);
+            color: #05070d;
+            border-color: #00f0ff;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.6), 0 0 25px rgba(157, 78, 221, 0.4);
+            transform: translateY(-2px);
+            text-shadow: none;
+        }
+        .og-btn-card:active {
+            transform: translateY(0);
+        }
+
+        /* Tier List: Dourado Âmbar & Rosa Choque Gamer */
+        .og-btn-tier {
+            background: linear-gradient(135deg, rgba(255, 183, 3, 0.16) 0%, rgba(255, 107, 107, 0.24) 100%);
+            border: 1px solid rgba(255, 183, 3, 0.5);
+            color: #ffc837;
+            box-shadow: 0 2px 10px rgba(255, 183, 3, 0.15), inset 0 0 12px rgba(255, 183, 3, 0.08);
+            text-shadow: 0 0 8px rgba(255, 183, 3, 0.45);
+        }
+        .og-btn-tier:hover {
+            background: linear-gradient(135deg, #ffb703 0%, #ff5e7e 100%);
+            color: #05070d;
+            border-color: #ffb703;
+            box-shadow: 0 4px 20px rgba(255, 183, 3, 0.6), 0 0 25px rgba(255, 94, 126, 0.4);
+            transform: translateY(-2px);
+            text-shadow: none;
+        }
+        .og-btn-tier:active {
+            transform: translateY(0);
+        }
+
+        /* Suporte ao Modo Claro (White Mode Premium) */
+        body.light-mode .og-btn-card {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(124, 58, 237, 0.14) 100%);
+            border-color: #0284c7;
+            color: #0284c7;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
+            text-shadow: none;
+        }
+        body.light-mode .og-btn-card:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #7c3aed 100%);
+            color: #ffffff;
+            border-color: #0284c7;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+        body.light-mode .og-btn-tier {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(225, 29, 72, 0.14) 100%);
+            border-color: #d97706;
+            color: #d97706;
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
+            text-shadow: none;
+        }
+        body.light-mode .og-btn-tier:hover {
+            background: linear-gradient(135deg, #d97706 0%, #e11d48 100%);
+            color: #ffffff;
+            border-color: #d97706;
+            box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35);
+        }
+
         /* Notes Internal */
         .quick-note-area {
             width: 100%;
@@ -1184,7 +1308,7 @@
             }
         }
         
-        /* Sleek Intro overlay */
+        /* Sleek Intro overlay (Ultra-Leve & Rápido) */
         #cleanIntro {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1193,7 +1317,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
+            will-change: opacity, transform;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .intro-brand {
             font-size: clamp(1.35rem, 6.6vw, 3rem);
@@ -1201,19 +1329,23 @@
             letter-spacing: clamp(3px, 1.8vw, 10px);
             color: var(--text-main);
             text-shadow: 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-purple);
-            animation: glowText 2s ease forwards;
+            animation: glowText 0.5s ease forwards;
             max-width: 95vw;
             text-align: center;
             white-space: nowrap;
         }
         @keyframes glowText {
-            0% { opacity: 0; filter: blur(10px); transform: scale(0.9); }
-            50% { opacity: 1; filter: blur(0px); transform: scale(1); }
-            100% { opacity: 1; }
+            0% { opacity: 0; filter: blur(6px); transform: scale(0.96); }
+            100% { opacity: 1; filter: blur(0px); transform: scale(1); }
         }
         .intro-hidden,
+        #cleanIntro.intro-hidden { 
+            opacity: 0 !important; 
+            visibility: hidden !important; 
+            pointer-events: none !important;
+        }
+
         html.overcritic-no-intro #cleanIntro,
-        #cleanIntro.intro-hidden,
         #cleanIntro[style*="display: none"] { 
             opacity: 0 !important; 
             visibility: hidden !important; 
@@ -2232,13 +2364,61 @@
         })();
     </script>
 
-    <!-- CLEAN INTRO -->
-    <div id="cleanIntro">
+    <!-- CLEAN INTRO (Ultra-Rápida com Fail-Safe Incondicional) -->
+    <div id="cleanIntro" onclick="if(window.finalizarIntroImediato) window.finalizarIntroImediato();" ontouchstart="if(window.finalizarIntroImediato) window.finalizarIntroImediato();" title="Clique ou toque para pular">
         <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
-            <img src="assets/overcritic_icon.png" alt="OVERCRITIC" style="width:120px; height:120px; border-radius:24px; box-shadow:0 0 35px rgba(0,240,255,0.5); border:1px solid rgba(0,240,255,0.4); animation: glowText 2s ease forwards;">
+            <img src="assets/overcritic_icon.png" alt="OVERCRITIC" style="width:120px; height:120px; border-radius:24px; box-shadow:0 0 35px rgba(0,240,255,0.5); border:1px solid rgba(0,240,255,0.4); animation: glowText 0.5s ease forwards;">
             <div class="intro-brand">OVERCRITIC</div>
         </div>
     </div>
+    <script>
+        // FAIL-SAFE IMEDIATO E AUTÔNOMO: Garante que o Splash Screen NUNCA trave a tela
+        window.finalizarIntroImediato = function() {
+            var intro = document.getElementById('cleanIntro');
+            if (intro) {
+                intro.classList.add('intro-hidden');
+                intro.style.setProperty('display', 'none', 'important');
+                try { intro.remove(); } catch(e) {}
+            }
+        };
+
+        (function() {
+            try {
+                var hasSeen = sessionStorage.getItem('overcritic_intro_seen');
+                var isReload = false;
+                if (window.performance && window.performance.navigation) {
+                    if (window.performance.navigation.type === 1) isReload = true;
+                }
+                if (!isReload && window.performance && typeof performance.getEntriesByType === 'function') {
+                    var nav = performance.getEntriesByType("navigation");
+                    if (nav && nav.length > 0 && nav[0].type === "reload") isReload = true;
+                }
+
+                if (hasSeen && !isReload) {
+                    // Passagem entre abas/páginas: Entrada instantânea (0ms)
+                    window.finalizarIntroImediato();
+                } else {
+                    // Primeira vez ou recarregamento: Exibição fluida com tempo limite de 1.2 segundos
+                    sessionStorage.setItem('overcritic_intro_seen', 'true');
+                    setTimeout(function() {
+                        var intro = document.getElementById('cleanIntro');
+                        if (intro) {
+                            intro.classList.add('intro-hidden');
+                            setTimeout(window.finalizarIntroImediato, 350);
+                        }
+                    }, 1200);
+                }
+            } catch(e) {
+                window.finalizarIntroImediato();
+            }
+
+            // Failsafe incondicional rígido: encerra em no máximo 1.6s
+            setTimeout(window.finalizarIntroImediato, 1600);
+            window.addEventListener('click', window.finalizarIntroImediato, { once: true, passive: true });
+            window.addEventListener('keydown', window.finalizarIntroImediato, { once: true, passive: true });
+            window.addEventListener('touchstart', window.finalizarIntroImediato, { once: true, passive: true });
+        })();
+    </script>
 
     <!-- BACKGROUND -->
     <canvas id="bgParticlesCanvas"></canvas>
@@ -2439,6 +2619,23 @@
                             <span class="stat-arrow">›</span>
                         </div>
                     </a>
+                    <div class="stat-item" style="cursor: pointer; background: rgba(0, 240, 255, 0.05); border-color: rgba(0, 240, 255, 0.2);" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal();" title="Gerar e compartilhar meu Gamer Card Oficial">
+                        <span class="stat-label" id="homeGamificationLabel" style="color:var(--text-main); font-weight:700;">🌱 Recruta Gamer</span>
+                        <div class="stat-val-wrapper">
+                            <span class="val" id="statNivelGamer" style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 800;">Nv. 1</span>
+                            <span class="stat-arrow">✨</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="home-gamification-actions">
+                    <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal();" style="flex: 1;" title="Gerar e compartilhar meu Gamer Card Oficial">
+                        <span class="btn-icon">🎴</span>
+                        <span>Gamer Card</span>
+                    </button>
+                    <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList();" style="flex: 1;" title="Criar minha Tier List Pessoal com jogos e filmes">
+                        <span class="btn-icon">🎯</span>
+                        <span>Tier List</span>
+                    </button>
                 </div>
             </div>
 
@@ -2548,7 +2745,7 @@
             });
         }
 
-        // ── GERENCIAMENTO DA ANIMAÇÃO DE ENTRADA (SPLASH INTRO) ──
+        // ── GERENCIAMENTO DA ANIMAÇÃO DE ENTRADA (SPLASH INTRO ULTRA-RÁPIDA) ──
         function finalizarIntroImediato() {
             const intro = document.getElementById('cleanIntro');
             if (intro) {
@@ -2575,19 +2772,17 @@
 
             const hasSeenIntro = sessionStorage.getItem('overcritic_intro_seen');
 
-            // Regra oficial: Animação de entrada APENAS na primeira vez que abre o site OU ao apertar F5
+            // Regra: Animação fluida de 1.2 segundos na primeira vez que abre o site ou F5
             if (!hasSeenIntro || isReload) {
                 sessionStorage.setItem('overcritic_intro_seen', 'true');
-                // Executa a animação completa da logo e texto neon por 2 segundos
                 setTimeout(() => {
                     intro.classList.add('intro-hidden');
-                    // Fade out suave com duração de 800ms
-                    setTimeout(finalizarIntroImediato, 800);
-                }, 2000);
-                // Failsafe de proteção contra travamento
-                setTimeout(finalizarIntroImediato, 3500);
+                    setTimeout(finalizarIntroImediato, 350);
+                }, 1200);
+                // Failsafe absoluto
+                setTimeout(finalizarIntroImediato, 1600);
             } else {
-                // Passagem entre abas (ex: clicar no botão Início / Home): NÃO exibe abertura, entra direto!
+                // Passagem entre abas: Entrada instantânea (0ms)
                 finalizarIntroImediato();
             }
         }
@@ -2596,9 +2791,20 @@
         gerenciarIntro();
 
         function inicializarDashboard() {
+            // 1. CARREGAMENTO INSTANTÂNEO (0ms): Exibe os dados do cache local sem nenhuma espera de rede
             try { carregarEstatisticas(); } catch(e) { console.error('Erro estatísticas:', e); }
             try { carregarAnotacoes(); } catch(e) { console.error('Erro anotações:', e); }
             try { carregarFeedComunitario(); } catch(e) { console.error('Erro feed:', e); }
+            try { atualizarCapasDinamicas(); } catch(e) {}
+            try { if (typeof atualizarEstadoAuthHeader === 'function') atualizarEstadoAuthHeader(); } catch(e) {}
+
+            // 2. TAREFAS DE REDE EM SEGUNDO PLANO (Não bloqueiam a interface nem o Splash Screen)
+            const rodarEmSegundoPlano = window.requestIdleCallback || function(cb) { setTimeout(cb, 100); };
+            rodarEmSegundoPlano(() => {
+                try { sincronizarEstatisticasSupabase(); } catch(e) { console.warn('Erro sync nuvem:', e); }
+                try { if (typeof inicializarRadarGeekHome === 'function') inicializarRadarGeekHome(); } catch(e) {}
+                try { if (typeof carregarTendenciasDoDiaHome === 'function') carregarTendenciasDoDiaHome(); } catch(e) {}
+            });
         }
 
         if (document.readyState === 'loading') {
@@ -2680,21 +2886,34 @@
                 }
             } catch(e) {}
 
+            const email = (localStorage.getItem('overcritic_user_email') || '').toLowerCase();
+            const isAdmin = (typeof isAdminUser === 'function' && isAdminUser())
+                || email === 'mesquitagabriel255@gmail.com'
+                || currentUser.toLowerCase() === 'pontug'
+                || currentUser.toLowerCase() === 'admin'
+                || localStorage.getItem('overcritic_is_admin') === 'true';
+
+            if (isLogged && window.OvercriticGamification && typeof window.OvercriticGamification.vincularDadosLegadosUsuario === 'function') {
+                window.OvercriticGamification.vincularDadosLegadosUsuario(currentUser, currentUid);
+            }
+
             // 2. Limpeza de Jogos (remover seeds, itens de outros e excluídos)
             try {
                 const rawJogos = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos');
                 if (rawJogos) {
                     const parsed = JSON.parse(rawJogos);
                     if (Array.isArray(parsed)) {
+                        const fakeIds = [1789741152346, 1789742639992, 1789743477104];
                         const limpos = parsed.filter(j => {
                             if (!j) return false;
                             if (window.isItemExcluidoGlobal && window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor)) return false;
-                            const isSeed = j.id && (j.id === 101 || j.id === 102 || j.id === 103 || j.id === 104 || j.id === 105);
-                            if (isSeed) return false;
+                            const idNum = Number(j.id);
+                            const isSeed = idNum && (idNum === 101 || idNum === 102 || idNum === 103 || idNum === 104 || idNum === 105 || String(j.id).startsWith('feed_seed_'));
+                            if (isSeed || fakeIds.includes(idNum)) return false;
                             if (isLogged) {
                                 const dono = (j.autor || '').toLowerCase();
                                 const uid = j.userId || j.user_id;
-                                return (uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase());
+                                return (uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase()) || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono));
                             }
                             return false;
                         });
@@ -2707,37 +2926,25 @@
                 }
             } catch(e) {}
 
-            // 3. Limpeza de Platinas Pessoais (remover plat_seed_, excluídos e separar do feed comunitário)
+            // 3. Consolidação e Higienização de Platinas Pessoais
             try {
-                const rawPlats = localStorage.getItem('overcritic_minhas_platinas') 
-                              || localStorage.getItem('overcritic_platinas_feed') 
-                              || localStorage.getItem('overcritic_platinas');
-                if (rawPlats) {
-                    const parsed = JSON.parse(rawPlats);
+                if (isLogged) {
+                    const rMinhas = localStorage.getItem('overcritic_minhas_platinas') || '[]';
+                    const parsed = JSON.parse(rMinhas);
+                    let limpas = [];
                     if (Array.isArray(parsed)) {
-                        const limpas = parsed.filter(p => {
-                            if (!p) return false;
+                        limpas = parsed.filter(p => {
+                            if (!p || (!p.title && !p.titulo)) return false;
+                            if (p.id && String(p.id).startsWith('plat_seed_')) return false;
                             if (window.isItemExcluidoGlobal && window.isItemExcluidoGlobal('platina', p.id, p.title || p.titulo, p.user || p.usuario)) return false;
-                            const isSeed = typeof p.id === 'string' && p.id.startsWith('plat_seed_');
-                            if (isSeed) return false;
-                            if (isLogged) {
-                                const dono = (p.user || p.usuario || '').toLowerCase();
-                                const uid = p.userId || p.user_id;
-                                return (uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase());
-                            }
-                            return false;
+                            return true;
                         });
-                        localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(limpas));
                     }
-                } else if (!isLogged) {
+                    localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(limpas));
+                } else {
                     localStorage.setItem('overcritic_minhas_platinas', JSON.stringify([]));
                 }
             } catch(e) {}
-
-            // Expurgar de todas as listas locais os registros já excluídos
-            if (typeof window.limparItemDeTodosStorages === 'function') {
-                window.limparItemDeTodosStorages();
-            }
         }
 
         // Stats loader & real-time sync (Apenas dados REAIS do usuário logado)
@@ -2756,69 +2963,68 @@
                 return;
             }
 
-            // 1. Jogos do usuário
+            // Consolidação segura de dados com suporte retroativo
             let countJogos = 0;
-            try {
-                const rawJogos = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos');
-                if (rawJogos) {
-                    const parsed = JSON.parse(rawJogos);
-                    if (Array.isArray(parsed)) {
-                        const meus = parsed.filter(j => {
-                            const dono = (j.autor || '').toLowerCase();
-                            const uid = j.userId || j.user_id;
-                            const isSeed = j.id && (j.id === 101 || j.id === 102 || j.id === 103 || j.id === 104 || j.id === 105);
-                            return !isSeed && ((uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase()));
-                        });
-                        countJogos = meus.length;
-                    }
-                }
-            } catch (e) {
-                console.error('Erro ao ler estatísticas de jogos:', e);
-            }
-
-            // 2. Mídias do usuário
             let countMidias = 0;
-            try {
-                const rawMidias = localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias');
-                if (rawMidias) {
-                    const parsed = JSON.parse(rawMidias);
-                    if (Array.isArray(parsed)) {
-                        const minhas = parsed.filter(m => {
-                            const dono = (m.autor || '').toLowerCase();
-                            const uid = m.userId || m.user_id;
-                            const isSeed = typeof m.id === 'string' && m.id.startsWith('seed-');
-                            return !isSeed && ((uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase()));
-                        });
-                        countMidias = minhas.length;
-                    }
-                }
-            } catch (e) {
-                console.error('Erro ao ler estatísticas de mídias:', e);
-            }
-
-            // 3. Platinas do usuário
             let countPlatinas = 0;
-            try {
-                const rawPlats = localStorage.getItem('overcritic_minhas_platinas');
-                if (rawPlats) {
-                    const parsed = JSON.parse(rawPlats);
-                    if (Array.isArray(parsed)) {
-                        const minhas = parsed.filter(p => {
-                            const dono = (p.user || p.usuario || '').toLowerCase();
-                            const uid = p.userId || p.user_id;
-                            const isSeed = typeof p.id === 'string' && p.id.startsWith('plat_seed_');
-                            return !isSeed && ((uid && uid === currentUid) || (dono && dono === currentUser.toLowerCase()));
-                        });
-                        countPlatinas = minhas.length;
+
+            let consolidados = null;
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.obterDadosConsolidadosUsuario === 'function') {
+                consolidados = window.OvercriticGamification.obterDadosConsolidadosUsuario(currentUser, currentUid);
+                countJogos = consolidados.jogos.length;
+                countMidias = consolidados.midias.length;
+                countPlatinas = consolidados.platinas.length;
+            } else {
+                try {
+                    const fakeIds = [1789741152346, 1789742639992, 1789743477104];
+                    const rawJogos = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos');
+                    if (rawJogos) {
+                        const parsed = JSON.parse(rawJogos);
+                        if (Array.isArray(parsed)) {
+                            countJogos = parsed.filter(j => !j.id?.toString().startsWith('10') && !fakeIds.includes(Number(j.id)) && ((j.userId === currentUid) || ((j.autor || '').toLowerCase() === currentUser.toLowerCase()))).length;
+                        }
                     }
-                }
-            } catch (e) {
-                console.error('Erro ao ler estatísticas de platinas:', e);
+                    const rawMidias = localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias');
+                    if (rawMidias) {
+                        const parsed = JSON.parse(rawMidias);
+                        if (Array.isArray(parsed)) {
+                            countMidias = parsed.filter(m => !m.id?.toString().startsWith('seed-') && ((m.userId === currentUid) || ((m.autor || '').toLowerCase() === currentUser.toLowerCase()))).length;
+                        }
+                    }
+                    const rawPlats = localStorage.getItem('overcritic_minhas_platinas');
+                    if (rawPlats) {
+                        const parsed = JSON.parse(rawPlats);
+                        if (Array.isArray(parsed)) {
+                            countPlatinas = parsed.filter(p => !p.id?.toString().startsWith('plat_seed_') && ((p.userId === currentUid) || ((p.user || p.usuario || '').toLowerCase() === currentUser.toLowerCase()))).length;
+                        }
+                    }
+                } catch(e) {}
             }
 
             animarNumero('statJogos', countJogos);
             animarNumero('statMidias', countMidias);
             animarNumero('statPlatinas', countPlatinas);
+
+            if (window.OvercriticGamification) {
+                const prog = window.OvercriticGamification.calcularProgressoGamer({
+                    jogos: (consolidados && consolidados.jogos) ? consolidados.jogos : countJogos,
+                    midias: (consolidados && consolidados.midias) ? consolidados.midias : countMidias,
+                    platinas: (consolidados && consolidados.platinas) ? consolidados.platinas : countPlatinas
+                });
+                const elNv = document.getElementById('statNivelGamer');
+                if (elNv) {
+                    elNv.innerHTML = `${prog.icone} Nv. ${prog.nivel}`;
+                    elNv.style.color = prog.cor;
+                }
+                const lbl = document.getElementById('homeGamificationLabel');
+                if (lbl) {
+                    lbl.textContent = prog.titulo;
+                }
+                const headerStatus = document.querySelector('.header-user-status');
+                if (headerStatus) {
+                    headerStatus.innerHTML = `<span style="color:${prog.cor}; font-weight:800;">${prog.icone} Nv. ${prog.nivel} ${prog.titulo}</span>`;
+                }
+            }
         }
 
         async function sincronizarEstatisticasSupabase() {
@@ -2836,35 +3042,37 @@
             }
 
             try {
-                // 1. Jogos do usuário logado na nuvem
-                let queryJogos = window.sbClient.from('reviews_jogos').select('*', { count: 'exact', head: true });
-                if (currentUid) {
-                    queryJogos = queryJogos.or(`user_id.eq.${currentUid},autor.ilike.${currentUser}`);
-                } else {
-                    queryJogos = queryJogos.ilike('autor', currentUser);
-                }
-                const { count: cJogos, error: errJ } = await queryJogos;
-                if (!errJ && typeof cJogos === 'number') animarNumero('statJogos', cJogos);
+                if (window.OvercriticGamification && typeof window.OvercriticGamification.sincronizarDadosCompletosUsuario === 'function') {
+                    const dadosCompletos = await window.OvercriticGamification.sincronizarDadosCompletosUsuario(currentUser, currentUid);
+                    if (dadosCompletos) {
+                        const finalJ = dadosCompletos.jogos ? dadosCompletos.jogos.length : 0;
+                        const finalM = dadosCompletos.midias ? dadosCompletos.midias.length : 0;
+                        const finalP = dadosCompletos.platinas ? dadosCompletos.platinas.length : 0;
 
-                // 2. Mídias do usuário logado na nuvem
-                let queryMidias = window.sbClient.from('reviews_midias').select('*', { count: 'exact', head: true });
-                if (currentUid) {
-                    queryMidias = queryMidias.or(`user_id.eq.${currentUid},autor.ilike.${currentUser}`);
-                } else {
-                    queryMidias = queryMidias.ilike('autor', currentUser);
-                }
-                const { count: cMidias, error: errM } = await queryMidias;
-                if (!errM && typeof cMidias === 'number') animarNumero('statMidias', cMidias);
+                        animarNumero('statJogos', finalJ);
+                        animarNumero('statMidias', finalM);
+                        animarNumero('statPlatinas', finalP);
 
-                // 3. Platinas do usuário logado na nuvem
-                let queryPlatinas = window.sbClient.from('platinas').select('*', { count: 'exact', head: true });
-                if (currentUid) {
-                    queryPlatinas = queryPlatinas.or(`user_id.eq.${currentUid},usuario.ilike.${currentUser}`);
-                } else {
-                    queryPlatinas = queryPlatinas.ilike('usuario', currentUser);
+                        const prog = window.OvercriticGamification.calcularProgressoGamer({
+                            jogos: dadosCompletos.jogos || finalJ,
+                            midias: dadosCompletos.midias || finalM,
+                            platinas: dadosCompletos.platinas || finalP
+                        });
+                        const elNv = document.getElementById('statNivelGamer');
+                        if (elNv) {
+                            elNv.innerHTML = `${prog.icone} Nv. ${prog.nivel}`;
+                            elNv.style.color = prog.cor;
+                        }
+                        const lbl = document.getElementById('homeGamificationLabel');
+                        if (lbl) {
+                            lbl.textContent = prog.titulo;
+                        }
+                        const headerStatus = document.querySelector('.header-user-status');
+                        if (headerStatus) {
+                            headerStatus.innerHTML = `<span style="color:${prog.cor}; font-weight:800;">${prog.icone} Nv. ${prog.nivel} ${prog.titulo}</span>`;
+                        }
+                    }
                 }
-                const { count: cPlatinas, error: errP } = await queryPlatinas;
-                if (!errP && typeof cPlatinas === 'number') animarNumero('statPlatinas', cPlatinas);
             } catch (e) {
                 console.warn('Erro ao sincronizar estatísticas pessoais do Supabase:', e);
             }
@@ -3659,10 +3867,7 @@
             }
         }
 
-        atualizarCapasDinamicas();
-        atualizarEstadoAuthHeader();
-        inicializarRadarGeekHome();
-        window.addEventListener('pageshow', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); inicializarRadarGeekHome(); });
+        window.addEventListener('pageshow', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); });
         window.addEventListener('storage', () => { atualizarCapasDinamicas(); atualizarEstadoAuthHeader(); carregarFeedComunitario(); });
         setInterval(carregarFeedComunitario, 30000);
     </script>

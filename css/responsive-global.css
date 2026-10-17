@@ -77,7 +77,9 @@ input[type="password"] {
     padding: 16px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-    transition: opacity 0.8s ease, visibility 0.8s ease !important;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease !important;
+    will-change: opacity, transform !important;
+    cursor: pointer !important;
 }
 
 #cleanIntro > div {
@@ -114,8 +116,13 @@ input[type="password"] {
 }
 
 .intro-hidden,
+#cleanIntro.intro-hidden { 
+    opacity: 0 !important; 
+    visibility: hidden !important; 
+    pointer-events: none !important;
+}
+
 html.overcritic-no-intro #cleanIntro,
-#cleanIntro.intro-hidden,
 #cleanIntro[style*="display: none"] { 
     opacity: 0 !important; 
     visibility: hidden !important; 

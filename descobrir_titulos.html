@@ -19,13 +19,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Season Reset v26.10.7: Zeramento Geral Imediato (Preserva Usuários e Sessões) -->
+    <script>
+        (function() {
+            var RESET_KEY = 'overcritic_season_reset_v26_10_7_run_v2';
+            if (localStorage.getItem(RESET_KEY) !== 'concluido') {
+                var keysParaZerar = [
+                    'overcritic_reviews', 'overcritic_jogos', 'overclock_jogos',
+                    'OVERCRITIC_MIDIAS', 'overcritic_midias',
+                    'overcritic_minhas_platinas', 'overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'platinasSalvas',
+                    'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
+                ];
+                keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.setItem(RESET_KEY, 'concluido');
+            }
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/version.js"></script>
-    <script src="js/avatarManager.js"></script>
-    <script src="js/geekNewsManager.js"></script>
-    <script src="js/pwaManager.js" defer></script>
+    <script src="supabaseClient.js?v=26.10.7_clean"></script>
+    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
+    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
+    <script src="js/notifications.js?v=26.10.7_clean"></script>
+    <script src="js/version.js?v=26.10.7_clean"></script>
+    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
+    <script src="js/geekNewsManager.js?v=26.10.7_clean"></script>
+    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
     <style>
         :root {
             --bg-color: #07090f;

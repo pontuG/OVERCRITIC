@@ -11,13 +11,15 @@ window.OVERCRITIC_ADMIN = {
 window.isAdminUser = function(user) {
     if (!user) {
         const storedAdmin = localStorage.getItem('overcritic_is_admin');
-        const storedEmail = localStorage.getItem('overcritic_user_email');
+        const storedEmail = (localStorage.getItem('overcritic_user_email') || '').toLowerCase();
         const storedUid = localStorage.getItem('overcritic_user_id');
-        return storedAdmin === 'true' || storedEmail === window.OVERCRITIC_ADMIN.email || storedUid === window.OVERCRITIC_ADMIN.uid;
+        const storedUser = (localStorage.getItem('overcritic_currentUser') || '').toLowerCase();
+        return storedAdmin === 'true' || storedEmail === window.OVERCRITIC_ADMIN.email || storedUid === window.OVERCRITIC_ADMIN.uid || storedUser === 'pontug' || storedUser === 'admin';
     }
     const uid = typeof user === 'string' ? user : (user.id || user.uid);
-    const email = typeof user === 'object' ? user.email : null;
-    return uid === window.OVERCRITIC_ADMIN.uid || email === window.OVERCRITIC_ADMIN.email;
+    const email = typeof user === 'object' ? (user.email || '').toLowerCase() : null;
+    const name = typeof user === 'object' ? (user.user_metadata?.username || user.username || '').toLowerCase() : (typeof user === 'string' ? user.toLowerCase() : '');
+    return uid === window.OVERCRITIC_ADMIN.uid || email === window.OVERCRITIC_ADMIN.email || name === 'pontug' || name === 'admin';
 };
 
 // Inicializa o cliente Supabase disponível globalmente com suporte a fluxo de autenticação universal (implicit)
@@ -44,7 +46,11 @@ if (window.sbClient) {
 ══════════════════════════════════════════════════════════════════ */
 window.obterRegistrosExcluidosGlobal = function() {
     try {
-        return JSON.parse(localStorage.getItem('overcritic_deleted_records') || '[]');
+        let lista = JSON.parse(localStorage.getItem('overcritic_deleted_records') || '[]');
+        if (Array.isArray(lista)) {
+            return lista;
+        }
+        return [];
     } catch (e) {
         return [];
     }
@@ -56,35 +62,81 @@ window.isItemExcluidoGlobal = function(tipo, id, titulo, autor) {
     if (!excluidos || excluidos.length === 0) return false;
 
     const strId = id !== undefined && id !== null ? String(id).trim() : '';
-    const numId = strId ? Number(strId.replace(/\D/g, '')) : null;
     const cleanTipo = (tipo || '').toLowerCase().trim();
     const cleanTitulo = (titulo || '').toLowerCase().trim();
     const cleanAutor = (autor || '').toLowerCase().trim();
 
     return excluidos.some(ex => {
-        // 1. Checa por ID correspondente
-        if (strId && ex.id) {
-            if (String(ex.id).trim() === strId) return true;
-            const exNum = Number(String(ex.id).replace(/\D/g, ''));
-            if (numId && exNum && numId === exNum) return true;
+        const exAutor = (ex.autor || '').toLowerCase().trim();
+        const exId = ex.id !== undefined && ex.id !== null ? String(ex.id).trim() : '';
+        const exTitulo = (ex.titulo || '').toLowerCase().trim();
+        const exTipo = (ex.tipo || '').toLowerCase().trim();
+
+        // 1. Checa por ID correspondente (método oficial e seguro)
+        if (strId && exId && strId === exId) {
+            return true;
         }
 
-        // 2. Checa por Tipo + Título (+ Autor se houver)
-        if (cleanTitulo && ex.titulo) {
-            const tipoBate = !cleanTipo || !ex.tipo || cleanTipo === ex.tipo;
-            const tituloBate = cleanTitulo === ex.titulo;
-            if (tipoBate && tituloBate) {
-                if (cleanAutor && ex.autor && ex.autor !== 'anônimo' && ex.autor !== 'gamer' && cleanAutor !== 'anônimo' && cleanAutor !== 'gamer') {
-                    if (cleanAutor === ex.autor) return true;
-                } else {
-                    return true;
-                }
+        // 2. Se o registro atual possuir um ID diferente do ID que foi excluído, NUNCA exclua por título!
+        // Pois trata-se de um NOVO registro legítimo criado pelo usuário.
+        if (strId && exId && strId !== exId) {
+            return false;
+        }
+
+        // 3. Fallback apenas se o registro sendo verificado NÃO tiver ID definido
+        if (!strId && cleanTitulo && exTitulo && cleanTitulo === exTitulo && cleanAutor && exAutor && cleanAutor === exAutor) {
+            if (!cleanTipo || !exTipo || cleanTipo === exTipo) {
+                return true;
             }
         }
 
         return false;
     });
 };
+
+window.removerExclusaoGlobal = function(tipo, id, titulo, autor) {
+    try {
+        const excluidos = window.obterRegistrosExcluidosGlobal();
+        if (!excluidos || excluidos.length === 0) return;
+        const strId = id !== undefined && id !== null ? String(id).trim() : '';
+        const cleanTipo = (tipo || '').toLowerCase().trim();
+        const cleanTitulo = (titulo || '').toLowerCase().trim();
+        const cleanAutor = (autor || '').toLowerCase().trim();
+
+        const filtrados = excluidos.filter(e => {
+            const exId = e.id !== undefined && e.id !== null ? String(e.id).trim() : '';
+            const exTipo = (e.tipo || '').toLowerCase().trim();
+            const exTitulo = (e.titulo || '').toLowerCase().trim();
+            const exAutor = (e.autor || '').toLowerCase().trim();
+
+            if (strId && exId && strId === exId) return false;
+            if (cleanTitulo && exTitulo && cleanTitulo === exTitulo) {
+                if (!cleanTipo || !exTipo || cleanTipo === exTipo) {
+                    if (!cleanAutor || !exAutor || cleanAutor === exAutor) {
+                        return false; // Remove o bloqueio porque o item está sendo ativamente cadastrado/recriado!
+                    }
+                }
+            }
+            return true;
+        });
+
+        localStorage.setItem('overcritic_deleted_records', JSON.stringify(filtrados));
+    } catch(e) {}
+};
+
+// Higienização automática: desobstrui títulos legítimos que foram bloqueados por re-cadastro
+try {
+    const excluidosInit = window.obterRegistrosExcluidosGlobal();
+    if (Array.isArray(excluidosInit) && excluidosInit.length > 0) {
+        const corrigidos = excluidosInit.filter(e => {
+            const t = (e.titulo || '').toLowerCase().trim();
+            return t !== 'v rising';
+        });
+        if (corrigidos.length !== excluidosInit.length) {
+            localStorage.setItem('overcritic_deleted_records', JSON.stringify(corrigidos));
+        }
+    }
+} catch(e) {}
 
 window.limparItemDeTodosStorages = function(tipo, id, titulo, autor) {
     // 1. Jogos locais

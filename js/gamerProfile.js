@@ -17,13 +17,16 @@
                 -webkit-backdrop-filter: blur(14px);
                 z-index: 100000;
                 display: flex;
-                align-items: center;
+                align-items: flex-start;
                 justify-content: center;
-                padding: 20px;
+                padding: 24px 16px;
                 opacity: 0;
                 visibility: hidden;
                 transition: opacity 0.3s ease, visibility 0.3s;
                 box-sizing: border-box;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
             }
             .gamer-profile-overlay.active {
                 opacity: 1;
@@ -33,6 +36,7 @@
                 width: 100%;
                 max-width: 820px;
                 max-height: 90vh;
+                margin: auto;
                 background: linear-gradient(145deg, rgba(13, 18, 30, 0.98), rgba(9, 12, 22, 0.98));
                 border: 1px solid rgba(0, 240, 255, 0.3);
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 240, 255, 0.2);
@@ -282,10 +286,10 @@
         overlay.className = 'gamer-profile-overlay';
         overlay.innerHTML = `
             <div class="gamer-profile-card">
-                <div class="gp-header">
-                    <div class="gp-user-info">
+                <div class="gp-header" style="flex-wrap: wrap; gap: 16px;">
+                    <div class="gp-user-info" style="flex: 1; min-width: 260px;">
                         <div class="gp-avatar" id="gpAvatar">🎮</div>
-                        <div class="gp-names">
+                        <div class="gp-names" style="flex: 1;">
                             <div class="gp-username">
                                 <span id="gpUsername">Jogador</span>
                                 <span id="gpAdminBadge" class="gp-badge-admin" style="display:none;">👑 ADMIN & FUNDADOR</span>
@@ -293,6 +297,25 @@
                             </div>
                             <div style="font-size:0.8rem; color:var(--text-muted, #adb5bd);" id="gpEmailRow">
                                 Perfil Oficial da Comunidade Overcritic
+                            </div>
+                            <!-- Barra de XP e Nível Gamer -->
+                            <div class="og-xp-bar-wrap" id="gpXpBarWrap">
+                                <div class="og-xp-header">
+                                    <span id="gpLevelBadge" class="og-level-badge">🌱 Nv. 1 Recruta Gamer</span>
+                                    <span id="gpXpText">0 XP</span>
+                                </div>
+                                <div class="og-xp-track">
+                                    <div class="og-xp-fill" id="gpXpFill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                            <!-- Ações Gamificadas -->
+                            <div class="og-profile-actions">
+                                <button type="button" class="og-btn-action og-btn-card" id="gpBtnGamerCard" title="Gerar e baixar seu Gamer Card para redes sociais">
+                                    <span>✨</span> Gerar Gamer Card
+                                </button>
+                                <button type="button" class="og-btn-action og-btn-tier" id="gpBtnTierList" title="Criar sua Tier List personalizada com seus jogos e filmes">
+                                    <span>🎯</span> Minha Tier List
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -370,7 +393,15 @@
 
     function fecharPerfilGamerModal() {
         const overlay = document.getElementById('gamerProfileOverlay');
-        if (overlay) overlay.classList.remove('active');
+        if (overlay && overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+            if (typeof window.liberarScrollFundo === 'function') {
+                window.liberarScrollFundo();
+            } else {
+                document.documentElement.classList.remove('og-modal-scroll-lock');
+                document.body.classList.remove('og-modal-scroll-lock');
+            }
+        }
     }
 
     function renderizarAbaAtual(aba) {
@@ -493,6 +524,7 @@
         const isAdmin = (window.isAdminUser && window.isAdminUser({ id: targetUserId, email: cleanName }))
             || cleanName.toLowerCase().includes('gabriel')
             || cleanName.toLowerCase() === 'admin'
+            || cleanName.toLowerCase() === 'pontug'
             || cleanName.toLowerCase().includes('mesquitagabriel255');
 
         if (isAdmin) {
@@ -512,6 +544,12 @@
             <div class="gp-skeleton"></div>
         `;
         overlay.classList.add('active');
+        if (typeof window.bloquearScrollFundo === 'function') {
+            window.bloquearScrollFundo();
+        } else {
+            document.documentElement.classList.add('og-modal-scroll-lock');
+            document.body.classList.add('og-modal-scroll-lock');
+        }
 
         // Busca dados sincronizados
         let jogos = [];
@@ -557,23 +595,36 @@
 
         // 2. Fallback / Merge LocalStorage
         try {
-            const localJogos = JSON.parse(localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos') || '[]');
-            const extraJ = localJogos.filter(j => (j.autor || '').toLowerCase() === cleanName.toLowerCase());
-            extraJ.forEach(ej => {
-                if (!jogos.some(j => String(j.id) === String(ej.id))) jogos.push(ej);
-            });
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.obterDadosConsolidadosUsuario === 'function') {
+                const consolidados = window.OvercriticGamification.obterDadosConsolidadosUsuario(cleanName, targetUserId);
+                consolidados.jogos.forEach(ej => {
+                    if (!jogos.some(j => String(j.id) === String(ej.id))) jogos.push(ej);
+                });
+                consolidados.platinas.forEach(ep => {
+                    if (!platinas.some(p => String(p.id) === String(ep.id))) platinas.push(ep);
+                });
+                consolidados.midias.forEach(em => {
+                    if (!midias.some(m => String(m.id) === String(em.id))) midias.push(em);
+                });
+            } else {
+                const localJogos = JSON.parse(localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos') || '[]');
+                const extraJ = localJogos.filter(j => (j.autor || '').toLowerCase() === cleanName.toLowerCase());
+                extraJ.forEach(ej => {
+                    if (!jogos.some(j => String(j.id) === String(ej.id))) jogos.push(ej);
+                });
 
-            const localPlat = JSON.parse(localStorage.getItem('overcritic_platinas_feed') || localStorage.getItem('overcritic_platinas') || '[]');
-            const extraP = localPlat.filter(p => (p.user || p.usuario || '').toLowerCase() === cleanName.toLowerCase());
-            extraP.forEach(ep => {
-                if (!platinas.some(p => String(p.id) === String(ep.id))) platinas.push(ep);
-            });
+                const localPlat = JSON.parse(localStorage.getItem('overcritic_platinas_feed') || localStorage.getItem('overcritic_platinas') || '[]');
+                const extraP = localPlat.filter(p => (p.user || p.usuario || '').toLowerCase() === cleanName.toLowerCase());
+                extraP.forEach(ep => {
+                    if (!platinas.some(p => String(p.id) === String(ep.id))) platinas.push(ep);
+                });
 
-            const localMid = JSON.parse(localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias') || '[]');
-            const extraM = localMid.filter(m => (m.autor || '').toLowerCase() === cleanName.toLowerCase());
-            extraM.forEach(em => {
-                if (!midias.some(m => String(m.id) === String(em.id))) midias.push(em);
-            });
+                const localMid = JSON.parse(localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias') || '[]');
+                const extraM = localMid.filter(m => (m.autor || '').toLowerCase() === cleanName.toLowerCase());
+                extraM.forEach(em => {
+                    if (!midias.some(m => String(m.id) === String(em.id))) midias.push(em);
+                });
+            }
         } catch(e) {}
 
         // Filtra quaisquer registros que tenham sido excluídos
@@ -612,6 +663,51 @@
             midias,
             abaAtiva: 'jogos'
         };
+
+        // 3. Atualiza Nível Gamer, XP e Botões Gamificados
+        if (window.OvercriticGamification) {
+            const prog = window.OvercriticGamification.calcularProgressoGamer({
+                jogos: jogos,
+                midias: midias,
+                platinas: platinas
+            });
+
+            const levelBadge = document.getElementById('gpLevelBadge');
+            if (levelBadge) {
+                levelBadge.innerHTML = `${prog.icone} Nv. ${prog.nivel} ${prog.titulo}`;
+                levelBadge.style.color = prog.cor;
+                levelBadge.style.borderColor = prog.cor;
+                levelBadge.style.background = prog.bg;
+            }
+
+            const xpText = document.getElementById('gpXpText');
+            if (xpText) {
+                xpText.textContent = `${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`;
+            }
+
+            const xpFill = document.getElementById('gpXpFill');
+            if (xpFill) {
+                xpFill.style.width = `${prog.porcentagem}%`;
+            }
+        }
+
+        // Listeners para abrir o Gamer Card e Tier List
+        const btnCard = document.getElementById('gpBtnGamerCard');
+        if (btnCard) {
+            btnCard.onclick = () => {
+                if (window.abrirGamerCardModal) {
+                    window.abrirGamerCardModal(_dadosUsuarioAtual);
+                }
+            };
+        }
+        const btnTier = document.getElementById('gpBtnTierList');
+        if (btnTier) {
+            btnTier.onclick = () => {
+                if (window.abrirModalTierList) {
+                    window.abrirModalTierList(_dadosUsuarioAtual);
+                }
+            };
+        }
 
         // Reseta aba ativa para "jogos"
         document.querySelectorAll('.gp-tab-btn').forEach(b => b.classList.remove('active'));

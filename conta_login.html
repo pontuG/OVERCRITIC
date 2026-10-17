@@ -18,14 +18,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Season Reset v26.10.7: Zeramento Geral Imediato (Preserva Usuários e Sessões) -->
+    <script>
+        (function() {
+            var RESET_KEY = 'overcritic_season_reset_v26_10_7_run_v2';
+            if (localStorage.getItem(RESET_KEY) !== 'concluido') {
+                var keysParaZerar = [
+                    'overcritic_reviews', 'overcritic_jogos', 'overclock_jogos',
+                    'OVERCRITIC_MIDIAS', 'overcritic_midias',
+                    'overcritic_minhas_platinas', 'overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'platinasSalvas',
+                    'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
+                ];
+                keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.setItem(RESET_KEY, 'concluido');
+            }
+        })();
+    </script>
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js"></script>
-    <script src="js/apiClient.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/version.js"></script>
-    <script src="js/avatarManager.js"></script>
-    <script src="js/pwaManager.js" defer></script>
+    <script src="supabaseClient.js?v=26.10.7_clean"></script>
+    <script src="js/apiClient.js?v=26.10.7_clean"></script>
+    <script src="js/notifications.js?v=26.10.7_clean"></script>
+    <script src="js/version.js?v=26.10.7_clean"></script>
+    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
+    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
+    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -596,6 +613,10 @@
                         <span>🛡️</span> E-mail Autenticado no Supabase
                     </div>
 
+                    <div id="profLevelBadgeContainer" style="margin-bottom: 22px; display: flex; justify-content: center;">
+                        <span id="profLevelBadgePill" class="og-level-badge" style="cursor: pointer;" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal(window._dadosUsuarioPerfil);">🌱 Nv. 1 Recruta Gamer</span>
+                    </div>
+
                     <div class="stats-cards-row">
                         <div class="stat-mini-card">
                             <div class="stat-mini-number" id="profJogosCount">0</div>
@@ -609,6 +630,16 @@
                             <div class="stat-mini-number" id="profPlatinasCount">0</div>
                             <div class="stat-mini-label">Platinas</div>
                         </div>
+                    </div>
+
+                    <!-- Ações Gamificadas -->
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;">
+                        <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal(window._dadosUsuarioPerfil);" style="flex: 1; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
+                            <span>✨</span> Gerar Meu Gamer Card
+                        </button>
+                        <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList(window._dadosUsuarioPerfil);" style="flex: 1; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
+                            <span>🎯</span> Minha Tier List
+                        </button>
                     </div>
 
                     <div class="profile-actions" style="margin-bottom: 14px;">
@@ -819,6 +850,131 @@
             }
         }
 
+        async function carregarEstatisticasPerfil() {
+            const cleanName = (usuarioAtualSessao?.user_metadata?.username || localStorage.getItem('overcritic_currentUser') || 'Jogador').trim();
+            const targetUserId = usuarioAtualSessao?.id || localStorage.getItem('overcritic_user_id') || '';
+
+            // Higienização de qualquer resquício de review falsa ou seed deletada
+            try {
+                const fakeReviewIds = [1789741152346, 1789742639992, 1789743477104];
+                ['overcritic_reviews', 'overcritic_jogos'].forEach(k => {
+                    const raw = localStorage.getItem(k);
+                    if (raw) {
+                        const list = JSON.parse(raw);
+                        if (Array.isArray(list)) {
+                            const limpa = list.filter(j => {
+                                if (!j) return false;
+                                const idNum = Number(j.id);
+                                if (idNum >= 101 && idNum <= 105) return false;
+                                if (fakeReviewIds.includes(idNum)) return false;
+                                return true;
+                            });
+                            localStorage.setItem(k, JSON.stringify(limpa));
+                        }
+                    }
+                });
+            } catch(e) {}
+
+            // 1. Vincula e recupera dados consolidados locais
+            let consolidados = { jogos: [], midias: [], platinas: [] };
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.obterDadosConsolidadosUsuario === 'function') {
+                consolidados = window.OvercriticGamification.obterDadosConsolidadosUsuario(cleanName, targetUserId);
+            } else {
+                try {
+                    const rawJ = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos') || '[]';
+                    consolidados.jogos = JSON.parse(rawJ).filter(j => (j.autor || '').toLowerCase() === cleanName.toLowerCase());
+                    const rawM = localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias') || '[]';
+                    consolidados.midias = JSON.parse(rawM).filter(m => (m.autor || '').toLowerCase() === cleanName.toLowerCase());
+                    const rawP = localStorage.getItem('overcritic_minhas_platinas') || localStorage.getItem('overcritic_platinas_feed') || '[]';
+                    consolidados.platinas = JSON.parse(rawP).filter(p => (p.user || p.usuario || '').toLowerCase() === cleanName.toLowerCase());
+                } catch(e) {}
+            }
+
+            let countJ = consolidados.jogos.length;
+            let countM = consolidados.midias.length;
+            let countP = consolidados.platinas.length;
+
+            const elJ = document.getElementById('profJogosCount');
+            const elM = document.getElementById('profMidiasCount');
+            const elP = document.getElementById('profPlatinasCount');
+            if (elJ) elJ.textContent = countJ;
+            if (elM) elM.textContent = countM;
+            if (elP) elP.textContent = countP;
+
+            window._dadosUsuarioPerfil = {
+                username: cleanName,
+                userId: targetUserId,
+                jogos: consolidados.jogos,
+                midias: consolidados.midias,
+                platinas: consolidados.platinas
+            };
+
+            // Atualiza Gamificação (Nível, Ícone e XP)
+            if (window.OvercriticGamification) {
+                const prog = window.OvercriticGamification.calcularProgressoGamer({
+                    jogos: consolidados.jogos,
+                    midias: consolidados.midias,
+                    platinas: consolidados.platinas
+                });
+                const pill = document.getElementById('profLevelBadgePill');
+                if (pill) {
+                    pill.innerHTML = `${prog.icone} Nv. ${prog.nivel} ${prog.titulo} • ${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+                    pill.style.color = prog.cor;
+                    pill.style.borderColor = prog.cor;
+                    pill.style.background = prog.bg;
+                }
+            }
+
+            // 2. Sincronização bidirecional completa com a nuvem Supabase
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.sincronizarDadosCompletosUsuario === 'function') {
+                try {
+                    const dadosNuvem = await window.OvercriticGamification.sincronizarDadosCompletosUsuario(cleanName, targetUserId);
+                    if (dadosNuvem) {
+                        const finalJogos = Array.isArray(dadosNuvem.jogos) ? dadosNuvem.jogos : consolidados.jogos;
+                        const finalMidias = Array.isArray(dadosNuvem.midias) ? dadosNuvem.midias : consolidados.midias;
+                        const finalPlatinas = Array.isArray(dadosNuvem.platinas) ? dadosNuvem.platinas : consolidados.platinas;
+
+                        countJ = finalJogos.length;
+                        countM = finalMidias.length;
+                        countP = finalPlatinas.length;
+
+                        localStorage.setItem('overcritic_reviews', JSON.stringify(finalJogos));
+                        localStorage.setItem('overcritic_jogos', JSON.stringify(finalJogos));
+                        localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(finalPlatinas));
+                        localStorage.setItem('overcritic_platinas_feed', JSON.stringify(finalPlatinas));
+                        localStorage.setItem('overcritic_platinas', JSON.stringify(finalPlatinas));
+                        localStorage.setItem('overclock_platinas', JSON.stringify(finalPlatinas));
+                        localStorage.setItem('platinasSalvas', JSON.stringify(finalPlatinas));
+
+                        if (elJ) elJ.textContent = countJ;
+                        if (elM) elM.textContent = countM;
+                        if (elP) elP.textContent = countP;
+
+                        window._dadosUsuarioPerfil = {
+                            username: cleanName,
+                            userId: targetUserId,
+                            jogos: finalJogos,
+                            midias: finalMidias,
+                            platinas: finalPlatinas
+                        };
+
+                        const progNuvem = window.OvercriticGamification.calcularProgressoGamer({
+                            jogos: finalJogos,
+                            midias: finalMidias,
+                            platinas: finalPlatinas
+                        });
+                        const pill = document.getElementById('profLevelBadgePill');
+                        if (pill) {
+                            pill.innerHTML = `${progNuvem.icone} Nv. ${progNuvem.nivel} ${progNuvem.titulo} • ${progNuvem.xpTotal.toLocaleString('pt-BR')} XP`;
+                            pill.style.color = progNuvem.cor;
+                            pill.style.borderColor = progNuvem.cor;
+                            pill.style.background = progNuvem.bg;
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+
         function selecionarAvatarRegistro(avatar) {
             const inputHidden = document.getElementById('regSelectedAvatar');
             const preview = document.getElementById('regAvatarPreview');
@@ -926,22 +1082,6 @@
                 console.error('Erro ao verificar sessão:', err);
                 alternarTab('login');
             }
-        }
-
-        async function carregarEstatisticasPerfil() {
-            try {
-                const rawJogos = JSON.parse(localStorage.getItem('overcritic_reviews') || '[]');
-                const rawMidias = JSON.parse(localStorage.getItem('OVERCRITIC_MIDIAS') || '[]');
-                const rawPlatinas = JSON.parse(localStorage.getItem('overcritic_platinas_feed') || '[]');
-
-                const jogos = rawJogos.filter(j => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor));
-                const midias = rawMidias.filter(m => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('midia', m.id, m.title, m.autor));
-                const platinas = rawPlatinas.filter(p => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('platina', p.id, p.title || p.titulo, p.user || p.usuario));
-
-                document.getElementById('profJogosCount').innerText = jogos.length;
-                document.getElementById('profMidiasCount').innerText = midias.length;
-                document.getElementById('profPlatinasCount').innerText = platinas.length;
-            } catch (e) {}
         }
 
         // FUNÇÃO PARA REENVIAR E-MAIL DE CONFIRMAÇÃO

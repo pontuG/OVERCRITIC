@@ -17,15 +17,32 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Season Reset v26.10.7: Zeramento Geral Imediato (Preserva Usuários e Sessões) -->
+    <script>
+        (function() {
+            var RESET_KEY = 'overcritic_season_reset_v26_10_7_run_v2';
+            if (localStorage.getItem(RESET_KEY) !== 'concluido') {
+                var keysParaZerar = [
+                    'overcritic_reviews', 'overcritic_jogos', 'overclock_jogos',
+                    'OVERCRITIC_MIDIAS', 'overcritic_midias',
+                    'overcritic_minhas_platinas', 'overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'platinasSalvas',
+                    'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
+                ];
+                keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.setItem(RESET_KEY, 'concluido');
+            }
+        })();
+    </script>
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js"></script>
-    <script src="js/gamerProfile.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/trofeusDatabase.js"></script>
-    <script src="js/version.js"></script>
-    <script src="js/avatarManager.js"></script>
-    <script src="js/pwaManager.js" defer></script>
+    <script src="supabaseClient.js?v=26.10.7_clean"></script>
+    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
+    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
+    <script src="js/notifications.js?v=26.10.7_clean"></script>
+    <script src="js/trofeusDatabase.js?v=26.10.7_clean"></script>
+    <script src="js/version.js?v=26.10.7_clean"></script>
+    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
+    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -833,19 +850,91 @@
             box-shadow: 0 2px 10px rgba(179, 134, 0, 0.35);
         }
 
-        .btn-delete-mine {
-            background: transparent;
-            border: none;
-            color: var(--danger-color);
+        .btn-edit-mine {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
             cursor: pointer;
-            font-size: 0.82rem;
-            padding: 4px 8px;
-            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             transition: all 0.2s ease;
         }
 
+        .btn-edit-mine:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-delete-mine {
+            background: rgba(255, 51, 102, 0.08);
+            border: 1px solid rgba(255, 51, 102, 0.25);
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 9px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .btn-delete-mine:hover {
-            background: rgba(255, 51, 102, 0.15);
+            background: rgba(255, 51, 102, 0.2);
+            border-color: var(--danger-color);
+            transform: translateY(-1px);
+        }
+
+        .btn-cancelar-edicao {
+            background: rgba(255, 51, 102, 0.12);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 16px 24px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-cancelar-edicao:hover {
+            background: var(--danger-color);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
+        }
+
+        body.light-mode .btn-edit-mine {
+            background: rgba(0, 150, 214, 0.1);
+            border-color: rgba(0, 150, 214, 0.4);
+            color: #007799;
+        }
+
+        body.light-mode .btn-edit-mine:hover {
+            background: rgba(0, 150, 214, 0.22);
+            color: #005577;
+        }
+
+        body.light-mode .btn-cancelar-edicao {
+            background: rgba(230, 40, 80, 0.1);
+            border-color: rgba(230, 40, 80, 0.5);
+            color: #d11a45;
+        }
+
+        body.light-mode .btn-cancelar-edicao:hover {
+            background: #d11a45;
+            color: #ffffff;
         }
 
         /* ══════ SEÇÃO: INFORMATIVO DOS MAIS PLATINADOS ══════ */
@@ -1332,6 +1421,282 @@
             box-shadow: 0 6px 25px rgba(197, 27, 41, 0.35);
         }
 
+        /* ══════ CONTROLE EXATO DE TROFÉUS & CURADORIA OFICIAL ══════ */
+        .diff-chip-status {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(0, 240, 255, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .diff-chip-status.uncatalogued {
+            background: rgba(245, 158, 11, 0.12);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .diff-curated-badge {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+
+        .diff-curated-badge.verified {
+            background: rgba(0, 240, 255, 0.06);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.08);
+        }
+
+        .diff-curated-badge.uncatalogued {
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .diff-curated-badge .badge-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .diff-curated-badge .badge-text-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .diff-curated-badge strong {
+            color: var(--text-main);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .diff-curated-badge span {
+            color: var(--text-muted);
+            font-size: 0.76rem;
+        }
+
+        .diff-xp-tag {
+            background: linear-gradient(135deg, var(--accent-gold), #ff8800);
+            color: #07090f;
+            padding: 1px 7px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.72rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* Card de Controle de Troféus */
+        .trophy-control-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-mode .trophy-control-card {
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .trophy-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .trophy-card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .trophy-card-title h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .trophy-inputs-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .trophy-num-box {
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .trophy-num-box label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+        }
+
+        .trophy-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .trophy-num-input {
+            width: 100%;
+            font-size: 1.25rem !important;
+            font-weight: 800 !important;
+            text-align: center;
+            padding: 10px 36px 10px 16px !important;
+            letter-spacing: 0.5px;
+        }
+
+        #platinaUnlockedTrophies {
+            color: var(--accent-gold) !important;
+            border-color: rgba(255, 215, 0, 0.4) !important;
+            background: rgba(255, 215, 0, 0.04) !important;
+        }
+
+        #platinaTotalTrophies {
+            color: #fff !important;
+        }
+
+        body.light-mode #platinaTotalTrophies {
+            color: #0e121a !important;
+        }
+
+        .trophy-unit-tag {
+            position: absolute;
+            right: 12px;
+            font-size: 1.1rem;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .trophy-divisor {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            padding-top: 20px;
+        }
+
+        .official-verified-tag {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.12);
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .official-verified-tag.manual {
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .trophy-range-slider {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--accent-gold);
+        }
+
+        .trophy-progress-banner {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        body.light-mode .trophy-progress-banner {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .trophy-banner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.86rem;
+            font-weight: 700;
+        }
+
+        .trophy-banner-count {
+            color: var(--text-main);
+        }
+
+        .trophy-pct-badge {
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .trophy-pct-badge.is-100 {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .trophy-pct-badge.is-progress {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .trophy-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .trophy-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 99px;
+            transition: width 0.3s ease;
+        }
+
+        .trophy-bar-fill.is-100 {
+            background: linear-gradient(90deg, var(--accent-gold), #ffaa00);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
         /* ══════ EXPLORADOR DE TROFÉUS (API) ══════ */
         .explorer-header {
             background: var(--glass-bg);
@@ -1811,10 +2176,11 @@
         <!-- ══════ ABA 4: FORMULÁRIO DE REGISTRO DE PLATINA ══════ -->
         <section id="tabCadastrar" class="tab-content">
             <div class="register-container">
-                <h2 class="form-title">🏆 Registrar Conquista de Troféus</h2>
-                <p class="form-subtitle">Digite o nome do jogo para preencher automaticamente com a capa oficial e dados da internet, ou preencha manualmente.</p>
+                <h2 class="form-title" id="formPlatinaTitle">🏆 Registrar Conquista de Troféus</h2>
+                <p class="form-subtitle" id="formPlatinaSubtitle">Digite o nome do jogo para preencher automaticamente com a capa oficial e dados da internet, ou preencha manualmente.</p>
 
                 <form id="platinaRegisterForm">
+                    <input type="hidden" id="editingPlatinaId" value="">
                     <div class="form-grid">
 
                         <!-- BUSCA DE JOGO NA API -->
@@ -1861,40 +2227,95 @@
                             <input type="url" id="platinaCoverUrl" class="form-input" placeholder="https://cdn.akamai.steamstatic.com/steam/apps/.../header.jpg">
                         </div>
 
-                        <!-- PROGRESSO (%) -->
+                        <!-- DIFICULDADE DA PLATINA (CURADORIA OFICIAL / DECIDIDA PELO SITE) -->
                         <div class="form-group">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <label class="form-label" for="platinaProgress">Progresso de Troféus (%) *</label>
-                                <span id="progressValueDisplay" style="font-weight: 800; color: var(--accent-gold); font-size: 0.95rem;">100%</span>
+                                <label class="form-label" for="platinaDifficulty">Dificuldade da Platina (Curadoria)</label>
+                                <span id="diffStatusBadge" class="diff-chip-status">🔒 Verificada</span>
                             </div>
-                            <input type="range" id="platinaProgress" min="0" max="100" value="100" class="form-input" style="padding: 4px;" oninput="document.getElementById('progressValueDisplay').textContent = this.value + '%'">
-                            <button type="button" class="btn-shortcut-platina" onclick="marcarCemPorCento()">
-                                🏆 Marcar 100% Platina Conquistada!
-                            </button>
-                        </div>
-
-                        <!-- DIFICULDADE ESTIMADA COM BADGES -->
-                        <div class="form-group">
-                            <label class="form-label" for="platinaDifficulty">Dificuldade da Platina</label>
-                            <select id="platinaDifficulty" class="form-select">
-                                <option value="2/10 - Muito Fácil 🟢">🟢 2/10 - Muito Fácil (Rápida 10-20h)</option>
-                                <option value="3/10 - Tranquila 🌿">🌿 3/10 - Tranquila (Astro Bot / Spider-Man 2)</option>
-                                <option value="5/10 - Moderada 🟡">🟡 5/10 - Moderada (Ghost of Tsushima / God of War)</option>
-                                <option value="8/10 - Difícil 💀" selected>💀 8/10 - Difícil (Elden Ring / Wukong / Bloodborne)</option>
-                                <option value="10/10 - Lendária / Insana 👑">👑 10/10 - Lendária / Insana (Baldur's Gate 3 / Sekiro)</option>
+                            <select id="platinaDifficulty" class="form-select" onchange="document.getElementById('platinaDifficultyFinal').value = this.value;">
+                                <option value="2/10 - Muito Fácil 🟢">🟢 2/10 - Muito Fácil (10-20h) • +150 XP</option>
+                                <option value="3/10 - Tranquila 🌿">🌿 3/10 - Tranquila (Astro Bot / Spider-Man 2) • +150 XP</option>
+                                <option value="5/10 - Moderada 🟡">🟡 5/10 - Moderada (Ghost of Tsushima / God of War) • +250 XP</option>
+                                <option value="8/10 - Difícil 💀" selected>💀 8/10 - Difícil (Elden Ring / Wukong / Bloodborne) • +400 XP</option>
+                                <option value="10/10 - Lendária / Insana 👑">👑 10/10 - Lendária / Insana (Baldur's Gate 3 / Sekiro) • +600 XP</option>
                             </select>
+                            <input type="hidden" id="platinaDifficultyFinal" value="8/10 - Difícil 💀">
+
+                            <!-- Badge Explicativo de Curadoria Oficial vs Não-Catalogado -->
+                            <div id="diffCuratedBadge" class="diff-curated-badge verified">
+                                <span id="diffCuratedIcon" class="badge-icon">🔒</span>
+                                <div class="badge-text-wrap">
+                                    <strong id="diffCuratedTitle">Dificuldade Oficial Fixada pelo Overcritic <span class="diff-xp-tag">+400 XP</span></strong>
+                                    <span id="diffCuratedReason">Definida oficialmente para garantir a integridade do ranking de XP da comunidade.</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- HORAS JOGADAS -->
+                        <!-- HORAS INVESTIDAS NA PLATINA -->
                         <div class="form-group">
                             <label class="form-label" for="platinaHours">Horas Investidas na Platina</label>
                             <input type="number" id="platinaHours" class="form-input" placeholder="Ex: 85" min="1" max="9999" value="60">
                         </div>
 
-                        <!-- TROFÉUS DESBLOQUEADOS (TOTAL) -->
-                        <div class="form-group">
-                            <label class="form-label" for="platinaTrophiesCount">Total de Troféus Desbloqueados</label>
-                            <input type="text" id="platinaTrophiesCount" class="form-input" placeholder="Ex: 42/42 ou 35/50" value="Todos Desbloqueados">
+                        <!-- CONTROLE DE TROFÉUS (PROGRESSO EM QUANTIDADE EXATA DE CONQUISTAS) -->
+                        <div class="form-group form-full">
+                            <div class="trophy-control-card">
+                                <div class="trophy-card-header">
+                                    <div class="trophy-card-title">
+                                        <span style="font-size: 1.2rem;">🎯</span>
+                                        <h4>Conquistas & Troféus Desbloqueados (Quantidade Exata)</h4>
+                                    </div>
+                                    <button type="button" class="btn-shortcut-platina" onclick="marcarTodosTrofeusDesbloqueados()">
+                                        🏆 Platina Completa (Marcar Todos)
+                                    </button>
+                                </div>
+
+                                <div class="trophy-inputs-row">
+                                    <!-- Troféus Desbloqueados -->
+                                    <div class="trophy-num-box">
+                                        <label for="platinaUnlockedTrophies">Troféus Desbloqueados</label>
+                                        <div class="trophy-input-wrap">
+                                            <input type="number" id="platinaUnlockedTrophies" class="form-input trophy-num-input" min="0" max="100" value="50" oninput="atualizarProgressoTrofeus()">
+                                            <span class="trophy-unit-tag">🏆</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="trophy-divisor">de</div>
+
+                                    <!-- Total Oficial -->
+                                    <div class="trophy-num-box">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <label for="platinaTotalTrophies">Total de Troféus do Jogo</label>
+                                            <span id="totalOfficialBadge" class="official-verified-tag">✓ Oficial</span>
+                                        </div>
+                                        <div class="trophy-input-wrap">
+                                            <input type="number" id="platinaTotalTrophies" class="form-input trophy-num-input" min="1" max="999" value="50" oninput="atualizarProgressoTrofeus()">
+                                            <span class="trophy-unit-tag">🎯</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Slider Sincronizado de Troféus -->
+                                <div style="margin-top: 14px;">
+                                    <input type="range" id="platinaTrophiesRange" min="0" max="50" value="50" class="form-input trophy-range-slider" oninput="document.getElementById('platinaUnlockedTrophies').value = this.value; atualizarProgressoTrofeus();">
+                                </div>
+
+                                <!-- Placar Visual em Tempo Real -->
+                                <div class="trophy-progress-banner">
+                                    <div class="trophy-banner-header">
+                                        <span id="trophyProgressCountText" class="trophy-banner-count">50 de 50 Troféus Desbloqueados</span>
+                                        <span id="trophyProgressPctBadge" class="trophy-pct-badge is-100">100% • Platina Conquistada! 🏆</span>
+                                    </div>
+                                    <div class="trophy-bar-bg">
+                                        <div id="trophyBarFill" class="trophy-bar-fill is-100" style="width: 100%;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Inputs Ocultos de Compatibilidade com o Feed e Supabase -->
+                                <input type="hidden" id="platinaProgress" value="100">
+                                <input type="hidden" id="platinaTrophiesCount" value="50 / 50 Troféus (100%)">
+                            </div>
                         </div>
 
                         <!-- RELATO / COMENTÁRIO DA PLATINA -->
@@ -1905,9 +2326,14 @@
 
                     </div>
 
-                    <button type="submit" class="btn-submit-platina">
-                        <span>🏆</span> SALVAR PLATINA NO MEU PERFIL E NO FEED DA COMUNIDADE
-                    </button>
+                    <div style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
+                        <button type="submit" id="btnSubmitPlatina" class="btn-submit-platina" style="flex: 1;">
+                            <span id="btnSubmitPlatinaIcon">🏆</span> <span id="btnSubmitPlatinaText">Salvar</span>
+                        </button>
+                        <button type="button" class="btn-cancelar-edicao" id="btnCancelarEdicaoPlatina" style="display: none;" onclick="cancelarEdicaoPlatina()">
+                            ❌ Cancelar Edição
+                        </button>
+                    </div>
                 </form>
             </div>
         </section>
@@ -2302,155 +2728,79 @@
         ];
 
         /* ═══════════════════════════════════
-           FEED INICIAL DA COMUNIDADE
+           FEED REAL DA COMUNIDADE & MEUS DADOS
         ═══════════════════════════════════ */
-        const SEED_FEED = [
-            {
-                id: 'plat_seed_1',
-                title: 'Elden Ring: Shadow of the Erdtree',
-                cover: 'https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg',
-                user: 'EldenHunter_BR',
-                platform: 'PlayStation 5',
-                progress: 100,
-                difficulty: '10/10 - Lendária / Insana 👑',
-                difficultyCategory: 'lendaria',
-                hours: 145,
-                trophiesCount: '42/42 Troféus',
-                notes: 'Uma das platinas mais gratificantes de todos os tempos. Derrotar Malenia e o Consorte Prometido exigiu precisão absoluta!',
-                date: 'Hoje às 21:15',
-                applause: 24,
-                applaudedBy: [],
-                steamAppID: '1245620'
-            },
-            {
-                id: 'plat_seed_2',
-                title: 'Astro Bot',
-                cover: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
-                user: 'PixelHunter',
-                platform: 'PlayStation 5',
-                progress: 100,
-                difficulty: '3/10 - Tranquila 🌿',
-                difficultyCategory: 'facil',
-                hours: 18,
-                trophiesCount: '44/44 Troféus',
-                notes: 'Platina deliciosa! Todos os bots resgatados com sorriso de orelha a orelha.',
-                date: 'Hoje às 18:30',
-                applause: 19,
-                applaudedBy: [],
-                steamAppID: null
-            },
-            {
-                id: 'plat_seed_3',
-                title: 'God of War Ragnarök',
-                cover: 'https://cdn.akamai.steamstatic.com/steam/apps/2322010/header.jpg',
-                user: 'KratosSpartan',
-                platform: 'PlayStation 5',
-                progress: 100,
-                difficulty: '5/10 - Moderada 🟡',
-                difficultyCategory: 'moderada',
-                hours: 72,
-                trophiesCount: '36/36 Troféus',
-                notes: 'As lutas contra Gná e o Rei Hrolf foram intensas! Valeu cada segundo para o 100%.',
-                date: 'Ontem às 19:40',
-                applause: 18,
-                applaudedBy: [],
-                steamAppID: '2322010'
-            },
-            {
-                id: 'plat_seed_4',
-                title: 'Cyberpunk 2077',
-                cover: 'https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg',
-                user: 'V_NightCity',
-                platform: 'PC / Steam',
-                progress: 100,
-                difficulty: '5/10 - Moderada 🟡',
-                difficultyCategory: 'moderada',
-                hours: 110,
-                trophiesCount: '57/57 Troféus',
-                notes: 'Night City me conquistou por completo. Conquistei todos os finais e limpei o mapa com Phantom Liberty!',
-                date: '21/09/2026',
-                applause: 31,
-                applaudedBy: [],
-                steamAppID: '1091500'
-            },
-            {
-                id: 'plat_seed_5',
-                title: 'Black Myth: Wukong',
-                cover: 'https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg',
-                user: 'MonkeyKing99',
-                platform: 'PC / Steam',
-                progress: 88,
-                difficulty: '8/10 - Difícil 💀',
-                difficultyCategory: 'dificil',
-                hours: 64,
-                trophiesCount: '32/36 Troféus',
-                notes: 'Faltam apenas 4 troféus para o 100%! O combate é sensacional.',
-                date: '20/09/2026',
-                applause: 15,
-                applaudedBy: [],
-                steamAppID: '2358720'
-            }
-        ];
-
         function obterFeedSalvo() {
-            const raw = localStorage.getItem('overcritic_platinas_feed') 
-                     || localStorage.getItem('overcritic_platinas') 
-                     || localStorage.getItem('overclock_platinas');
-            let feed;
-            if (!raw) {
-                feed = SEED_FEED.map(item => ({ ...item, applaudedBy: item.applaudedBy || [] }));
-                salvarFeed(feed);
-                return feed;
-            }
-            try { 
-                feed = JSON.parse(raw); 
-                if (!Array.isArray(feed) || feed.length === 0) {
-                    feed = SEED_FEED.map(item => ({ ...item, applaudedBy: item.applaudedBy || [] }));
-                    salvarFeed(feed);
-                }
-            } catch (e) { 
-                feed = SEED_FEED; 
-            }
+            let combinadas = [];
+            ['overcritic_minhas_platinas', 'overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'platinasSalvas'].forEach(k => {
+                try {
+                    const raw = localStorage.getItem(k);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) combinadas.push(...parsed);
+                    }
+                } catch(e) {}
+            });
 
-            // Normalização de capas oficiais (corrige registros antigos com Unsplash) e migração de aplausos
+            // Remove itens excluídos, remove seeds fictícias e consolida por jogo + usuário
+            const mapa = new Map();
+            combinadas.forEach(p => {
+                if (!p || (!p.title && !p.titulo)) return;
+                if (p.id && String(p.id).startsWith('plat_seed_')) return; // NUNCA permitir platinas falsas
+                if (window.isItemExcluidoGlobal && window.isItemExcluidoGlobal('platina', p.id, p.title || p.titulo, p.user || p.usuario)) return;
+                
+                const k = `${(p.title || p.titulo).trim().toLowerCase()}_${(p.user || p.usuario || '').trim().toLowerCase()}`;
+                if (!mapa.has(k)) {
+                    mapa.set(k, p);
+                } else {
+                    const exist = mapa.get(k);
+                    const idExist = Number(String(exist.id).replace(/\D/g, '')) || 0;
+                    const idNovo = Number(String(p.id).replace(/\D/g, '')) || 0;
+                    if (idNovo >= idExist) {
+                        mapa.set(k, p);
+                    }
+                }
+            });
+
+            let feed = Array.from(mapa.values());
+
+            // Normalização de capas oficiais e aplausos
             let alterou = false;
-            const currentUser = obterUsuarioAtual();
 
             feed.forEach(item => {
-                if (item && item.title) {
+                const itemTitulo = item.title || item.titulo || '';
+                if (itemTitulo) {
+                    if (!item.title) item.title = itemTitulo;
                     if (!item.cover || item.cover.includes('unsplash.com')) {
-                        item.cover = resolverCapaOficialJogo(item.title, item.cover);
+                        item.cover = resolverCapaOficialJogo(itemTitulo, item.cover);
                         alterou = true;
                     }
                 }
                 if (!Array.isArray(item.applaudedBy)) {
                     item.applaudedBy = [];
-                    // Se não for seed e já possuía aplausos registrados em testes anteriores
-                    if (item.id && !item.id.startsWith('plat_seed_')) {
-                        if (item.applause > 0) {
-                            item.applaudedBy = [currentUser];
-                            item.applause = 1;
-                        }
-                    }
                     alterou = true;
                 }
             });
 
-            if (alterou) {
-                salvarFeed(feed);
-            }
-
-            if (window.isItemExcluidoGlobal) {
-                feed = feed.filter(p => !window.isItemExcluidoGlobal('platina', p.id, p.title || p.titulo, p.user || p.usuario));
+            if (alterou && feed.length > 0) {
+                try {
+                    localStorage.setItem('overcritic_platinas_feed', JSON.stringify(feed));
+                    localStorage.setItem('overcritic_platinas', JSON.stringify(feed));
+                    localStorage.setItem('overclock_platinas', JSON.stringify(feed));
+                } catch(e) {}
             }
 
             return feed;
         }
 
         function salvarFeed(lista) {
-            localStorage.setItem('overcritic_platinas_feed', JSON.stringify(lista));
-            localStorage.setItem('overcritic_platinas', JSON.stringify(lista));
-            localStorage.setItem('overclock_platinas', JSON.stringify(lista));
+            const arr = Array.isArray(lista) ? lista : [];
+            try {
+                localStorage.setItem('overcritic_platinas_feed', JSON.stringify(arr));
+                localStorage.setItem('overcritic_platinas', JSON.stringify(arr));
+                localStorage.setItem('overclock_platinas', JSON.stringify(arr));
+                localStorage.setItem('platinasSalvas', JSON.stringify(arr));
+            } catch(e) {}
             window.dispatchEvent(new Event('storage'));
             atualizarEstatisticasGlobais();
         }
@@ -2459,7 +2809,17 @@
         // INTEGRAÇÃO COM SUPABASE (PLATINAS)
         // ═══════════════════════════════════
         function mapPlatinaParaSupabase(p) {
-            const uid = localStorage.getItem('overcritic_user_id') || null;
+            let uid = localStorage.getItem('overcritic_user_id') || null;
+            const usuario = (p.user || p.usuario || localStorage.getItem('overcritic_currentUser') || '').trim();
+            const isAdmin = (typeof isAdminUser === 'function' && isAdminUser())
+                || usuario.toLowerCase() === 'pontug'
+                || usuario.toLowerCase() === 'admin'
+                || localStorage.getItem('overcritic_is_admin') === 'true';
+
+            if (!uid && isAdmin) {
+                uid = '958a1b5f-4151-42c7-97f2-caf0e59fbb86';
+            }
+
             let idNum = p.id;
             if (typeof idNum === 'string') {
                 idNum = Number(idNum.replace(/\D/g, '')) || Date.now();
@@ -2468,7 +2828,7 @@
             return {
                 id: Number(idNum),
                 user_id: p.userId || p.user_id || uid,
-                usuario: p.user || p.usuario || 'Visitante',
+                usuario: usuario || 'Visitante',
                 titulo: p.title || p.titulo || 'Sem título',
                 plataforma: p.platform || p.plataforma || 'PC',
                 dificuldade: p.difficulty || p.dificuldade || 'Moderada',
@@ -2504,6 +2864,25 @@
         async function sincronizarPlatinasSupabase() {
             if (!window.sbClient) return;
             try {
+                const currentUser = (obterUsuarioAtual() || '').trim();
+                let currentUid = localStorage.getItem('overcritic_user_id') || '';
+                const isAdmin = (typeof isAdminUser === 'function' && isAdminUser())
+                    || currentUser.toLowerCase() === 'pontug'
+                    || currentUser.toLowerCase() === 'admin'
+                    || localStorage.getItem('overcritic_is_admin') === 'true';
+
+                if (!currentUid && isAdmin) {
+                    currentUid = '958a1b5f-4151-42c7-97f2-caf0e59fbb86';
+                }
+
+                const idsExpurgados = [1790130987906, 1790131037408, 1790339420104];
+                // Temporada ativa: protege novos cadastros marcando o reset como concluído
+                const CLOUD_SEASON_RESET_KEY = 'overcritic_cloud_season_reset_v26_10_7';
+                try { localStorage.setItem(CLOUD_SEASON_RESET_KEY, 'concluido'); } catch(e) {}
+
+                const locais = obterFeedSalvo().filter(p => !idsExpurgados.includes(Number(p.id)));
+
+                // 1. Download das platinas oficiais da nuvem
                 const { data, error } = await window.sbClient
                     .from('platinas')
                     .select('*')
@@ -2514,43 +2893,93 @@
                     return;
                 }
 
+                const mapa = new Map();
+
                 if (data && data.length > 0) {
                     const platinasNuvem = data
+                        .filter(p => !idsExpurgados.includes(Number(p.id)))
                         .filter(p => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('platina', p.id, p.titulo, p.usuario))
                         .map(mapSupabaseParaPlatina);
-                    const mapa = new Map();
-                    platinasNuvem.forEach(p => mapa.set(String(p.id), p));
 
-                    const locais = obterFeedSalvo();
-                    locais.forEach(p => {
-                        const chave = String(p.id).replace(/\D/g, '');
-                        if (!mapa.has(chave) && !mapa.has(String(p.id))) {
-                            mapa.set(String(p.id), p);
+                    // Agrupa e deduplica platinas da nuvem (mantém a versão mais recente em caso de duplicatas)
+                    platinasNuvem.forEach(p => {
+                        const chave = `${(p.title || p.titulo || '').trim().toLowerCase()}_${(p.user || p.usuario || '').trim().toLowerCase()}`;
+                        if (chave) {
+                            if (mapa.has(chave)) {
+                                const exist = mapa.get(chave);
+                                const idExist = Number(String(exist.id).replace(/\D/g, '')) || 0;
+                                const idNovo = Number(String(p.id).replace(/\D/g, '')) || 0;
+                                if (idNovo > idExist) {
+                                    if (window.sbClient && idExist) {
+                                        window.sbClient.from('platinas').delete().eq('id', idExist).catch(() => {});
+                                    }
+                                    mapa.set(chave, p);
+                                } else if (idExist > idNovo) {
+                                    if (window.sbClient && idNovo) {
+                                        window.sbClient.from('platinas').delete().eq('id', idNovo).catch(() => {});
+                                    }
+                                }
+                            } else {
+                                mapa.set(chave, p);
+                            }
                         }
                     });
-
-                    const listaConsolidada = Array.from(mapa.values());
-                    salvarFeed(listaConsolidada);
-                    renderizarFeedComunidade();
-                    renderizarMinhasPlatinas();
-                    console.log('⚡ [Supabase] ' + data.length + ' platinas sincronizadas da nuvem!');
                 }
+
+                // Mescla com itens locais legítimos
+                locais.forEach(p => {
+                    const chave = `${(p.title || p.titulo || '').trim().toLowerCase()}_${(p.user || p.usuario || '').trim().toLowerCase()}`;
+                    if (chave && !mapa.has(chave)) {
+                        mapa.set(chave, p);
+                        salvarPlatinaNoSupabase(p);
+                    }
+                });
+
+                const listaConsolidada = Array.from(mapa.values());
+                salvarFeed(listaConsolidada);
+                localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(listaConsolidada));
+                localStorage.setItem('overcritic_platinas_feed', JSON.stringify(listaConsolidada));
+                localStorage.setItem('overcritic_platinas', JSON.stringify(listaConsolidada));
+                renderizarFeedComunidade();
+                renderizarMinhasPlatinas();
+                renderizarTopMaisPlatinados();
+                atualizarEstatisticasGlobais();
+                console.log('⚡ [Supabase] ' + listaConsolidada.length + ' platinas consolidadas com sucesso!');
             } catch (err) {
                 console.warn('Erro ao conectar com Supabase Platinas:', err);
             }
         }
 
-        async function salvarPlatinaNoSupabase(platina) {
+        async function salvarPlatinaNoSupabase(platina, isEdicao = false) {
             if (!window.sbClient) return;
             try {
                 const payload = mapPlatinaParaSupabase(platina);
-                const { error } = await window.sbClient
-                    .from('platinas')
-                    .upsert(payload, { onConflict: 'id' });
-                if (error) {
-                    console.warn('⚠️ [Supabase] Erro ao salvar platina:', error.message);
+                let error = null;
+
+                if (isEdicao && payload.id) {
+                    // Update direto no registro do banco de dados por ID (garante alteração em tempo real)
+                    const resUpdate = await window.sbClient
+                        .from('platinas')
+                        .update(payload)
+                        .eq('id', payload.id);
+                    if (resUpdate.error) {
+                        console.warn('⚠️ [Supabase] Falha no update direto da platina, tentando upsert:', resUpdate.error.message);
+                        const resUpsert = await window.sbClient
+                            .from('platinas')
+                            .upsert(payload, { onConflict: 'id' });
+                        error = resUpsert.error;
+                    }
                 } else {
-                    console.log('☁️ [Supabase] Platina sincronizada na nuvem com sucesso!');
+                    const resUpsert = await window.sbClient
+                        .from('platinas')
+                        .upsert(payload, { onConflict: 'id' });
+                    error = resUpsert.error;
+                }
+
+                if (error) {
+                    console.warn('⚠️ [Supabase] Erro ao salvar/alterar platina:', error.message);
+                } else {
+                    console.log(`☁️ [Supabase] Platina (${isEdicao ? 'ALTERAÇÃO' : 'CADASTRO'}) sincronizada no banco com sucesso! ID:`, payload.id);
                 }
             } catch (err) {
                 console.warn('Erro na requisição Supabase:', err);
@@ -2574,7 +3003,7 @@
         }
 
         /* ═══════════════════════════════════
-           RENDERIZAÇÃO: MAIS PLATINADOS & RANKING
+           RENDERIZAÇÃO: MAIS PLATINADOS & RANKING DINÂMICO
         ═══════════════════════════════════ */
         let filtroDificuldadeRankingAtual = 'todos';
 
@@ -2592,13 +3021,90 @@
             renderizarTopMaisPlatinados();
         }
 
+        function obterRankingDinamicoMaisPlatinados() {
+            const feed = obterFeedSalvo();
+            if (!feed || feed.length === 0) return [];
+
+            const mapaJogos = new Map();
+            feed.forEach(p => {
+                if (!p || (!p.title && !p.titulo)) return;
+                const titulo = (p.title || p.titulo).trim();
+                const chave = titulo.toLowerCase();
+
+                if (!mapaJogos.has(chave)) {
+                    mapaJogos.set(chave, {
+                        title: titulo,
+                        cover: p.cover || resolverCapaOficialJogo(titulo),
+                        platform: p.platform || 'Multiplataforma',
+                        difficultyCategory: p.difficultyCategory || 'moderada',
+                        difficultyLabel: p.difficulty || 'Moderada 🟡',
+                        estimatedHours: p.hours ? `${p.hours}h` : 'Variável',
+                        notes: p.notes || `Título registrado e platinado pela comunidade Overcritic!`,
+                        steamAppID: p.steamAppID || null,
+                        totalPlatinums: 0,
+                        concluidos: 0,
+                        totalRegistros: 0,
+                        somaHoras: 0
+                    });
+                }
+                const entry = mapaJogos.get(chave);
+                entry.totalRegistros++;
+                if (p.progress === undefined || Number(p.progress) === 100) {
+                    entry.totalPlatinums++;
+                    entry.concluidos++;
+                }
+                if (p.hours) entry.somaHoras += Number(p.hours);
+                if (p.cover && !p.cover.includes('unsplash.com')) entry.cover = p.cover;
+                if (p.notes && p.notes.length > entry.notes.length) entry.notes = p.notes;
+                if (p.steamAppID && !entry.steamAppID) entry.steamAppID = p.steamAppID;
+            });
+
+            const lista = Array.from(mapaJogos.values());
+            // Ordena pelo maior número de platinas, depois pelo total de jogadores
+            lista.sort((a, b) => (b.totalPlatinums - a.totalPlatinums) || (b.totalRegistros - a.totalRegistros));
+
+            return lista.map((j, idx) => {
+                const taxa = j.totalRegistros > 0 ? Math.round((j.concluidos / j.totalRegistros) * 100) : 100;
+                const mediaHoras = j.totalRegistros > 0 && j.somaHoras > 0 ? `${Math.round(j.somaHoras / j.totalRegistros)}h` : j.estimatedHours;
+                return {
+                    ...j,
+                    rank: idx + 1,
+                    estimatedHours: mediaHoras,
+                    completionRate: `${taxa}%`
+                };
+            });
+        }
+
         function renderizarTopMaisPlatinados() {
             const podiumContainer = document.getElementById('podiumTop3Container');
             const tableBody = document.getElementById('rankingTableBody');
 
-            let lista = [...TOP_MAIS_PLATINADOS];
+            let lista = obterRankingDinamicoMaisPlatinados();
             if (filtroDificuldadeRankingAtual !== 'todos') {
                 lista = lista.filter(j => j.difficultyCategory === filtroDificuldadeRankingAtual);
+            }
+
+            if (!lista || lista.length === 0) {
+                podiumContainer.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; background: var(--glass-bg); border: 1px dashed var(--glass-border); border-radius: 18px;">
+                        <div style="font-size: 2.8rem; margin-bottom: 8px;">🏆</div>
+                        <h3 style="color: var(--accent-gold); margin-bottom: 6px;">Temporada Aberta: Ranking Zerado</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 460px; margin: 0 auto 16px;">
+                            Nenhum jogo foi platinado na comunidade ainda. Cadastre sua primeira platina para inaugurar o <strong>#1 do Ranking Mundial</strong>!
+                        </p>
+                        <button class="btn-shortcut-platina" onclick="alternarAba('cadastrar')" style="display: inline-flex;">
+                            <span>✨</span> Registrar Minha Platina
+                        </button>
+                    </div>
+                `;
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 36px 12px; color: var(--text-muted);">
+                            Nenhum jogo ranqueado no momento. As platinas registradas pelos usuários entrarão automaticamente no Ranking R#.
+                        </td>
+                    </tr>
+                `;
+                return;
             }
 
             // Pódio Top 3
@@ -2632,7 +3138,7 @@
                         <div class="podium-info">
                             <div class="podium-title">${jogo.title}</div>
                             <div class="podium-stat-row">
-                                <span>🏆 <strong>${jogo.totalPlatinums}</strong> platinas</span>
+                                <span>🏆 <strong>${jogo.totalPlatinums}</strong> ${jogo.totalPlatinums === 1 ? 'platina' : 'platinas'}</span>
                                 <span>⏱️ ${jogo.estimatedHours}</span>
                             </div>
                             <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -2678,7 +3184,7 @@
                         </td>
                         <td><span class="diff-badge ${badgeDiffClass}">${jogo.difficultyLabel}</span></td>
                         <td style="color: var(--text-muted); font-size: 0.85rem;">⏱️ ${jogo.estimatedHours}</td>
-                        <td><strong style="color: var(--accent-gold);">${jogo.totalPlatinums}</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">jogadores</span></td>
+                        <td><strong style="color: var(--accent-gold);">${jogo.totalPlatinums}</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">${jogo.totalPlatinums === 1 ? 'jogador' : 'jogadores'}</span></td>
                         <td><span style="color: var(--accent-cyan); font-weight: 700;">${jogo.completionRate}</span></td>
                         <td style="text-align: right;">
                             <button class="btn-shortcut-platina" style="margin: 0; padding: 6px 12px; font-size: 0.75rem;" onclick="puxarParaCadastroDireto('${jogo.title}', '${jogo.cover}', '${jogo.difficultyLabel}')">
@@ -2722,37 +3228,50 @@
            TROCA DE ABAS
         ═══════════════════════════════════ */
         function alternarAba(abaNome) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tabs-container .tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
+            const containerBtns = document.querySelectorAll('.tabs-container .tab-btn');
             let activeBtn = null;
+            let targetTab = null;
+
             if (abaNome === 'mais_platinados') {
-                activeBtn = document.querySelectorAll('.tab-btn')[0];
-                document.getElementById('tabMaisPlatinados').classList.add('active');
-                renderizarTopMaisPlatinados();
+                activeBtn = containerBtns[0];
+                targetTab = document.getElementById('tabMaisPlatinados');
+                targetTab?.classList.add('active');
+                activeBtn?.classList.add('active');
+                try { renderizarTopMaisPlatinados(); } catch(e) { console.warn('Aviso ao renderizar top platinados:', e); }
             } else if (abaNome === 'feed') {
-                activeBtn = document.querySelectorAll('.tab-btn')[1];
-                document.getElementById('tabFeed').classList.add('active');
-                renderizarFeedComunidade();
+                activeBtn = containerBtns[1];
+                targetTab = document.getElementById('tabFeed');
+                targetTab?.classList.add('active');
+                activeBtn?.classList.add('active');
+                try { renderizarFeedComunidade(); } catch(e) { console.warn('Aviso ao renderizar feed:', e); }
             } else if (abaNome === 'minhas') {
-                activeBtn = document.querySelectorAll('.tab-btn')[2];
-                document.getElementById('tabMinhas').classList.add('active');
-                renderizarMinhasPlatinas();
+                activeBtn = containerBtns[2];
+                targetTab = document.getElementById('tabMinhas');
+                targetTab?.classList.add('active');
+                activeBtn?.classList.add('active');
+                try { renderizarMinhasPlatinas(); } catch(e) { console.warn('Aviso ao renderizar minhas platinas:', e); }
             } else if (abaNome === 'cadastrar') {
-                activeBtn = document.querySelectorAll('.tab-btn')[3];
-                document.getElementById('tabCadastrar').classList.add('active');
+                activeBtn = containerBtns[3];
+                targetTab = document.getElementById('tabCadastrar');
+                targetTab?.classList.add('active');
+                activeBtn?.classList.add('active');
             } else if (abaNome === 'api') {
-                activeBtn = document.querySelectorAll('.tab-btn')[4];
-                document.getElementById('tabApi').classList.add('active');
+                activeBtn = containerBtns[4];
+                targetTab = document.getElementById('tabApi');
+                targetTab?.classList.add('active');
+                activeBtn?.classList.add('active');
             }
 
             if (activeBtn) {
-                activeBtn.classList.add('active');
                 try {
                     activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                 } catch(e) {}
             }
         }
+        window.alternarAba = alternarAba;
 
         /* ═══════════════════════════════════
            RENDERIZAÇÃO: FEED DA COMUNIDADE
@@ -2791,12 +3310,13 @@
         ═══════════════════════════════════ */
         function renderizarMinhasPlatinas() {
             const container = document.getElementById('myPlatinasGrid');
+            if (!container) return;
             const feed = obterFeedSalvo();
             const usuarioAtual = obterUsuarioAtual().toLowerCase();
             const currentUid = localStorage.getItem('overcritic_user_id') || '';
             const isLogged = usuarioAtual && usuarioAtual !== 'visitante';
 
-            const termo = (document.getElementById('myFilterSearch')?.value || '').toLowerCase();
+            const termo = (document.getElementById('myFilterSearch')?.value || '').toLowerCase().trim();
             const status = document.getElementById('myFilterStatus')?.value || 'todos';
 
             // Minhas Platinas: apenas itens criados pelo usuário atual, excluindo terminantemente seeds de demonstração
@@ -2809,16 +3329,42 @@
                     return dono === 'visitante' || dono === 'anônimo' || dono === 'anonimo';
                 }
 
-                const dono = (item.user || '').toLowerCase();
+                const dono = (item.user || item.usuario || '').toLowerCase();
                 const uid = item.userId || item.user_id;
-                return (uid && uid === currentUid) || (dono && dono === usuarioAtual);
+                const email = (localStorage.getItem('overcritic_user_email') || '').toLowerCase();
+                const isAdmin = (typeof isAdminUser === 'function' && isAdminUser())
+                    || email === 'mesquitagabriel255@gmail.com'
+                    || usuarioAtual === 'pontug'
+                    || usuarioAtual === 'admin'
+                    || localStorage.getItem('overcritic_is_admin') === 'true';
+
+                return (uid && uid === currentUid) || (dono && dono === usuarioAtual) || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono));
             });
 
-            // Sincroniza a chave pessoal local para o Resumo Rápido da Home
+            // Normaliza cada registro
+            minhas = minhas.map(item => {
+                const title = item.title || item.titulo || 'Sem título';
+                const user = item.user || item.usuario || 'pontuG';
+                const cover = item.cover || item.cover_url || '';
+                const progress = item.progress !== undefined ? Number(item.progress) : 100;
+                const hours = Number(item.hours || item.horas) || 0;
+                const difficulty = item.difficulty || item.dificuldade || 'Moderada';
+                return {
+                    ...item,
+                    title,
+                    user,
+                    cover: resolverCapaOficialJogo(title, cover),
+                    progress,
+                    hours,
+                    difficulty
+                };
+            });
+
+            // Sincroniza sempre a chave pessoal local para o Resumo Rápido da Home
             localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(minhas));
 
             if (termo) {
-                minhas = minhas.filter(item => item.title.toLowerCase().includes(termo));
+                minhas = minhas.filter(item => (item.title || item.titulo || '').toLowerCase().includes(termo));
             }
 
             if (status === 'platinado') {
@@ -2859,11 +3405,14 @@
            HTML DO CARD DE PLATINA
         ═══════════════════════════════════ */
         function criarCardPlatinaHTML(item, isMinhaLista) {
-            const is100 = Number(item.progress) === 100;
-            const badgeTexto = is100 ? '🏆 100% PLATINADO' : `⏳ ${item.progress}% EM BUSCA`;
+            const is100 = (item.progress === undefined || Number(item.progress) === 100);
+            const progressoValor = item.progress !== undefined ? Number(item.progress) : 100;
+            const badgeTexto = is100 ? '🏆 100% PLATINADO' : `⏳ ${progressoValor}% EM BUSCA`;
             const badgeClass = is100 ? 'gold-platina' : '';
 
-            const coverUrl = resolverCapaOficialJogo(item.title, item.cover);
+            const itemTitulo = item.title || item.titulo || 'Jogo';
+            const escapedTitle = itemTitulo.replace(/'/g, "\\'");
+            const coverUrl = resolverCapaOficialJogo(itemTitulo, item.cover);
 
             // Dificuldade com cor apropriada
             let badgeDiffClass = 'diff-badge-moderada';
@@ -2879,6 +3428,7 @@
             const isOwner = currentUser && (currentUser.toLowerCase() === (item.user || '').toLowerCase());
             const isAdmin = typeof window.isAdminUser === 'function' ? window.isAdminUser() : false;
             const canDelete = isMinhaLista || isOwner || isAdmin;
+            const canEdit = isMinhaLista || isOwner || isAdmin;
 
             const currentAvatar = typeof window.getUsuarioAvatarAtual === 'function' ? window.getUsuarioAvatarAtual() : (localStorage.getItem('overcritic_user_avatar') || '🎮');
             const finalAvatar = isOwner ? currentAvatar : (item.avatar || (item.user || 'P').charAt(0).toUpperCase());
@@ -2887,7 +3437,7 @@
             return `
                 <div class="platina-card ${is100 ? 'is-100' : ''}">
                     <div class="platina-cover-wrap">
-                        <img src="${coverUrl}" alt="${item.title}" class="platina-cover" onerror="tratarErroCapaPlatina(this, '${item.title}')">
+                        <img src="${coverUrl}" alt="${escapedTitle}" class="platina-cover" onerror="tratarErroCapaPlatina(this, '${escapedTitle}')">
                         <div class="platina-badge-top">
                             ${badgeTexto}
                         </div>
@@ -2931,10 +3481,16 @@
                                 <span>👏</span> Parabéns! (<strong id="applause_${item.id}" data-applause-count="${item.id}">${item.applause || 0}</strong>)
                             </button>
 
-                            <div style="display: flex; gap: 8px;">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                                 ${item.steamAppID ? `
                                     <button class="btn-applause" style="background: rgba(0, 240, 255, 0.1); border-color: rgba(0, 240, 255, 0.3); color: var(--accent-cyan);" onclick="explorarTrofeusDoJogoDireto('${item.steamAppID}', '${item.title.replace(/'/g, "\\'")}')">
                                         🔍 Troféus
+                                    </button>
+                                ` : ''}
+
+                                ${canEdit ? `
+                                    <button class="btn-edit-mine" onclick="iniciarEdicaoPlatina('${item.id}')" title="Editar informações da platina">
+                                        ✏️ Editar
                                     </button>
                                 ` : ''}
 
@@ -2956,7 +3512,8 @@
         function darAplausos(id) {
             const currentUser = obterUsuarioAtual();
             const feed = obterFeedSalvo();
-            const item = feed.find(p => p.id === id);
+            const strId = String(id);
+            const item = feed.find(p => String(p.id) === strId);
             if (!item) return;
 
             if (!Array.isArray(item.applaudedBy)) {
@@ -3006,7 +3563,8 @@
 
         async function excluirPlatina(id) {
             let feed = obterFeedSalvo();
-            const item = feed.find(p => String(p.id) === String(id));
+            const strId = String(id);
+            const item = feed.find(p => String(p.id) === strId);
             const tituloItem = item ? (item.title || item.titulo) : 'Platina';
             const usuarioItem = item ? (item.user || item.usuario) : '';
             const currentUser = (obterUsuarioAtual() || '').toLowerCase();
@@ -3026,8 +3584,9 @@
             });
             if (!confirmou) return;
 
-            feed = feed.filter(p => String(p.id) !== String(id));
+            feed = feed.filter(p => String(p.id) !== strId && !((p.title || p.titulo) === tituloItem && (p.user || p.usuario) === usuarioItem));
             salvarFeed(feed);
+            localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(feed));
 
             if (window.registrarExclusaoGlobal) {
                 await window.registrarExclusaoGlobal('platina', id, tituloItem, usuarioItem);
@@ -3035,29 +3594,193 @@
                 await excluirPlatinaDoSupabase(id);
             }
 
+            if (window.sbClient) {
+                const numId = Number(strId.replace(/\D/g, '')) || id;
+                if (numId) {
+                    try { await window.sbClient.from('platinas').delete().eq('id', numId); } catch(e) {}
+                }
+                if (tituloItem && usuarioItem) {
+                    try { await window.sbClient.from('platinas').delete().ilike('titulo', tituloItem).ilike('usuario', usuarioItem); } catch(e) {}
+                }
+            }
+
             renderizarFeedComunidade();
             renderizarMinhasPlatinas();
+            renderizarTopMaisPlatinados();
+            atualizarEstatisticasGlobais();
             showToast.success('Registro removido com sucesso!');
         }
+
+        /* ═══════════════════════════════════
+           EDIÇÃO / ALTERAÇÃO DE PLATINAS
+        ═══════════════════════════════════ */
+        function iniciarEdicaoPlatina(id) {
+            const feed = obterFeedSalvo();
+            const strId = String(id);
+            const item = feed.find(p => String(p.id) === strId);
+            if (!item) {
+                mostrarToast('Registro de conquista não encontrado.', '⚠️');
+                return;
+            }
+
+            const currentUser = (obterUsuarioAtual() || '').toLowerCase();
+            const itemUser = (item.user || item.usuario || '').toLowerCase();
+            const isAdmin = typeof window.isAdminUser === 'function' ? window.isAdminUser() : false;
+            const canEdit = !itemUser || itemUser === currentUser || isAdmin;
+
+            if (!canEdit) {
+                mostrarToast('Você só pode alterar as suas próprias conquistas.', '🔒');
+                return;
+            }
+
+            // Define ID no campo oculto
+            const editIdInput = document.getElementById('editingPlatinaId');
+            if (editIdInput) editIdInput.value = item.id;
+
+            // Altera cabeçalho e botão de salvar
+            const formTitle = document.getElementById('formPlatinaTitle');
+            const formSub = document.getElementById('formPlatinaSubtitle');
+            const btnSubmitText = document.getElementById('btnSubmitPlatinaText');
+            const btnSubmitIcon = document.getElementById('btnSubmitPlatinaIcon');
+            const btnCancel = document.getElementById('btnCancelarEdicaoPlatina');
+
+            const itemNome = item.title || item.titulo || 'Jogo';
+            if (formTitle) formTitle.innerHTML = `✏️ Alterar Platina: <span style="color:var(--accent-cyan);">${itemNome}</span>`;
+            if (formSub) formSub.textContent = 'Altere as informações da sua conquista. Ao salvar, os dados serão atualizados diretamente no banco de dados do Supabase e no seu perfil.';
+            if (btnSubmitText) btnSubmitText.textContent = 'Salvar';
+            if (btnSubmitIcon) btnSubmitIcon.textContent = '💾';
+            if (btnCancel) btnCancel.style.display = 'inline-flex';
+
+            // Preenche campos do formulário
+            const titleInput = document.getElementById('platinaTitle');
+            const platformSelect = document.getElementById('platinaPlatform');
+            const coverInput = document.getElementById('platinaCoverUrl');
+            const hoursInput = document.getElementById('platinaHours');
+            const notesInput = document.getElementById('platinaNotes');
+            const totalInput = document.getElementById('platinaTotalTrophies');
+            const unlockedInput = document.getElementById('platinaUnlockedTrophies');
+
+            if (titleInput) titleInput.value = itemNome;
+            if (platformSelect && item.platform) platformSelect.value = item.platform;
+            if (coverInput) coverInput.value = item.cover || item.cover_url || '';
+            if (hoursInput) hoursInput.value = item.hours || item.horas || 0;
+            if (notesInput) notesInput.value = item.notes || item.relato || '';
+
+            // Troféus e Dificuldade
+            const totalOficial = item.totalTrophies || (typeof obterTotalOficialJogo === 'function' ? obterTotalOficialJogo(itemNome, item.steamAppID) : null) || 40;
+            let unlocked = item.unlockedTrophies;
+            if (unlocked === undefined || unlocked === null) {
+                const prog = item.progress !== undefined ? Number(item.progress) : 100;
+                unlocked = prog === 100 ? totalOficial : Math.round((prog / 100) * totalOficial);
+            }
+
+            if (totalInput) totalInput.value = totalOficial;
+            if (unlockedInput) unlockedInput.value = unlocked;
+
+            jogoSelecionadoSteamAppID = item.steamAppID || null;
+
+            if (typeof aplicarDificuldadeOficialFormulario === 'function') {
+                aplicarDificuldadeOficialFormulario(itemNome, item.steamAppID);
+            }
+
+            if (item.difficulty) {
+                const diffSelect = document.getElementById('platinaDifficulty');
+                const diffFinal = document.getElementById('platinaDifficultyFinal');
+                if (diffSelect) {
+                    for (let opt of diffSelect.options) {
+                        if (opt.value.toLowerCase().includes(item.difficulty.toLowerCase().substring(0, 5))) {
+                            diffSelect.value = opt.value;
+                            break;
+                        }
+                    }
+                }
+                if (diffFinal) diffFinal.value = item.difficulty;
+            }
+
+            if (typeof atualizarProgressoTrofeus === 'function') {
+                atualizarProgressoTrofeus();
+            }
+
+            // Preview do Jogo
+            const previewBox = document.getElementById('gamePreviewBox');
+            const previewImg = document.getElementById('previewCoverImg');
+            const previewTitle = document.getElementById('previewTitleText');
+            const previewSub = document.getElementById('previewSubText');
+            if (previewBox && previewImg && previewTitle && previewSub) {
+                previewImg.src = item.cover || resolverCapaOficialJogo(itemNome);
+                previewTitle.textContent = itemNome;
+                previewSub.textContent = `Editando registro existente (ID: ${item.id})`;
+                previewBox.style.display = 'flex';
+            }
+
+            // Alterna para aba de cadastro / edição
+            alternarAba('cadastrar');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            mostrarToast(`Carregado para alteração: "${itemNome}". Modifique e salve!`, '✏️');
+        }
+        window.iniciarEdicaoPlatina = iniciarEdicaoPlatina;
+
+        function cancelarEdicaoPlatina() {
+            const editIdInput = document.getElementById('editingPlatinaId');
+            if (editIdInput) editIdInput.value = '';
+
+            const formTitle = document.getElementById('formPlatinaTitle');
+            const formSub = document.getElementById('formPlatinaSubtitle');
+            const btnSubmitText = document.getElementById('btnSubmitPlatinaText');
+            const btnSubmitIcon = document.getElementById('btnSubmitPlatinaIcon');
+            const btnCancel = document.getElementById('btnCancelarEdicaoPlatina');
+
+            if (formTitle) formTitle.innerHTML = '🏆 Registrar Conquista de Troféus';
+            if (formSub) formSub.textContent = 'Digite o nome do jogo para preencher automaticamente com a capa oficial e dados da internet, ou preencha manualmente.';
+            if (btnSubmitText) btnSubmitText.textContent = 'Salvar';
+            if (btnSubmitIcon) btnSubmitIcon.textContent = '🏆';
+            if (btnCancel) btnCancel.style.display = 'none';
+
+            document.getElementById('platinaRegisterForm')?.reset();
+            const previewBox = document.getElementById('gamePreviewBox');
+            if (previewBox) previewBox.style.display = 'none';
+
+            const inputTotal = document.getElementById('platinaTotalTrophies');
+            const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
+            if (inputTotal) inputTotal.value = 50;
+            if (inputUnlocked) inputUnlocked.value = 50;
+            if (typeof aplicarDificuldadeOficialFormulario === 'function') {
+                aplicarDificuldadeOficialFormulario('', null);
+            }
+            if (typeof atualizarProgressoTrofeus === 'function') {
+                atualizarProgressoTrofeus();
+            }
+            jogoSelecionadoSteamAppID = null;
+        }
+        window.cancelarEdicaoPlatina = cancelarEdicaoPlatina;
 
         /* ═══════════════════════════════════
            ESTATÍSTICAS HERO
         ═══════════════════════════════════ */
         function atualizarEstatisticasGlobais() {
             const feed = obterFeedSalvo();
-            const total100 = feed.filter(p => Number(p.progress) === 100).length;
-            const inProgress = feed.filter(p => Number(p.progress) < 100).length;
+            const total100 = feed.filter(p => (p.progress === undefined || Number(p.progress) === 100)).length;
+            const inProgress = feed.filter(p => (p.progress !== undefined && Number(p.progress) < 100)).length;
 
             let somaProgresso = 0;
-            feed.forEach(p => { somaProgresso += Number(p.progress) || 0; });
+            feed.forEach(p => { 
+                const prog = p.progress !== undefined ? Number(p.progress) : 100;
+                somaProgresso += (isNaN(prog) ? 100 : prog);
+            });
             const media = feed.length > 0 ? Math.round(somaProgresso / feed.length) : 0;
 
             const gamerScore = (total100 * 1000) + (inProgress * 350) + (feed.reduce((acc, cur) => acc + (cur.applause || 0), 0) * 10);
 
-            document.getElementById('statTotalPlatinas').textContent = total100;
-            document.getElementById('statInProgresso').textContent = inProgress;
-            document.getElementById('statMediaConclusao').textContent = `${media}%`;
-            document.getElementById('statGamerScore').textContent = gamerScore.toLocaleString('pt-BR');
+            const elTotal = document.getElementById('statTotalPlatinas');
+            const elProg = document.getElementById('statInProgresso');
+            const elMedia = document.getElementById('statMediaConclusao');
+            const elScore = document.getElementById('statGamerScore');
+
+            if (elTotal) elTotal.textContent = total100;
+            if (elProg) elProg.textContent = inProgress;
+            if (elMedia) elMedia.textContent = `${media}%`;
+            if (elScore) elScore.textContent = gamerScore.toLocaleString('pt-BR');
         }
 
         /* ═══════════════════════════════════
@@ -3205,7 +3928,16 @@
             } else if (typeof obterTotalOficialJogo === 'function') {
                 totalConquistas = obterTotalOficialJogo(game.external, game.steamAppID);
             }
-            document.getElementById('platinaTrophiesCount').value = `${totalConquistas} / ${totalConquistas} Troféus (100%)`;
+
+            // Define quantidade exata de troféus e desbloqueados
+            const inputTotal = document.getElementById('platinaTotalTrophies');
+            const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
+            if (inputTotal) inputTotal.value = totalConquistas;
+            if (inputUnlocked) inputUnlocked.value = totalConquistas;
+
+            // Aplica dificuldade oficial decidida pelo site (com bloqueio anti-exploit)
+            aplicarDificuldadeOficialFormulario(game.external, game.steamAppID);
+            atualizarProgressoTrofeus();
 
             const previewBox = document.getElementById('gamePreviewBox');
             const previewImg = document.getElementById('previewCoverImg');
@@ -3221,9 +3953,7 @@
         }
 
         function marcarCemPorCento() {
-            document.getElementById('platinaProgress').value = 100;
-            document.getElementById('progressValueDisplay').textContent = '100%';
-            mostrarToast('Progresso definido para 100% PLATINADO! 🏆', '👑');
+            marcarTodosTrofeusDesbloqueados();
         }
 
         function puxarParaCadastroDireto(titulo, capa, dificuldade) {
@@ -3240,7 +3970,14 @@
             } else if (typeof obterTotalOficialJogo === 'function') {
                 total = obterTotalOficialJogo(titulo, null);
             }
-            document.getElementById('platinaTrophiesCount').value = `${total} / ${total} Troféus (100%)`;
+
+            const inputTotal = document.getElementById('platinaTotalTrophies');
+            const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
+            if (inputTotal) inputTotal.value = total;
+            if (inputUnlocked) inputUnlocked.value = total;
+
+            aplicarDificuldadeOficialFormulario(titulo, null);
+            atualizarProgressoTrofeus();
 
             const previewBox = document.getElementById('gamePreviewBox');
             const previewImg = document.getElementById('previewCoverImg');
@@ -3249,24 +3986,31 @@
 
             previewImg.src = capaOficial;
             previewTitle.textContent = titulo;
-            previewSub.textContent = `Carregado do Top Platinados • ${total} Conquistas • ${dificuldade}`;
+            previewSub.textContent = `Carregado do Top Platinados • ${total} Conquistas Oficiais`;
             previewBox.style.display = 'flex';
 
-            marcarCemPorCento();
-            mostrarToast(`"${titulo}" preenchido com 100%! Finalize os detalhes para salvar.`, '✨');
+            mostrarToast(`"${titulo}" preenchido com ${total} troféus oficiais!`, '✨');
         }
 
         // Envio do Formulário de Cadastro
-        document.getElementById('platinaRegisterForm').addEventListener('submit', (e) => {
+        document.getElementById('platinaRegisterForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const title = document.getElementById('platinaTitle').value.trim();
             const platform = document.getElementById('platinaPlatform').value;
             let cover = document.getElementById('platinaCoverUrl').value.trim();
-            const progress = Number(document.getElementById('platinaProgress').value);
-            const difficulty = document.getElementById('platinaDifficulty').value;
+
+            const unlocked = parseInt(document.getElementById('platinaUnlockedTrophies')?.value) || 0;
+            const total = parseInt(document.getElementById('platinaTotalTrophies')?.value) || 1;
+            const progress = Math.min(100, Math.round((unlocked / total) * 100));
+
+            // Lê a dificuldade oficial mesmo com o select desabilitado
+            const difficultySelect = document.getElementById('platinaDifficulty');
+            const difficultyFinalInput = document.getElementById('platinaDifficultyFinal');
+            const difficulty = (difficultyFinalInput?.value) || (difficultySelect?.value) || '5/10 - Moderada 🟡';
+
             const hours = Number(document.getElementById('platinaHours').value) || 0;
-            const trophiesCount = document.getElementById('platinaTrophiesCount').value.trim() || 'Conquistas registradas';
+            const trophiesCount = `${unlocked} / ${total} Troféus (${progress}%)`;
             const notes = document.getElementById('platinaNotes').value.trim();
 
             if (!title) return showToast.warning('Por favor, informe o nome do jogo.');
@@ -3282,38 +4026,81 @@
             else if (diffLower.includes('difícil')) diffCat = 'dificil';
             else if (diffLower.includes('lendária') || diffLower.includes('insana')) diffCat = 'lendaria';
 
-            const novoRegistro = {
-                id: 'plat_' + Date.now(),
-                userId: localStorage.getItem('overcritic_user_id') || null,
+            const editingId = document.getElementById('editingPlatinaId')?.value;
+            const currentUser = obterUsuarioAtual();
+
+            let feed = obterFeedSalvo();
+            let original = null;
+            if (editingId) {
+                original = feed.find(p => String(p.id) === String(editingId));
+            }
+
+            const idNum = editingId ? (original?.id !== undefined ? original.id : (Number(editingId) || editingId)) : Date.now();
+
+            const registroSalvar = {
+                id: idNum,
+                userId: original?.userId || original?.user_id || localStorage.getItem('overcritic_user_id') || null,
                 title,
                 platform,
                 cover,
                 progress,
+                unlockedTrophies: unlocked,
+                totalTrophies: total,
                 difficulty,
                 difficultyCategory: diffCat,
                 hours,
                 trophiesCount,
                 notes,
-                user: obterUsuarioAtual(),
-                date: 'Hoje às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                applause: 0,
-                applaudedBy: [],
-                steamAppID: jogoSelecionadoSteamAppID
+                user: original?.user || original?.usuario || currentUser,
+                date: original ? (String(original.date || '').includes('(editado)') ? original.date : `${original.date || 'Recente'} (editado)`) : ('Hoje às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })),
+                applause: original?.applause || 0,
+                applaudedBy: original?.applaudedBy || [],
+                steamAppID: jogoSelecionadoSteamAppID || original?.steamAppID || null
             };
 
-            const feed = obterFeedSalvo();
-            feed.unshift(novoRegistro);
+            // Remove de qualquer lista de exclusão global (desbloqueia se havia sido apagado anteriormente)
+            if (window.removerExclusaoGlobal) {
+                window.removerExclusaoGlobal('platina', idNum, title, registroSalvar.user);
+            }
+
+            if (editingId) {
+                const idx = feed.findIndex(p => String(p.id) === String(editingId));
+                if (idx !== -1) {
+                    feed[idx] = registroSalvar;
+                } else {
+                    feed.unshift(registroSalvar);
+                }
+            } else {
+                // Remove qualquer versão antiga/duplicada do mesmo jogo desse usuário antes de adicionar a nova
+                feed = feed.filter(p => {
+                    const pTitle = (p.title || p.titulo || '').trim().toLowerCase();
+                    const pUser = (p.user || p.usuario || '').trim().toLowerCase();
+                    return !(pTitle === title.trim().toLowerCase() && pUser === currentUser.toLowerCase());
+                });
+                feed.unshift(registroSalvar);
+            }
+
             salvarFeed(feed);
-            salvarPlatinaNoSupabase(novoRegistro);
+            localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(feed));
+            localStorage.setItem('overcritic_platinas_feed', JSON.stringify(feed));
+            localStorage.setItem('overcritic_platinas', JSON.stringify(feed));
 
-            document.getElementById('platinaRegisterForm').reset();
-            document.getElementById('gamePreviewBox').style.display = 'none';
-            document.getElementById('progressValueDisplay').textContent = '100%';
-            document.getElementById('platinaProgress').value = 100;
-            jogoSelecionadoSteamAppID = null;
+            // Sincroniza imediatamente com a nuvem Supabase (passa isEdicao=true se for edição para update no banco)
+            await salvarPlatinaNoSupabase(registroSalvar, !!editingId);
 
-            mostrarToast(`Platina de "${title}" registrada com sucesso!`, '🏆');
-            alternarAba('feed');
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.recalcularEstatisticasGlobais === 'function') {
+                window.OvercriticGamification.recalcularEstatisticasGlobais();
+            }
+
+            cancelarEdicaoPlatina();
+
+            renderizarMinhasPlatinas();
+            renderizarTopMaisPlatinados();
+            renderizarFeedComunidade();
+            atualizarEstatisticasGlobais();
+
+            mostrarToast(editingId ? `Platina de "${title}" alterada com sucesso no Supabase e no seu perfil!` : `Platina de "${title}" registrada com sucesso! (${unlocked}/${total} troféus)`, '🏆');
+            alternarAba('minhas');
         });
 
         /* ═══════════════════════════════════
@@ -3884,6 +4671,375 @@
             return 40;
         }
 
+        /* ══════════════════════════════════════════════════════════════════════════
+           CURADORIA OFICIAL OVERCRITIC: BANCO DE DIFICULDADES E XP ANTI-EXPLOIT
+        ══════════════════════════════════════════════════════════════════════════ */
+        const DIFICULDADE_OFICIAL_JOGOS = {
+            // LENDÁRIA (9-10/10) • +600 XP (Exigem moderação estrita / curadoria oficial)
+            '814380': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Parries milimétricos, bosses impiedosos como Isshin e sem margem para erro.' },
+            'sekiro': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Parries milimétricos, bosses impiedosos como Isshin e sem margem para erro.' },
+            'sekiro: shadows die twice': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Parries milimétricos, bosses impiedosos como Isshin e sem margem para erro.' },
+            '1086940': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Modo Honra (morte permanente da campanha sem recarregar save) e 150h+ de profundidade.' },
+            "baldur's gate 3": { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Modo Honra (morte permanente da campanha sem recarregar save) e 150h+ de profundidade.' },
+            'baldurs gate 3': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Modo Honra (morte permanente da campanha sem recarregar save) e 150h+ de profundidade.' },
+            '367520': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Panteão de Hallownest com 42 bosses consecutivos em sequência implacável.' },
+            'hollow knight': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Panteão de Hallownest com 42 bosses consecutivos em sequência implacável.' },
+            '268910': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Todos os chefes no modo Especialista com Rank A/S e desafios Pacifista.' },
+            'cuphead': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Todos os chefes no modo Especialista com Rank A/S e desafios Pacifista.' },
+            '504230': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Fitas do Lado B e C dos 8 capítulos e morangos dourados sem morrer.' },
+            'celeste': { value: '10/10 - Lendária / Insana 👑', label: '10/10 - Lendária / Insana 👑', category: 'lendaria', xp: 600, motivo: 'Curadoria Oficial: Fitas do Lado B e C dos 8 capítulos e morangos dourados sem morrer.' },
+
+            // DIFÍCIL (7-8/10) • +400 XP
+            '1245620': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 42 conquistas oficiais, Malenia sem morrer e conquista dos 3 finais lendários.' },
+            'elden ring': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 42 conquistas oficiais, Malenia sem morrer e conquista dos 3 finais lendários.' },
+            '2358720': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 81 conquistas, todos os espíritos, curiosidades e Erlang Shen no NG+.' },
+            'black myth: wukong': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 81 conquistas, todos os espíritos, curiosidades e Erlang Shen no NG+.' },
+            'black myth wukong': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 81 conquistas, todos os espíritos, curiosidades e Erlang Shen no NG+.' },
+            'bloodborne_ps4': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Cálice de Pthumeru Ihyll, Cão de Caça Amaldiçoado e Rainha Yharnam.' },
+            'bloodborne': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Cálice de Pthumeru Ihyll, Cão de Caça Amaldiçoado e Rainha Yharnam.' },
+            '374320': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todas as magias/anéis, farm extenso de itens de pacto e 3 jornadas.' },
+            'dark souls iii': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todas as magias/anéis, farm extenso de itens de pacto e 3 jornadas.' },
+            'dark souls 3': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todas as magias/anéis, farm extenso de itens de pacto e 3 jornadas.' },
+            '2114200': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Honra do Cavaleiro (todas as armas raras de caudas e chefes).' },
+            'dark souls: remastered': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Honra do Cavaleiro (todas as armas raras de caudas e chefes).' },
+            'dark souls remastered': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Honra do Cavaleiro (todas as armas raras de caudas e chefes).' },
+            '335300': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todos os feitiços e milagres no NG++ do Chanceler Wellager.' },
+            'dark souls ii': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todos os feitiços e milagres no NG++ do Chanceler Wellager.' },
+            '1627720': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Sistema de parry exigente, chefes impiedosos e 3 finais de humanidade.' },
+            'lies of p': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Sistema de parry exigente, chefes impiedosos e 3 finais de humanidade.' },
+            '2050650': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Conclusão no Profissional com Rank S+ (menos de 5h30 e máx 15 saves).' },
+            'resident evil 4': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Conclusão no Profissional com Rank S+ (menos de 5h30 e máx 15 saves).' },
+            'resident evil 4 remake': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Conclusão no Profissional com Rank S+ (menos de 5h30 e máx 15 saves).' },
+            '1174180': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 70 medalhas de ouro em missões, Zoólogo/Especialista em peles e 100% de Arthur.' },
+            'red dead redemption 2': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 70 medalhas de ouro em missões, Zoólogo/Especialista em peles e 100% de Arthur.' },
+            'rdr2': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 70 medalhas de ouro em missões, Zoólogo/Especialista em peles e 100% de Arthur.' },
+            '271590': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Nível 100 no GTA Online, 70 medalhas de ouro e 100% de colecionáveis de San Andreas.' },
+            'grand theft auto v': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Nível 100 no GTA Online, 70 medalhas de ouro e 100% de colecionáveis de San Andreas.' },
+            'gta 5': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Nível 100 no GTA Online, 70 medalhas de ouro e 100% de colecionáveis de San Andreas.' },
+            'gta v': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Nível 100 no GTA Online, 70 medalhas de ouro e 100% de colecionáveis de San Andreas.' },
+            '582010': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Farm colossal de coroas gigantes e miniaturas de dezenas de monstros (250h+).' },
+            'monster hunter: world': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Farm colossal de coroas gigantes e miniaturas de dezenas de monstros (250h+).' },
+            'monster hunter world': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Farm colossal de coroas gigantes e miniaturas de dezenas de monstros (250h+).' },
+            '1145360': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Epílogo completo de Zagreu, Calor 16 e todas as lembranças do submundo.' },
+            'hades': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Epílogo completo de Zagreu, Calor 16 e todas as lembranças do submundo.' },
+            '105600': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 115 conquistas, Senhor da Lua, purificação completa do mundo e todas as armaduras.' },
+            'terraria': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: 115 conquistas, Senhor da Lua, purificação completa do mundo e todas as armaduras.' },
+            '208650': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todos os 243 troféus do Charada, Cavaleiro Perfeito no NG+ e combo contínuo.' },
+            'batman: arkham knight': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todos os 243 troféus do Charada, Cavaleiro Perfeito no NG+ e combo contínuo.' },
+            'arkham knight': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Todos os 243 troféus do Charada, Cavaleiro Perfeito no NG+ e combo contínuo.' },
+            '1888160': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Rank S em todas as 59 missões de Rubicon e 3 finais completos.' },
+            'armored core vi': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Rank S em todas as 59 missões de Rubicon e 3 finais completos.' },
+            '782330': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Modo Vidas Extras e desafios mestre de Slayer.' },
+            'doom eternal': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Modo Vidas Extras e desafios mestre de Slayer.' },
+            '413150': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Jornada do Rei da Pradaria sem morrer (Fector\'s Challenge) e perfeição 100% da fazenda.' },
+            'stardew valley': { value: '8/10 - Difícil 💀', label: '8/10 - Difícil 💀', category: 'dificil', xp: 400, motivo: 'Curadoria Oficial: Jornada do Rei da Pradaria sem morrer (Fector\'s Challenge) e perfeição 100% da fazenda.' },
+
+            // MODERADA (4-6/10) • +250 XP
+            '1091500': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Limpeza completa de todos os distritos de Night City e desbloqueio de todos os finais de V.' },
+            'cyberpunk 2077': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Limpeza completa de todos os distritos de Night City e desbloqueio de todos os finais de V.' },
+            'cyberpunk': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Limpeza completa de todos os distritos de Night City e desbloqueio de todos os finais de V.' },
+            '2215430': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Santuários, bambus, contos do vento e libertação de todos os acampamentos mongóis.' },
+            'ghost of tsushima': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Santuários, bambus, contos do vento e libertação de todos os acampamentos mongóis.' },
+            '2322010': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os 9 reinos 100%, Rei Hrólf Kraki e Rainha Gná em Muspelheim.' },
+            'god of war ragnarok': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os 9 reinos 100%, Rei Hrólf Kraki e Rainha Gná em Muspelheim.' },
+            'god of war ragnarök': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os 9 reinos 100%, Rei Hrólf Kraki e Rainha Gná em Muspelheim.' },
+            '1593500': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os corvos de Odin e Rainha das Valquírias Sigrun.' },
+            'god of war': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os corvos de Odin e Rainha das Valquírias Sigrun.' },
+            'god of war (2018)': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os corvos de Odin e Rainha das Valquírias Sigrun.' },
+            '292030': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Dificuldade Marcha da Morte, colecionador de cartas de Gwent e todos os contratos de bruxo.' },
+            'the witcher 3: wild hunt': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Dificuldade Marcha da Morte, colecionador de cartas de Gwent e todos os contratos de bruxo.' },
+            'the witcher 3': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Dificuldade Marcha da Morte, colecionador de cartas de Gwent e todos os contratos de bruxo.' },
+            '1888930': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Colecionáveis, conversas opcionais, piadas da Ellie e bancadas de armas.' },
+            'the last of us part i': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Colecionáveis, conversas opcionais, piadas da Ellie e bancadas de armas.' },
+            'the last of us part 1': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Colecionáveis, conversas opcionais, piadas da Ellie e bancadas de armas.' },
+            'the last of us': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Colecionáveis, conversas opcionais, piadas da Ellie e bancadas de armas.' },
+            'the last of us part ii': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os colecionáveis de Seattle e aprimoramento completo de habilidades.' },
+            'the last of us 2': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os colecionáveis de Seattle e aprimoramento completo de habilidades.' },
+            '883710': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Rank S no Intenso com Leon e Claire e todos os bonecos Mr. Raccoon.' },
+            'resident evil 2': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Rank S no Intenso com Leon e Claire e todos os bonecos Mr. Raccoon.' },
+            '952060': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Modos Pesadelo e Inferno com Jill Valentine.' },
+            'resident evil 3': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Modos Pesadelo e Inferno com Jill Valentine.' },
+            '1196590': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Dificuldade Vilarejo das Sombras e Rank S em todas as fases do Mercenários.' },
+            'resident evil village': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Dificuldade Vilarejo das Sombras e Rank S em todas as fases do Mercenários.' },
+            '377160': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: 84 conquistas, 100% de felicidade no assentamento e todos os bobbleheads.' },
+            'fallout 4': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: 84 conquistas, 100% de felicidade no assentamento e todos os bobbleheads.' },
+            '489830': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: 75 conquistas, 15 artefatos daédricos e dragões lendários no nível 78.' },
+            'the elder scrolls v: skyrim': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: 75 conquistas, 15 artefatos daédricos e dragões lendários no nível 78.' },
+            'skyrim': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: 75 conquistas, 15 artefatos daédricos e dragões lendários no nível 78.' },
+            '1151640': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todas as zonas de caça com sóis ardentes e todos os caldeirões.' },
+            'horizon zero dawn': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todas as zonas de caça com sóis ardentes e todos os caldeirões.' },
+            '2420110': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Arenas de combate, drones de vigilância e caldeirões do Oeste Proibido.' },
+            'horizon forbidden west': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Arenas de combate, drones de vigilância e caldeirões do Oeste Proibido.' },
+            '1687950': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os confidentes no máximo, Palácio do 3º semestre e Mementos 100%.' },
+            'persona 5 royal': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os confidentes no máximo, Palácio do 3º semestre e Mementos 100%.' },
+            '1850570': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Conectar todas as instalações ao nível 5 e 80 entregas premium Rank S.' },
+            'death stranding': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Conectar todas as instalações ao nível 5 e 80 entregas premium Rank S.' },
+            'death stranding director\'s cut': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Conectar todas as instalações ao nível 5 e 80 entregas premium Rank S.' },
+            '2138330': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todas as palavras de poder, canções do escritor e colecionáveis de Saga.' },
+            'alan wake 2': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todas as palavras de poder, canções do escritor e colecionáveis de Saga.' },
+            '2124490': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os múltiplos finais psicológicos e quebra-cabeças no difícil.' },
+            'silent hill 2': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Todos os múltiplos finais psicológicos e quebra-cabeças no difícil.' },
+            '553850': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Extração no nível Impossível sem baixas e eliminação de Titãs/Bile Titans.' },
+            'helldivers 2': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Extração no nível Impossível sem baixas e eliminação de Titãs/Bile Titans.' },
+            '1623730': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Captura de Pals lendários e derrotar todos os chefes de torres das facções.' },
+            'palworld': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Captura de Pals lendários e derrotar todos os chefes de torres das facções.' },
+            '1462040': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Conclusão no modo Difícil e derrotar o Orgulho e Alegria no Simulador Shinra.' },
+            'final fantasy vii remake': { value: '5/10 - Moderada 🟡', label: '5/10 - Moderada 🟡', category: 'moderada', xp: 250, motivo: 'Curadoria Oficial: Conclusão no modo Difícil e derrotar o Orgulho e Alegria no Simulador Shinra.' },
+
+            // FÁCIL / TRANQUILA (1-3/10) • +150 XP
+            'astro_bot_ps5': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Resgate de todos os 300 Bots VIPs com pura diversão e sem troféus frustrantes.' },
+            'astro bot': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Resgate de todos os 300 Bots VIPs com pura diversão e sem troféus frustrantes.' },
+            '1817070': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: 100% dos distritos de Nova York, ninhos de simbiontes e sem troféus de dificuldade.' },
+            "marvel's spider-man 2": { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: 100% dos distritos de Nova York, ninhos de simbiontes e sem troféus de dificuldade.' },
+            'spider-man 2': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: 100% dos distritos de Nova York, ninhos de simbiontes e sem troféus de dificuldade.' },
+            '1817190': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de bases de Fisk e Demônios, todas as roupas e mochilas de Peter Parker.' },
+            "marvel's spider-man remastered": { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de bases de Fisk e Demônios, todas as roupas e mochilas de Peter Parker.' },
+            'spider-man': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de bases de Fisk e Demônios, todas as roupas e mochilas de Peter Parker.' },
+            '1332010': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Aventura aconchegante do gatinho, memórias do B-12 e speedrun relaxante de 2 horas.' },
+            'stray': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Aventura aconchegante do gatinho, memórias do B-12 e speedrun relaxante de 2 horas.' },
+            '1426210': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Cooperativo fantástico sem troféus perdíveis pesados, apenas mini-games criativos.' },
+            'it takes two': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Cooperativo fantástico sem troféus perdíveis pesados, apenas mini-games criativos.' }
+        };
+
+        function obterDificuldadeOficialJogo(titulo, steamAppID) {
+            if (steamAppID && DIFICULDADE_OFICIAL_JOGOS[steamAppID]) {
+                return { ...DIFICULDADE_OFICIAL_JOGOS[steamAppID], isCurated: true };
+            }
+            if (!titulo) {
+                return {
+                    value: '5/10 - Moderada 🟡',
+                    label: '5/10 - Moderada 🟡',
+                    category: 'moderada',
+                    xp: 250,
+                    isCurated: false,
+                    motivo: 'Jogo não localizado no catálogo oficial. Seleção manual liberada até 8/10 (Difícil).'
+                };
+            }
+
+            const tLower = titulo.toLowerCase().trim();
+            if (DIFICULDADE_OFICIAL_JOGOS[tLower]) {
+                return { ...DIFICULDADE_OFICIAL_JOGOS[tLower], isCurated: true };
+            }
+
+            // Testa aliases conhecidos
+            if (ALIASES_JOGOS && ALIASES_JOGOS[tLower]) {
+                const aliasNorm = ALIASES_JOGOS[tLower].toLowerCase().trim();
+                if (DIFICULDADE_OFICIAL_JOGOS[aliasNorm]) {
+                    return { ...DIFICULDADE_OFICIAL_JOGOS[aliasNorm], isCurated: true };
+                }
+            }
+
+            // Busca normalizada
+            const norm = tLower.replace(/[^a-z0-9]/g, '');
+            for (const k in DIFICULDADE_OFICIAL_JOGOS) {
+                const kNorm = k.replace(/[^a-z0-9]/g, '');
+                if (norm === kNorm || (norm.length > 3 && (norm.includes(kNorm) || kNorm.includes(norm)))) {
+                    return { ...DIFICULDADE_OFICIAL_JOGOS[k], isCurated: true };
+                }
+            }
+
+            return {
+                value: '5/10 - Moderada 🟡',
+                label: '5/10 - Moderada 🟡',
+                category: 'moderada',
+                xp: 250,
+                isCurated: false,
+                motivo: 'Jogo não listado no catálogo verificado. Indicação manual liberada até 8/10 (Difícil).'
+            };
+        }
+
+        function aplicarDificuldadeOficialFormulario(titulo, steamAppID) {
+            const diffData = obterDificuldadeOficialJogo(titulo, steamAppID);
+            const select = document.getElementById('platinaDifficulty');
+            const hiddenDiff = document.getElementById('platinaDifficultyFinal');
+            const statusBadge = document.getElementById('diffStatusBadge');
+            const badgeBox = document.getElementById('diffCuratedBadge');
+            const badgeTitle = document.getElementById('diffCuratedTitle');
+            const badgeReason = document.getElementById('diffCuratedReason');
+            const badgeIcon = document.getElementById('diffCuratedIcon');
+            const totalBadge = document.getElementById('totalOfficialBadge');
+
+            if (!select) return;
+
+            // Busca a opção correspondente no select
+            let encontrou = false;
+            for (let i = 0; i < select.options.length; i++) {
+                const optVal = select.options[i].value;
+                if (optVal.includes(diffData.category) || optVal.includes(diffData.value) || diffData.value.includes(optVal)) {
+                    select.selectedIndex = i;
+                    encontrou = true;
+                    break;
+                }
+            }
+            if (!encontrou) {
+                select.value = diffData.value;
+            }
+
+            if (hiddenDiff) hiddenDiff.value = select.value;
+
+            // Opção Lendária: só permitida para jogos com curadoria oficial
+            const optLendaria = select.querySelector('option[value*="Lendária"], option[value*="10/10"]');
+
+            if (diffData.isCurated) {
+                // Jogo Verificado Oficialmente: bloqueia edição para impedir farming indevido de XP
+                select.disabled = true;
+                select.style.opacity = '0.92';
+                select.style.cursor = 'not-allowed';
+                select.style.borderColor = 'var(--accent-gold)';
+
+                if (optLendaria) {
+                    optLendaria.disabled = false;
+                    optLendaria.textContent = '👑 10/10 - Lendária / Insana (Baldur\'s Gate 3 / Sekiro) • +600 XP';
+                }
+
+                if (statusBadge) {
+                    statusBadge.className = 'diff-chip-status';
+                    statusBadge.innerHTML = '🔒 Curadoria Oficial';
+                }
+
+                if (totalBadge) {
+                    totalBadge.className = 'official-verified-tag';
+                    totalBadge.textContent = '✓ Catálogo';
+                }
+
+                if (badgeBox) {
+                    badgeBox.className = 'diff-curated-badge verified';
+                    if (badgeIcon) badgeIcon.textContent = '🔒';
+                    if (badgeTitle) badgeTitle.innerHTML = `Dificuldade Oficial Fixada pelo Overcritic <span class="diff-xp-tag">+${diffData.xp} XP</span>`;
+                    if (badgeReason) badgeReason.textContent = diffData.motivo;
+                    badgeBox.style.display = 'flex';
+                }
+            } else {
+                // Jogo Não-Catalogado: seleção manual liberada até 8/10
+                select.disabled = false;
+                select.style.opacity = '1';
+                select.style.cursor = 'pointer';
+                select.style.borderColor = 'var(--glass-border)';
+
+                if (optLendaria) {
+                    optLendaria.disabled = true;
+                    optLendaria.textContent = '🔒 10/10 - Lendária (Requer Verificação Oficial)';
+                    if (select.value.includes('Lendária') || select.value.includes('10/10')) {
+                        select.value = '8/10 - Difícil 💀';
+                        if (hiddenDiff) hiddenDiff.value = select.value;
+                    }
+                }
+
+                if (statusBadge) {
+                    statusBadge.className = 'diff-chip-status uncatalogued';
+                    statusBadge.innerHTML = '⚙️ Manual';
+                }
+
+                if (totalBadge) {
+                    totalBadge.className = 'official-verified-tag manual';
+                    totalBadge.textContent = '✏️ Manual';
+                }
+
+                if (badgeBox) {
+                    badgeBox.className = 'diff-curated-badge uncatalogued';
+                    if (badgeIcon) badgeIcon.textContent = '⚙️';
+                    if (badgeTitle) badgeTitle.innerHTML = `Dificuldade Sugerida pelo Jogador <span class="diff-xp-tag">+${diffData.xp} XP</span>`;
+                    if (badgeReason) badgeReason.textContent = 'Jogo não listado no catálogo oficial. Escolha a dificuldade estimada (Lendária 10/10 é reservada para títulos oficiais para garantir o ranking justo).';
+                    badgeBox.style.display = 'flex';
+                }
+            }
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           CONTROLE DE CONQUISTAS E TROFÉUS (PROGRESSO EM QUANTIDADE EXATA)
+        ══════════════════════════════════════════════════════════════════════════ */
+        function atualizarProgressoTrofeus() {
+            const inputTotal = document.getElementById('platinaTotalTrophies');
+            const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
+            const range = document.getElementById('platinaTrophiesRange');
+            const textCount = document.getElementById('trophyProgressCountText');
+            const badgePct = document.getElementById('trophyProgressPctBadge');
+            const barFill = document.getElementById('trophyBarFill');
+            const hiddenProgress = document.getElementById('platinaProgress');
+            const hiddenTrophiesCount = document.getElementById('platinaTrophiesCount');
+
+            if (!inputTotal || !inputUnlocked) return;
+
+            let total = parseInt(inputTotal.value);
+            if (isNaN(total) || total < 1) total = 1;
+
+            let unlocked = parseInt(inputUnlocked.value);
+            if (isNaN(unlocked) || unlocked < 0) unlocked = 0;
+            if (unlocked > total) {
+                unlocked = total;
+                inputUnlocked.value = total;
+            }
+
+            if (range) {
+                range.max = total;
+                range.value = unlocked;
+            }
+
+            const pct = Math.min(100, Math.round((unlocked / total) * 100));
+
+            if (textCount) {
+                textCount.textContent = `${unlocked} de ${total} Troféus Desbloqueados`;
+            }
+
+            if (badgePct) {
+                if (pct === 100) {
+                    badgePct.className = 'trophy-pct-badge is-100';
+                    badgePct.innerHTML = '100% • Platina Conquistada! 🏆';
+                } else {
+                    badgePct.className = 'trophy-pct-badge is-progress';
+                    badgePct.innerHTML = `${pct}% • Em Busca da Platina ⏳`;
+                }
+            }
+
+            if (barFill) {
+                barFill.style.width = pct + '%';
+                if (pct === 100) {
+                    barFill.classList.add('is-100');
+                } else {
+                    barFill.classList.remove('is-100');
+                }
+            }
+
+            if (hiddenProgress) hiddenProgress.value = pct;
+            if (hiddenTrophiesCount) hiddenTrophiesCount.value = `${unlocked} / ${total} Troféus (${pct}%)`;
+        }
+
+        function marcarTodosTrofeusDesbloqueados() {
+            const inputTotal = document.getElementById('platinaTotalTrophies');
+            const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
+            if (!inputTotal || !inputUnlocked) return;
+
+            const total = Math.max(1, parseInt(inputTotal.value) || 1);
+            inputUnlocked.value = total;
+            atualizarProgressoTrofeus();
+            mostrarToast(`Todos os ${total} troféus marcados como conquistados! Platina 100% 🏆`, '👑');
+        }
+
+        // Listener dinâmico para auto-identificar jogo digitado manualmente no formulário
+        let debounceTituloTimer = null;
+        document.getElementById('platinaTitle')?.addEventListener('input', function() {
+            clearTimeout(debounceTituloTimer);
+            const val = this.value.trim();
+            debounceTituloTimer = setTimeout(() => {
+                if (val.length >= 2) {
+                    const totalOficial = obterTotalOficialJogo(val, null);
+                    const inputTotal = document.getElementById('platinaTotalTrophies');
+                    const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
+                    if (inputTotal && totalOficial && totalOficial !== 40) {
+                        inputTotal.value = totalOficial;
+                        if (inputUnlocked && parseInt(inputUnlocked.value) > totalOficial) {
+                            inputUnlocked.value = totalOficial;
+                        }
+                    }
+                    aplicarDificuldadeOficialFormulario(val, null);
+                    atualizarProgressoTrofeus();
+                } else if (!val) {
+                    aplicarDificuldadeOficialFormulario('', null);
+                    atualizarProgressoTrofeus();
+                }
+            }, 350);
+        });
+
         let listaTrofeusAtual = [];
         let filtroTipoTrofeuAtual = 'todos';
         let filtroTextoTrofeuAtual = '';
@@ -4434,7 +5590,13 @@
             jogoSelecionadoSteamAppID = jogoAtualConsultado.steamAppID;
 
             const total = jogoAtualConsultado.total || 40;
-            document.getElementById('platinaTrophiesCount').value = `${total} / ${total} Troféus (100%)`;
+            const inputTotal = document.getElementById('platinaTotalTrophies');
+            const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
+            if (inputTotal) inputTotal.value = total;
+            if (inputUnlocked) inputUnlocked.value = total;
+
+            aplicarDificuldadeOficialFormulario(jogoAtualConsultado.title, jogoAtualConsultado.steamAppID);
+            atualizarProgressoTrofeus();
 
             const previewBox = document.getElementById('gamePreviewBox');
             const previewImg = document.getElementById('previewCoverImg');
@@ -4446,8 +5608,7 @@
             previewSub.textContent = `Carregado do Explorador • ${total} Conquistas Oficiais`;
             previewBox.style.display = 'flex';
 
-            marcarCemPorCento();
-            mostrarToast('Jogo e total de conquistas pré-preenchidos para registrar!', '✨');
+            mostrarToast(`"${jogoAtualConsultado.title}" preenchido com ${total} troféus oficiais!`, '✨');
         }
 
         /* ═══════════════════════════════════
@@ -4470,14 +5631,39 @@
         /* ═══════════════════════════════════
            INICIALIZAÇÃO
         ═══════════════════════════════════ */
-        window.addEventListener('DOMContentLoaded', () => {
-            configurarSugestoesExploradorTrofeus();
-            atualizarDisplayUsuario();
-            atualizarEstatisticasGlobais();
-            renderizarTopMaisPlatinados();
-            renderizarFeedComunidade();
-            renderizarMinhasPlatinas();
-            sincronizarPlatinasSupabase();
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                configurarSugestoesExploradorTrofeus();
+                aplicarDificuldadeOficialFormulario('', null);
+                atualizarProgressoTrofeus();
+                atualizarDisplayUsuario();
+                atualizarEstatisticasGlobais();
+                renderizarTopMaisPlatinados();
+                renderizarFeedComunidade();
+                renderizarMinhasPlatinas();
+
+                // Detecta aba indicada na URL ou abre em Minha Coleção Pessoal imediatamente
+                const params = new URLSearchParams(window.location.search);
+                const abaAlvo = params.get('tab') || params.get('aba') || window.location.hash.replace('#', '');
+                if (abaAlvo && ['mais_platinados', 'feed', 'minhas', 'cadastrar', 'api'].includes(abaAlvo)) {
+                    alternarAba(abaAlvo);
+                } else {
+                    alternarAba('minhas');
+                }
+            } catch (err) {
+                console.warn('Aviso na inicialização local das platinas:', err);
+            }
+
+            // Sincroniza nuvem em segundo plano com auto-recuperação
+            try {
+                await sincronizarPlatinasSupabase();
+                atualizarEstatisticasGlobais();
+                renderizarMinhasPlatinas();
+                renderizarFeedComunidade();
+                renderizarTopMaisPlatinados();
+            } catch (err) {
+                console.warn('Aviso ao sincronizar platinas com nuvem:', err);
+            }
         });
     </script>
 </body>

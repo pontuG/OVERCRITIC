@@ -17,15 +17,32 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Season Reset v26.10.7: Zeramento Geral Imediato (Preserva Usuários e Sessões) -->
+    <script>
+        (function() {
+            var RESET_KEY = 'overcritic_season_reset_v26_10_7_run_v2';
+            if (localStorage.getItem(RESET_KEY) !== 'concluido') {
+                var keysParaZerar = [
+                    'overcritic_reviews', 'overcritic_jogos', 'overclock_jogos',
+                    'OVERCRITIC_MIDIAS', 'overcritic_midias',
+                    'overcritic_minhas_platinas', 'overcritic_platinas_feed', 'overcritic_platinas', 'overclock_platinas', 'platinasSalvas',
+                    'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
+                ];
+                keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.setItem(RESET_KEY, 'concluido');
+            }
+        })();
+    </script>
     <!-- Conexão com Supabase e Backend C# -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js"></script>
-    <script src="js/apiClient.js"></script>
-    <script src="js/gamerProfile.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/version.js"></script>
-    <script src="js/avatarManager.js"></script>
-    <script src="js/pwaManager.js" defer></script>
+    <script src="supabaseClient.js?v=26.10.7_clean"></script>
+    <script src="js/apiClient.js?v=26.10.7_clean"></script>
+    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
+    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
+    <script src="js/notifications.js?v=26.10.7_clean"></script>
+    <script src="js/version.js?v=26.10.7_clean"></script>
+    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
+    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -1921,8 +1938,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Sua crítica / experiência pessoal</label>
-                        <textarea id="myReview" rows="4" placeholder="Escreva aqui o que você achou da jogabilidade, história, desempenho e se vale a pena..." required></textarea>
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Sua crítica / experiência pessoal</span>
+                            <span id="gameReviewQualityBadge" style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); transition: all 0.25s ease;">⚡ Nota Rápida: +100 XP</span>
+                        </label>
+                        <textarea id="myReview" rows="4" placeholder="Escreva aqui o que você achou da jogabilidade, história, desempenho e se vale a pena..."></textarea>
+                        <div id="gameReviewQualityHint" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                            💡 <em>Dica: Escreva uma resenha autêntica de 80+ caracteres para ganhar +50 XP, ou 200+ para Crítica Completa (+100 XP).</em>
+                        </div>
                     </div>
 
                     <div style="display: flex; gap: 10px;">
@@ -2101,36 +2124,55 @@
             const currentUser = obterUsuarioAtualLogado().toLowerCase();
             const currentUid = localStorage.getItem('overcritic_user_id') || '';
             const isLogged = currentUser && currentUser !== 'visitante';
+            const email = (localStorage.getItem('overcritic_user_email') || '').toLowerCase();
+            const isAdmin = (typeof isAdminUser === 'function' && isAdminUser())
+                || email === 'mesquitagabriel255@gmail.com'
+                || currentUser === 'pontug'
+                || currentUser === 'admin'
+                || localStorage.getItem('overcritic_is_admin') === 'true';
 
-            const raw = localStorage.getItem(STORAGE_KEY)
-                     || localStorage.getItem('overcritic_jogos')
-                     || localStorage.getItem('overclock_jogos');
-            if (!raw) return [];
-
-            try {
-                const parsed = JSON.parse(raw);
-                if (!Array.isArray(parsed)) return [];
-
-                // Filtra apenas jogos do usuário atual e remove seeds/mocks e itens excluídos
-                return parsed.filter(j => {
-                    if (!j) return false;
-                    if (window.isItemExcluidoGlobal && window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor)) return false;
-                    const isSeed = j.id && (j.id === 101 || j.id === 102 || j.id === 103 || j.id === 104 || j.id === 105);
-                    if (isSeed) return false;
-
-                    if (!isLogged) {
-                        // Se visitante, mantém apenas o que foi cadastrado localmente como Visitante/Anônimo
-                        const dono = (j.autor || '').toLowerCase();
-                        return dono === 'visitante' || dono === 'anônimo' || dono === 'anonimo';
+            let combinados = [];
+            ['overcritic_reviews', 'overcritic_jogos', 'overclock_jogos'].forEach(key => {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) combinados.push(...parsed);
                     }
+                } catch(e) {}
+            });
 
+            const mapa = new Map();
+            combinados.forEach(j => {
+                if (!j || !j.titulo) return;
+                const idNum = Number(j.id);
+                // Exclui seeds falsos (101 a 105 ou feed_seed_)
+                if (idNum >= 101 && idNum <= 105) return;
+                if (String(j.id).startsWith('feed_seed_')) return;
+                // Exclui os 3 IDs antigos falsos/deletados
+                if (idNum === 1789741152346 || idNum === 1789742639992 || idNum === 1789743477104) return;
+
+                if (!isLogged) {
                     const dono = (j.autor || '').toLowerCase();
-                    const uid = j.userId || j.user_id;
-                    return (uid && uid === currentUid) || (dono && dono === currentUser);
-                });
-            } catch(e) {
-                return [];
-            }
+                    if (dono === 'visitante' || dono === 'anônimo' || dono === 'anonimo') {
+                        mapa.set(j.id || j.titulo, j);
+                    }
+                    return;
+                }
+
+                const dono = (j.autor || '').toLowerCase();
+                const uid = j.userId || j.user_id;
+                const eDoUsuario = (uid && uid === currentUid)
+                    || (dono && dono === currentUser)
+                    || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono));
+
+                if (eDoUsuario) {
+                    const k = j.id ? String(j.id) : j.titulo.trim().toLowerCase();
+                    if (!mapa.has(k)) mapa.set(k, j);
+                }
+            });
+
+            return Array.from(mapa.values());
         }
 
         function salvarJogos(lista) {
@@ -2142,11 +2184,21 @@
            INTEGRAÇÃO COM O SUPABASE
         ═══════════════════════════════════ */
         function mapJogoParaSupabase(j) {
-            const currentUid = localStorage.getItem('overcritic_user_id') || null;
+            let currentUid = localStorage.getItem('overcritic_user_id') || null;
+            const autor = (j.autor || localStorage.getItem('overcritic_currentUser') || '').trim();
+            const isAdmin = (typeof isAdminUser === 'function' && isAdminUser())
+                || autor.toLowerCase() === 'pontug'
+                || autor.toLowerCase() === 'admin'
+                || localStorage.getItem('overcritic_is_admin') === 'true';
+
+            if (!currentUid && isAdmin) {
+                currentUid = '958a1b5f-4151-42c7-97f2-caf0e59fbb86';
+            }
+
             return {
                 id: Number(j.id),
                 user_id: j.userId || j.user_id || currentUid,
-                autor: j.autor || 'Anônimo',
+                autor: autor || 'Anônimo',
                 titulo: j.titulo || 'Sem título',
                 generos: j.generos || '',
                 palavras_chave: j.palavrasChave || '',
@@ -2186,10 +2238,18 @@
             if (!window.sbClient) return;
 
             const currentUser = obterUsuarioAtualLogado();
-            const currentUid = localStorage.getItem('overcritic_user_id') || '';
+            let currentUid = localStorage.getItem('overcritic_user_id') || '';
+            const isAdmin = (typeof isAdminUser === 'function' && isAdminUser())
+                || currentUser.toLowerCase() === 'pontug'
+                || currentUser.toLowerCase() === 'admin'
+                || localStorage.getItem('overcritic_is_admin') === 'true';
+
+            if (!currentUid && isAdmin) {
+                currentUid = '958a1b5f-4151-42c7-97f2-caf0e59fbb86';
+            }
+
             const isLogged = currentUser && currentUser.toLowerCase() !== 'visitante';
 
-            // Visitantes não herdam análises da nuvem
             if (!isLogged) {
                 renderizarCriticas();
                 return;
@@ -2213,15 +2273,27 @@
 
                 if (data) {
                     const jogosNuvem = data
-                        .filter(j => !window.isItemExcluidoGlobal || !window.isItemExcluidoGlobal('jogo', j.id, j.titulo, j.autor))
+                        .filter(j => {
+                            if (!j || !j.titulo) return false;
+                            const idNum = Number(j.id);
+                            if (idNum >= 101 && idNum <= 105) return false;
+                            if (idNum === 1789741152346 || idNum === 1789742639992 || idNum === 1789743477104) return false;
+                            return true;
+                        })
                         .map(mapSupabaseParaJogo);
+
                     const mapa = new Map();
-                    jogosNuvem.forEach(j => mapa.set(j.id, j));
+                    // Nuvem primeiro (garante dados reais do banco)
+                    jogosNuvem.forEach(j => {
+                        const chave = (j.titulo || '').trim().toLowerCase();
+                        if (chave) mapa.set(chave, j);
+                    });
 
                     // Mescla apenas com análises locais que sejam do mesmo usuário e não estejam excluídas
                     const locais = obterJogosSalvos();
                     locais.forEach(j => {
-                        if (!mapa.has(j.id)) mapa.set(j.id, j);
+                        const chave = (j.titulo || '').trim().toLowerCase();
+                        if (chave && !mapa.has(chave)) mapa.set(chave, j);
                     });
 
                     const listaConsolidada = Array.from(mapa.values());
@@ -2234,17 +2306,35 @@
             }
         }
 
-        async function salvarJogoNoSupabase(jogo) {
+        async function salvarJogoNoSupabase(jogo, isEdicao = false) {
             if (!window.sbClient) return;
             try {
                 const payload = mapJogoParaSupabase(jogo);
-                const { error } = await window.sbClient
-                    .from('reviews_jogos')
-                    .upsert(payload, { onConflict: 'id' });
-                if (error) {
-                    console.warn('⚠️ [Supabase] Aviso ao salvar na nuvem:', error.message);
+                let error = null;
+
+                if (isEdicao && payload.id) {
+                    const resUpdate = await window.sbClient
+                        .from('reviews_jogos')
+                        .update(payload)
+                        .eq('id', payload.id);
+                    if (resUpdate.error) {
+                        console.warn('⚠️ [Supabase] Falha no update direto de jogo, tentando upsert:', resUpdate.error.message);
+                        const resUpsert = await window.sbClient
+                            .from('reviews_jogos')
+                            .upsert(payload, { onConflict: 'id' });
+                        error = resUpsert.error;
+                    }
                 } else {
-                    console.log('☁️ [Supabase] Análise sincronizada na nuvem com sucesso!');
+                    const resUpsert = await window.sbClient
+                        .from('reviews_jogos')
+                        .upsert(payload, { onConflict: 'id' });
+                    error = resUpsert.error;
+                }
+
+                if (error) {
+                    console.warn('⚠️ [Supabase] Aviso ao salvar/alterar análise na nuvem:', error.message);
+                } else {
+                    console.log(`☁️ [Supabase] Análise (${isEdicao ? 'ALTERAÇÃO' : 'CADASTRO'}) sincronizada no banco com sucesso! ID:`, payload.id);
                 }
             } catch (err) {
                 console.warn('Erro na requisição Supabase:', err);
@@ -2266,21 +2356,31 @@
             }
         }
 
-        // Se o usuário estiver logado, associa automaticamente à sua autoria análises que eram anônimas
+        // Se o usuário estiver logado, associa automaticamente à sua autoria análises que eram anônimas ou legadas
         function migrarAnalisesAnonimasParaUsuario() {
             const currentUser = getCurrentUser();
             if (!currentUser) return;
-            const jogos = obterJogosSalvos();
-            let alterou = false;
-            jogos.forEach(j => {
-                if (!j.autor || j.autor === 'Anônimo') {
-                    j.autor = currentUser;
-                    alterou = true;
-                }
-            });
-            if (alterou) {
-                salvarJogos(jogos);
+
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.vincularDadosLegadosUsuario === 'function') {
+                window.OvercriticGamification.vincularDadosLegadosUsuario(currentUser);
             }
+
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY) || '[]';
+                const jogos = JSON.parse(raw);
+                if (Array.isArray(jogos)) {
+                    let alterou = false;
+                    jogos.forEach(j => {
+                        if (!j.autor || j.autor === 'Anônimo' || j.autor === 'Visitante') {
+                            j.autor = currentUser;
+                            alterou = true;
+                        }
+                    });
+                    if (alterou) {
+                        salvarJogos(jogos);
+                    }
+                }
+            } catch(e) {}
         }
 
         /* ═══════════════════════════════════
@@ -2488,14 +2588,21 @@
                 comments: []
             };
 
+            if (window.removerExclusaoGlobal) {
+                window.removerExclusaoGlobal('jogo', dadosJogo.id, dadosJogo.titulo, currentUser);
+            }
+
             if (editingId) {
                 const original = jogosExistentes.find(j => j.id === parseInt(editingId));
                 if (original) {
                     dadosJogo.likes = original.likes || [];
                     dadosJogo.comments = original.comments || [];
+                    dadosJogo.autor = original.autor || currentUser;
+                    dadosJogo.userId = original.userId || original.user_id;
+                    dadosJogo.dataRegistro = original.dataRegistro || dadosJogo.dataRegistro;
                 }
                 jogosExistentes = jogosExistentes.map(j => j.id === parseInt(editingId) ? dadosJogo : j);
-                showToast.success('Análise atualizada com sucesso!');
+                showToast.success('Análise alterada no Supabase e no seu perfil!');
             } else {
                 jogosExistentes.push(dadosJogo);
                 salvarJogos(jogosExistentes);
@@ -2531,7 +2638,12 @@
             }
 
             salvarJogos(jogosExistentes);
-            salvarJogoNoSupabase(dadosJogo);
+            salvarJogoNoSupabase(dadosJogo, !!editingId);
+
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.recalcularEstatisticasGlobais === 'function') {
+                window.OvercriticGamification.recalcularEstatisticasGlobais();
+            }
+
             limparFormulario();
             renderizarCriticas();
             if (window.innerWidth <= 768 && typeof alternarSecaoMobile === 'function') {
@@ -2540,12 +2652,14 @@
         }
 
         function editarCritica(id) {
-            const currentUser = getCurrentUser();
+            const currentUser = (getCurrentUser() || '').toLowerCase();
+            const isAdmin = (typeof isAdminUser === 'function' && isAdminUser()) || (localStorage.getItem('overcritic_is_admin') === 'true');
             const jogos = obterJogosSalvos();
             const jogo = jogos.find(j => j.id === id);
             if (!jogo) return;
 
-            const podeEditar = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || jogo.autor === currentUser;
+            const isOwner = !currentUser || !jogo.autor || jogo.autor === 'Anônimo' || (jogo.autor.toLowerCase() === currentUser);
+            const podeEditar = isOwner || isAdmin;
             if (!podeEditar) {
                 showToast.warning('Você só pode editar suas próprias críticas.');
                 return;
@@ -2572,6 +2686,7 @@
 
             document.getElementById('btnSubmitForm').innerText = 'SALVAR ALTERAÇÕES';
             document.getElementById('btnCancelarEdicao').style.display = 'block';
+            if (window._atualizarBadgeQualidadeJogo) window._atualizarBadgeQualidadeJogo();
             if (typeof alternarSecaoMobile === 'function') {
                 alternarSecaoMobile('cadastrar');
             }
@@ -2614,7 +2729,14 @@
                 excluirJogoDoSupabase(id);
             }
 
+            try {
+                let quickList = obterAvaliacoesRapidas();
+                quickList = quickList.filter(q => q.id !== id && (q.titulo || '').toLowerCase() !== (jogo.titulo || '').toLowerCase());
+                salvarAvaliacoesRapidas(quickList);
+            } catch(e) {}
+
             renderizarCriticas();
+            renderizarAvaliacoesRapidas();
             showToast.success(`Crítica de "${jogo.titulo}" excluída com sucesso.`);
         }
 
@@ -2625,6 +2747,7 @@
             document.getElementById('coverPreview').style.display = 'none';
             document.getElementById('btnSubmitForm').innerText = 'REGISTRAR CRÍTICA';
             document.getElementById('btnCancelarEdicao').style.display = 'none';
+            if (window._atualizarBadgeQualidadeJogo) window._atualizarBadgeQualidadeJogo();
         }
 
         /* ═══════════════════════════════════
@@ -2729,7 +2852,7 @@
                     </div>
                     <div class="review-text-preview">${j.review}</div>
                     <div class="card-actions">
-                        ${isOwner ? `<button class="btn-ghost" onclick="editarCritica(${j.id})">✏️ Editar</button>` : ''}
+                        ${(isOwner || isAdmin) ? `<button class="btn-ghost" onclick="editarCritica(${j.id})">✏️ Editar</button>` : ''}
                         ${canDelete ? `<button class="btn-ghost" style="border-color:#ff0055;color:#ff0055;" onclick="excluirCritica(${j.id})" title="${isAdmin && !isOwner ? 'Moderar/Excluir (Admin)' : 'Excluir crítica'}">🗑️ ${isAdmin && !isOwner ? '<span style="font-size:0.72rem; color:#ffd700; font-weight:bold;">Admin</span>' : ''}</button>` : ''}
                         <button class="like-btn ${liked ? 'liked' : ''}" onclick="toggleLike(${j.id})">
                             ${liked ? '❤️' : '🤍'} ${likes.length}
@@ -2756,70 +2879,47 @@
         }
 
         /* ═══════════════════════════════════
-           AVALIAÇÕES RÁPIDAS (DIREITA SUPERIOR)
+           AVALIAÇÕES RÁPIDAS & COMPARATIVO METACRITIC OFICIAL
         ═══════════════════════════════════ */
         const QUICK_STORAGE_KEY = 'overcritic_quick_feed';
 
-        const SEED_QUICK_REVIEWS = [
+        // Comparativo oficial com notas e dados da crítica internacional do Metacritic (Sem fakes/seeds inventados)
+        const COMPARATIVO_METACRITIC_OFICIAL = [
             {
-                id: 101,
-                autor: "CyberKnight",
-                avatar: "⚔️",
+                id: 'meta_elden_ring',
+                fonte: "Metacritic Oficial",
+                veiculo: "Aclamação Crítica Universal",
+                avatar: "🏆",
                 titulo: "Elden Ring: Shadow of the Erdtree",
-                nota: "9.8",
-                tag: "🏆 Obra-prima",
-                texto: "A atmosfera e a direção de arte são de outro patamar. Bosses brutais, mas vencer cada um é uma sensação incrível!",
-                tempo: "Há 12 min",
-                likes: 18,
-                curtido: false
+                metascore: "95",
+                tag: "🏆 Metascore 95",
+                texto: "Metacritic: Aclamação universal com base em 64 análises de veículos profissionais da indústria (IGN 10/10, PC Gamer 95/100).",
+                tempo: "Oficial Metacritic",
+                isOfficial: true
             },
             {
-                id: 102,
-                autor: "Lara_Valkyrie",
-                avatar: "👑",
+                id: 'meta_baldurs_gate_3',
+                fonte: "Metacritic Oficial",
+                veiculo: "Aclamação Crítica Universal",
+                avatar: "⭐",
                 titulo: "Baldur's Gate 3",
-                nota: "10",
-                tag: "🔥 Insuperável",
-                texto: "Cada escolha realmente altera o rumo da narrativa. A escrita e os companheiros elevaram o patamar dos RPGs modernos.",
-                tempo: "Há 35 min",
-                likes: 29,
-                curtido: false
+                metascore: "96",
+                tag: "🔥 Metascore 96",
+                texto: "Metacritic: Vencedor unânime de Jogo do Ano e uma das maiores médias da história dos RPGs ocidentais (Eurogamer 10/10).",
+                tempo: "Oficial Metacritic",
+                isOfficial: true
             },
             {
-                id: 103,
-                autor: "PixelHunter",
-                avatar: "🎯",
-                titulo: "Cyberpunk 2077: Phantom Liberty",
-                nota: "9.2",
-                tag: "💎 Gráficos Insanos",
-                texto: "Com o patch 2.0 e a expansão virou uma obra de arte. A trilha sonora e Dogtown te prendem por dezenas de horas.",
-                tempo: "Há 1h",
-                likes: 12,
-                curtido: false
-            },
-            {
-                id: 104,
-                autor: "Dante_BR",
-                avatar: "⚡",
-                titulo: "Black Myth: Wukong",
-                nota: "9.0",
-                tag: "⚡ Combate Fluido",
-                texto: "Visual de cair o queixo no Unreal Engine 5. Chefes super criativos e uma recriação espetacular da mitologia chinesa!",
-                tempo: "Há 2h",
-                likes: 21,
-                curtido: false
-            },
-            {
-                id: 105,
-                autor: "SpeedyGamer",
-                avatar: "🏎️",
-                titulo: "Forza Horizon 5",
-                nota: "8.8",
-                tag: "🎮 Pura Diversão",
-                texto: "Física deliciosa e ambientação perfeita no México. O jogo ideal para relaxar ouvindo uma boa playlist no fim de semana.",
-                tempo: "Há 3h",
-                likes: 8,
-                curtido: false
+                id: 'meta_rdr2',
+                fonte: "Metacritic Oficial",
+                veiculo: "Aclamação Crítica Universal",
+                avatar: "🌟",
+                titulo: "Red Dead Redemption 2",
+                metascore: "97",
+                tag: "👑 Metascore 97",
+                texto: "Metacritic: Considerado um divisor de águas técnico e narrativo pela imprensa mundial (GameSpot 10/10, IGN 10/10).",
+                tempo: "Oficial Metacritic",
+                isOfficial: true
             }
         ];
 
@@ -2838,7 +2938,20 @@
                 try {
                     const parsed = JSON.parse(salvo);
                     if (Array.isArray(parsed)) {
-                        return parsed.filter(item => item && item.id > 105);
+                        const limpa = parsed.filter(item => {
+                            if (!item) return false;
+                            const idNum = Number(item.id);
+                            if (idNum >= 101 && idNum <= 105) return false;
+                            if (String(item.id).startsWith('feed_seed_')) return false;
+                            // Remove análises de teste iniciais do usuário
+                            const tit = (item.titulo || '').toLowerCase().trim();
+                            if (tit.includes('ragnarok') || tit.includes('ragnarök') || tit.includes('red dead redemption') || tit.includes('god of war')) return false;
+                            return true;
+                        });
+                        if (limpa.length !== parsed.length) {
+                            localStorage.setItem(QUICK_STORAGE_KEY, JSON.stringify(limpa));
+                        }
+                        return limpa;
                     }
                 } catch (e) {
                     console.error('Erro ao ler avaliações rápidas:', e);
@@ -2854,49 +2967,84 @@
         function renderizarAvaliacoesRapidas() {
             const container = document.getElementById('quickFeedContainer');
             if (!container) return;
-            const lista = obterAvaliacoesRapidas();
+            const avaliacoesReais = obterAvaliacoesRapidas();
             container.innerHTML = '';
-
-            if (lista.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:25px;font-size:0.8rem;opacity:0.7;">Nenhuma avaliação rápida ainda. Seja o primeiro a registrar!</div>';
-                return;
-            }
 
             const currentUserLower = (localStorage.getItem('overcritic_currentUser') || '').toLowerCase();
             const currentAvatar = typeof window.getUsuarioAvatarAtual === 'function' ? window.getUsuarioAvatarAtual() : (localStorage.getItem('overcritic_user_avatar') || '🎮');
 
-            lista.forEach(item => {
+            // 1. Se houver avaliações rápidas REAIS postadas por usuários, renderiza-as com prioridade
+            if (avaliacoesReais.length > 0) {
+                avaliacoesReais.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'quick-feed-item';
+                    const escapedTitle = (item.titulo || '').replace(/'/g, "\\'");
+                    const itemUserLower = (item.autor || '').toLowerCase();
+                    const avatarFinal = (itemUserLower && itemUserLower === currentUserLower) ? currentAvatar : (item.avatar || '🎮');
+                    const avatarHtml = typeof window.renderizarAvatarHtml === 'function' 
+                        ? window.renderizarAvatarHtml(avatarFinal, '🎮') 
+                        : `<span>${avatarFinal || '🎮'}</span>`;
+
+                    div.innerHTML = `
+                        <div class="qf-top">
+                            <div class="qf-user-info">
+                                <div class="qf-avatar" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}')">${avatarHtml}</div>
+                                <div class="qf-meta">
+                                    <span class="qf-name" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}')">${item.autor}</span>
+                                    <span class="qf-time">${item.tempo || 'Recentemente'}</span>
+                                </div>
+                            </div>
+                            <div class="qf-badge-group">
+                                <span class="qf-tag">${item.tag || '🎮 Minha Análise'}</span>
+                                <span class="qf-rating">⭐ ${item.nota}</span>
+                            </div>
+                        </div>
+                        <div class="qf-game-title">🕹️ ${item.titulo}</div>
+                        <div class="qf-comment">"${item.texto}"</div>
+                        <div class="qf-footer">
+                            <button class="qf-like-btn ${item.curtido ? 'liked' : ''}" onclick="curtirAvaliacaoRapida(${item.id})">
+                                ${item.curtido ? '❤️' : '🤍'} <span>${item.likes || 0}</span>
+                            </button>
+                            <button class="qf-rate-btn" onclick="avaliarJogoDaLista('${escapedTitle}')">
+                                ✍️ Avaliar também
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            // 2. Comparativo Oficial da Crítica Especializada (Metacritic Oficial) - Dados reais para comparação
+            COMPARATIVO_METACRITIC_OFICIAL.forEach(meta => {
                 const div = document.createElement('div');
                 div.className = 'quick-feed-item';
-                const escapedTitle = (item.titulo || '').replace(/'/g, "\\'");
-                const itemUserLower = (item.autor || '').toLowerCase();
-                const avatarFinal = (itemUserLower && itemUserLower === currentUserLower) ? currentAvatar : (item.avatar || '🎮');
-                const avatarHtml = typeof window.renderizarAvatarHtml === 'function' 
-                    ? window.renderizarAvatarHtml(avatarFinal, '🎮') 
-                    : `<span>${avatarFinal || '🎮'}</span>`;
+                div.style.borderColor = 'rgba(0, 240, 255, 0.18)';
+                div.style.background = 'linear-gradient(135deg, rgba(0, 240, 255, 0.03), rgba(157, 78, 221, 0.03))';
+                const escapedTitle = (meta.titulo || '').replace(/'/g, "\\'");
 
                 div.innerHTML = `
                     <div class="qf-top">
                         <div class="qf-user-info">
-                            <div class="qf-avatar" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}')">${avatarHtml}</div>
+                            <div class="qf-avatar" style="background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3);">
+                                <span>${meta.avatar}</span>
+                            </div>
                             <div class="qf-meta">
-                                <span class="qf-name" style="cursor:pointer;" onclick="if(window.abrirPerfilGamerModal) window.abrirPerfilGamerModal('${item.autor}')">${item.autor}</span>
-                                <span class="qf-time">${item.tempo || 'Recentemente'}</span>
+                                <span class="qf-name" style="color: var(--accent-cyan); font-weight: 800;">${meta.fonte}</span>
+                                <span class="qf-time" style="color: var(--text-muted); font-size: 0.72rem;">${meta.veiculo}</span>
                             </div>
                         </div>
                         <div class="qf-badge-group">
-                            <span class="qf-tag">${item.tag || '🎮 Destaque'}</span>
-                            <span class="qf-rating">⭐ ${item.nota}</span>
+                            <span class="qf-tag" style="background: rgba(255, 215, 0, 0.12); color: #ffd700; border-color: rgba(255, 215, 0, 0.3); font-weight: 800;">${meta.tag}</span>
                         </div>
                     </div>
-                    <div class="qf-game-title">🕹️ ${item.titulo}</div>
-                    <div class="qf-comment">"${item.texto}"</div>
-                    <div class="qf-footer">
-                        <button class="qf-like-btn ${item.curtido ? 'liked' : ''}" onclick="curtirAvaliacaoRapida(${item.id})">
-                            ${item.curtido ? '❤️' : '🤍'} <span>${item.likes || 0}</span>
-                        </button>
-                        <button class="qf-rate-btn" onclick="avaliarJogoDaLista('${escapedTitle}')">
-                            ✍️ Avaliar também
+                    <div class="qf-game-title">🕹️ ${meta.titulo}</div>
+                    <div class="qf-comment" style="font-size: 0.78rem; opacity: 0.88; font-style: normal;">${meta.texto}</div>
+                    <div class="qf-footer" style="margin-top: 10px;">
+                        <span style="font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+                            <span>📊</span> Comparativo da Mídia
+                        </span>
+                        <button class="qf-rate-btn" onclick="avaliarJogoDaLista('${escapedTitle}')" style="background: rgba(0, 240, 255, 0.1); border-color: rgba(0, 240, 255, 0.3); color: var(--accent-cyan);">
+                            ✍️ Comparar com minha nota
                         </button>
                     </div>
                 `;
@@ -3160,13 +3308,38 @@
         /* ═══════════════════════════════════
            INIT
         ═══════════════════════════════════ */
-        document.addEventListener('DOMContentLoaded', () => {
+        function configurarMonitorQualidadeReview() {
+            const reviewInput = document.getElementById('myReview');
+            const badge = document.getElementById('gameReviewQualityBadge');
+            const hint = document.getElementById('gameReviewQualityHint');
+            if (!reviewInput || !badge) return;
+
+            function atualizar() {
+                if (!window.OvercriticGamification || typeof window.OvercriticGamification.avaliarQualidadeReview !== 'function') return;
+                const info = window.OvercriticGamification.avaliarQualidadeReview(reviewInput.value);
+                badge.textContent = `${info.icone} ${info.label}: +${info.xp} XP`;
+                badge.style.color = info.cor;
+                badge.style.borderColor = info.cor;
+                badge.style.background = `${info.cor}18`;
+                if (hint) {
+                    hint.innerHTML = `💡 <em>${info.motivo}</em>`;
+                }
+            }
+
+            reviewInput.addEventListener('input', atualizar);
+            window._atualizarBadgeQualidadeJogo = atualizar;
+            atualizar();
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            configurarMonitorQualidadeReview();
             migrarAnalisesAnonimasParaUsuario();
             updateAuthUI();
             renderizarCriticas();
             renderizarAvaliacoesRapidas();
             carregarJogosApi('trending');
-            sincronizarJogosSupabase();
+            await sincronizarJogosSupabase();
+            renderizarCriticas();
 
             // Verificar se o usuário veio da aba descobrir_jogos.html com parâmetros
             const urlParams = new URLSearchParams(window.location.search);

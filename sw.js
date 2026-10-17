@@ -1,9 +1,9 @@
 /**
- * OVERCRITIC Service Worker - PWA Engine v26.10.6
+ * OVERCRITIC Service Worker - PWA Engine v26.10.7
  * Fornece carregamento instantâneo, funcionamento offline e cache resiliente.
  */
 
-const CACHE_NAME = 'overcritic-pwa-v26.10.6';
+const CACHE_NAME = 'overcritic-pwa-v26.10.7';
 
 const APP_SHELL = [
   './',
@@ -20,6 +20,7 @@ const APP_SHELL = [
   './js/version.js',
   './js/notifications.js',
   './js/gamerProfile.js',
+  './js/overcriticGamification.js',
   './js/avatarManager.js',
   './js/geekNewsManager.js',
   './js/pwaManager.js',
@@ -70,9 +71,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Requisições para APIs de terceiros ou Supabase: Network First com Timeout
-  const isApiRequest = url.hostname.includes('supabase.co') ||
-                       url.hostname.includes('rawg.io') ||
+  // Supabase (banco de dados dinâmico ao vivo): Network Only, NUNCA armazenar em cache SW
+  if (url.hostname.includes('supabase.co')) {
+    return;
+  }
+
+  // Requisições para APIs de terceiros (RAWG, TMDB, Notícias): Network First
+  const isApiRequest = url.hostname.includes('rawg.io') ||
                        url.hostname.includes('themoviedb.org') ||
                        url.hostname.includes('newsdata.io');
 

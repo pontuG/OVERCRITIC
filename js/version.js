@@ -9,15 +9,33 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.6",
+    version: "26.10.7",
     year: "2026",
     month: "10",
-    build: 6,
-    releaseDate: "15/10/2026",
+    build: 7,
+    releaseDate: "16/10/2026",
     status: "Versão Estável",
-    codename: "Android Flawless: Radar White-Mode, Bento Cards Vivos & Player 16:9 Responsivo",
+    codename: "Season Reset, Edição Direta Supabase, Tier List & Gamer Card Responsivos",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.7",
+            date: "16/10/2026",
+            title: "Season Reset, Edição Direta Supabase, Tier List & Gamer Card Responsivos",
+            highlights: [
+                "Edição e atualização direta no banco de dados (Supabase) para Platinas, Avaliações e Mídias com botões concisos 'Salvar'",
+                "Tier List Pessoal 100% responsiva: altura de linhas otimizada (58px / 50px) para acomodar todos os tiers e coleção em qualquer tela",
+                "Novos recursos na Tier List: botão 'Limpar' para resetar o quadro e filtros rápidos por tipo (Todas, Jogos, Filmes/Séries)",
+                "Gamer Card Holográfico responsivo: botão flutuante de fechar (✕) no topo, contenção de rolagem e densidade visual perfeita",
+                "Bloqueio universal de rolagem do fundo (body scroll lock) enquanto modais estiverem abertos e atalho universal na tecla Escape",
+                "Zeramento geral de análises e platinas residuais: nuvem (Supabase) e caches locais limpos para todos os perfis começarem do zero (Nv. 1 Recruta Gamer, 0 XP)",
+                "Contas e credenciais de login de usuários 100% preservadas e intactas",
+                "Ranking Geral dos Mais Platinados (R#) 100% dinâmico: pódio e tabela alimentados exclusivamente por conquistas reais da temporada",
+                "Eliminação do loop de auto-upload em segundo plano que restaurava dados residuais excluídos",
+                "Exibição elegante da Splash Screen calibrada para 1.2 segundos com dismiss opcional de 1 toque",
+                "Conciliação definitiva e sincronização unificada entre Críticas Cadastradas, Avaliações Rápidas, Minha Coleção e Resumo Rápido da Home"
+            ]
+        },
         {
             version: "26.10.6",
             date: "15/10/2026",
@@ -398,6 +416,16 @@ function inicializarMobileDrawer() {
             <nav class="mobile-drawer-nav">
                 ${navLinksHTML}
             </nav>
+
+            <!-- FERRAMENTAS GAMER EXCLUSIVAS -->
+            <div style="padding: 10px 16px; display: flex; flex-direction: column; gap: 8px;">
+                <button type="button" class="og-btn-action og-btn-card" onclick="fecharMenuLateralMobile(); if(window.abrirGamerCardModal) window.abrirGamerCardModal();" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
+                    <span>✨</span> Gerar Meu Gamer Card
+                </button>
+                <button type="button" class="og-btn-action og-btn-tier" onclick="fecharMenuLateralMobile(); if(window.abrirModalTierList) window.abrirModalTierList();" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
+                    <span>🎯</span> Minha Tier List
+                </button>
+            </div>
 
             <!-- RODAPÉ DO DRAWER -->
             <div class="mobile-drawer-footer">
