@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -35,14 +35,14 @@
         })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.7_clean"></script>
-    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
-    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
-    <script src="js/notifications.js?v=26.10.7_clean"></script>
-    <script src="js/version.js?v=26.10.7_clean"></script>
-    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
-    <script src="js/geekNewsManager.js?v=26.10.7_clean"></script>
-    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
+    <script src="supabaseClient.js?v=26.10.8"></script>
+    <script src="js/gamerProfile.js?v=26.10.8"></script>
+    <script src="js/overcriticGamification.js?v=26.10.8"></script>
+    <script src="js/notifications.js?v=26.10.8"></script>
+    <script src="js/version.js?v=26.10.8"></script>
+    <script src="js/avatarManager.js?v=26.10.8"></script>
+    <script src="js/geekNewsManager.js?v=26.10.8"></script>
+    <script src="js/pwaManager.js?v=26.10.8" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -2798,19 +2798,35 @@
                 const queryLower = query.toLowerCase();
                 const normQuery = queryLower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-                // Dicionário inteligente de siglas, abreviações e apelidos gamers
+                // Dicionário inteligente de siglas, abreviações e grandes franquias gamers
                 const ALIASES_JOGOS = {
-                    'gow': 'God of War',
-                    'gowr': 'God of War Ragnarök',
                     'gta': 'Grand Theft Auto',
                     'gta5': 'Grand Theft Auto V',
                     'gtav': 'Grand Theft Auto V',
+                    'gta 5': 'Grand Theft Auto V',
+                    'gta v': 'Grand Theft Auto V',
+                    'gta sa': 'Grand Theft Auto: San Andreas',
+                    'gta 4': 'Grand Theft Auto IV',
+                    'gta iv': 'Grand Theft Auto IV',
+                    'gta vc': 'Grand Theft Auto: Vice City',
+                    'gta 6': 'Grand Theft Auto VI',
+                    'gta vi': 'Grand Theft Auto VI',
+                    'gta trilogy': 'Grand Theft Auto: The Trilogy',
                     'rdr': 'Red Dead Redemption',
                     'rdr2': 'Red Dead Redemption 2',
+                    'rdr 2': 'Red Dead Redemption 2',
+                    'gow': 'God of War',
+                    'gowr': 'God of War Ragnarök',
+                    'gow ragnarok': 'God of War Ragnarök',
                     'tlou': 'The Last of Us',
                     'tlou2': 'The Last of Us Part II',
+                    'tlou 2': 'The Last of Us Part II',
                     'cod': 'Call of Duty',
+                    'mw': 'Call of Duty: Modern Warfare',
+                    'mw2': 'Call of Duty: Modern Warfare II',
+                    'mw3': 'Call of Duty: Modern Warfare III',
                     're4': 'Resident Evil 4',
+                    're 4': 'Resident Evil 4',
                     're2': 'Resident Evil 2',
                     're3': 'Resident Evil 3',
                     're': 'Resident Evil',
@@ -2819,6 +2835,9 @@
                     'bg3': "Baldur's Gate 3",
                     'cp2077': 'Cyberpunk 2077',
                     'mk': 'Mortal Kombat',
+                    'mk1': 'Mortal Kombat 1',
+                    'mk11': 'Mortal Kombat 11',
+                    'sf6': 'Street Fighter 6',
                     'ac': "Assassin's Creed",
                     'botw': 'Breath of the Wild',
                     'totk': 'Tears of the Kingdom',
@@ -2926,7 +2945,18 @@
                     const results = await Promise.all(fetchPromises);
                     const allApiItems = results.flat();
                     if (Array.isArray(allApiItems)) {
-                        matchesApi = allApiItems.map(item => {
+                        matchesApi = allApiItems
+                            .filter(item => {
+                                if (!item || !item.external) return false;
+                                const itLower = item.external.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                                const qLimpo = normQuery;
+                                const contemPalavraExata = new RegExp(`\\b${qLimpo}\\b`, 'i').test(itLower);
+                                const comecaComTermo = itLower.startsWith(qLimpo);
+                                const contemExpandido = termoExpandido && itLower.includes(termoExpandido.toLowerCase());
+                                const ehBuscaLonga = qLimpo.length >= 4 && itLower.includes(qLimpo);
+                                return contemPalavraExata || comecaComTermo || contemExpandido || ehBuscaLonga;
+                            })
+                            .map(item => {
                             const priceNum = parseFloat(item.cheapest) || 0;
                             const steamId = item.steamAppID && item.steamAppID !== '0' ? item.steamAppID : null;
                             const thumb = steamId 
@@ -2997,18 +3027,30 @@
                 }
 
                 // 6. Ordenação por relevância:
-                // - Igual exato primeiro
-                // - Começa com o termo
-                // - Contém a palavra inteira
+                // - Correspondência exata da query ou da sigla expandida primeiro
+                // - Início de título com query ou sigla expandida
+                // - Ocorrência de palavra inteira
+                const normExp = termoExpandido ? termoExpandido.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') : null;
                 unicos.sort((a, b) => {
                     const aTit = a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                     const bTit = b.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-                    if (aTit === normQuery && bTit !== normQuery) return -1;
-                    if (bTit === normQuery && aTit !== normQuery) return 1;
+                    const calcScore = (tit) => {
+                        let score = 0;
+                        if (tit === normQuery || (normExp && tit === normExp)) score += 100;
+                        if (tit.startsWith(normQuery) || (normExp && tit.startsWith(normExp))) score += 50;
+                        if (new RegExp(`\\b${normQuery}\\b`, 'i').test(tit)) score += 35;
+                        if (normExp && new RegExp(`\\b${normExp}\\b`, 'i').test(tit)) score += 40;
+                        if (tit.includes(normQuery) || (normExp && tit.includes(normExp))) score += 10;
+                        return score;
+                    };
 
-                    if (aTit.startsWith(normQuery) && !bTit.startsWith(normQuery)) return -1;
-                    if (bTit.startsWith(normQuery) && !aTit.startsWith(normQuery)) return 1;
+                    const scoreA = calcScore(aTit);
+                    const scoreB = calcScore(bTit);
+
+                    if (scoreA !== scoreB) {
+                        return scoreB - scoreA;
+                    }
 
                     return aTit.localeCompare(bTit);
                 });

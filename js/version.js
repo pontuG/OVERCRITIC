@@ -9,15 +9,29 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.7",
+    version: "26.10.8",
     year: "2026",
     month: "10",
-    build: 7,
-    releaseDate: "16/10/2026",
+    build: 8,
+    releaseDate: "19/10/2026",
     status: "Versão Estável",
-    codename: "Season Reset, Edição Direta Supabase, Tier List & Gamer Card Responsivos",
+    codename: "Sincronização Oficial do Ranking Comunitário via Nuvem Supabase & XP Real Unificado",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.8",
+            date: "19/10/2026",
+            title: "Sincronização Oficial do Ranking Comunitário via Nuvem Supabase & XP Real Unificado",
+            highlights: [
+                "Sincronização oficial em tempo real com o Supabase: o Ranking Geral da Comunidade agora busca e consolida o acervo real de todos os jogadores (XP, platinas e críticas) diretamente da nuvem",
+                "Fim da divergência entre contas: o líder pontuG (400 XP, 2 platinas e 1 análise) permanece com a Coroa 👑 e o topo do ranking em qualquer conta logada ou anônima",
+                "Preservação do acervo comunitário não-destrutiva: fazer login com nova conta não sobrescreve nem deleta mais as platinas e críticas de outros membros no LocalStorage",
+                "Critério de desempate à prova de falhas: prioriza XP decrescente, total de platinas, análises e antiguidade da conta, impedindo que novas contas com 0 XP assumam o topo",
+                "Atualização assíncrona com botão 'Atualizar' inteligente e escuta de eventos em tempo real em todas as páginas e abas de ranking",
+                "Redesign Cyberpunk Glassmorphic dos dropdowns (<select>): tema escuro nativo (color-scheme: dark), seta neon SVG personalizada e ícones temáticos dedicados por plataforma e status de jogatina",
+                "Recuperação visual do ícone 🎮 com badge luminoso neon no cabeçalho e na barra de navegação ativa, eliminando o corte de transparência"
+            ]
+        },
         {
             version: "26.10.7",
             date: "16/10/2026",

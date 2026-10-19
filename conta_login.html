@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -36,13 +36,13 @@
     </script>
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.7_clean"></script>
-    <script src="js/apiClient.js?v=26.10.7_clean"></script>
-    <script src="js/notifications.js?v=26.10.7_clean"></script>
-    <script src="js/version.js?v=26.10.7_clean"></script>
-    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
-    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
-    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
+    <script src="supabaseClient.js?v=26.10.8"></script>
+    <script src="js/apiClient.js?v=26.10.8"></script>
+    <script src="js/notifications.js?v=26.10.8"></script>
+    <script src="js/version.js?v=26.10.8"></script>
+    <script src="js/avatarManager.js?v=26.10.8"></script>
+    <script src="js/overcriticGamification.js?v=26.10.8"></script>
+    <script src="js/pwaManager.js?v=26.10.8" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -221,6 +221,11 @@
             position: relative;
             overflow: hidden;
             animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .auth-container.wide-ranking {
+            max-width: 980px !important;
         }
 
         @keyframes slideUp {
@@ -459,7 +464,7 @@
 
         .stats-cards-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 30px;
         }
@@ -537,12 +542,12 @@
                 max-width: 100% !important;
             }
             .stats-cards-row { 
-                grid-template-columns: repeat(3, 1fr) !important; 
+                grid-template-columns: repeat(2, 1fr) !important; 
             }
         }
         @media (max-width: 480px) {
             .stats-cards-row { 
-                grid-template-columns: 1fr !important; 
+                grid-template-columns: repeat(2, 1fr) !important; 
             }
             .auth-container { 
                 padding: 20px 12px !important; 
@@ -594,6 +599,7 @@
                 <button class="tab-btn" id="tabProfile" onclick="alternarTab('profile')">👤 MEU PERFIL</button>
                 <button class="tab-btn active" id="tabLogin" onclick="alternarTab('login')">🔑 ENTRAR</button>
                 <button class="tab-btn" id="tabRegister" onclick="alternarTab('register')">✨ CRIAR CONTA</button>
+                <button class="tab-btn" id="tabRanking" onclick="alternarTab('ranking')">🏆 RANKING GERAL</button>
             </div>
 
             <!-- ALERTA DE STATUS / FEEDBACK -->
@@ -630,15 +636,22 @@
                             <div class="stat-mini-number" id="profPlatinasCount">0</div>
                             <div class="stat-mini-label">Platinas</div>
                         </div>
+                        <div class="stat-mini-card" onclick="alternarTab('ranking')" style="cursor: pointer; border-color: rgba(255, 215, 0, 0.4);" title="Ver minha posição no Ranking Geral">
+                            <div class="stat-mini-number" id="profRankingPos" style="color: #ffd700;">#1</div>
+                            <div class="stat-mini-label">Ranking Geral</div>
+                        </div>
                     </div>
 
                     <!-- Ações Gamificadas -->
-                    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;">
-                        <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal(window._dadosUsuarioPerfil);" style="flex: 1; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
-                            <span>✨</span> Gerar Meu Gamer Card
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap;">
+                        <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal(window._dadosUsuarioPerfil);" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
+                            <span>✨</span> Gerar Gamer Card
                         </button>
-                        <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList(window._dadosUsuarioPerfil);" style="flex: 1; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
+                        <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList(window._dadosUsuarioPerfil);" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
                             <span>🎯</span> Minha Tier List
+                        </button>
+                        <button type="button" class="og-btn-action" onclick="alternarTab('ranking')" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.4); color: #ffd700;">
+                            <span>🏆</span> Ranking Geral
                         </button>
                     </div>
 
@@ -742,6 +755,11 @@
                 </form>
             </div>
 
+            <!-- ══════ ABA 4: RANKING GERAL DA COMUNIDADE ══════ -->
+            <div id="rankingTabContent" style="display: none;">
+                <div id="communityRankingContainerAuth"></div>
+            </div>
+
         </div>
     </div>
 
@@ -757,24 +775,32 @@
 
         let usuarioAtualSessao = null;
 
-        // Alternância entre as 3 Abas
+        // Alternância entre as Abas
         function alternarTab(modo) {
             esconderAlerta();
             const tabProfile = document.getElementById('tabProfile');
             const tabLogin = document.getElementById('tabLogin');
             const tabRegister = document.getElementById('tabRegister');
+            const tabRanking = document.getElementById('tabRanking');
 
             const contentProfile = document.getElementById('profileTabContent');
             const contentLogin = document.getElementById('loginTabContent');
             const contentRegister = document.getElementById('registerTabContent');
+            const contentRanking = document.getElementById('rankingTabContent');
 
             const title = document.getElementById('authSectionTitle');
             const subtitle = document.getElementById('authSectionSubtitle');
             const badge = document.getElementById('authSectionBadge');
+            const authContainer = document.querySelector('.auth-container');
 
             // Reset classes
-            [tabProfile, tabLogin, tabRegister].forEach(b => b.classList.remove('active'));
-            [contentProfile, contentLogin, contentRegister].forEach(c => c.style.display = 'none');
+            [tabProfile, tabLogin, tabRegister, tabRanking].forEach(b => { if (b) b.classList.remove('active'); });
+            [contentProfile, contentLogin, contentRegister, contentRanking].forEach(c => { if (c) c.style.display = 'none'; });
+
+            if (authContainer) {
+                if (modo === 'ranking') authContainer.classList.add('wide-ranking');
+                else authContainer.classList.remove('wide-ranking');
+            }
 
             if (modo === 'profile') {
                 tabProfile.classList.add('active');
@@ -790,6 +816,20 @@
                 title.innerText = 'Entrar na Conta';
                 subtitle.innerText = 'Acesse com seu e-mail e senha para salvar suas críticas na nuvem.';
                 renderizarVisualLogin();
+            } else if (modo === 'ranking') {
+                if (tabRanking) tabRanking.classList.add('active');
+                if (contentRanking) contentRanking.style.display = 'block';
+                badge.innerText = 'LEADERBOARD OFICIAL';
+                title.innerText = 'Ranking Geral da Comunidade';
+                subtitle.innerText = 'Classificação de todos os membros cadastrados por XP, platinas e críticas no Overcritic.';
+                if (window.OvercriticGamification && typeof window.OvercriticGamification.renderizarRankingComunidade === 'function') {
+                    window.OvercriticGamification.renderizarRankingComunidade('communityRankingContainerAuth');
+                    if (typeof window.OvercriticGamification.sincronizarRankingNuvem === 'function') {
+                        window.OvercriticGamification.sincronizarRankingNuvem().then(() => {
+                            window.OvercriticGamification.renderizarRankingComunidade('communityRankingContainerAuth', { silentSyncDone: true });
+                        });
+                    }
+                }
             } else {
                 tabRegister.classList.add('active');
                 contentRegister.style.display = 'block';
@@ -923,6 +963,12 @@
                     pill.style.borderColor = prog.cor;
                     pill.style.background = prog.bg;
                 }
+
+                if (typeof window.OvercriticGamification.obterPosicaoRankingUsuario === 'function') {
+                    const posObj = window.OvercriticGamification.obterPosicaoRankingUsuario(cleanName);
+                    const elPos = document.getElementById('profRankingPos');
+                    if (elPos) elPos.textContent = (posObj && posObj.posicao) ? `#${posObj.posicao}` : '#1';
+                }
             }
 
             // 2. Sincronização bidirecional completa com a nuvem Supabase
@@ -938,13 +984,13 @@
                         countM = finalMidias.length;
                         countP = finalPlatinas.length;
 
-                        localStorage.setItem('overcritic_reviews', JSON.stringify(finalJogos));
-                        localStorage.setItem('overcritic_jogos', JSON.stringify(finalJogos));
+                        // Apenas as platinas pessoais são associadas à chave exclusiva do usuário logado
                         localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(finalPlatinas));
-                        localStorage.setItem('overcritic_platinas_feed', JSON.stringify(finalPlatinas));
-                        localStorage.setItem('overcritic_platinas', JSON.stringify(finalPlatinas));
-                        localStorage.setItem('overclock_platinas', JSON.stringify(finalPlatinas));
-                        localStorage.setItem('platinasSalvas', JSON.stringify(finalPlatinas));
+
+                        // Sincroniza o Ranking Geral e os acervos comunitários via nuvem
+                        if (window.OvercriticGamification && typeof window.OvercriticGamification.sincronizarRankingNuvem === 'function') {
+                            window.OvercriticGamification.sincronizarRankingNuvem();
+                        }
 
                         if (elJ) elJ.textContent = countJ;
                         if (elM) elM.textContent = countM;
@@ -969,6 +1015,12 @@
                             pill.style.color = progNuvem.cor;
                             pill.style.borderColor = progNuvem.cor;
                             pill.style.background = progNuvem.bg;
+                        }
+
+                        if (typeof window.OvercriticGamification.obterPosicaoRankingUsuario === 'function') {
+                            const posObj = window.OvercriticGamification.obterPosicaoRankingUsuario(cleanName);
+                            const elPos = document.getElementById('profRankingPos');
+                            if (elPos) elPos.textContent = (posObj && posObj.posicao) ? `#${posObj.posicao}` : '#1';
                         }
                     }
                 } catch(e) {}
@@ -1069,7 +1121,17 @@
                     const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
                     localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
 
-                    if (tabParam === 'login') alternarTab('login');
+                    // Registra / atualiza no ranking da comunidade
+                    if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
+                        window.OvercriticGamification.registrarNovoJogadorNoRanking({
+                            username: username,
+                            avatar: metaAvatar || '🎮',
+                            email: session.user.email
+                        });
+                    }
+
+                    if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
+                    else if (tabParam === 'login') alternarTab('login');
                     else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
                     else alternarTab('profile'); // Padrão quando logado: ir direto ao Perfil!
                 } else {
@@ -1222,16 +1284,36 @@
                     localStorage.setItem('overcritic_user_email', email);
                     localStorage.setItem('overcritic_user_avatar', avatarEscolhido);
                     if (window.atualizarAvataresVisiveisNaPagina) window.atualizarAvataresVisiveisNaPagina(avatarEscolhido);
-                    mostrarAlerta(`🎉 <b>Conta criada com sucesso, ${username}!</b> Conectando ao seu perfil...`, 'success');
+
+                    // REGISTRO OFICIAL NO RANKING DA COMUNIDADE (Passo 4)
+                    if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
+                        window.OvercriticGamification.registrarNovoJogadorNoRanking({
+                            username: username,
+                            avatar: avatarEscolhido,
+                            email: email
+                        });
+                    }
+
+                    mostrarAlerta(`🎉 <b>Conta criada com sucesso, ${username}!</b> Conectando ao seu perfil e ao Ranking Geral...`, 'success');
                     setTimeout(() => {
                         alternarTab('profile');
                     }, 1000);
                 } else {
                     document.getElementById('formRegister').reset();
+
+                    // Registra previamente no ranking comunitário
+                    if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
+                        window.OvercriticGamification.registrarNovoJogadorNoRanking({
+                            username: username,
+                            avatar: avatarEscolhido,
+                            email: email
+                        });
+                    }
+
                     mostrarAlerta(`
                         <div style="font-size: 1.1rem; margin-bottom: 8px;">📩 <b>Quase lá, ${username}!</b></div>
                         Enviamos um e-mail de confirmação para <b>${email}</b>.<br>
-                        Abra sua caixa de entrada e clique no link de ativação.<br><br>
+                        Você já foi registrado no <b>Ranking da Comunidade</b>! Abra sua caixa de entrada e clique no link de ativação.<br><br>
                         <div style="font-size: 0.8rem; background: rgba(0,240,255,0.08); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">
                             💡 <b>Dica:</b> Se o link não chegar em 2 minutos ou se expirar, você pode solicitar o reenvio a qualquer momento nesta página.
                         </div>
@@ -1299,6 +1381,15 @@
 
                     const isAdmin = window.isAdminUser ? window.isAdminUser(data.user) : false;
                     localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
+
+                    // Registra / atualiza no ranking comunitário
+                    if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
+                        window.OvercriticGamification.registrarNovoJogadorNoRanking({
+                            username: username,
+                            avatar: metaAvatar || '🎮',
+                            email: email
+                        });
+                    }
 
                     mostrarAlerta(`🎉 <b>Bem-vindo de volta, ${username}!</b> Sessão conectada com sucesso!`, 'success');
                     setTimeout(() => {

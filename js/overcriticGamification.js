@@ -107,8 +107,93 @@
      * - 📝 Resenha Opinativa (>= 80 chars autênticos): 150 XP (+50 XP bônus)
      * - 🌟 Crítica Overcritic Completa (>= 200 chars autênticos e ricos): 200 XP (+100 XP bônus)
      */
+    /**
+     * Dicionário Estruturado de Palavras-Chave de Análise & Universo Gamer / Audiovisual
+     * Organizado em pilares de crítica fundamentada
+     */
+    const CRITERIOS_CRITICA = {
+        jogabilidade: [
+            'jogabilidade', 'gameplay', 'mecanica', 'mecanicas', 'combate', 'controle', 'controles',
+            'movimentacao', 'movimentacoes', 'fisica', 'dificuldade', 'desafio', 'boss', 'bosses',
+            'chefe', 'chefes', 'level design', 'fases', 'missao', 'missoes', 'quest', 'quests',
+            'multiplayer', 'coop', 'campanha', 'exploracao', 'explorar', 'habilidade', 'habilidades',
+            'skills', 'build', 'progressao', 'precisao', 'estrategia', 'armas', 'tiro', 'tiroteio'
+        ],
+        narrativa: [
+            'historia', 'enredo', 'narrativa', 'roteiro', 'personagem', 'personagens', 'protagonista',
+            'antagonista', 'vilao', 'viloes', 'dialogo', 'dialogos', 'lore', 'desfecho', 'final',
+            'trama', 'reviravolta', 'plot', 'universo', 'mundo', 'profundidade', 'emocionante',
+            'desenvolvimento', 'campanha'
+        ],
+        visual: [
+            'grafico', 'graficos', 'visual', 'visuais', 'direcao de arte', 'arte', 'ambientacao',
+            'iluminacao', 'texturas', 'textura', 'animacao', 'animacoes', 'cenario', 'cenarios',
+            'fotografia', 'estetica', 'design'
+        ],
+        audio: [
+            'trilha sonora', 'trilha', 'musica', 'musicas', 'audio', 'som', 'dublagem',
+            'sonoplastia', 'soundtrack', 'ost', 'vozes', 'efeitos sonoros'
+        ],
+        tecnico: [
+            'desempenho', 'performance', 'otimizacao', 'fps', 'taxa de quadros', 'bugs', 'bug',
+            'glitches', 'glitch', 'fluidez', 'estabilidade', 'resolucao', 'loading', 'carregamento'
+        ],
+        experiencia: [
+            'imersao', 'imersivo', 'imersiva', 'atmosfera', 'experiencia', 'diversao', 'divertido',
+            'viciante', 'obra-prima', 'sensacional', 'espetacular', 'marcante', 'cativante',
+            'frustrante', 'repetitivo', 'decepcionante', 'vale a pena', 'recomendo', 'recomenda'
+        ],
+        audiovisual: [
+            'atuacao', 'atuacoes', 'elenco', 'diretor', 'direcao', 'cenas', 'cena', 'fotografia',
+            'efeitos especiais', 'cgi', 'temporada', 'episodio', 'episodios', 'filme', 'serie'
+        ]
+    };
+
+    /**
+     * Detector de Palavras Ininteligíveis / Teclado Mash / Gibberish
+     */
+    function isPalavraGibberish(p) {
+        if (!p || p.length < 5) return false;
+        const pLower = p.toLowerCase();
+
+        // 1. Letra 'ç' colada a outra consoante (impossível em português)
+        if (/[bcdfghjklmnpqrstvwxyz]ç|ç[bcdfghjklmnpqrstvwxyz]/.test(pLower)) return true;
+
+        // 2. Quatro ou mais consoantes consecutivas (exceto padrões válidos raros como 'nstr', 'ngth')
+        if (/[bcdfghjklmnpqrstvwxyz]{4,}/.test(pLower)) {
+            if (!/(nstr|rstr|lstr|mstr|ngth)/.test(pLower)) return true;
+        }
+
+        // 3. Padrões de mash de teclado e agrupamentos dissonantes (ex: hch, cj, vhf, açov, etc.)
+        if (/(cj|hcç|hch|vh|hf|çv|ncv|lkch|hch|qz|zj|zx|q[b-df-hj-np-tv-z]|asdf|zxcv|hjkl)/.test(pLower)) {
+            const excecoes = ['feedback', 'checkpoint', 'match', 'sketch', 'switch', 'witcher', 'block', 'black'];
+            if (!excecoes.some(ex => pLower.includes(ex))) return true;
+        }
+
+        // 4. Quatro ou mais vogais consecutivas (ex: açeoif)
+        if (/[aeiouáéíóúâêôãõ]{4,}/.test(pLower)) return true;
+
+        // 5. Proporção anômala de vogais em palavras de 6+ letras
+        const vogais = (pLower.match(/[aeiouáéíóúâêôãõ]/g) || []).length;
+        const ratio = vogais / pLower.length;
+        if (pLower.length >= 6 && (ratio < 0.18 || ratio > 0.78)) return true;
+
+        return false;
+    }
+
+    /**
+     * Avalia a qualidade de uma resenha para conceder bônus de XP com proteção anti-spam avançada:
+     * 1. Bloqueia repetições consecutivas de caracteres e palavras (ex: aaaaa, etc etc etc, ata ata ata).
+     * 2. Bloqueia sequências de teclado mash / gibberish (ex: hchalokch, açeoif, vianv).
+     * 3. Exige vocabulário crítico autêntico (termos reais de análise gamer/audiovisual).
+     * 
+     * Patamares:
+     * - ⚡ Nota Rápida (100 XP): Sem resenha, curta (< 75 caracteres) ou sem termos analíticos.
+     * - 📝 Resenha Opinativa (150 XP -> +50 XP bônus): >= 75 chars, termos de análise e sem spam.
+     * - 🌟 Crítica Completa (200 XP -> +100 XP bônus): >= 180 chars, múltiplos pilares críticos e profundidade.
+     */
     function avaliarQualidadeReview(item) {
-        if (!item) return { xp: 100, nivel: 'rapida', label: 'Nota Rápida', bonus: 0, icone: '⚡', cor: '#94a3b8' };
+        if (!item) return { xp: 100, nivel: 'rapida', label: 'Nota Rápida', bonus: 0, icone: '⚡', cor: '#94a3b8', motivo: 'Escreva uma resenha autêntica para ganhar bônus de XP' };
 
         let texto = '';
         if (typeof item === 'string') {
@@ -120,7 +205,7 @@
         texto = String(texto || '').trim();
         const len = texto.length;
 
-        if (len < 60) {
+        if (len < 50) {
             return {
                 xp: 100,
                 nivel: 'rapida',
@@ -128,7 +213,7 @@
                 bonus: 0,
                 icone: '⚡',
                 cor: '#94a3b8',
-                motivo: len === 0 ? 'Sem resenha escrita' : `Faltam ${Math.max(0, 80 - len)} caracteres para bônus de Resenha`
+                motivo: len === 0 ? 'Sem resenha escrita' : `Faltam ${Math.max(0, 75 - len)} caracteres e termos de análise para bônus`
             };
         }
 
@@ -142,12 +227,12 @@
                 icone: '⚡',
                 cor: '#f59e0b',
                 spam: true,
-                motivo: 'Caracteres repetitivos em sequência detectados (sem bônus)'
+                motivo: '⚠️ Caracteres repetitivos em sequência detectados (sem bônus de XP)'
             };
         }
 
-        // Filtro 2: Bloqueia sequências em loop de 2 a 4 caracteres (ex: asdasdasdasd, abcabcabc)
-        if (/(.{2,4})\1{3,}/i.test(texto)) {
+        // Filtro 2: Bloqueia palavras repetidas consecutivas com espaçamento (ex: "etc etc etc", "ata ata ata", "la la la")
+        if (/\b(\p{L}{2,})\b(?:\s+[.,/\\-]*\s*\b\1\b){2,}/iu.test(texto)) {
             return {
                 xp: 100,
                 nivel: 'rapida',
@@ -156,34 +241,29 @@
                 icone: '⚡',
                 cor: '#f59e0b',
                 spam: true,
-                motivo: 'Padrão repetitivo detectado (sem bônus)'
+                motivo: '⚠️ Repetição excessiva de palavras idênticas (sem bônus de XP)'
             };
         }
 
-        // Filtro 3: Fonética em português (proporção saudável de vogais em textos com letras)
-        const totalLetras = (texto.match(/[a-zà-ú]/gi) || []).length;
-        const totalVogais = (texto.match(/[aeiouáéíóúâêôãõ]/gi) || []).length;
-        if (totalLetras >= 20) {
-            const ratioVogais = totalVogais / totalLetras;
-            if (ratioVogais < 0.22 || ratioVogais > 0.75) {
-                return {
-                    xp: 100,
-                    nivel: 'rapida',
-                    label: 'Nota Rápida',
-                    bonus: 0,
-                    icone: '⚡',
-                    cor: '#f59e0b',
-                    spam: true,
-                    motivo: 'Estrutura fonética irregular / mash de consoantes (sem bônus)'
-                };
-            }
+        // Filtro 3: Bloqueia sequências ou frases repetidas em loop (ex: "muito bom muito bom muito bom")
+        if (/\b(\p{L}+\s+\p{L}+)\b(?:\s+\1\b){1,}/iu.test(texto)) {
+            return {
+                xp: 100,
+                nivel: 'rapida',
+                label: 'Nota Rápida',
+                bonus: 0,
+                icone: '⚡',
+                cor: '#f59e0b',
+                spam: true,
+                motivo: '⚠️ Frases repetitivas em loop detectadas (sem bônus de XP)'
+            };
         }
 
-        // Extrai palavras válidas (alfanumérico com acentuação)
-        const palavras = texto.toLowerCase().match(/[a-zà-ú0-9]+/gi) || [];
+        // Extrai palavras individuais
+        const palavras = texto.match(/[\p{L}0-9]+/giu) || [];
 
         // Filtro 4: Palavras gigantescas coladas sem espaço (mash de teclado)
-        const temPalavraMonstro = palavras.some(p => p.length > 25);
+        const temPalavraMonstro = palavras.some(p => p.length > 24);
         if (temPalavraMonstro) {
             return {
                 xp: 100,
@@ -193,7 +273,22 @@
                 icone: '⚡',
                 cor: '#f59e0b',
                 spam: true,
-                motivo: 'Palavras excessivamente longas sem espaçamento (sem bônus)'
+                motivo: '⚠️ Palavras excessivamente longas sem espaçamento (sem bônus de XP)'
+            };
+        }
+
+        // Filtro 5: Detector de Palavras Gibberish / Mash aleatório
+        const palavrasGibberish = palavras.filter(isPalavraGibberish);
+        if (palavrasGibberish.length >= 1) {
+            return {
+                xp: 100,
+                nivel: 'rapida',
+                label: 'Nota Rápida',
+                bonus: 0,
+                icone: '⚡',
+                cor: '#f59e0b',
+                spam: true,
+                motivo: '⚠️ Palavras sem sentido ou sequências desconexas detectadas (sem bônus de XP)'
             };
         }
 
@@ -209,8 +304,8 @@
             };
         }
 
-        // Filtro 5: Vocabulário único (evita Ctrl+V da mesma palavra infinitamente)
-        const palavrasUnicas = new Set(palavras);
+        // Filtro 6: Vocabulário único (evita Ctrl+V de palavras)
+        const palavrasUnicas = new Set(palavras.map(p => p.toLowerCase()));
         const ratioUnicas = palavrasUnicas.size / palavras.length;
         if (ratioUnicas < 0.45 && palavras.length > 10) {
             return {
@@ -221,12 +316,44 @@
                 icone: '⚡',
                 cor: '#f59e0b',
                 spam: true,
-                motivo: 'Repetição excessiva da mesma palavra (sem bônus)'
+                motivo: '⚠️ Baixa variedade de vocabulário detectada (sem bônus de XP)'
+            };
+        }
+
+        // ══════════════════════════════════════════════
+        // VERIFICAÇÃO DE PALAVRAS-CHAVE DE CRÍTICA REAL
+        // ══════════════════════════════════════════════
+        const textoNormalizado = texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const categoriasPresentes = new Set();
+        const palavrasChaveEncontradas = new Set();
+
+        for (const [categoria, termos] of Object.entries(CRITERIOS_CRITICA)) {
+            for (const termo of termos) {
+                const termoNorm = termo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                const regexTermo = new RegExp(`\\b${termoNorm}\\b`, 'i');
+                if (regexTermo.test(textoNormalizado)) {
+                    categoriasPresentes.add(categoria);
+                    palavrasChaveEncontradas.add(termoNorm);
+                }
+            }
+        }
+
+        // Se tem comprimento mas nenhuma palavra-chave crítica foi identificada
+        if (len >= 75 && palavrasChaveEncontradas.size === 0) {
+            return {
+                xp: 100,
+                nivel: 'rapida',
+                label: 'Nota Rápida',
+                bonus: 0,
+                icone: '⚡',
+                cor: '#94a3b8',
+                motivo: '💡 Comente sobre aspectos do jogo (ex: jogabilidade, história, gráficos ou combate) para ativar o bônus de XP!'
             };
         }
 
         // 🌟 Nível 3: Crítica Overcritic Completa (200 XP -> +100 XP bônus)
-        if (len >= 180 && palavrasUnicas.size >= 14) {
+        // Exige >= 180 caracteres, ao menos 18 palavras, 14 únicas, 3 termos analíticos e 2 pilares distintos
+        if (len >= 180 && palavras.length >= 16 && palavrasUnicas.size >= 12 && palavrasChaveEncontradas.size >= 3 && categoriasPresentes.size >= 2) {
             return {
                 xp: 200,
                 nivel: 'completa',
@@ -234,13 +361,24 @@
                 bonus: 100,
                 icone: '🌟',
                 cor: '#ffd700',
-                motivo: 'Análise aprofundada e fundamentada (+100 XP de Bônus Ativado!)'
+                motivo: '🌟 Análise aprofundada com múltiplos pilares críticos (+100 XP de Bônus Ativado!)'
             };
         }
 
         // 📝 Nível 2: Resenha Opinativa (150 XP -> +50 XP bônus)
-        if (len >= 75 && palavrasUnicas.size >= 8) {
-            const faltamCompleta = Math.max(0, 180 - len);
+        // Exige >= 75 caracteres, ao menos 10 palavras e 1 termo analítico
+        if (len >= 75 && palavras.length >= 9 && palavrasUnicas.size >= 7 && palavrasChaveEncontradas.size >= 1) {
+            const faltamChar = Math.max(0, 180 - len);
+            const faltamCategorias = Math.max(0, 2 - categoriasPresentes.size);
+            const faltamTermos = Math.max(0, 3 - palavrasChaveEncontradas.size);
+
+            let dicaCompleta = 'Opinião autêntica com termos de análise (+50 XP de Bônus!). ';
+            if (faltamChar > 0) {
+                dicaCompleta += `Escreva mais ~${faltamChar} caracteres para Crítica Completa (+100 XP).`;
+            } else if (faltamCategorias > 0 || faltamTermos > 0) {
+                dicaCompleta += `Aborde outro pilar (ex: gráficos, enredo, áudio ou jogabilidade) para Crítica Completa (+100 XP).`;
+            }
+
             return {
                 xp: 150,
                 nivel: 'opinativa',
@@ -248,7 +386,7 @@
                 bonus: 50,
                 icone: '📝',
                 cor: '#22c55e',
-                motivo: `Opinião autêntica (+50 XP de Bônus!). Faltam ~${faltamCompleta} caracteres para Crítica Completa.`
+                motivo: dicaCompleta
             };
         }
 
@@ -259,7 +397,7 @@
             bonus: 0,
             icone: '⚡',
             cor: '#94a3b8',
-            motivo: `Faltam ${Math.max(0, 80 - len)} caracteres para alcançar Resenha Opinativa`
+            motivo: `Faltam ${Math.max(0, 75 - len)} caracteres para alcançar Resenha Opinativa (+50 XP)`
         };
     }
 
@@ -1436,6 +1574,486 @@
                     width: 100%;
                     justify-content: center;
                 }
+            }
+
+            /* ══════ RANKING GERAL DA COMUNIDADE (LÍDERES OVERCRITIC) ══════ */
+            .og-community-ranking-card {
+                background: var(--card-bg, rgba(13, 19, 33, 0.7));
+                border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+                border-radius: 24px;
+                padding: clamp(20px, 3vw, 36px);
+                margin: 40px 0;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 240, 255, 0.05);
+                position: relative;
+                overflow: hidden;
+            }
+            body.light-mode .og-community-ranking-card {
+                background: rgba(255, 255, 255, 0.88);
+                border-color: rgba(0, 0, 0, 0.08);
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.06);
+            }
+            .og-ranking-main-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                flex-wrap: wrap;
+                gap: 16px;
+                margin-bottom: 28px;
+            }
+            .og-ranking-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 12px;
+                background: rgba(255, 215, 0, 0.12);
+                border: 1px solid rgba(255, 215, 0, 0.3);
+                border-radius: 20px;
+                color: #ffd700;
+                font-size: 0.75rem;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                margin-bottom: 8px;
+            }
+            body.light-mode .og-ranking-badge {
+                background: rgba(217, 119, 6, 0.12);
+                border-color: rgba(217, 119, 6, 0.3);
+                color: #b45309;
+            }
+            .og-ranking-title {
+                font-size: clamp(1.4rem, 2.4vw, 2rem);
+                font-weight: 900;
+                color: var(--text-main, #f8f9fa);
+                margin: 0 0 6px 0;
+                letter-spacing: -0.5px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            body.light-mode .og-ranking-title {
+                color: #0f172a;
+            }
+            .og-ranking-subtitle {
+                font-size: 0.88rem;
+                color: var(--text-muted, #adb5bd);
+                max-width: 650px;
+                line-height: 1.5;
+            }
+            body.light-mode .og-ranking-subtitle {
+                color: #64748b;
+            }
+            .og-ranking-actions {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .og-btn-ranking-action {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 9px 18px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+                color: var(--text-main, #f8f9fa);
+                font-size: 0.85rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.25s ease;
+            }
+            .og-btn-ranking-action:hover {
+                background: rgba(255, 255, 255, 0.1);
+                transform: translateY(-2px);
+            }
+            .og-btn-ranking-action.primary {
+                background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(157, 78, 221, 0.18));
+                border-color: var(--accent-cyan, #00f0ff);
+                color: var(--accent-cyan, #00f0ff);
+                box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+            }
+            .og-btn-ranking-action.primary:hover {
+                background: linear-gradient(135deg, #00f0ff, #9d4edd);
+                color: #07090f;
+                box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+            }
+
+            /* PÓDIO DOS LÍDERES */
+            .og-podium-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                align-items: flex-end;
+                margin-bottom: 36px;
+            }
+            @media (max-width: 860px) {
+                .og-podium-grid {
+                    grid-template-columns: 1fr;
+                    align-items: stretch;
+                }
+            }
+            .og-podium-card {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 20px;
+                padding: 24px 20px;
+                text-align: center;
+                position: relative;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            body.light-mode .og-podium-card {
+                background: rgba(255, 255, 255, 0.9);
+                border-color: rgba(0, 0, 0, 0.08);
+            }
+            .og-podium-card:hover {
+                transform: translateY(-4px);
+            }
+            .og-podium-card.rank-1 {
+                border-color: rgba(255, 215, 0, 0.45);
+                background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+                box-shadow: 0 10px 30px rgba(255, 215, 0, 0.12);
+                padding-top: 32px;
+                padding-bottom: 28px;
+            }
+            body.light-mode .og-podium-card.rank-1 {
+                background: linear-gradient(180deg, rgba(254, 243, 199, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+                border-color: rgba(245, 158, 11, 0.4);
+            }
+            .og-podium-card.rank-2 {
+                border-color: rgba(203, 213, 225, 0.35);
+                background: linear-gradient(180deg, rgba(203, 213, 225, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            }
+            .og-podium-card.rank-3 {
+                border-color: rgba(205, 127, 50, 0.35);
+                background: linear-gradient(180deg, rgba(205, 127, 50, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            }
+            .og-podium-crown {
+                position: absolute;
+                top: -16px;
+                font-size: 1.8rem;
+                animation: ogFloatCrown 2.5s ease-in-out infinite alternate;
+                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+            }
+            @keyframes ogFloatCrown {
+                from { transform: translateY(0); }
+                to { transform: translateY(-5px); }
+            }
+            .og-podium-avatar-wrap {
+                width: 68px;
+                height: 68px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.2rem;
+                background: rgba(0, 0, 0, 0.3);
+                border: 2px solid currentColor;
+                margin-bottom: 12px;
+                position: relative;
+            }
+            .og-podium-card.rank-1 .og-podium-avatar-wrap {
+                width: 80px;
+                height: 80px;
+                font-size: 2.6rem;
+                border-color: #ffd700;
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            }
+            .og-podium-card.rank-2 .og-podium-avatar-wrap {
+                border-color: #cbd5e1;
+                box-shadow: 0 0 15px rgba(203, 213, 225, 0.3);
+            }
+            .og-podium-card.rank-3 .og-podium-avatar-wrap {
+                border-color: #cd7f32;
+                box-shadow: 0 0 15px rgba(205, 127, 50, 0.3);
+            }
+            .og-podium-rank-badge {
+                position: absolute;
+                bottom: -8px;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.72rem;
+                font-weight: 800;
+                background: #000;
+                border: 1px solid currentColor;
+                letter-spacing: 0.5px;
+            }
+            .og-podium-name {
+                font-size: 1.15rem;
+                font-weight: 800;
+                color: var(--text-main, #f8f9fa);
+                margin: 6px 0 2px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                justify-content: center;
+            }
+            body.light-mode .og-podium-name {
+                color: #0f172a;
+            }
+            .og-podium-patente {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 3px 10px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 800;
+                margin-bottom: 12px;
+                border: 1px solid currentColor;
+            }
+            .og-podium-xp {
+                font-size: 1.35rem;
+                font-weight: 900;
+                letter-spacing: -0.5px;
+                margin-bottom: 10px;
+            }
+            .og-podium-card.rank-1 .og-podium-xp {
+                color: #ffd700;
+                text-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+            }
+            .og-podium-card.rank-2 .og-podium-xp {
+                color: #cbd5e1;
+            }
+            .og-podium-card.rank-3 .og-podium-xp {
+                color: #cd7f32;
+            }
+            .og-podium-stats-row {
+                display: flex;
+                gap: 12px;
+                font-size: 0.78rem;
+                color: var(--text-muted, #adb5bd);
+                padding-top: 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                width: 100%;
+                justify-content: center;
+            }
+            body.light-mode .og-podium-stats-row {
+                color: #64748b;
+                border-color: rgba(0, 0, 0, 0.06);
+            }
+
+            /* TABELA DO RANKING GERAL */
+            .og-ranking-table-card {
+                background: rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 18px;
+                overflow: hidden;
+            }
+            body.light-mode .og-ranking-table-card {
+                background: #ffffff;
+                border-color: rgba(0, 0, 0, 0.08);
+            }
+            .og-ranking-table-header {
+                padding: 16px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 12px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                background: rgba(255, 255, 255, 0.02);
+            }
+            body.light-mode .og-ranking-table-header {
+                background: rgba(0, 0, 0, 0.02);
+                border-color: rgba(0, 0, 0, 0.06);
+            }
+            .og-ranking-table-title {
+                font-size: 0.95rem;
+                font-weight: 800;
+                color: var(--text-main, #f8f9fa);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            body.light-mode .og-ranking-table-title {
+                color: #0f172a;
+            }
+            .og-ranking-table-legend {
+                display: flex;
+                gap: 8px;
+                font-size: 0.76rem;
+                color: var(--text-muted, #adb5bd);
+            }
+            .og-legend-pill {
+                padding: 2px 8px;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+            }
+            .og-ranking-table-responsive {
+                width: 100%;
+                overflow-x: auto;
+            }
+            .og-ranking-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+                font-size: 0.88rem;
+            }
+            .og-ranking-table th {
+                padding: 14px 18px;
+                font-size: 0.75rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                color: var(--text-muted, #adb5bd);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                background: rgba(0, 0, 0, 0.15);
+            }
+            body.light-mode .og-ranking-table th {
+                background: #f8fafc;
+                color: #64748b;
+                border-color: #e2e8f0;
+            }
+            .og-ranking-table td {
+                padding: 14px 18px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+                color: var(--text-main, #f8f9fa);
+                vertical-align: middle;
+            }
+            body.light-mode .og-ranking-table td {
+                color: #1e293b;
+                border-color: #f1f5f9;
+            }
+            .og-rank-row {
+                transition: background 0.2s ease;
+            }
+            .og-rank-row:hover {
+                background: rgba(0, 240, 255, 0.04);
+            }
+            body.light-mode .og-rank-row:hover {
+                background: rgba(2, 132, 199, 0.04);
+            }
+            .og-rank-row.is-current-user {
+                background: rgba(0, 240, 255, 0.08);
+                border-left: 3px solid var(--accent-cyan, #00f0ff);
+            }
+            body.light-mode .og-rank-row.is-current-user {
+                background: rgba(2, 132, 199, 0.08);
+                border-left: 3px solid #0284c7;
+            }
+            .og-rank-num {
+                font-size: 1.05rem;
+                font-weight: 900;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .og-rank-user-cell {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .og-rank-user-avatar {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.05);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.3rem;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                flex-shrink: 0;
+            }
+            .og-rank-user-name {
+                font-weight: 800;
+                color: var(--text-main, #f8f9fa);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            body.light-mode .og-rank-user-name {
+                color: #0f172a;
+            }
+            .og-rank-badge-role {
+                font-size: 0.68rem;
+                padding: 2px 6px;
+                border-radius: 6px;
+                background: rgba(255, 215, 0, 0.12);
+                color: #ffd700;
+                border: 1px solid rgba(255, 215, 0, 0.3);
+                font-weight: 700;
+            }
+            body.light-mode .og-rank-badge-role {
+                background: rgba(217, 119, 6, 0.12);
+                color: #b45309;
+                border-color: rgba(217, 119, 6, 0.3);
+            }
+            .og-rank-badge-you {
+                font-size: 0.68rem;
+                padding: 2px 6px;
+                border-radius: 6px;
+                background: rgba(0, 240, 255, 0.15);
+                color: var(--accent-cyan, #00f0ff);
+                border: 1px solid var(--accent-cyan, #00f0ff);
+                font-weight: 800;
+            }
+            .og-rank-patente-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 0.76rem;
+                font-weight: 800;
+                border: 1px solid currentColor;
+            }
+            .og-rank-xp-bar-wrap {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .og-rank-xp-text {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.75rem;
+                font-weight: 700;
+            }
+            .og-rank-xp-track {
+                width: 100%;
+                height: 6px;
+                background: rgba(255, 255, 255, 0.08);
+                border-radius: 6px;
+                overflow: hidden;
+            }
+            body.light-mode .og-rank-xp-track {
+                background: #e2e8f0;
+            }
+            .og-rank-xp-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #00f0ff, #9d4edd);
+                border-radius: 6px;
+            }
+            .og-rank-btn-view {
+                padding: 6px 12px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: var(--text-main, #f8f9fa);
+                font-size: 0.78rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                white-space: nowrap;
+            }
+            .og-rank-btn-view:hover {
+                background: rgba(0, 240, 255, 0.15);
+                border-color: var(--accent-cyan, #00f0ff);
+                color: var(--accent-cyan, #00f0ff);
+            }
+            .og-ranking-empty {
+                text-align: center;
+                padding: 40px 20px;
+            }
+            .og-podium-card-placeholder {
+                min-height: 200px;
             }
         `;
         document.head.appendChild(style);
@@ -2705,7 +3323,24 @@
                 }
                 const { data: nuvemJogos } = await qJogos;
 
+                // A) JOGOS: Sincronização segura sem deletar o acervo de outros membros
+                let reviewsAtuais = [];
+                try {
+                    reviewsAtuais = JSON.parse(localStorage.getItem('overcritic_reviews') || '[]') || [];
+                    if (!Array.isArray(reviewsAtuais)) reviewsAtuais = [];
+                } catch(e) { reviewsAtuais = []; }
+
+                // Mantém os jogos de outros autores intactos
                 const mapaJ = new Map();
+                reviewsAtuais.forEach(j => {
+                    if (!j || !j.titulo) return;
+                    const dono = (j.autor || '').toLowerCase();
+                    const eDeste = dono === usernameLower || (effectiveUid && (j.userId === effectiveUid || j.user_id === effectiveUid));
+                    if (!eDeste) {
+                        mapaJ.set(j.titulo.trim().toLowerCase(), j);
+                    }
+                });
+
                 if (Array.isArray(nuvemJogos)) {
                     nuvemJogos.forEach(row => {
                         const idNum = Number(row.id);
@@ -2745,7 +3380,7 @@
                 }
                 const { data: nuvemPlatinas } = await qPlat;
 
-                const mapaPlat = new Map();
+                const minhasPlatinasUsuario = [];
                 if (Array.isArray(nuvemPlatinas)) {
                     nuvemPlatinas.forEach(row => {
                         const plat = {
@@ -2764,13 +3399,36 @@
                             date: row.data_conquista,
                             badges: Array.isArray(row.badges) ? row.badges : []
                         };
-                        const k = plat.title.trim().toLowerCase();
-                        mapaPlat.set(k, plat);
+                        minhasPlatinasUsuario.push(plat);
                     });
                 }
 
+                // Minhas platinas pessoais (exclusivas do usuário logado)
+                localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(minhasPlatinasUsuario));
+
+                // Feed e repositório global de platinas: Mantém platinas de outros usuários intactas!
+                let platinasGlobais = [];
+                try {
+                    platinasGlobais = JSON.parse(localStorage.getItem('overcritic_platinas') || '[]') || [];
+                    if (!Array.isArray(platinasGlobais)) platinasGlobais = [];
+                } catch(e) { platinasGlobais = []; }
+
+                const mapaPlat = new Map();
+                platinasGlobais.forEach(p => {
+                    if (!p || (!p.title && !p.titulo)) return;
+                    const dono = (p.user || p.usuario || '').toLowerCase();
+                    const eDeste = dono === usernameLower || (effectiveUid && (p.userId === effectiveUid || p.user_id === effectiveUid));
+                    if (!eDeste) {
+                        const k = (p.title || p.titulo).trim().toLowerCase() + '___' + dono;
+                        mapaPlat.set(k, p);
+                    }
+                });
+                minhasPlatinasUsuario.forEach(p => {
+                    const k = (p.title || p.titulo).trim().toLowerCase() + '___' + (p.user || p.usuario || '').trim().toLowerCase();
+                    mapaPlat.set(k, p);
+                });
+
                 const consolidadaP = Array.from(mapaPlat.values());
-                localStorage.setItem('overcritic_minhas_platinas', JSON.stringify(consolidadaP));
                 localStorage.setItem('overcritic_platinas_feed', JSON.stringify(consolidadaP));
                 localStorage.setItem('overcritic_platinas', JSON.stringify(consolidadaP));
                 localStorage.setItem('overclock_platinas', JSON.stringify(consolidadaP));
@@ -2801,51 +3459,60 @@
 
         const effectiveUid = uid || (isAdmin ? '958a1b5f-4151-42c7-97f2-caf0e59fbb86' : '');
 
-        // 1. Jogos do usuário
+        // 1. Jogos do usuário (Lê caches da nuvem e local)
         let jogos = [];
         const fakeReviewIds = [1789741152346, 1789742639992, 1789743477104];
         try {
+            const rawNuvemJ = localStorage.getItem('overcritic_comunidade_jogos_nuvem') || '[]';
             const rawJ = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos') || '[]';
-            const parsedJ = JSON.parse(rawJ);
-            if (Array.isArray(parsedJ)) {
-                jogos = parsedJ.filter(j => {
-                    if (!j || !j.titulo) return false;
-                    const idNum = Number(j.id);
-                    const isSeed = idNum && (idNum === 101 || idNum === 102 || idNum === 103 || idNum === 104 || idNum === 105 || String(j.id).startsWith('feed_seed_'));
-                    if (isSeed || fakeReviewIds.includes(idNum)) return false;
-                    const dono = (j.autor || '').toLowerCase();
-                    const eDoUsuario = dono === usernameLower 
-                        || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
-                        || (effectiveUid && (j.userId === effectiveUid || j.user_id === effectiveUid));
-                    return eDoUsuario;
-                });
-            }
+            const combinadosJ = [...JSON.parse(rawNuvemJ), ...JSON.parse(rawJ)];
+            const mapJ = new Map();
+            combinadosJ.forEach(j => {
+                if (!j || !j.titulo) return;
+                const idNum = Number(j.id);
+                const isSeed = idNum && (idNum === 101 || idNum === 102 || idNum === 103 || idNum === 104 || idNum === 105 || String(j.id).startsWith('feed_seed_'));
+                if (isSeed || fakeReviewIds.includes(idNum)) return;
+                const dono = (j.autor || '').toLowerCase();
+                const eDoUsuario = dono === usernameLower 
+                    || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
+                    || (effectiveUid && (j.userId === effectiveUid || j.user_id === effectiveUid));
+                if (eDoUsuario) {
+                    const key = j.titulo.trim().toLowerCase();
+                    if (!mapJ.has(key)) mapJ.set(key, j);
+                }
+            });
+            jogos = Array.from(mapJ.values());
         } catch(e) {}
 
         // 2. Mídias
         let midias = [];
         try {
+            const rawNuvemM = localStorage.getItem('overcritic_comunidade_midias_nuvem') || '[]';
             const rawM = localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias') || '[]';
-            const parsedM = JSON.parse(rawM);
-            if (Array.isArray(parsedM)) {
-                midias = parsedM.filter(m => {
-                    if (!m) return false;
-                    const dono = (m.autor || '').toLowerCase();
-                    const eDoUsuario = dono === usernameLower 
-                        || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
-                        || (effectiveUid && (m.userId === effectiveUid || m.user_id === effectiveUid));
-                    return eDoUsuario;
-                });
-            }
+            const combinadasM = [...JSON.parse(rawNuvemM), ...JSON.parse(rawM)];
+            const mapM = new Map();
+            combinadasM.forEach(m => {
+                if (!m) return;
+                const dono = (m.autor || '').toLowerCase();
+                const eDoUsuario = dono === usernameLower 
+                    || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
+                    || (effectiveUid && (m.userId === effectiveUid || m.user_id === effectiveUid));
+                if (eDoUsuario) {
+                    const key = (m.titulo || '').trim().toLowerCase();
+                    if (!mapM.has(key)) mapM.set(key, m);
+                }
+            });
+            midias = Array.from(mapM.values());
         } catch(e) {}
 
-        // 3. Platinas (Unifica overcritic_minhas_platinas, overcritic_platinas_feed e overcritic_platinas)
+        // 3. Platinas (Unifica nuvem comunitária, overcritic_minhas_platinas, overcritic_platinas_feed e overcritic_platinas)
         let platinas = [];
         try {
+            const rawNuvemP = localStorage.getItem('overcritic_comunidade_platinas_nuvem') || '[]';
             const rawMinhas = localStorage.getItem('overcritic_minhas_platinas') || '[]';
             const rawFeed = localStorage.getItem('overcritic_platinas_feed') || '[]';
             const rawPlats = localStorage.getItem('overcritic_platinas') || '[]';
-            const combinadas = [...JSON.parse(rawMinhas), ...JSON.parse(rawFeed), ...JSON.parse(rawPlats)];
+            const combinadas = [...JSON.parse(rawNuvemP), ...JSON.parse(rawMinhas), ...JSON.parse(rawFeed), ...JSON.parse(rawPlats)];
             const mapP = new Map();
 
             const idsExpurgados = [1790130987906, 1790131037408, 1790339420104];
@@ -2958,6 +3625,737 @@
         atualizarBadgesNivelPagina();
     }
 
+    /* ════════════════════════════════════════════════════════
+       7. RANKING GERAL DA COMUNIDADE (LÍDERES OVERCRITIC)
+       Passo 4: Classificação Global dos Jogadores Cadastrados
+    ════════════════════════════════════════════════════════ */
+    const CHAVE_STORAGE_RANKING_MEMBROS = 'overcritic_ranking_comunidade_v26_10';
+
+    /**
+     * Registra ou atualiza um jogador na base oficial de ranking comunitário.
+     * Chamado automaticamente no cadastro em conta_login.html ou ao atualizar perfil.
+     */
+    function registrarNovoJogadorNoRanking(dados) {
+        if (!dados || !dados.username) return null;
+        const username = String(dados.username).trim();
+        if (!username || ['visitante', 'anônimo', 'anonimo', 'jogador'].includes(username.toLowerCase())) return null;
+
+        let rankingLista = [];
+        try {
+            rankingLista = JSON.parse(localStorage.getItem(CHAVE_STORAGE_RANKING_MEMBROS) || '[]');
+            if (!Array.isArray(rankingLista)) rankingLista = [];
+        } catch(e) { rankingLista = []; }
+
+        const uLower = username.toLowerCase();
+        const idx = rankingLista.findIndex(u => (u.username || '').toLowerCase() === uLower);
+        const agora = new Date().toISOString();
+
+        const jogadorDados = {
+            username: username,
+            avatar: dados.avatar || '🎮',
+            email: dados.email || '',
+            role: (uLower === 'pontug' || dados.email === 'mesquitagabriel255@gmail.com') ? 'Fundador & Admin' : 'Membro da Comunidade',
+            dataCadastro: dados.dataCadastro || agora,
+            ultimaAtividade: agora
+        };
+
+        if (idx >= 0) {
+            rankingLista[idx] = { ...rankingLista[idx], ...jogadorDados, dataCadastro: rankingLista[idx].dataCadastro || agora };
+        } else {
+            rankingLista.push(jogadorDados);
+        }
+
+        try {
+            localStorage.setItem(CHAVE_STORAGE_RANKING_MEMBROS, JSON.stringify(rankingLista));
+        } catch(e) {}
+
+        // Dispara evento para atualização em tempo real de widgets abertos
+        window.dispatchEvent(new CustomEvent('overcritic_ranking_atualizado', { detail: jogadorDados }));
+        return jogadorDados;
+    }
+
+    /**
+     * SINCRONIZAÇÃO EM TEMPO REAL DO RANKING GERAL COM A NUVEM SUPABASE
+     * Consulta a coleção global de platinas, análises de jogos e mídias no Supabase,
+     * garantindo que pontuações (XP), platinas e críticas de TODOS os membros fiquem 100%
+     * idênticas e sincronizadas em qualquer computador, navegador e conta autenticada.
+     */
+    async function sincronizarRankingNuvem(forcar = false) {
+        if (!window.sbClient) {
+            return obterRankingGeralComunidade();
+        }
+
+        const agora = Date.now();
+        if (!forcar && window._ultimoSyncRankingNuvem && (agora - window._ultimoSyncRankingNuvem < 10000)) {
+            return obterRankingGeralComunidade();
+        }
+        window._ultimoSyncRankingNuvem = agora;
+
+        try {
+            const fakeReviewIds = [1789741152346, 1789742639992, 1789743477104];
+            const idsExpurgados = [1790130987906, 1790131037408, 1790339420104];
+
+            // 1. Busca todos os registros públicos da comunidade em paralelo
+            const [resJogos, resPlatinas, resMidias] = await Promise.all([
+                window.sbClient.from('reviews_jogos').select('*').order('created_at', { ascending: false }),
+                window.sbClient.from('platinas').select('*').order('created_at', { ascending: false }),
+                window.sbClient.from('reviews_midias').select('*').order('created_at', { ascending: false })
+            ]);
+
+            const nuvemJogos = Array.isArray(resJogos?.data) ? resJogos.data : [];
+            const nuvemPlatinas = Array.isArray(resPlatinas?.data) ? resPlatinas.data : [];
+            const nuvemMidias = Array.isArray(resMidias?.data) ? resMidias.data : [];
+
+            // 2. Normaliza Jogos
+            const formatadosJ = nuvemJogos
+                .filter(row => {
+                    const idNum = Number(row.id);
+                    return !fakeReviewIds.includes(idNum) && !(idNum >= 101 && idNum <= 105);
+                })
+                .map(row => ({
+                    id: Number(row.id),
+                    userId: row.user_id,
+                    autor: row.autor,
+                    titulo: row.titulo,
+                    generos: row.generos,
+                    palavrasChave: row.palavras_chave,
+                    mediaInternet: row.media_internet,
+                    plataforma: row.plataforma,
+                    minhaNota: String(row.minha_nota),
+                    status: row.status,
+                    review: row.review,
+                    capaUrl: row.capa_url,
+                    dataRegistro: row.data_registro,
+                    likes: Array.isArray(row.likes) ? row.likes : [],
+                    comments: Array.isArray(row.comments) ? row.comments : []
+                }));
+
+            // 3. Normaliza Platinas
+            const formatadosP = nuvemPlatinas
+                .filter(row => {
+                    const idNum = Number(row.id);
+                    return !idsExpurgados.includes(idNum);
+                })
+                .map(row => ({
+                    id: row.id,
+                    userId: row.user_id,
+                    user: row.usuario,
+                    title: row.titulo,
+                    platform: row.plataforma,
+                    difficulty: row.dificuldade,
+                    difficultyCategory: (row.dificuldade || '').toLowerCase().includes('fácil') || (row.dificuldade || '').toLowerCase().includes('tranquila') ? 'facil' : ((row.dificuldade || '').toLowerCase().includes('difícil') ? 'dificil' : ((row.dificuldade || '').toLowerCase().includes('lendária') || (row.dificuldade || '').toLowerCase().includes('insana') ? 'lendaria' : 'moderada')),
+                    hours: row.horas || 0,
+                    progress: row.nota !== null && row.nota !== undefined ? Number(row.nota) : 100,
+                    trophiesCount: '100% Conquistado',
+                    notes: row.relato || '',
+                    cover: row.cover_url,
+                    date: row.data_conquista,
+                    badges: Array.isArray(row.badges) ? row.badges : []
+                }));
+
+            // 4. Normaliza Mídias
+            const formatadosM = nuvemMidias.map(row => ({
+                id: row.id,
+                userId: row.user_id,
+                autor: row.autor,
+                titulo: row.titulo,
+                tipo: row.tipo,
+                genero: row.genero,
+                nota: row.nota,
+                review: row.review,
+                posterUrl: row.poster_url,
+                dataRegistro: row.data_registro
+            }));
+
+            // Armazena nas chaves dedicadas de nuvem comunitária
+            localStorage.setItem('overcritic_comunidade_jogos_nuvem', JSON.stringify(formatadosJ));
+            localStorage.setItem('overcritic_comunidade_platinas_nuvem', JSON.stringify(formatadosP));
+            localStorage.setItem('overcritic_comunidade_midias_nuvem', JSON.stringify(formatadosM));
+
+            // Mescla de forma segura nas chaves de reviews e platinas gerais
+            try {
+                let localJ = [];
+                try { localJ = JSON.parse(localStorage.getItem('overcritic_reviews') || '[]') || []; } catch(e) {}
+                const mapJ = new Map();
+                formatadosJ.forEach(item => { if (item && item.titulo) mapJ.set(item.titulo.trim().toLowerCase(), item); });
+                localJ.forEach(item => {
+                    if (item && item.titulo && !mapJ.has(item.titulo.trim().toLowerCase())) {
+                        mapJ.set(item.titulo.trim().toLowerCase(), item);
+                    }
+                });
+                const mergedJ = Array.from(mapJ.values());
+                localStorage.setItem('overcritic_reviews', JSON.stringify(mergedJ));
+                localStorage.setItem('overcritic_jogos', JSON.stringify(mergedJ));
+                localStorage.setItem('overclock_jogos', JSON.stringify(mergedJ));
+            } catch(e) {}
+
+            try {
+                let localP = [];
+                try { localP = JSON.parse(localStorage.getItem('overcritic_platinas') || '[]') || []; } catch(e) {}
+                const mapP = new Map();
+                formatadosP.forEach(item => {
+                    if (item && item.title) {
+                        const k = item.title.trim().toLowerCase() + '___' + (item.user || '').trim().toLowerCase();
+                        mapP.set(k, item);
+                    }
+                });
+                localP.forEach(item => {
+                    if (item && item.title) {
+                        const k = item.title.trim().toLowerCase() + '___' + (item.user || item.usuario || '').trim().toLowerCase();
+                        if (!mapP.has(k)) mapP.set(k, item);
+                    }
+                });
+                const mergedP = Array.from(mapP.values());
+                localStorage.setItem('overcritic_platinas_feed', JSON.stringify(mergedP));
+                localStorage.setItem('overcritic_platinas', JSON.stringify(mergedP));
+                localStorage.setItem('overclock_platinas', JSON.stringify(mergedP));
+                localStorage.setItem('platinasSalvas', JSON.stringify(mergedP));
+            } catch(e) {}
+
+            // Atualiza membros da comunidade com base nos autores da nuvem
+            let membros = [];
+            try {
+                membros = JSON.parse(localStorage.getItem(CHAVE_STORAGE_RANKING_MEMBROS) || '[]');
+                if (!Array.isArray(membros)) membros = [];
+            } catch(e) { membros = []; }
+
+            const mapaMembros = new Map();
+            membros.forEach(m => {
+                if (m && m.username) mapaMembros.set(m.username.trim().toLowerCase(), m);
+            });
+
+            // Garante pontuG como Fundador & Admin oficial
+            if (!mapaMembros.has('pontug')) {
+                mapaMembros.set('pontug', {
+                    username: 'pontuG',
+                    avatar: localStorage.getItem('overcritic_user_avatar') || '👑',
+                    email: 'mesquitagabriel255@gmail.com',
+                    role: 'Fundador & Admin',
+                    dataCadastro: '2026-10-01'
+                });
+            } else {
+                const p = mapaMembros.get('pontug');
+                p.role = 'Fundador & Admin';
+            }
+
+            // Registra autores encontrados nas platinas da nuvem
+            formatadosP.forEach(p => {
+                const autor = (p.user || '').trim();
+                if (!autor || ['visitante', 'anônimo', 'anonimo', 'jogador'].includes(autor.toLowerCase())) return;
+                const k = autor.toLowerCase();
+                if (!mapaMembros.has(k)) {
+                    mapaMembros.set(k, {
+                        username: autor,
+                        avatar: '🎮',
+                        email: '',
+                        role: k === 'pontug' ? 'Fundador & Admin' : 'Membro da Comunidade',
+                        dataCadastro: p.date || new Date().toISOString()
+                    });
+                }
+            });
+
+            // Registra autores encontrados nas análises de jogos da nuvem
+            formatadosJ.forEach(j => {
+                const autor = (j.autor || '').trim();
+                if (!autor || ['visitante', 'anônimo', 'anonimo', 'jogador'].includes(autor.toLowerCase())) return;
+                const k = autor.toLowerCase();
+                if (!mapaMembros.has(k)) {
+                    mapaMembros.set(k, {
+                        username: autor,
+                        avatar: '🎮',
+                        email: '',
+                        role: k === 'pontug' ? 'Fundador & Admin' : 'Membro da Comunidade',
+                        dataCadastro: j.dataRegistro || new Date().toISOString()
+                    });
+                }
+            });
+
+            try {
+                localStorage.setItem(CHAVE_STORAGE_RANKING_MEMBROS, JSON.stringify(Array.from(mapaMembros.values())));
+            } catch(e) {}
+
+            // Atualiza nível do usuário no header / perfil
+            atualizarBadgesNivelPagina();
+
+            // Dispara evento para re-renderização
+            window.dispatchEvent(new CustomEvent('overcritic_ranking_atualizado', { detail: { origem: 'nuvem' } }));
+
+            return obterRankingGeralComunidade();
+        } catch(err) {
+            console.warn('⚠️ [Gamificação] Aviso na sincronização do ranking na nuvem:', err);
+            return obterRankingGeralComunidade();
+        }
+    }
+
+    /**
+     * Consolida e calcula em tempo real o Ranking Geral da Comunidade.
+     * Percorre todos os membros cadastrados e todos os autores reais de platinas e críticas,
+     * aplicando o cálculo oficial da matriz NIVEIS_GAMER e bônus de XP.
+     */
+    function obterRankingGeralComunidade() {
+        let membrosCadastrados = [];
+        try {
+            membrosCadastrados = JSON.parse(localStorage.getItem(CHAVE_STORAGE_RANKING_MEMBROS) || '[]');
+            if (!Array.isArray(membrosCadastrados)) membrosCadastrados = [];
+        } catch(e) { membrosCadastrados = []; }
+
+        // 1. Garante perfil oficial do Administrador pontuG
+        if (!membrosCadastrados.some(m => (m.username || '').toLowerCase() === 'pontug')) {
+            membrosCadastrados.push({
+                username: 'pontuG',
+                avatar: localStorage.getItem('overcritic_user_avatar') || '👑',
+                email: 'mesquitagabriel255@gmail.com',
+                role: 'Fundador & Admin',
+                dataCadastro: '2026-10-01'
+            });
+        }
+
+        // 2. Garante o usuário ativo na sessão
+        const userAtivo = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim();
+        if (userAtivo && !['visitante', 'anônimo', 'anonimo', 'jogador'].includes(userAtivo.toLowerCase())) {
+            if (!membrosCadastrados.some(m => (m.username || '').toLowerCase() === userAtivo.toLowerCase())) {
+                membrosCadastrados.push({
+                    username: userAtivo,
+                    avatar: localStorage.getItem('overcritic_user_avatar') || '🎮',
+                    email: localStorage.getItem('overcritic_user_email') || '',
+                    role: 'Membro da Comunidade',
+                    dataCadastro: new Date().toISOString()
+                });
+            }
+        }
+
+        // 3. Lê todos os registros (combinando caches da nuvem e locais para máxima consistência)
+        let todosJogos = [];
+        let todasPlatinas = [];
+        let todasMidias = [];
+
+        try {
+            const rawNuvemJ = localStorage.getItem('overcritic_comunidade_jogos_nuvem') || '[]';
+            const rawLocalJ = localStorage.getItem('overcritic_reviews') || localStorage.getItem('overcritic_jogos') || '[]';
+            const combinadosJ = [...JSON.parse(rawNuvemJ), ...JSON.parse(rawLocalJ)];
+            const mapJ = new Map();
+            combinadosJ.forEach(j => {
+                if (j && j.titulo) {
+                    const k = j.titulo.trim().toLowerCase();
+                    if (!mapJ.has(k)) mapJ.set(k, j);
+                }
+            });
+            todosJogos = Array.from(mapJ.values());
+        } catch(e) { todosJogos = []; }
+
+        try {
+            const rawNuvemP = localStorage.getItem('overcritic_comunidade_platinas_nuvem') || '[]';
+            const rawMinhas = localStorage.getItem('overcritic_minhas_platinas') || '[]';
+            const rawFeed = localStorage.getItem('overcritic_platinas_feed') || '[]';
+            const rawPlats = localStorage.getItem('overcritic_platinas') || '[]';
+            const combinadas = [...JSON.parse(rawNuvemP), ...JSON.parse(rawMinhas), ...JSON.parse(rawFeed), ...JSON.parse(rawPlats)];
+            const mapP = new Map();
+            combinadas.forEach(p => {
+                if (!p || (!p.title && !p.titulo)) return;
+                const k = (p.title || p.titulo).trim().toLowerCase() + '___' + (p.user || p.usuario || '').trim().toLowerCase();
+                if (!mapP.has(k)) mapP.set(k, p);
+            });
+            todasPlatinas = Array.from(mapP.values());
+        } catch(e) { todasPlatinas = []; }
+
+        try {
+            const rawNuvemM = localStorage.getItem('overcritic_comunidade_midias_nuvem') || '[]';
+            const rawM = localStorage.getItem('OVERCRITIC_MIDIAS') || localStorage.getItem('overcritic_midias') || '[]';
+            const combinadasM = [...JSON.parse(rawNuvemM), ...JSON.parse(rawM)];
+            const mapM = new Map();
+            combinadasM.forEach(m => {
+                if (!m || !m.titulo) return;
+                const k = (m.titulo || '').trim().toLowerCase() + '___' + (m.autor || '').trim().toLowerCase();
+                if (!mapM.has(k)) mapM.set(k, m);
+            });
+            todasMidias = Array.from(mapM.values());
+        } catch(e) { todasMidias = []; }
+
+        // Mapeia todos os jogadores únicos
+        const mapaJogadores = new Map();
+        membrosCadastrados.forEach(m => {
+            const k = (m.username || '').trim().toLowerCase();
+            if (k) mapaJogadores.set(k, { ...m });
+        });
+
+        // Adiciona autores legítimos encontrados nos registros
+        [...todosJogos, ...todasPlatinas, ...todasMidias].forEach(item => {
+            if (!item) return;
+            const autor = (item.autor || item.user || item.usuario || '').trim();
+            if (!autor || ['visitante', 'anônimo', 'anonimo', 'gamer'].includes(autor.toLowerCase())) return;
+            const k = autor.toLowerCase();
+            if (!mapaJogadores.has(k)) {
+                mapaJogadores.set(k, {
+                    username: autor,
+                    avatar: '🎮',
+                    email: '',
+                    role: k === 'pontug' ? 'Fundador & Admin' : 'Membro da Comunidade',
+                    dataCadastro: item.dataRegistro || item.date || new Date().toISOString()
+                });
+            }
+        });
+
+        // 4. Calcula o progresso e XP oficial de cada jogador
+        const ranking = [];
+        for (const [keyUser, membro] of mapaJogadores.entries()) {
+            const uName = membro.username;
+            const uNameLower = keyUser;
+
+            // Filtra acervo do jogador com verificação cruzada de autor e ID único de pontuG/Admin
+            let jogosDoUser = todosJogos.filter(j => {
+                const autor = (j.autor || '').toLowerCase();
+                if (autor === uNameLower) return true;
+                if (uNameLower === 'pontug' && (['admin', 'administrador', 'adm'].includes(autor) || j.userId === '958a1b5f-4151-42c7-97f2-caf0e59fbb86' || j.user_id === '958a1b5f-4151-42c7-97f2-caf0e59fbb86')) return true;
+                return false;
+            });
+
+            let platinasDoUser = todasPlatinas.filter(p => {
+                const autor = (p.user || p.usuario || '').toLowerCase();
+                if (autor === uNameLower) return true;
+                if (uNameLower === 'pontug' && (['admin', 'administrador', 'adm'].includes(autor) || p.userId === '958a1b5f-4151-42c7-97f2-caf0e59fbb86' || p.user_id === '958a1b5f-4151-42c7-97f2-caf0e59fbb86')) return true;
+                return false;
+            });
+
+            let midiasDoUser = todasMidias.filter(m => {
+                const autor = (m.autor || '').toLowerCase();
+                if (autor === uNameLower) return true;
+                if (uNameLower === 'pontug' && (['admin', 'administrador', 'adm'].includes(autor) || m.userId === '958a1b5f-4151-42c7-97f2-caf0e59fbb86' || m.user_id === '958a1b5f-4151-42c7-97f2-caf0e59fbb86')) return true;
+                return false;
+            });
+
+            // Se for pontuG / Admin ou o usuário logado, utiliza a consolidação detalhada do perfil
+            if (uNameLower === 'pontug' || (userAtivo && uNameLower === userAtivo.toLowerCase())) {
+                const dadosConsolidados = obterDadosConsolidadosUsuario(uName);
+                if (dadosConsolidados) {
+                    if (dadosConsolidados.jogos.length > 0) jogosDoUser = dadosConsolidados.jogos;
+                    if (dadosConsolidados.platinas.length > 0) platinasDoUser = dadosConsolidados.platinas;
+                    if (dadosConsolidados.midias.length > 0) midiasDoUser = dadosConsolidados.midias;
+                }
+            }
+
+            const progresso = calcularProgressoGamer({
+                jogos: jogosDoUser,
+                midias: midiasDoUser,
+                platinas: platinasDoUser
+            });
+
+            ranking.push({
+                username: uName,
+                avatar: membro.avatar || '🎮',
+                role: membro.role || (uNameLower === 'pontug' ? 'Fundador & Admin' : 'Membro da Comunidade'),
+                email: membro.email || '',
+                xp: progresso.xpTotal || 0,
+                nivel: progresso.nivel || 1,
+                tituloPatente: progresso.titulo || 'Recruta Gamer',
+                iconePatente: progresso.icone || '🌱',
+                corPatente: progresso.cor || '#94a3b8',
+                bgPatente: progresso.bg || 'rgba(148, 163, 184, 0.15)',
+                totalPlatinas: platinasDoUser.length,
+                totalJogos: jogosDoUser.length,
+                totalMidias: midiasDoUser.length,
+                totalAnalises: jogosDoUser.length + midiasDoUser.length,
+                progresso: progresso,
+                dataCadastro: membro.dataCadastro
+            });
+        }
+
+        // 5. Ordenação do Ranking:
+        // 1º XP Total (quem tem mais pontos fica no topo)
+        // 2º Total de Platinas (desempate)
+        // 3º Total de Análises (desempate)
+        // 4º Prioridade do Fundador & Admin (evita que contas zeradas assumam a coroa)
+        // 5º Membro mais antigo por data de cadastro
+        // 6º Ordem Alfabética
+        ranking.sort((a, b) => {
+            if (b.xp !== a.xp) return b.xp - a.xp;
+            if (b.totalPlatinas !== a.totalPlatinas) return b.totalPlatinas - a.totalPlatinas;
+            if (b.totalAnalises !== a.totalAnalises) return b.totalAnalises - a.totalAnalises;
+            const aIsAdmin = a.role === 'Fundador & Admin' || (a.username || '').toLowerCase() === 'pontug';
+            const bIsAdmin = b.role === 'Fundador & Admin' || (b.username || '').toLowerCase() === 'pontug';
+            if (aIsAdmin && !bIsAdmin) return -1;
+            if (!aIsAdmin && bIsAdmin) return 1;
+            const dataA = new Date(a.dataCadastro || 0).getTime();
+            const dataB = new Date(b.dataCadastro || 0).getTime();
+            if (dataA !== dataB) return dataA - dataB;
+            return a.username.localeCompare(b.username);
+        });
+
+        // Atribui colocação oficial
+        ranking.forEach((j, idx) => {
+            j.rank = idx + 1;
+        });
+
+        // Mantém atualizado no localStorage para acesso ultrarrápido (0ms)
+        try {
+            const simplificado = ranking.map(r => ({
+                username: r.username,
+                avatar: r.avatar,
+                role: r.role,
+                email: r.email,
+                dataCadastro: r.dataCadastro
+            }));
+            localStorage.setItem(CHAVE_STORAGE_RANKING_MEMBROS, JSON.stringify(simplificado));
+        } catch(e) {}
+
+        return ranking;
+    }
+
+    /**
+     * Retorna a posição e os dados no ranking de um usuário específico.
+     */
+    function obterPosicaoRankingUsuario(nomeUsuario) {
+        const ranking = obterRankingGeralComunidade();
+        const target = (nomeUsuario || localStorage.getItem('overcritic_currentUser') || '').toLowerCase().trim();
+        const encontrado = ranking.find(j => j.username.toLowerCase() === target);
+        if (encontrado) {
+            return {
+                posicao: encontrado.rank,
+                totalJogadores: ranking.length,
+                jogador: encontrado
+            };
+        }
+        return {
+            posicao: ranking.length + 1,
+            totalJogadores: ranking.length,
+            jogador: null
+        };
+    }
+
+    /**
+     * Renderizador do Card do Pódio (Top 1, 2 e 3)
+     */
+    function renderizarCardPodio(jogador, posicao, currentUser) {
+        if (!jogador) return '';
+        const isUser = currentUser && (jogador.username || '').toLowerCase() === currentUser;
+        const rankClass = `rank-${posicao}`;
+        const medalhas = {
+            1: { icone: '👑', label: '1º Lugar', cor: '#ffd700' },
+            2: { icone: '🥈', label: '2º Lugar', cor: '#cbd5e1' },
+            3: { icone: '🥉', label: '3º Lugar', cor: '#cd7f32' }
+        };
+        const m = medalhas[posicao] || { icone: '🎖️', label: `${posicao}º`, cor: '#94a3b8' };
+        const avatarHtml = typeof window.renderizarAvatarHtml === 'function'
+            ? window.renderizarAvatarHtml(jogador.avatar, '🎮')
+            : (jogador.avatar || '🎮');
+
+        return `
+            <div class="og-podium-card ${rankClass} ${isUser ? 'is-current-user' : ''}">
+                ${posicao === 1 ? '<div class="og-podium-crown">👑</div>' : ''}
+                <div class="og-podium-avatar-wrap">
+                    <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        ${avatarHtml}
+                    </div>
+                    <span class="og-podium-rank-badge" style="color:${m.cor}; border-color:${m.cor};">
+                        ${m.icone} #${posicao}
+                    </span>
+                </div>
+                <div class="og-podium-name">
+                    ${jogador.username}
+                    ${isUser ? '<span class="og-rank-badge-you">(Você)</span>' : ''}
+                </div>
+                <div class="og-podium-patente" style="color:${jogador.corPatente}; background:${jogador.bgPatente}; border-color:${jogador.corPatente};">
+                    ${jogador.iconePatente} Nv. ${jogador.nivel} ${jogador.tituloPatente}
+                </div>
+                <div class="og-podium-xp">
+                    ${jogador.xp.toLocaleString('pt-BR')} <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted, #adb5bd);">XP</span>
+                </div>
+                <div class="og-podium-stats-row">
+                    <span>🏆 <b>${jogador.totalPlatinas}</b> platinas</span>
+                    <span>•</span>
+                    <span>📝 <b>${jogador.totalAnalises}</b> críticas</span>
+                </div>
+                <button type="button" class="og-rank-btn-view" style="margin-top: 14px; width: 100%;" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal('${jogador.username}');">
+                    🎴 Ver Gamer Card
+                </button>
+            </div>
+        `;
+    }
+
+    /**
+     * Renderizador de Linha da Tabela de Classificação
+     */
+    function renderizarLinhaTabelaRanking(jogador, posicao, currentUser) {
+        const isUser = currentUser && (jogador.username || '').toLowerCase() === currentUser;
+        const medalhasRank = {
+            1: '<span style="color:#ffd700; font-size:1.2rem;">🥇 1</span>',
+            2: '<span style="color:#cbd5e1; font-size:1.2rem;">🥈 2</span>',
+            3: '<span style="color:#cd7f32; font-size:1.2rem;">🥉 3</span>'
+        };
+        const rankDisplay = medalhasRank[posicao] || `<span style="font-weight:800; color:var(--text-muted, #adb5bd);">#${posicao}</span>`;
+
+        const prog = jogador.progresso || {};
+        const pct = prog.pctNivel || 0;
+        const avatarHtml = typeof window.renderizarAvatarHtml === 'function'
+            ? window.renderizarAvatarHtml(jogador.avatar, '🎮')
+            : (jogador.avatar || '🎮');
+
+        return `
+            <tr class="og-rank-row ${isUser ? 'is-current-user' : ''}">
+                <td class="og-rank-num">
+                    ${rankDisplay}
+                </td>
+                <td>
+                    <div class="og-rank-user-cell">
+                        <div class="og-rank-user-avatar" style="overflow: hidden; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            ${avatarHtml}
+                        </div>
+                        <div>
+                            <div class="og-rank-user-name">
+                                <span>${jogador.username}</span>
+                                ${isUser ? '<span class="og-rank-badge-you">(Você)</span>' : ''}
+                                ${jogador.role === 'Fundador & Admin' ? '<span class="og-rank-badge-role">ADMIN</span>' : ''}
+                            </div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted, #adb5bd);">
+                                ${jogador.role || 'Membro da Comunidade'}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="og-rank-patente-pill" style="color:${jogador.corPatente}; background:${jogador.bgPatente}; border-color:${jogador.corPatente};">
+                        ${jogador.iconePatente} Nv. ${jogador.nivel} ${jogador.tituloPatente}
+                    </div>
+                </td>
+                <td style="text-align: center; font-weight: 800; color: #ffd700;">
+                    ${jogador.totalPlatinas}
+                </td>
+                <td style="text-align: center; font-weight: 700;">
+                    ${jogador.totalAnalises}
+                </td>
+                <td>
+                    <div class="og-rank-xp-bar-wrap">
+                        <div class="og-rank-xp-text">
+                            <span style="color:var(--text-main, #f8f9fa); font-weight:800;">${jogador.xp.toLocaleString('pt-BR')} XP</span>
+                            <span style="color:var(--text-muted, #adb5bd); font-size:0.7rem;">${pct}%</span>
+                        </div>
+                        <div class="og-rank-xp-track">
+                            <div class="og-rank-xp-fill" style="width: ${Math.min(100, Math.max(5, pct))}%;"></div>
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    <button type="button" class="og-rank-btn-view" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal('${jogador.username}');" title="Ver Gamer Card Oficial">
+                        🎴 Card
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    /**
+     * Renderizador Modular Completo do Ranking da Comunidade
+     */
+    function renderizarRankingComunidade(containerId = 'communityRankingContainer', opcoes = {}) {
+        const container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+        if (!container) return;
+        injetarEstilosGamificacao();
+
+        const lista = obterRankingGeralComunidade();
+        const currentUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || 'visitante').toLowerCase();
+
+        if (!lista || lista.length === 0) {
+            container.innerHTML = `
+                <div class="og-ranking-empty">
+                    <div style="font-size: 2.5rem; margin-bottom: 12px;">🏆</div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: var(--accent-gold, #ffd700); margin-bottom: 6px;">Temporada Aberta: Ranking da Comunidade</div>
+                    <div style="font-size: 0.88rem; color: var(--text-muted, #adb5bd); max-width: 500px; margin: 0 auto 16px;">
+                        Cadastre sua conta ou registre sua primeira platina / crítica para inaugurar o topo do Ranking Geral!
+                    </div>
+                    <a href="conta_login.html?tab=register" class="og-btn-ranking-action primary" style="text-decoration: none;">
+                        ✨ Entrar na Disputa do Ranking
+                    </a>
+                </div>
+            `;
+            return;
+        }
+
+        const top3 = lista.slice(0, 3);
+
+        // Pódio Top 3
+        let podiumHtml = '';
+        if (top3.length > 0) {
+            podiumHtml = `
+                <div class="og-podium-grid">
+                    ${top3[1] ? renderizarCardPodio(top3[1], 2, currentUser) : '<div class="og-podium-card-placeholder"></div>'}
+                    ${top3[0] ? renderizarCardPodio(top3[0], 1, currentUser) : ''}
+                    ${top3[2] ? renderizarCardPodio(top3[2], 3, currentUser) : '<div class="og-podium-card-placeholder"></div>'}
+                </div>
+            `;
+        }
+
+        // Tabela Completa
+        const tabelaHtml = `
+            <div class="og-ranking-table-card">
+                <div class="og-ranking-table-header">
+                    <div class="og-ranking-table-title">
+                        <span>📜</span> Classificação Geral dos Jogadores (${lista.length} ${lista.length === 1 ? 'Membro' : 'Membros'})
+                    </div>
+                    <div class="og-ranking-table-legend">
+                        <span class="og-legend-pill">🏆 Platinas</span>
+                        <span class="og-legend-pill">📝 Críticas</span>
+                        <span class="og-legend-pill">✨ XP Overcritic</span>
+                    </div>
+                </div>
+                <div class="og-ranking-table-responsive">
+                    <table class="og-ranking-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px; text-align: center;">Posição</th>
+                                <th>Jogador / Perfil</th>
+                                <th>Patente Atual</th>
+                                <th style="text-align: center;">Platinas 🏆</th>
+                                <th style="text-align: center;">Análises 📝</th>
+                                <th style="width: 220px;">Progresso de XP</th>
+                                <th style="width: 110px; text-align: center;">Gamer Card</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${lista.map((jogador, idx) => renderizarLinhaTabelaRanking(jogador, idx + 1, currentUser)).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = `
+            <div class="og-community-ranking-card">
+                <div class="og-ranking-main-header">
+                    <div>
+                        <div class="og-ranking-badge">
+                            <span>🏆</span> LEADERBOARD OFICIAL
+                        </div>
+                        <h2 class="og-ranking-title">
+                            <span>🏆</span> Ranking Geral da Comunidade
+                        </h2>
+                        <div class="og-ranking-subtitle">
+                            Classificação dos membros cadastrados por experiência (XP), platinas conquistadas e análises avaliadas no Overcritic.
+                        </div>
+                    </div>
+                    <div class="og-ranking-actions">
+                        <button type="button" class="og-btn-ranking-action" onclick="if(window.OvercriticGamification && typeof window.OvercriticGamification.sincronizarRankingNuvem === 'function') { window.OvercriticGamification.sincronizarRankingNuvem(true).then(() => window.OvercriticGamification.renderizarRankingComunidade('${containerId}', { silentSyncDone: true })); } else if(window.OvercriticGamification) { window.OvercriticGamification.renderizarRankingComunidade('${containerId}', { forcar: true }); }" title="Atualizar Ranking da Comunidade via Nuvem">
+                            <span>🔄</span> Atualizar
+                        </button>
+                        <button type="button" class="og-btn-ranking-action primary" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal();" title="Visualizar meu Gamer Card Oficial">
+                            <span>🎴</span> Meu Gamer Card
+                        </button>
+                    </div>
+                </div>
+                ${podiumHtml}
+                ${tabelaHtml}
+            </div>
+        `;
+
+        // Dispara sincronização em segundo plano com a nuvem Supabase
+        if (!opcoes.silentSyncDone && (opcoes.forcar || !window._ultimoSyncRankingNuvem || (Date.now() - window._ultimoSyncRankingNuvem > 10000))) {
+            sincronizarRankingNuvem(opcoes.forcar).then(() => {
+                const cAtual = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+                if (cAtual) {
+                    renderizarRankingComunidade(cAtual, { silentSyncDone: true });
+                }
+            }).catch(e => console.warn('Sync nuvem ranking background:', e));
+        }
+    }
+
     // Listener Global de Tecla Escape para Fechamento Seguro de Modais
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -2981,12 +4379,17 @@
         vincularDadosLegadosUsuario,
         obterDadosConsolidadosUsuario,
         sincronizarDadosCompletosUsuario,
+        sincronizarRankingNuvem,
         executarLimpezaGeralDados,
         abrirGamerCardModal,
         fecharGamerCardModal,
         abrirModalTierList,
         fecharModalTierList,
-        atualizarBadgesNivelPagina
+        atualizarBadgesNivelPagina,
+        registrarNovoJogadorNoRanking,
+        obterRankingGeralComunidade,
+        obterPosicaoRankingUsuario,
+        renderizarRankingComunidade
     };
 
     window.NIVEIS_GAMER = NIVEIS_GAMER;
@@ -3000,8 +4403,13 @@
     window.vincularDadosLegadosUsuario = vincularDadosLegadosUsuario;
     window.obterDadosConsolidadosUsuario = obterDadosConsolidadosUsuario;
     window.sincronizarDadosCompletosUsuario = sincronizarDadosCompletosUsuario;
+    window.sincronizarRankingNuvem = sincronizarRankingNuvem;
     window.executarLimpezaGeralDados = executarLimpezaGeralDados;
+    window.registrarNovoJogadorNoRanking = registrarNovoJogadorNoRanking;
+    window.obterRankingGeralComunidade = obterRankingGeralComunidade;
+    window.obterPosicaoRankingUsuario = obterPosicaoRankingUsuario;
+    window.renderizarRankingComunidade = renderizarRankingComunidade;
 
-    console.log('🎮 [Overcritic] Motor de Gamificação, Níveis & Tier List carregado!');
+    console.log('🎮 [Overcritic] Motor de Gamificação, Níveis, Ranking Comunitário & Tier List carregado!');
 })();
 

@@ -12,8 +12,10 @@
     <link rel="apple-touch-icon" href="assets/overcritic_icon.png">
     <link rel="manifest" href="manifest.json">
     <title>OVERCRITIC - Críticas de Jogos</title>
+    <link rel="icon" type="image/png" href="assets/overcritic_icon.png">
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="shortcut icon" href="assets/overcritic_icon.png">
+    <link rel="apple-touch-icon" href="assets/overcritic_icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -35,14 +37,14 @@
     </script>
     <!-- Conexão com Supabase e Backend C# -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.7_clean"></script>
-    <script src="js/apiClient.js?v=26.10.7_clean"></script>
-    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
-    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
-    <script src="js/notifications.js?v=26.10.7_clean"></script>
-    <script src="js/version.js?v=26.10.7_clean"></script>
-    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
-    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
+    <script src="supabaseClient.js?v=26.10.8"></script>
+    <script src="js/apiClient.js?v=26.10.8"></script>
+    <script src="js/gamerProfile.js?v=26.10.8"></script>
+    <script src="js/overcriticGamification.js?v=26.10.8"></script>
+    <script src="js/notifications.js?v=26.10.8"></script>
+    <script src="js/version.js?v=26.10.8"></script>
+    <script src="js/avatarManager.js?v=26.10.8"></script>
+    <script src="js/pwaManager.js?v=26.10.8" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -77,22 +79,38 @@
 
         body.light-mode input[type="text"],
         body.light-mode input[type="number"],
-        body.light-mode select,
         body.light-mode textarea {
             background: #ffffff;
             border-color: #cbd5e1;
             color: var(--text-main);
         }
-        body.light-mode input:focus,
-        body.light-mode select:focus,
-        body.light-mode textarea:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(2, 132, 199, 0.2);
-            background: #ffffff;
+        body.light-mode select {
+            color-scheme: light;
+            background-color: #ffffff !important;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: calc(100% - 14px) center !important;
+            background-size: 15px !important;
+            padding: 11px 44px 11px 16px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 12px !important;
+            color: #0f172a !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+        }
+        body.light-mode select:hover {
+            border-color: #0284c7 !important;
+            box-shadow: 0 0 14px rgba(2, 132, 199, 0.2) !important;
+        }
+        body.light-mode select:focus {
+            border-color: #0284c7 !important;
+            box-shadow: 0 0 20px rgba(2, 132, 199, 0.25) !important;
+            background-color: #ffffff !important;
         }
         body.light-mode select option {
-            background: #ffffff;
-            color: #0f172a;
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            padding: 12px 16px !important;
+            font-size: 0.92rem !important;
         }
         body.light-mode select optgroup {
             background: #dfe4ec;
@@ -273,8 +291,15 @@
         }
         .nav-item:hover, .nav-item.active {
             color: var(--accent-cyan);
-            background: rgba(0, 240, 255, 0.1);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            background: rgba(0, 240, 255, 0.12);
+            box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+        }
+        .nav-item.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(157, 78, 221, 0.25)) !important;
+            border: 1px solid var(--accent-cyan) !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), inset 0 0 10px rgba(0, 240, 255, 0.2) !important;
+            transform: scale(1.05);
         }
         .nav-item:hover::after {
             content: attr(data-tooltip);
@@ -320,26 +345,87 @@
             width: calc(100% - var(--sidebar-width));
         }
 
-        .header-section { margin-bottom: 30px; }
+        .header-section { margin-bottom: 28px; }
+
+        .header-top-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            margin-bottom: 12px;
+        }
 
         .greeting {
-            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 2.2rem;
             font-weight: 800;
             margin: 0;
-            background: linear-gradient(90deg, var(--text-main), var(--text-muted));
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .greeting-icon-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(157, 78, 221, 0.22));
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            box-shadow: 0 0 24px rgba(0, 240, 255, 0.35), 0 0 12px rgba(157, 78, 221, 0.25);
+            font-size: 1.8rem;
+            -webkit-text-fill-color: initial !important;
+            color: initial !important;
+            flex-shrink: 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .greeting:hover .greeting-icon-badge {
+            transform: scale(1.08) rotate(-4deg);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.6), 0 0 15px rgba(157, 78, 221, 0.4);
+        }
+
+        .greeting-text {
+            background: linear-gradient(90deg, #ffffff 0%, #d8b4fe 50%, #00f0ff 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
         }
 
         .subtitle {
             color: var(--accent-cyan);
             font-size: 0.9rem;
-            margin-top: 6px;
+            margin-top: 8px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 2px;
+        }
+
+        body.light-mode .header-top-tag {
+            color: #0284c7;
+            background: rgba(2, 132, 199, 0.08);
+            border-color: rgba(2, 132, 199, 0.3);
+        }
+        body.light-mode .greeting-icon-badge {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.12), rgba(124, 58, 237, 0.15));
+            border-color: rgba(2, 132, 199, 0.35);
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.15);
+        }
+        body.light-mode .greeting-text {
+            background: linear-gradient(90deg, #0f172a 0%, #4338ca 60%, #0284c7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* ═══════════════════════════════════
@@ -451,8 +537,8 @@
             color: var(--text-muted);
         }
 
-        input, select, textarea {
-            background: rgba(0, 0, 0, 0.2);
+        input, textarea {
+            background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--glass-border);
             border-radius: 10px;
             color: var(--text-main);
@@ -460,11 +546,54 @@
             font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
             outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
         }
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 12px rgba(157, 78, 221, 0.25);
+        input:focus, textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* ── SELECT GAMER ULTRA-ESTILIZADO (DARK THEME) ── */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            color-scheme: dark;
+            background-color: #0b1120 !important;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: calc(100% - 14px) center !important;
+            background-size: 15px !important;
+            padding: 11px 44px 11px 16px !important;
+            border: 1px solid rgba(0, 240, 255, 0.28) !important;
+            border-radius: 12px !important;
+            color: #f8f9fa !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 0.92rem !important;
+            font-weight: 600 !important;
+            cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.25s ease;
+        }
+        select:hover {
+            border-color: rgba(0, 240, 255, 0.6) !important;
+            box-shadow: 0 0 16px rgba(0, 240, 255, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.35) !important;
+            background-color: #0f172a !important;
+        }
+        select:focus {
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 22px rgba(0, 240, 255, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+            background-color: #0f172a !important;
+            outline: none !important;
+        }
+        select option {
+            background-color: #0b1120 !important;
+            color: #f8f9fa !important;
+            padding: 14px 18px !important;
+            font-size: 0.92rem !important;
+            font-weight: 600 !important;
+            line-height: 1.8;
         }
 
         .btn-primary {
@@ -1838,7 +1967,11 @@
     <!-- ══════ MAIN CONTENT ══════ -->
     <main class="main-content">
         <header class="header-section">
-            <h1 class="greeting">🎮 Críticas de Jogos</h1>
+            <div class="header-top-tag">🎮 HUB DE CRÍTICAS & AVALIAÇÕES</div>
+            <h1 class="greeting">
+                <span class="greeting-icon-badge">🎮</span>
+                <span class="greeting-text">Críticas de Jogos</span>
+            </h1>
             <div class="subtitle">Registre, avalie e compartilhe suas opiniões</div>
         </header>
 
@@ -1911,11 +2044,14 @@
                     <div class="form-group">
                         <label>Plataforma jogada</label>
                         <select id="gamePlatform">
-                            <option value="PC">PC (Steam/Epic)</option>
-                            <option value="PlayStation 5">PlayStation 5</option>
-                            <option value="PlayStation 4">PlayStation 4</option>
-                            <option value="Xbox Series X/S">Xbox Series X/S</option>
-                            <option value="Nintendo Switch">Nintendo Switch</option>
+                            <option value="PC">🖥️ PC (Steam / Epic Games / GOG)</option>
+                            <option value="PlayStation 5">🎮 PlayStation 5</option>
+                            <option value="PlayStation 4">🎮 PlayStation 4</option>
+                            <option value="Xbox Series X/S">🟩 Xbox Series X | S</option>
+                            <option value="Xbox One">🟩 Xbox One</option>
+                            <option value="Nintendo Switch">🔴 Nintendo Switch</option>
+                            <option value="Mobile">📱 Mobile (Android / iOS)</option>
+                            <option value="Outro">🕹️ Outra Plataforma</option>
                         </select>
                     </div>
 
@@ -1929,10 +2065,11 @@
                         <div class="form-group">
                             <label>Status da sua jogatina</label>
                             <select id="gameStatus">
-                                <option value="Zerado">Zerado / Concluído</option>
-                                <option value="Platinado">Platinado 🏆</option>
-                                <option value="Jogando">Jogando Atualmente</option>
-                                <option value="Abandonado">Abandonado</option>
+                                <option value="Zerado">🏁 Zerado / Concluído</option>
+                                <option value="Platinado">🏆 Platinado (100% Conquistas)</option>
+                                <option value="Jogando">🎮 Jogando Atualmente</option>
+                                <option value="Abandonado">⏸️ Abandonado / Dropado</option>
+                                <option value="Na Fila">⏳ Na Fila (Backlog)</option>
                             </select>
                         </div>
                     </div>
@@ -1944,7 +2081,7 @@
                         </label>
                         <textarea id="myReview" rows="4" placeholder="Escreva aqui o que você achou da jogabilidade, história, desempenho e se vale a pena..."></textarea>
                         <div id="gameReviewQualityHint" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
-                            💡 <em>Dica: Escreva uma resenha autêntica de 80+ caracteres para ganhar +50 XP, ou 200+ para Crítica Completa (+100 XP).</em>
+                            💡 <em>Dica: Escreva uma resenha autêntica para ganhar até +100 XP extras.</em>
                         </div>
                     </div>
 
@@ -2021,19 +2158,19 @@
             <div class="filter-bar">
                 <input type="text" id="searchFilter" placeholder="🔍 Filtrar por nome..." oninput="renderizarCriticas()">
                 <select id="statusFilter" onchange="renderizarCriticas()">
-                    <option value="">Todos os Status</option>
-                    <option value="Zerado">Zerado / Concluído</option>
-                    <option value="Platinado">Platinado 🏆</option>
-                    <option value="Jogando">Jogando Atualmente</option>
-                    <option value="Abandonado">Abandonado</option>
+                    <option value="">🎯 Todos os Status</option>
+                    <option value="Zerado">🏁 Zerado / Concluído</option>
+                    <option value="Platinado">🏆 Platinado (100%)</option>
+                    <option value="Jogando">🎮 Jogando Atualmente</option>
+                    <option value="Abandonado">⏸️ Abandonado / Dropado</option>
                 </select>
                 <select id="platformFilter" onchange="renderizarCriticas()">
-                    <option value="">Todas as Plataformas</option>
-                    <option value="PC">PC (Steam/Epic)</option>
-                    <option value="PlayStation 5">PlayStation 5</option>
-                    <option value="PlayStation 4">PlayStation 4</option>
-                    <option value="Xbox Series X/S">Xbox Series X/S</option>
-                    <option value="Nintendo Switch">Nintendo Switch</option>
+                    <option value="">🌐 Todas as Plataformas</option>
+                    <option value="PC">🖥️ PC (Steam / Epic)</option>
+                    <option value="PlayStation 5">🎮 PlayStation 5</option>
+                    <option value="PlayStation 4">🎮 PlayStation 4</option>
+                    <option value="Xbox Series X/S">🟩 Xbox Series X/S</option>
+                    <option value="Nintendo Switch">🔴 Nintendo Switch</option>
                 </select>
             </div>
 
@@ -2384,39 +2521,404 @@
         }
 
         /* ═══════════════════════════════════
-           BUSCA & AUTO-PREENCHER
+           RECONHECIMENTO DE GRANDES FRANQUIAS & SIGLAS
+        ═══════════════════════════════════ */
+        const MAPA_SIGLAS_JOGOS = {
+            'gta': 'Grand Theft Auto',
+            'gta 5': 'Grand Theft Auto V',
+            'gta5': 'Grand Theft Auto V',
+            'gta v': 'Grand Theft Auto V',
+            'gtav': 'Grand Theft Auto V',
+            'gta 4': 'Grand Theft Auto IV',
+            'gta4': 'Grand Theft Auto IV',
+            'gta iv': 'Grand Theft Auto IV',
+            'gtaiv': 'Grand Theft Auto IV',
+            'gta sa': 'Grand Theft Auto: San Andreas',
+            'gta san andreas': 'Grand Theft Auto: San Andreas',
+            'san andreas': 'Grand Theft Auto: San Andreas',
+            'gta vc': 'Grand Theft Auto: Vice City',
+            'gta vice city': 'Grand Theft Auto: Vice City',
+            'vice city': 'Grand Theft Auto: Vice City',
+            'gta 3': 'Grand Theft Auto III',
+            'gta3': 'Grand Theft Auto III',
+            'gta iii': 'Grand Theft Auto III',
+            'gta 6': 'Grand Theft Auto VI',
+            'gta6': 'Grand Theft Auto VI',
+            'gta vi': 'Grand Theft Auto VI',
+            'rdr': 'Red Dead Redemption',
+            'rdr2': 'Red Dead Redemption 2',
+            'rdr 2': 'Red Dead Redemption 2',
+            'gow': 'God of War',
+            'gow ragnarok': 'God of War Ragnarök',
+            'gowr': 'God of War Ragnarök',
+            'cod': 'Call of Duty',
+            'mw': 'Call of Duty: Modern Warfare',
+            'mw2': 'Call of Duty: Modern Warfare II',
+            'mw3': 'Call of Duty: Modern Warfare III',
+            'warzone': 'Call of Duty: Warzone',
+            'tlou': 'The Last of Us',
+            'tlou 1': 'The Last of Us Part I',
+            'tlou1': 'The Last of Us Part I',
+            'tlou 2': 'The Last of Us Part II',
+            'tlou2': 'The Last of Us Part II',
+            're': 'Resident Evil',
+            're4': 'Resident Evil 4',
+            're 4': 'Resident Evil 4',
+            're2': 'Resident Evil 2',
+            're 2': 'Resident Evil 2',
+            're3': 'Resident Evil 3',
+            're7': 'Resident Evil 7: Biohazard',
+            're8': 'Resident Evil Village',
+            'village': 'Resident Evil Village',
+            'cp2077': 'Cyberpunk 2077',
+            'cyberpunk': 'Cyberpunk 2077',
+            'bg3': "Baldur's Gate 3",
+            'er': 'Elden Ring',
+            'elden': 'Elden Ring',
+            'ds': 'Dark Souls',
+            'ds1': 'Dark Souls',
+            'ds2': 'Dark Souls II',
+            'ds3': 'Dark Souls III',
+            'bb': 'Bloodborne',
+            'sekiro': 'Sekiro: Shadows Die Twice',
+            'ac': "Assassin's Creed",
+            'ac shadows': "Assassin's Creed Shadows",
+            'ac valhalla': "Assassin's Creed Valhalla",
+            'ac odyssey': "Assassin's Creed Odyssey",
+            'ac origins': "Assassin's Creed Origins",
+            'ac black flag': "Assassin's Creed IV: Black Flag",
+            'ff': 'Final Fantasy',
+            'ff7': 'Final Fantasy VII',
+            'ffvii': 'Final Fantasy VII',
+            'ff16': 'Final Fantasy XVI',
+            'ffxvi': 'Final Fantasy XVI',
+            'zelda': 'The Legend of Zelda',
+            'botw': 'The Legend of Zelda: Breath of the Wild',
+            'totk': 'The Legend of Zelda: Tears of the Kingdom',
+            'cs': 'Counter-Strike',
+            'cs2': 'Counter-Strike 2',
+            'csgo': 'Counter-Strike: Global Offensive',
+            'mk': 'Mortal Kombat',
+            'mk1': 'Mortal Kombat 1',
+            'mk11': 'Mortal Kombat 11',
+            'sf': 'Street Fighter',
+            'sf6': 'Street Fighter 6',
+            'nfs': 'Need for Speed',
+            'bmw': 'Black Myth: Wukong',
+            'wukong': 'Black Myth: Wukong',
+            'sm': "Marvel's Spider-Man",
+            'sm2': "Marvel's Spider-Man 2",
+            'spiderman': "Marvel's Spider-Man",
+            'spider-man': "Marvel's Spider-Man",
+            'hl': 'Half-Life',
+            'hl2': 'Half-Life 2',
+            'mgs': 'Metal Gear Solid',
+            'tw3': 'The Witcher 3: Wild Hunt',
+            'witcher': 'The Witcher 3: Wild Hunt',
+            'skyrim': 'The Elder Scrolls V: Skyrim',
+            'tes': 'The Elder Scrolls',
+            'fifa': 'EA SPORTS FC 25',
+            'fc25': 'EA SPORTS FC 25',
+            'fc24': 'EA SPORTS FC 24',
+            'hd2': 'Helldivers 2'
+        };
+
+        const CATALOGO_TOP_FRANQUIAS = [
+            {
+                titulo: 'Grand Theft Auto V',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg',
+                generos: 'Ação, Aventura, Mundo Aberto',
+                tags: '#MundoAberto, #Ação, #Crime, #Multiplayer',
+                media: '96 / 100',
+                steamAppID: '271590',
+                franquia: 'Grand Theft Auto',
+                aliases: ['gta', 'gta 5', 'gta5', 'gta v', 'gtav', 'grand theft auto', 'grand theft auto 5', 'grand theft auto v']
+            },
+            {
+                titulo: 'Grand Theft Auto: San Andreas',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1546990/header.jpg',
+                generos: 'Ação, Aventura, Mundo Aberto',
+                tags: '#Classico, #MundoAberto, #Nostalgia, #CJ',
+                media: '93 / 100',
+                steamAppID: '1546990',
+                franquia: 'Grand Theft Auto',
+                aliases: ['gta sa', 'gta san andreas', 'san andreas', 'gta', 'grand theft auto san andreas']
+            },
+            {
+                titulo: 'Grand Theft Auto IV: The Complete Edition',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/12210/header.jpg',
+                generos: 'Ação, Aventura, Mundo Aberto',
+                tags: '#FisicaRealista, #Historia, #MundoAberto, #NikoBellic',
+                media: '98 / 100',
+                steamAppID: '12210',
+                franquia: 'Grand Theft Auto',
+                aliases: ['gta 4', 'gta iv', 'gtaiv', 'gta', 'grand theft auto 4', 'grand theft auto iv']
+            },
+            {
+                titulo: 'Grand Theft Auto: Vice City',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1546970/header.jpg',
+                generos: 'Ação, Aventura, Anos 80',
+                tags: '#Anos80, #TrilhaSonora, #Classico, #TommyVercetti',
+                media: '95 / 100',
+                steamAppID: '1546970',
+                franquia: 'Grand Theft Auto',
+                aliases: ['gta vc', 'gta vice city', 'vice city', 'gta', 'grand theft auto vice city']
+            },
+            {
+                titulo: 'Grand Theft Auto VI',
+                capa: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg',
+                generos: 'Ação, Aventura, Mundo Aberto',
+                tags: '#GTA6, #NovaGeracao, #MundoAberto, #ViceCity',
+                media: '99 / 100',
+                steamAppID: null,
+                franquia: 'Grand Theft Auto',
+                aliases: ['gta 6', 'gta vi', 'gtavi', 'grand theft auto 6', 'grand theft auto vi', 'gta']
+            },
+            {
+                titulo: 'Grand Theft Auto: The Trilogy - The Definitive Edition',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1546970/header.jpg',
+                generos: 'Ação, Aventura, Mundo Aberto',
+                tags: '#Trilogia, #Remaster, #MundoAberto',
+                media: '80 / 100',
+                steamAppID: '1546970',
+                franquia: 'Grand Theft Auto',
+                aliases: ['gta trilogy', 'gta trilogia', 'grand theft auto trilogy', 'gta']
+            },
+            {
+                titulo: 'Red Dead Redemption 2',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg',
+                generos: 'Ação, Aventura, Mundo Aberto, Velho Oeste',
+                tags: '#ObraPrima, #MundoAberto, #Historia, #Faroeste',
+                media: '97 / 100',
+                steamAppID: '1174180',
+                franquia: 'Red Dead',
+                aliases: ['rdr2', 'rdr 2', 'rdr', 'red dead', 'red dead redemption 2', 'arthur morgan']
+            },
+            {
+                titulo: 'God of War Ragnarök',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/2322010/header.jpg',
+                generos: 'Ação, Aventura, Mitologia Nórdica',
+                tags: '#Ragnarok, #Kratos, #Atreus, #Epico',
+                media: '94 / 100',
+                steamAppID: '2322010',
+                franquia: 'God of War',
+                aliases: ['gow ragnarok', 'gowr', 'gow ragnarök', 'god of war ragnarok', 'gow']
+            },
+            {
+                titulo: 'God of War',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg',
+                generos: 'Ação, Aventura, Mitologia Nórdica',
+                tags: '#Kratos, #Historia, #Mitologia, #Acao',
+                media: '94 / 100',
+                steamAppID: '1593500',
+                franquia: 'God of War',
+                aliases: ['gow', 'gow 2018', 'god of war', 'kratos']
+            },
+            {
+                titulo: 'The Last of Us Part I',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1888930/header.jpg',
+                generos: 'Ação, Aventura, Pós-Apocalíptico',
+                tags: '#Historia, #Joel, #Ellie, #Emocionante',
+                media: '89 / 100',
+                steamAppID: '1888930',
+                franquia: 'The Last of Us',
+                aliases: ['tlou', 'tlou 1', 'the last of us', 'the last of us part 1']
+            },
+            {
+                titulo: 'Elden Ring',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg',
+                generos: 'Ação, RPG, Soulslike, Mundo Aberto',
+                tags: '#SoulsLike, #Desafio, #Goty, #FantasiaSombria',
+                media: '96 / 100',
+                steamAppID: '1245620',
+                franquia: 'Elden Ring',
+                aliases: ['er', 'elden', 'elden ring', 'fromsoftware', 'shadow of the erdtree']
+            },
+            {
+                titulo: 'Cyberpunk 2077',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg',
+                generos: 'RPG, Ação, Cyberpunk, Mundo Aberto',
+                tags: '#Cyberpunk, #NightCity, #MundoAberto, #RPG',
+                media: '88 / 100',
+                steamAppID: '1091500',
+                franquia: 'Cyberpunk',
+                aliases: ['cp2077', 'cyberpunk', 'cyberpunk 2077', 'phantom liberty']
+            },
+            {
+                titulo: "Baldur's Gate 3",
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg',
+                generos: 'RPG, Estratégia, Fantasia, Turno',
+                tags: '#Goty, #RPG, #D&D, #Liberdade',
+                media: '96 / 100',
+                steamAppID: '1086940',
+                franquia: "Baldur's Gate",
+                aliases: ['bg3', "baldur's gate 3", 'baldurs gate', 'larian']
+            },
+            {
+                titulo: 'The Witcher 3: Wild Hunt',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg',
+                generos: 'RPG, Ação, Fantasia, Mundo Aberto',
+                tags: '#Geralt, #MundoAberto, #ObraPrima, #RPG',
+                media: '93 / 100',
+                steamAppID: '292030',
+                franquia: 'The Witcher',
+                aliases: ['tw3', 'witcher', 'witcher 3', 'the witcher 3', 'the witcher']
+            },
+            {
+                titulo: "Marvel's Spider-Man Remastered",
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg',
+                generos: 'Ação, Aventura, Super-Herói, Mundo Aberto',
+                tags: '#SpiderMan, #MundoAberto, #SuperHeroi, #Acao',
+                media: '87 / 100',
+                steamAppID: '1817070',
+                franquia: 'Spider-Man',
+                aliases: ['sm', 'spiderman', 'spider-man', 'spider man', 'spider']
+            },
+            {
+                titulo: 'Resident Evil 4 (Remake)',
+                capa: 'https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg',
+                generos: 'Ação, Terror, Sobrevivência',
+                tags: '#Terror, #SurvivalHorror, #Leon, #Capcom',
+                media: '93 / 100',
+                steamAppID: '2050650',
+                franquia: 'Resident Evil',
+                aliases: ['re4', 're 4', 're4 remake', 'resident evil 4', 're']
+            }
+        ];
+
+        function preencherCamposDiretoDoCatalogo(meta) {
+            document.getElementById('gameTitle').value = meta.titulo;
+            document.getElementById('gameGenres').value = meta.generos;
+            document.getElementById('gameKeywords').value = meta.tags;
+            document.getElementById('internetRating').value = meta.media;
+
+            if (meta.capa) {
+                const imgPreview = document.getElementById('coverPreview');
+                imgPreview.src = meta.capa;
+                imgPreview.style.display = 'block';
+                document.getElementById('gameCoverUrl').value = meta.capa;
+                const placeholder = document.getElementById('coverPlaceholder');
+                if (placeholder) placeholder.style.display = 'none';
+            }
+
+            showToast.success(`🏆 "${meta.titulo}" carregado com sucesso!`);
+        }
+
+        /* ═══════════════════════════════════
+           BUSCA & AUTO-PREENCHER INTELIGENTE
         ═══════════════════════════════════ */
         async function buscarSugestões(query) {
             const dropdown = document.getElementById('suggestionsDropdown');
+            if (!query || query.trim().length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const qLimpo = query.trim().toLowerCase();
+            const termoExpandido = MAPA_SIGLAS_JOGOS[qLimpo] || null;
+
+            // 1. Coleta sugestões prioritárias do catálogo de grandes franquias
+            let itensSugestao = [];
+            const titulosVistos = new Set();
+
+            CATALOGO_TOP_FRANQUIAS.forEach(jogo => {
+                const titLower = jogo.titulo.toLowerCase();
+                const matchAlias = jogo.aliases.some(al => al === qLimpo || qLimpo.startsWith(al) || al.startsWith(qLimpo));
+                const matchTit = titLower.includes(qLimpo) || (termoExpandido && titLower.includes(termoExpandido.toLowerCase()));
+
+                if (matchAlias || matchTit) {
+                    const chave = jogo.titulo.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (!titulosVistos.has(chave)) {
+                        titulosVistos.add(chave);
+                        itensSugestao.push({
+                            title: jogo.titulo,
+                            thumb: jogo.capa,
+                            isTopFranchise: true,
+                            franquia: jogo.franquia,
+                            meta: jogo
+                        });
+                    }
+                }
+            });
+
+            // 2. Consulta API de Jogos (CheapShark) usando o termo expandido ou a query
             try {
-                const searchUrl = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=5`;
+                const buscaTermo = termoExpandido || query;
+                const searchUrl = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(buscaTermo)}&limit=15`;
                 const response = await fetch(searchUrl);
                 const data = await response.json();
 
-                if (!data || data.length === 0) {
-                    dropdown.style.display = 'none';
-                    return;
-                }
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        const itLower = item.external.toLowerCase();
 
-                dropdown.innerHTML = '';
-                data.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'suggestion-item';
-                    div.innerHTML = `
-                        <img src="${item.thumb}" alt="thumb">
-                        <span>🔍 ${item.external}</span>
-                    `;
-                    div.onclick = () => {
-                        document.getElementById('apiSearchInput').value = item.external;
-                        dropdown.style.display = 'none';
-                        buscarDadosInternet();
-                    };
-                    dropdown.appendChild(div);
-                });
-                dropdown.style.display = 'block';
+                        // FILTRO ANTI-RUÍDO CRÍTICO:
+                        // Descarta jogos onde a query é apenas um pedaço perdido no meio de outra palavra (ex: "RagTag", "Flying Tank", "Spring Tales" para "GTA")
+                        const contemPalavraExata = new RegExp(`\\b${qLimpo}\\b`, 'i').test(itLower);
+                        const comecaComTermo = itLower.startsWith(qLimpo);
+                        const contemExpandido = termoExpandido && itLower.includes(termoExpandido.toLowerCase());
+                        const ehBuscaLonga = qLimpo.length >= 4 && itLower.includes(qLimpo);
+
+                        if (!contemPalavraExata && !comecaComTermo && !contemExpandido && !ehBuscaLonga) {
+                            return; // Descarta ruídos indesejados!
+                        }
+
+                        const chave = itLower.replace(/[^a-z0-9]/g, '');
+                        if (titulosVistos.has(chave)) return;
+                        titulosVistos.add(chave);
+
+                        let thumb = item.thumb || '';
+                        if (item.steamAppID && item.steamAppID !== '0') {
+                            thumb = `https://cdn.akamai.steamstatic.com/steam/apps/${item.steamAppID}/header.jpg`;
+                        }
+
+                        itensSugestao.push({
+                            title: item.external,
+                            thumb: thumb,
+                            steamAppID: item.steamAppID,
+                            isTopFranchise: false
+                        });
+                    });
+                }
             } catch (err) {
-                console.error('Erro ao buscar sugestões:', err);
+                console.warn('Erro ao consultar CheapShark:', err);
             }
+
+            if (itensSugestao.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            // Limita a 6 melhores opções
+            const exibiveis = itensSugestao.slice(0, 6);
+
+            dropdown.innerHTML = '';
+            exibiveis.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `
+                    <img src="${item.thumb}" alt="thumb" onerror="this.src='assets/placeholder_game.png';">
+                    <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; flex: 1;">
+                        <span style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</span>
+                        ${item.isTopFranchise ? `
+                            <span style="font-size: 0.68rem; color: #ffd700; font-weight: 800; display: flex; align-items: center; gap: 4px;">
+                                👑 <span>Franquia Consagrada (${item.franquia})</span>
+                            </span>
+                        ` : ''}
+                    </div>
+                `;
+                div.onclick = () => {
+                    document.getElementById('apiSearchInput').value = item.title;
+                    dropdown.style.display = 'none';
+                    if (item.meta) {
+                        preencherCamposDiretoDoCatalogo(item.meta);
+                    } else {
+                        buscarDadosInternet();
+                    }
+                };
+                dropdown.appendChild(div);
+            });
+            dropdown.style.display = 'block';
         }
 
         const cacheCapasAlternativas = {};
@@ -2474,27 +2976,52 @@
         }
 
         async function buscarDadosInternet() {
-            const query = document.getElementById('apiSearchInput').value.trim();
-            if (!query) return showToast.warning('Digite o nome de um jogo para buscar!');
+            const rawQuery = document.getElementById('apiSearchInput').value.trim();
+            if (!rawQuery) return showToast.warning('Digite o nome de um jogo para buscar!');
+
+            const qLimpo = rawQuery.toLowerCase();
+            const termoExpandido = MAPA_SIGLAS_JOGOS[qLimpo] || null;
+
+            // 1. Resolução Imediata no Catálogo de Grandes Franquias (ex: "GTA" -> "Grand Theft Auto V")
+            const curatedMatch = CATALOGO_TOP_FRANQUIAS.find(j => {
+                const titLower = j.titulo.toLowerCase();
+                const matchAlias = j.aliases.some(al => al === qLimpo);
+                const matchTit = titLower === qLimpo || (termoExpandido && titLower === termoExpandido.toLowerCase());
+                return matchAlias || matchTit;
+            }) || (qLimpo === 'gta' ? CATALOGO_TOP_FRANQUIAS[0] : null);
+
+            if (curatedMatch) {
+                preencherCamposDiretoDoCatalogo(curatedMatch);
+                return;
+            }
 
             const btn = document.getElementById('btnAutoPreencher');
             btn.innerText = 'BUSCANDO...';
             btn.disabled = true;
 
+            const termoFinalBusca = termoExpandido || rawQuery;
+
             try {
-                const searchUrl = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=1`;
+                const searchUrl = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(termoFinalBusca)}&limit=10`;
                 const response = await fetch(searchUrl);
                 const data = await response.json();
 
-                let gameTitle = query;
+                let gameTitle = termoFinalBusca;
                 let capaOficial = '';
+                let gameItem = null;
 
-                if (data && data.length > 0) {
-                    const game = data[0];
-                    gameTitle = game.external;
-                    capaOficial = game.thumb || '';
-                    if (game.steamAppID && game.steamAppID !== '0') {
-                        capaOficial = `https://cdn.akamai.steamstatic.com/steam/apps/${game.steamAppID}/header.jpg`;
+                if (Array.isArray(data) && data.length > 0) {
+                    // Seleciona o item mais relevante descartando ruídos de substring
+                    const melhorMatch = data.find(it => {
+                        const itLow = it.external.toLowerCase();
+                        return itLow.startsWith(qLimpo) || (termoExpandido && itLow.includes(termoExpandido.toLowerCase()));
+                    }) || data[0];
+
+                    gameItem = melhorMatch;
+                    gameTitle = melhorMatch.external;
+                    capaOficial = melhorMatch.thumb || '';
+                    if (melhorMatch.steamAppID && melhorMatch.steamAppID !== '0') {
+                        capaOficial = `https://cdn.akamai.steamstatic.com/steam/apps/${melhorMatch.steamAppID}/header.jpg`;
                     }
                 }
 
@@ -2503,11 +3030,9 @@
                     capaOficial = await buscarCapaAlternativa(gameTitle) || '';
                 }
 
-                if (!data || data.length === 0) {
-                    if (!capaOficial) {
-                        showToast.error('Jogo não localizado no banco de dados comercial nem na base global.');
-                        return;
-                    }
+                if (!gameItem && !capaOficial) {
+                    showToast.error('Jogo não localizado no banco de dados comercial nem na base global.');
+                    return;
                 }
 
                 document.getElementById('gameTitle').value = gameTitle;
@@ -2521,18 +3046,30 @@
                     if (placeholder) placeholder.style.display = 'none';
                 }
 
-                const nomeLower = game.external.toLowerCase();
+                const nomeLower = gameTitle.toLowerCase();
                 let generos = [], tags = [];
 
-                if (nomeLower.includes('elden') || nomeLower.includes('souls') || nomeLower.includes('bloodborne') || nomeLower.includes('sekiro')) {
+                if (nomeLower.includes('grand theft auto') || nomeLower.includes('gta')) {
+                    generos.push('Ação', 'Aventura', 'Mundo Aberto');
+                    tags.push('#MundoAberto', '#Ação', '#Crime', '#Multiplayer');
+                } else if (nomeLower.includes('red dead') || nomeLower.includes('rdr')) {
+                    generos.push('Ação', 'Aventura', 'Mundo Aberto', 'Faroeste');
+                    tags.push('#MundoAberto', '#Faroeste', '#Historia', '#ObraPrima');
+                } else if (nomeLower.includes('god of war') || nomeLower.includes('gow')) {
+                    generos.push('Ação', 'Aventura', 'Mitologia');
+                    tags.push('#Mitologia', '#Kratos', '#Combate', '#Epico');
+                } else if (nomeLower.includes('elden') || nomeLower.includes('souls') || nomeLower.includes('bloodborne') || nomeLower.includes('sekiro')) {
                     generos.push('Ação', 'RPG', 'Soulslike');
                     tags.push('#SoulsLike', '#Desafio', '#FantasiaSombria');
                 } else if (nomeLower.includes('spider-man') || nomeLower.includes('batman') || nomeLower.includes('hero')) {
                     generos.push('Ação', 'Aventura', 'Mundo Aberto');
                     tags.push('#SuperHeroi', '#MundoAberto', '#Acao');
-                } else if (nomeLower.includes('duty') || nomeLower.includes('warzone') || nomeLower.includes('counter')) {
+                } else if (nomeLower.includes('duty') || nomeLower.includes('warzone') || nomeLower.includes('counter') || nomeLower.includes('cs')) {
                     generos.push('Tiro (FPS)', 'Ação');
                     tags.push('#FPS', '#Multiplayer', '#Competitivo');
+                } else if (nomeLower.includes('resident evil')) {
+                    generos.push('Ação', 'Terror', 'Sobrevivência');
+                    tags.push('#Terror', '#SurvivalHorror', '#Capcom');
                 } else {
                     generos.push('Ação', 'Aventura');
                     tags.push('#Gaming', '#Singleplayer');
@@ -2541,12 +3078,12 @@
                 document.getElementById('gameGenres').value = generos.join(', ');
                 document.getElementById('gameKeywords').value = tags.join(', ');
 
-                const priceNum = parseFloat(game.cheapest) || 15;
-                const charCodeSum = game.external.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                const calculatedScore = 75 + ((charCodeSum + Math.floor(priceNum)) % 24);
+                const priceNum = gameItem ? (parseFloat(gameItem.cheapest) || 15) : 20;
+                const charCodeSum = gameTitle.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                const calculatedScore = 78 + ((charCodeSum + Math.floor(priceNum)) % 21);
                 document.getElementById('internetRating').value = `${calculatedScore} / 100`;
 
-                showToast.success(`Dados de "${game.external}" carregados com sucesso!`);
+                showToast.success(`Dados de "${gameTitle}" carregados com sucesso!`);
 
             } catch (error) {
                 console.error('Erro ao buscar o jogo:', error);
@@ -3322,7 +3859,7 @@
                 badge.style.borderColor = info.cor;
                 badge.style.background = `${info.cor}18`;
                 if (hint) {
-                    hint.innerHTML = `💡 <em>${info.motivo}</em>`;
+                    hint.innerHTML = `💡 <em>${info.motivo || 'Escreva uma resenha para ganhar bônus de XP'}</em>`;
                 }
             }
 

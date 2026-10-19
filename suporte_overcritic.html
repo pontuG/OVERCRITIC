@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -36,13 +36,13 @@
     </script>
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.7_clean"></script>
-    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
-    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
-    <script src="js/notifications.js?v=26.10.7_clean"></script>
-    <script src="js/version.js?v=26.10.7_clean"></script>
-    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
-    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
+    <script src="supabaseClient.js?v=26.10.8"></script>
+    <script src="js/gamerProfile.js?v=26.10.8"></script>
+    <script src="js/overcriticGamification.js?v=26.10.8"></script>
+    <script src="js/notifications.js?v=26.10.8"></script>
+    <script src="js/version.js?v=26.10.8"></script>
+    <script src="js/avatarManager.js?v=26.10.8"></script>
+    <script src="js/pwaManager.js?v=26.10.8" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -878,6 +878,663 @@
             color: #ef4444;
         }
 
+        /* ═══════════════════════════════════
+           MODELO KANBAN - PAINEL ADMIN
+        ═══════════════════════════════════ */
+        .admin-kanban-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .kanban-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: rgba(13, 17, 27, 0.75);
+            border: 1px solid var(--glass-border);
+            padding: 14px 18px;
+            border-radius: 16px;
+        }
+        body.light-mode .kanban-toolbar {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .kanban-search-box {
+            flex: 1;
+            min-width: 240px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .kanban-search-box input {
+            width: 100%;
+            background: rgba(5, 8, 15, 0.75);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 9px 14px 9px 36px;
+            color: var(--text-main);
+            font-size: 0.86rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .kanban-search-box input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+        }
+        .kanban-search-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            pointer-events: none;
+            font-size: 0.85rem;
+        }
+        body.light-mode .kanban-search-box input {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+        body.light-mode .kanban-search-box input:focus {
+            background: #ffffff;
+            border-color: var(--accent-cyan);
+        }
+
+        .kanban-filters-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .kanban-view-toggle {
+            display: inline-flex;
+            background: rgba(5, 8, 15, 0.6);
+            padding: 3px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+        }
+        body.light-mode .kanban-view-toggle {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .kanban-view-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .kanban-view-btn.active {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 2px 8px rgba(0, 240, 255, 0.35);
+        }
+        body.light-mode .kanban-view-btn.active {
+            background: var(--accent-cyan);
+            color: #fff;
+        }
+
+        .kanban-btn-refresh {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .kanban-btn-refresh:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.08);
+        }
+        body.light-mode .kanban-btn-refresh {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        /* ─── KANBAN BOARD GRID ─── */
+        .kanban-board-container {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            align-items: start;
+            width: 100%;
+        }
+
+        .kanban-column {
+            background: rgba(13, 17, 27, 0.72);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 480px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        body.light-mode .kanban-column {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        /* Destaques de cada coluna */
+        .kanban-column.col-aberto {
+            border-top: 3px solid #f59e0b;
+        }
+        .kanban-column.col-analise {
+            border-top: 3px solid #00f0ff;
+        }
+        .kanban-column.col-resolvido {
+            border-top: 3px solid #10b981;
+        }
+
+        /* Estado dragover ao arrastar card */
+        .kanban-column.drag-hover {
+            background: rgba(0, 240, 255, 0.08);
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 22px rgba(0, 240, 255, 0.28);
+            transform: scale(1.008);
+        }
+        body.light-mode .kanban-column.drag-hover {
+            background: #e0f2fe;
+            border-color: #0284c7 !important;
+        }
+
+        .kanban-col-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .kanban-col-title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .kanban-col-icon {
+            font-size: 1.15rem;
+        }
+        .kanban-col-name {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.3px;
+        }
+        .kanban-col-count {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+        .col-aberto .kanban-col-count {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+        .col-analise .kanban-col-count {
+            background: rgba(0, 240, 255, 0.2);
+            color: #38bdf8;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+        }
+        .col-resolvido .kanban-col-count {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .kanban-cards-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 380px;
+            transition: all 0.2s ease;
+        }
+
+        /* ─── KANBAN TICKET CARD ─── */
+        .kanban-card {
+            background: rgba(20, 26, 42, 0.92);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            user-select: none;
+        }
+        .kanban-card:active {
+            cursor: grabbing;
+        }
+        .kanban-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 12px rgba(0, 240, 255, 0.15);
+        }
+        .kanban-card.is-dragging {
+            opacity: 0.35;
+            transform: scale(0.97) rotate(1.5deg);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 12px 25px rgba(0, 240, 255, 0.3);
+        }
+        body.light-mode .kanban-card {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        body.light-mode .kanban-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .kanban-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        .kanban-card-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .kanban-drag-grip {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            cursor: grab;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+            padding: 0 2px;
+            line-height: 1;
+        }
+        .kanban-card:hover .kanban-drag-grip {
+            opacity: 1;
+            color: var(--accent-cyan);
+        }
+
+        .kanban-card-title {
+            font-size: 0.94rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.35;
+        }
+
+        .kanban-card-message {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            white-space: pre-wrap;
+            max-height: 85px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        body.light-mode .kanban-card-message {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .kanban-card-reply-box {
+            background: rgba(0, 240, 255, 0.06);
+            border-left: 3px solid var(--accent-cyan);
+            padding: 6px 10px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.78rem;
+        }
+        body.light-mode .kanban-card-reply-box {
+            background: rgba(2, 132, 199, 0.08);
+        }
+        .kanban-reply-header {
+            font-weight: 800;
+            color: var(--accent-cyan);
+            font-size: 0.72rem;
+            margin-bottom: 2px;
+        }
+        .kanban-reply-text {
+            color: var(--text-main);
+            line-height: 1.35;
+            white-space: pre-wrap;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .kanban-card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        body.light-mode .kanban-card-meta {
+            border-top-color: #e2e8f0;
+        }
+
+        .kanban-card-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            margin-top: 2px;
+            flex-wrap: wrap;
+        }
+        .kanban-move-buttons {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .kanban-btn-move {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .kanban-btn-move:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+        }
+        body.light-mode .kanban-btn-move {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .kanban-empty-dropzone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 14px;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            gap: 6px;
+            min-height: 140px;
+        }
+        body.light-mode .kanban-empty-dropzone {
+            border-color: #cbd5e1;
+        }
+        .kanban-empty-dropzone span.empty-icon {
+            font-size: 1.6rem;
+            opacity: 0.6;
+        }
+        .kanban-empty-dropzone p {
+            font-size: 0.78rem;
+            margin: 0;
+        }
+
+        /* ─── MODAL DE RESPOSTA DO ADMIN ─── */
+        .admin-reply-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeInModal 0.2s ease;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .admin-reply-modal-box {
+            background: #0f1422;
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 580px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: scaleInModal 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes scaleInModal {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        body.light-mode .admin-reply-modal-box {
+            background: #ffffff;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        .admin-reply-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .reply-modal-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .reply-modal-ticket-id {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid var(--glass-border);
+        }
+        .reply-modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            line-height: 1;
+        }
+        .reply-modal-close:hover {
+            color: #ef4444;
+        }
+
+        .admin-reply-modal-body {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+        .reply-ticket-preview {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+        body.light-mode .reply-ticket-preview {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        .reply-textarea {
+            width: 100%;
+            background: rgba(5, 8, 15, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            min-height: 100px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .reply-textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+        }
+        body.light-mode .reply-textarea {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .reply-presets-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .reply-presets-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .reply-presets-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .reply-preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .reply-preset-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.1);
+        }
+        body.light-mode .reply-preset-btn {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .admin-reply-modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 14px 24px;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .btn-reply-cancel {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-reply-cancel:hover {
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .btn-reply-save {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: #000;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+        }
+        .btn-reply-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+        }
+        body.light-mode .btn-reply-save {
+            color: #fff;
+        }
+
+        /* ─── KANBAN RESPONSIVIDADE ─── */
+        @media (max-width: 992px) {
+            .kanban-board-container {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                padding-bottom: 14px;
+                gap: 16px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .kanban-column {
+                flex: 0 0 85vw;
+                max-width: 360px;
+                scroll-snap-align: center;
+            }
+            .kanban-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .kanban-filters-group {
+                justify-content: space-between;
+            }
+        }
+
         /* TOAST NOTIFICAÇÃO */
         .toast-notify {
             position: fixed;
@@ -1135,15 +1792,62 @@
             </div>
         </section>
 
-        <!-- ABA 3: PAINEL DO ADMINISTRADOR -->
+        <!-- ABA 3: PAINEL DO ADMINISTRADOR (MODELO KANBAN) -->
         <section id="sectionAdminPanel" style="display: none;">
-            <div class="form-card">
-                <div class="card-header-line">
-                    <div class="card-header-title">
-                        <span>👑 Caixa de Entrada do Administrador</span>
+            <div class="admin-kanban-wrapper">
+                <!-- CABEÇALHO DO KANBAN -->
+                <div class="card-header-line" style="margin-bottom: 2px;">
+                    <div>
+                        <div class="card-header-title" style="font-size: 1.25rem;">
+                            <span>👑 Quadro Kanban de Chamados (Admin)</span>
+                        </div>
+                        <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">
+                            Arraste os tickets entre as colunas para atualizar o status instantaneamente ou utilize os botões rápidos.
+                        </p>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <select id="adminFilterStatus" class="admin-select-filter" onchange="renderizarChamadosAdmin()">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <div class="kanban-view-toggle">
+                            <button type="button" id="btnViewKanban" class="kanban-view-btn active" onclick="alternarModoVisualizacaoAdmin('kanban')">📊 Kanban</button>
+                            <button type="button" id="btnViewList" class="kanban-view-btn" onclick="alternarModoVisualizacaoAdmin('lista')">📑 Lista</button>
+                        </div>
+                        <button type="button" class="kanban-btn-refresh" onclick="sincronizarChamadosSupabase(); mostrarToast('Chamados sincronizados com Supabase!', '🔄');" title="Sincronizar com banco de dados Supabase">
+                            🔄 Sincronizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BARRA DE PESQUISA E FILTROS -->
+                <div class="kanban-toolbar">
+                    <div class="kanban-search-box">
+                        <span class="kanban-search-icon">🔍</span>
+                        <input type="text" id="adminSearchInput" placeholder="Buscar por assunto, autor, tag ou ID..." oninput="filtrarChamadosAdmin()">
+                    </div>
+                    <div class="kanban-filters-group">
+                        <select id="adminFilterType" class="admin-select-filter" onchange="filtrarChamadosAdmin()">
+                            <option value="todos">Todos os Tipos</option>
+                            <option value="Sugestão de Melhoria">💡 Sugestão</option>
+                            <option value="Reportar Bug">🐛 Bug / Falha</option>
+                            <option value="Dúvida & Suporte">❓ Dúvida / Suporte</option>
+                            <option value="Parceria / Outros">🤝 Parceria / Outros</option>
+                        </select>
+                        <select id="adminFilterPriority" class="admin-select-filter" onchange="filtrarChamadosAdmin()">
+                            <option value="todos">Todas as Prioridades</option>
+                            <option value="Urgente">🚨 Urgente</option>
+                            <option value="Alta">🔥 Alta</option>
+                            <option value="Média">⚡ Média</option>
+                            <option value="Baixa">🌱 Baixa</option>
+                        </select>
+                        <select id="adminFilterSection" class="admin-select-filter" onchange="filtrarChamadosAdmin()">
+                            <option value="todos">Todas as Seções</option>
+                            <option value="Descobrir Jogos">Descobrir Jogos</option>
+                            <option value="Descobrir Títulos">Descobrir Títulos</option>
+                            <option value="Críticas de Jogos">Críticas de Jogos</option>
+                            <option value="Mídias (Filmes/Séries)">Mídias</option>
+                            <option value="Platinas & Troféus">Platinas & Troféus</option>
+                            <option value="Gamer Card / Perfil">Gamer Card / Perfil</option>
+                            <option value="Geral / Plataforma">Geral / Plataforma</option>
+                        </select>
+                        <select id="adminFilterStatus" class="admin-select-filter" style="display: none;" onchange="filtrarChamadosAdmin()">
                             <option value="todos">Todos os Status</option>
                             <option value="Aberto">Apenas Abertos</option>
                             <option value="Em Análise">Apenas Em Análise</option>
@@ -1152,8 +1856,66 @@
                     </div>
                 </div>
 
-                <div class="tickets-container" id="adminTicketsList">
-                    <!-- Renderizado dinamicamente via JS -->
+                <!-- QUADRO KANBAN (3 COLUNAS) -->
+                <div class="kanban-board-container" id="adminKanbanBoard">
+                    <!-- COLUNA 1: ABERTOS -->
+                    <div class="kanban-column col-aberto" data-status="Aberto" 
+                         ondragover="adminKanbanDragOver(event)" 
+                         ondragleave="adminKanbanDragLeave(event)" 
+                         ondrop="adminKanbanDrop(event, 'Aberto')">
+                        <div class="kanban-col-header">
+                            <div class="kanban-col-title-group">
+                                <span class="kanban-col-icon">📥</span>
+                                <span class="kanban-col-name">Abertos</span>
+                                <span class="kanban-col-count" id="countColAberto">0</span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Aguardando</span>
+                        </div>
+                        <div class="kanban-cards-wrapper" id="kanbanCardsAberto">
+                            <!-- Injetado dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- COLUNA 2: EM ANÁLISE -->
+                    <div class="kanban-column col-analise" data-status="Em Análise" 
+                         ondragover="adminKanbanDragOver(event)" 
+                         ondragleave="adminKanbanDragLeave(event)" 
+                         ondrop="adminKanbanDrop(event, 'Em Análise')">
+                        <div class="kanban-col-header">
+                            <div class="kanban-col-title-group">
+                                <span class="kanban-col-icon">🔍</span>
+                                <span class="kanban-col-name">Em Análise</span>
+                                <span class="kanban-col-count" id="countColAnalise">0</span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Trabalhando</span>
+                        </div>
+                        <div class="kanban-cards-wrapper" id="kanbanCardsAnalise">
+                            <!-- Injetado dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- COLUNA 3: RESOLVIDOS -->
+                    <div class="kanban-column col-resolvido" data-status="Resolvido" 
+                         ondragover="adminKanbanDragOver(event)" 
+                         ondragleave="adminKanbanDragLeave(event)" 
+                         ondrop="adminKanbanDrop(event, 'Resolvido')">
+                        <div class="kanban-col-header">
+                            <div class="kanban-col-title-group">
+                                <span class="kanban-col-icon">✅</span>
+                                <span class="kanban-col-name">Resolvidos</span>
+                                <span class="kanban-col-count" id="countColResolvido">0</span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Concluídos</span>
+                        </div>
+                        <div class="kanban-cards-wrapper" id="kanbanCardsResolvido">
+                            <!-- Injetado dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODO LISTA ALTERNATIVO (OCULTO POR PADRÃO) -->
+                <div class="tickets-container" id="adminTicketsList" style="display: none;">
+                    <!-- Renderizado se modo lista for ativado -->
                 </div>
             </div>
         </section>
@@ -1164,6 +1926,47 @@
     <div id="toastNotify" class="toast-notify">
         <span id="toastIcon">💡</span>
         <span id="toastMsg">Mensagem enviada com sucesso!</span>
+    </div>
+
+    <!-- MODAL DE RESPOSTA DO ADMIN -->
+    <div id="modalAdminReply" class="admin-reply-modal-backdrop" style="display: none;" onclick="fecharModalRespostaBackdrop(event)">
+        <div class="admin-reply-modal-box">
+            <div class="admin-reply-modal-header">
+                <div class="reply-modal-title">
+                    <span>👑 Responder Chamado</span>
+                    <span class="reply-modal-ticket-id" id="replyModalTicketId">#0</span>
+                </div>
+                <button type="button" class="reply-modal-close" onclick="fecharModalRespostaAdmin()" title="Fechar">&times;</button>
+            </div>
+            <div class="admin-reply-modal-body">
+                <div class="reply-ticket-preview" id="replyTicketPreview">
+                    <!-- Detalhes do chamado injetados via JS -->
+                </div>
+                <div>
+                    <label class="reply-presets-title" for="replyAdminTextarea" style="display: block; margin-bottom: 6px;">Sua Resposta Oficial (pontuG):</label>
+                    <textarea id="replyAdminTextarea" class="reply-textarea" placeholder="Digite a resposta do Administrador para este chamado..."></textarea>
+                </div>
+                <div class="reply-presets-container">
+                    <span class="reply-presets-title">⚡ Respostas Rápidas / Presets:</span>
+                    <div class="reply-presets-list">
+                        <button type="button" class="reply-preset-btn" onclick="inserirRespostaPreset('Sugestão analisada e implementada com sucesso na plataforma! Agradecemos pela ideia.')">💡 Sugestão implementada</button>
+                        <button type="button" class="reply-preset-btn" onclick="inserirRespostaPreset('Bug identificado e corrigido na versão mais recente do Overcritic!')">🛠️ Bug corrigido</button>
+                        <button type="button" class="reply-preset-btn" onclick="inserirRespostaPreset('Estamos analisando detalhadamente este caso para aplicar a melhoria em breve.')">🔍 Em análise detalhada</button>
+                        <button type="button" class="reply-preset-btn" onclick="inserirRespostaPreset('Agradecemos imensamente o seu feedback e contribuição para a comunidade!')">❤️ Agradecimento</button>
+                    </div>
+                </div>
+                <div style="margin-top: 4px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 600; color: var(--text-main);">
+                        <input type="checkbox" id="replyAutoResolve" checked style="width: 17px; height: 17px; accent-color: var(--accent-cyan); cursor: pointer;">
+                        <span>Marcar automaticamente como <strong style="color: #34d399;">✅ Resolvido</strong> ao enviar resposta</span>
+                    </label>
+                </div>
+            </div>
+            <div class="admin-reply-modal-footer">
+                <button type="button" class="btn-reply-cancel" onclick="fecharModalRespostaAdmin()">Cancelar</button>
+                <button type="button" class="btn-reply-save" onclick="salvarRespostaAdminModal()">💾 Enviar Resposta</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1461,25 +2264,260 @@
             list.innerHTML = meus.map(t => criarCardChamadoHTML(t, false)).join('');
         }
 
+        let modoVisualizacaoAdmin = 'kanban';
+        let draggedTicketId = null;
+        let currentReplyingTicketId = null;
+
+        function alternarModoVisualizacaoAdmin(modo) {
+            modoVisualizacaoAdmin = modo;
+            const btnKanban = document.getElementById('btnViewKanban');
+            const btnList = document.getElementById('btnViewList');
+            const kanbanBoard = document.getElementById('adminKanbanBoard');
+            const listView = document.getElementById('adminTicketsList');
+
+            if (modo === 'kanban') {
+                btnKanban?.classList.add('active');
+                btnList?.classList.remove('active');
+                if (kanbanBoard) kanbanBoard.style.display = 'grid';
+                if (listView) listView.style.display = 'none';
+            } else {
+                btnKanban?.classList.remove('active');
+                btnList?.classList.add('active');
+                if (kanbanBoard) kanbanBoard.style.display = 'none';
+                if (listView) listView.style.display = 'flex';
+            }
+            renderizarChamadosAdmin();
+        }
+
+        function filtrarChamadosAdmin() {
+            renderizarChamadosAdmin();
+        }
+
         function renderizarChamadosAdmin() {
-            const list = document.getElementById('adminTicketsList');
+            const todos = obterChamadosSalvos();
+
+            // Filtros de busca e seleção
+            const termoBusca = (document.getElementById('adminSearchInput')?.value || '').toLowerCase().trim();
+            const filtroTipo = document.getElementById('adminFilterType')?.value || 'todos';
+            const filtroPrioridade = document.getElementById('adminFilterPriority')?.value || 'todos';
+            const filtroSecao = document.getElementById('adminFilterSection')?.value || 'todos';
             const filtroStatus = document.getElementById('adminFilterStatus')?.value || 'todos';
 
-            const todos = obterChamadosSalvos();
-            const filtrados = filtroStatus === 'todos' ? todos : todos.filter(t => t.status === filtroStatus);
+            const filtrados = todos.filter(t => {
+                if (filtroStatus !== 'todos' && t.status !== filtroStatus) return false;
+                if (filtroTipo !== 'todos' && t.tipo !== filtroTipo) return false;
+                if (filtroPrioridade !== 'todos' && t.prioridade !== filtroPrioridade) return false;
+                if (filtroSecao !== 'todos' && t.secao !== filtroSecao) return false;
+                if (termoBusca) {
+                    const matchAssunto = (t.assunto || '').toLowerCase().includes(termoBusca);
+                    const matchMsg = (t.mensagem || '').toLowerCase().includes(termoBusca);
+                    const matchAutor = (t.autor || '').toLowerCase().includes(termoBusca);
+                    const matchId = String(t.id).includes(termoBusca);
+                    if (!matchAssunto && !matchMsg && !matchAutor && !matchId) return false;
+                }
+                return true;
+            });
 
-            if (!filtrados || filtrados.length === 0) {
-                list.innerHTML = `
-                    <div style="text-align: center; padding: 45px 20px; color: var(--text-muted);">
-                        <div style="font-size: 2.5rem; margin-bottom: 8px;">✨</div>
-                        <h4 style="color: var(--text-main); margin-bottom: 6px;">Nenhum chamado pendente</h4>
-                        <p style="font-size: 0.88rem;">Todas as solicitações nesta categoria foram atendidas.</p>
-                    </div>
-                `;
-                return;
+            // Se o modo for Lista
+            if (modoVisualizacaoAdmin === 'lista') {
+                const listEl = document.getElementById('adminTicketsList');
+                if (listEl) {
+                    if (!filtrados || filtrados.length === 0) {
+                        listEl.innerHTML = `
+                            <div style="text-align: center; padding: 45px 20px; color: var(--text-muted); background: var(--card-bg); border-radius: 16px; border: 1px solid var(--glass-border); width: 100%;">
+                                <div style="font-size: 2.5rem; margin-bottom: 8px;">✨</div>
+                                <h4 style="color: var(--text-main); margin-bottom: 6px;">Nenhum chamado encontrado</h4>
+                                <p style="font-size: 0.88rem;">Nenhum ticket corresponde aos filtros selecionados.</p>
+                            </div>
+                        `;
+                    } else {
+                        listEl.innerHTML = filtrados.map(t => criarCardChamadoHTML(t, true)).join('');
+                    }
+                }
             }
 
-            list.innerHTML = filtrados.map(t => criarCardChamadoHTML(t, true)).join('');
+            // Modo Kanban (3 colunas dinâmicas)
+            const colAbertoWrapper = document.getElementById('kanbanCardsAberto');
+            const colAnaliseWrapper = document.getElementById('kanbanCardsAnalise');
+            const colResolvidoWrapper = document.getElementById('kanbanCardsResolvido');
+
+            const abertos = filtrados.filter(t => t.status === 'Aberto');
+            const analise = filtrados.filter(t => t.status === 'Em Análise');
+            const resolvidos = filtrados.filter(t => t.status === 'Resolvido');
+
+            const countAberto = document.getElementById('countColAberto');
+            const countAnalise = document.getElementById('countColAnalise');
+            const countResolvido = document.getElementById('countColResolvido');
+
+            if (countAberto) countAberto.textContent = abertos.length;
+            if (countAnalise) countAnalise.textContent = analise.length;
+            if (countResolvido) countResolvido.textContent = resolvidos.length;
+
+            if (colAbertoWrapper) {
+                colAbertoWrapper.innerHTML = abertos.length > 0
+                    ? abertos.map(t => criarCardKanbanHTML(t)).join('')
+                    : criarEmptyDropzoneHTML('Aberto', 'Nenhum chamado aberto');
+            }
+            if (colAnaliseWrapper) {
+                colAnaliseWrapper.innerHTML = analise.length > 0
+                    ? analise.map(t => criarCardKanbanHTML(t)).join('')
+                    : criarEmptyDropzoneHTML('Em Análise', 'Nenhum chamado em análise');
+            }
+            if (colResolvidoWrapper) {
+                colResolvidoWrapper.innerHTML = resolvidos.length > 0
+                    ? resolvidos.map(t => criarCardKanbanHTML(t)).join('')
+                    : criarEmptyDropzoneHTML('Resolvido', 'Nenhum chamado resolvido');
+            }
+
+            atualizarEstatisticas();
+        }
+
+        function criarEmptyDropzoneHTML(status, texto) {
+            let icon = '📥';
+            if (status === 'Em Análise') icon = '🔍';
+            if (status === 'Resolvido') icon = '✅';
+
+            return `
+                <div class="kanban-empty-dropzone">
+                    <span class="empty-icon">${icon}</span>
+                    <p style="font-weight: 700; color: var(--text-main); font-size: 0.85rem;">${texto}</p>
+                    <p style="font-size: 0.74rem;">Arraste um ticket para cá para definir como "${status}"</p>
+                </div>
+            `;
+        }
+
+        function criarCardKanbanHTML(t) {
+            let badgeClass = 'badge-type-suggestion';
+            let typeIcon = '💡';
+            if (t.tipo === 'Reportar Bug') { badgeClass = 'badge-type-bug'; typeIcon = '🐛'; }
+            if (t.tipo.includes('Suporte') || t.tipo.includes('Dúvida')) { badgeClass = 'badge-type-support'; typeIcon = '❓'; }
+            if (t.tipo.includes('Parceria')) { badgeClass = 'badge-type-suggestion'; typeIcon = '🤝'; }
+
+            let prioridadeClass = 'priority-media';
+            if (t.prioridade === 'Baixa') prioridadeClass = 'priority-baixa';
+            if (t.prioridade === 'Alta') prioridadeClass = 'priority-alta';
+            if (t.prioridade === 'Urgente') prioridadeClass = 'priority-urgente';
+
+            // Botões de transição rápida de status (essenciais para mobile e agilidade)
+            let moveButtonsHTML = '';
+            if (t.status === 'Aberto') {
+                moveButtonsHTML = `
+                    <button type="button" class="kanban-btn-move" onclick="adminMudarStatus(${t.id}, 'Em Análise')" title="Mover para Em Análise">🔍 Analisar ➡️</button>
+                    <button type="button" class="kanban-btn-move" onclick="adminMudarStatus(${t.id}, 'Resolvido')" title="Marcar como Resolvido">✅ Resolver</button>
+                `;
+            } else if (t.status === 'Em Análise') {
+                moveButtonsHTML = `
+                    <button type="button" class="kanban-btn-move" onclick="adminMudarStatus(${t.id}, 'Aberto')" title="Retornar para Aberto">⬅️ Aberto</button>
+                    <button type="button" class="kanban-btn-move" onclick="adminMudarStatus(${t.id}, 'Resolvido')" title="Marcar como Resolvido">✅ Resolver ➡️</button>
+                `;
+            } else if (t.status === 'Resolvido') {
+                moveButtonsHTML = `
+                    <button type="button" class="kanban-btn-move" onclick="adminMudarStatus(${t.id}, 'Em Análise')" title="Reabrir em Análise">⬅️ Em Análise</button>
+                    <button type="button" class="kanban-btn-move" onclick="adminMudarStatus(${t.id}, 'Aberto')" title="Reabrir Chamado">📥 Reabrir</button>
+                `;
+            }
+
+            return `
+                <div class="kanban-card" 
+                     id="ticket-card-${t.id}"
+                     draggable="true" 
+                     ondragstart="adminKanbanDragStart(event, ${t.id})" 
+                     ondragend="adminKanbanDragEnd(event)"
+                     data-ticket-id="${t.id}">
+                    
+                    <div class="kanban-card-top">
+                        <div class="kanban-card-badges">
+                            <span class="ticket-badge-type ${badgeClass}">${typeIcon} ${t.tipo}</span>
+                            <span class="ticket-badge-priority ${prioridadeClass}">${t.prioridade}</span>
+                        </div>
+                        <div class="kanban-drag-grip" title="Arraste para mover de coluna">⠿</div>
+                    </div>
+
+                    <div class="kanban-card-title">${t.assunto}</div>
+                    
+                    <div class="kanban-card-message">${t.mensagem}</div>
+
+                    ${t.respostaAdmin ? `
+                        <div class="kanban-card-reply-box">
+                            <div class="kanban-reply-header">👑 Resposta enviada:</div>
+                            <div class="kanban-reply-text">${t.respostaAdmin}</div>
+                        </div>
+                    ` : ''}
+
+                    <div class="kanban-card-meta">
+                        <span>👤 <strong>${t.autor}</strong></span>
+                        <span>📍 ${t.secao || 'Geral'}</span>
+                        <span>📅 ${t.data}</span>
+                    </div>
+
+                    <div class="kanban-card-actions">
+                        <div class="kanban-move-buttons">
+                            ${moveButtonsHTML}
+                        </div>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <button type="button" class="btn-action-small" onclick="abrirModalRespostaAdmin(${t.id})" title="Responder chamado">💬 Responder</button>
+                            <button type="button" class="btn-action-small btn-action-danger" onclick="adminExcluir(${t.id})" title="Excluir chamado">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ═══════════════════════════════════
+           DRAG & DROP DO KANBAN
+        ═══════════════════════════════════ */
+        function adminKanbanDragStart(e, id) {
+            draggedTicketId = id;
+            if (e.dataTransfer) {
+                e.dataTransfer.setData('text/plain', String(id));
+                e.dataTransfer.effectAllowed = 'move';
+            }
+            const card = e.currentTarget;
+            setTimeout(() => {
+                if (card) card.classList.add('is-dragging');
+            }, 0);
+        }
+
+        function adminKanbanDragEnd(e) {
+            const card = e.currentTarget;
+            if (card) card.classList.remove('is-dragging');
+            document.querySelectorAll('.kanban-column').forEach(col => col.classList.remove('drag-hover'));
+            draggedTicketId = null;
+        }
+
+        function adminKanbanDragOver(e) {
+            e.preventDefault();
+            if (e.dataTransfer) {
+                e.dataTransfer.dropEffect = 'move';
+            }
+            const col = e.currentTarget;
+            if (!col.classList.contains('drag-hover')) {
+                col.classList.add('drag-hover');
+            }
+        }
+
+        function adminKanbanDragLeave(e) {
+            const col = e.currentTarget;
+            if (!col.contains(e.relatedTarget)) {
+                col.classList.remove('drag-hover');
+            }
+        }
+
+        function adminKanbanDrop(e, targetStatus) {
+            e.preventDefault();
+            const col = e.currentTarget;
+            col.classList.remove('drag-hover');
+
+            let ticketId = null;
+            if (e.dataTransfer) {
+                ticketId = e.dataTransfer.getData('text/plain');
+            }
+            if (!ticketId && draggedTicketId) {
+                ticketId = draggedTicketId;
+            }
+            if (!ticketId) return;
+
+            adminMudarStatus(ticketId, targetStatus);
         }
 
         function criarCardChamadoHTML(t, isAdmin) {
@@ -1529,10 +2567,10 @@
 
                         ${isAdmin ? `
                             <div class="admin-actions-bar">
-                                <button class="btn-action-small" onclick="adminMudarStatus(${t.id}, 'Em Análise')">🔍 Em Análise</button>
-                                <button class="btn-action-small" onclick="adminMudarStatus(${t.id}, 'Resolvido')">✅ Resolver</button>
-                                <button class="btn-action-small" onclick="adminResponder(${t.id})">💬 Responder</button>
-                                <button class="btn-action-small btn-action-danger" onclick="adminExcluir(${t.id})">🗑️</button>
+                                <button type="button" class="btn-action-small" onclick="adminMudarStatus(${t.id}, 'Em Análise')">🔍 Em Análise</button>
+                                <button type="button" class="btn-action-small" onclick="adminMudarStatus(${t.id}, 'Resolvido')">✅ Resolver</button>
+                                <button type="button" class="btn-action-small" onclick="abrirModalRespostaAdmin(${t.id})">💬 Responder</button>
+                                <button type="button" class="btn-action-small btn-action-danger" onclick="adminExcluir(${t.id})">🗑️</button>
                             </div>
                         ` : ''}
                     </div>
@@ -1541,39 +2579,101 @@
         }
 
         /* ═══════════════════════════════════
-           AÇÕES DO ADMINISTRADOR
+           AÇÕES DO ADMINISTRADOR E MODAL
         ═══════════════════════════════════ */
-        function adminResponder(id) {
+        function abrirModalRespostaAdmin(id) {
             const chamados = obterChamadosSalvos();
-            const ticket = chamados.find(t => t.id === id);
+            const ticket = chamados.find(t => String(t.id) === String(id));
             if (!ticket) return;
 
-            const resposta = prompt('Digite a resposta do Administrador para este chamado:', ticket.respostaAdmin || '');
-            if (resposta !== null) {
-                ticket.respostaAdmin = resposta.trim();
-                if (resposta.trim() && ticket.status === 'Aberto') {
-                    ticket.status = 'Em Análise';
-                }
-                salvarChamados(chamados);
-                renderizarChamadosAdmin();
-                renderizarMinhasMensagens();
+            currentReplyingTicketId = ticket.id;
+            const modal = document.getElementById('modalAdminReply');
+            const ticketIdEl = document.getElementById('replyModalTicketId');
+            const previewEl = document.getElementById('replyTicketPreview');
+            const textarea = document.getElementById('replyAdminTextarea');
+            const autoResolve = document.getElementById('replyAutoResolve');
 
-                if (window.sbClient) {
-                    window.sbClient.from('suporte_tickets')
-                        .update({ resposta_admin: ticket.respostaAdmin, status: ticket.status })
-                        .eq('id', ticket.id)
-                        .then(({ error }) => {
-                            if (error) console.warn('Erro ao atualizar chamado no Supabase:', error);
-                        });
-                }
-
-                mostrarToast('Resposta do Admin gravada!', '👑');
+            if (ticketIdEl) ticketIdEl.textContent = '#' + ticket.id;
+            if (previewEl) {
+                previewEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span>👤 <strong>${ticket.autor}</strong> • 📅 ${ticket.data}</span>
+                        <span style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700;">📍 ${ticket.secao || 'Geral'}</span>
+                    </div>
+                    <div style="font-weight: 700; color: var(--text-main); margin-bottom: 4px; font-size: 0.95rem;">${ticket.assunto}</div>
+                    <div style="color: var(--text-muted); font-size: 0.84rem; white-space: pre-wrap; line-height: 1.45; background: rgba(0,0,0,0.18); padding: 8px 10px; border-radius: 8px;">${ticket.mensagem}</div>
+                `;
             }
+            if (textarea) textarea.value = ticket.respostaAdmin || '';
+            if (autoResolve) autoResolve.checked = ticket.status !== 'Resolvido';
+
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => textarea && textarea.focus(), 60);
+            }
+        }
+
+        function fecharModalRespostaAdmin() {
+            const modal = document.getElementById('modalAdminReply');
+            if (modal) modal.style.display = 'none';
+            currentReplyingTicketId = null;
+        }
+
+        function fecharModalRespostaBackdrop(e) {
+            if (e.target.id === 'modalAdminReply') {
+                fecharModalRespostaAdmin();
+            }
+        }
+
+        function inserirRespostaPreset(texto) {
+            const textarea = document.getElementById('replyAdminTextarea');
+            if (textarea) {
+                textarea.value = texto;
+                textarea.focus();
+            }
+        }
+
+        function salvarRespostaAdminModal() {
+            if (!currentReplyingTicketId) return;
+            const textarea = document.getElementById('replyAdminTextarea');
+            const autoResolve = document.getElementById('replyAutoResolve');
+            const resposta = (textarea ? textarea.value : '').trim();
+
+            const chamados = obterChamadosSalvos();
+            const ticket = chamados.find(t => String(t.id) === String(currentReplyingTicketId));
+            if (!ticket) return;
+
+            ticket.respostaAdmin = resposta;
+            if (autoResolve && autoResolve.checked) {
+                ticket.status = 'Resolvido';
+            } else if (resposta && ticket.status === 'Aberto') {
+                ticket.status = 'Em Análise';
+            }
+
+            salvarChamados(chamados);
+            renderizarChamadosAdmin();
+            renderizarMinhasMensagens();
+
+            if (window.sbClient) {
+                window.sbClient.from('suporte_tickets')
+                    .update({ resposta_admin: ticket.respostaAdmin, status: ticket.status })
+                    .eq('id', ticket.id)
+                    .then(({ error }) => {
+                        if (error) console.warn('Erro ao atualizar chamado no Supabase:', error);
+                    });
+            }
+
+            fecharModalRespostaAdmin();
+            mostrarToast('Resposta do Administrador enviada!', '👑');
+        }
+
+        function adminResponder(id) {
+            abrirModalRespostaAdmin(id);
         }
 
         function adminMudarStatus(id, novoStatus) {
             const chamados = obterChamadosSalvos();
-            const ticket = chamados.find(t => t.id === id);
+            const ticket = chamados.find(t => String(t.id) === String(id));
             if (!ticket) return;
 
             ticket.status = novoStatus;
@@ -1603,7 +2703,7 @@
             if (!confirmou) return;
 
             let chamados = obterChamadosSalvos();
-            chamados = chamados.filter(t => t.id !== id);
+            chamados = chamados.filter(t => String(t.id) !== String(id));
             salvarChamados(chamados);
             renderizarChamadosAdmin();
             renderizarMinhasMensagens();

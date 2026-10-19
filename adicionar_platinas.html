@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -35,14 +35,14 @@
     </script>
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.7_clean"></script>
-    <script src="js/gamerProfile.js?v=26.10.7_clean"></script>
-    <script src="js/overcriticGamification.js?v=26.10.7_clean"></script>
-    <script src="js/notifications.js?v=26.10.7_clean"></script>
-    <script src="js/trofeusDatabase.js?v=26.10.7_clean"></script>
-    <script src="js/version.js?v=26.10.7_clean"></script>
-    <script src="js/avatarManager.js?v=26.10.7_clean"></script>
-    <script src="js/pwaManager.js?v=26.10.7_clean" defer></script>
+    <script src="supabaseClient.js?v=26.10.8"></script>
+    <script src="js/gamerProfile.js?v=26.10.8"></script>
+    <script src="js/overcriticGamification.js?v=26.10.8"></script>
+    <script src="js/notifications.js?v=26.10.8"></script>
+    <script src="js/trofeusDatabase.js?v=26.10.8"></script>
+    <script src="js/version.js?v=26.10.8"></script>
+    <script src="js/avatarManager.js?v=26.10.8"></script>
+    <script src="js/pwaManager.js?v=26.10.8" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -2007,6 +2007,9 @@
             <button class="tab-btn" onclick="alternarAba('api')">
                 <span>🔍</span> <span class="tab-label-full">Explorador de Troféus (API)</span><span class="tab-label-mobile">Explorador</span>
             </button>
+            <button class="tab-btn" onclick="alternarAba('ranking_jogadores')">
+                <span>👑</span> <span class="tab-label-full">Ranking da Comunidade</span><span class="tab-label-mobile">Ranking</span>
+            </button>
         </div>
 
         <!-- ══════ ABA NOVA: INFORMATIVO DOS MAIS PLATINADOS & GUIA DE DIFICULDADE ══════ -->
@@ -2393,6 +2396,11 @@
                     <p style="font-size: 0.88rem;">Digite um título acima ou explore a lista mundial em tempo real.</p>
                 </div>
             </div>
+        </section>
+
+        <!-- ══════ ABA NOVA: RANKING GERAL DE JOGADORES & PLATINADORES ══════ -->
+        <section id="tabRankingJogadores" class="tab-content">
+            <div id="platinasRankingJogadoresContainer"></div>
         </section>
 
     </main>
@@ -3263,6 +3271,16 @@
                 targetTab = document.getElementById('tabApi');
                 targetTab?.classList.add('active');
                 activeBtn?.classList.add('active');
+            } else if (abaNome === 'ranking_jogadores' || abaNome === 'ranking') {
+                activeBtn = containerBtns[5];
+                targetTab = document.getElementById('tabRankingJogadores');
+                targetTab?.classList.add('active');
+                activeBtn?.classList.add('active');
+                try {
+                    if (window.OvercriticGamification && typeof window.OvercriticGamification.renderizarRankingComunidade === 'function') {
+                        window.OvercriticGamification.renderizarRankingComunidade('platinasRankingJogadoresContainer');
+                    }
+                } catch(e) { console.warn('Aviso ao renderizar ranking de jogadores:', e); }
             }
 
             if (activeBtn) {
@@ -3272,6 +3290,13 @@
             }
         }
         window.alternarAba = alternarAba;
+
+        window.addEventListener('overcritic_ranking_atualizado', () => {
+            const container = document.getElementById('platinasRankingJogadoresContainer');
+            if (container && window.OvercriticGamification && typeof window.OvercriticGamification.renderizarRankingComunidade === 'function') {
+                window.OvercriticGamification.renderizarRankingComunidade(container, { silentSyncDone: true });
+            }
+        });
 
         /* ═══════════════════════════════════
            RENDERIZAÇÃO: FEED DA COMUNIDADE
@@ -3786,6 +3811,64 @@
         /* ═══════════════════════════════════
            BUSCA & AUTO-PREENCHER (FORMULÁRIO)
         ═══════════════════════════════════ */
+        const ALIASES_JOGOS = {
+            'gta': 'Grand Theft Auto',
+            'gta5': 'Grand Theft Auto V',
+            'gtav': 'Grand Theft Auto V',
+            'gta 5': 'Grand Theft Auto V',
+            'gta v': 'Grand Theft Auto V',
+            'gta sa': 'Grand Theft Auto: San Andreas',
+            'gta 4': 'Grand Theft Auto IV',
+            'gta iv': 'Grand Theft Auto IV',
+            'gta vc': 'Grand Theft Auto: Vice City',
+            'gta 6': 'Grand Theft Auto VI',
+            'gta vi': 'Grand Theft Auto VI',
+            'gta trilogy': 'Grand Theft Auto: The Trilogy',
+            'rdr': 'Red Dead Redemption',
+            'rdr2': 'Red Dead Redemption 2',
+            'rdr 2': 'Red Dead Redemption 2',
+            'gow': 'God of War',
+            'gowr': 'God of War Ragnarök',
+            'gow ragnarok': 'God of War Ragnarök',
+            'tlou': 'The Last of Us',
+            'tlou2': 'The Last of Us Part II',
+            'tlou 2': 'The Last of Us Part II',
+            'cod': 'Call of Duty',
+            'mw': 'Call of Duty: Modern Warfare',
+            'mw2': 'Call of Duty: Modern Warfare II',
+            'mw3': 'Call of Duty: Modern Warfare III',
+            're4': 'Resident Evil 4',
+            're 4': 'Resident Evil 4',
+            're2': 'Resident Evil 2',
+            're3': 'Resident Evil 3',
+            're': 'Resident Evil',
+            'ff': 'Final Fantasy',
+            'ff7': 'Final Fantasy VII',
+            'bg3': "Baldur's Gate 3",
+            'cp2077': 'Cyberpunk 2077',
+            'mk': 'Mortal Kombat',
+            'mk1': 'Mortal Kombat 1',
+            'mk11': 'Mortal Kombat 11',
+            'sf6': 'Street Fighter 6',
+            'ac': "Assassin's Creed",
+            'botw': 'Breath of the Wild',
+            'totk': 'Tears of the Kingdom',
+            'zelda': 'The Legend of Zelda',
+            'cs2': 'Counter-Strike 2',
+            'cs': 'Counter-Strike',
+            'sm2': "Marvel's Spider-Man 2",
+            'spider man': 'Spider-Man',
+            'spiderman': 'Spider-Man',
+            'spider': 'Spider-Man',
+            'er': 'Elden Ring',
+            'elden': 'Elden Ring',
+            'bmw': 'Black Myth: Wukong',
+            'wukong': 'Black Myth: Wukong',
+            'bb': 'Bloodborne',
+            'hd2': 'Helldivers 2',
+            'nfs': 'Need for Speed'
+        };
+
         let jogoSelecionadoSteamAppID = null;
 
         const inputSearchApi = document.getElementById('gameSearchApiInput');
@@ -3833,11 +3916,21 @@
             // 3. Busca complementar na web (CheapShark)
             try {
                 const termoWeb = siglaResolvida || query;
-                const res = await fetch(`https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(termoWeb)}&limit=6`);
+                const res = await fetch(`https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(termoWeb)}&limit=8`);
                 const data = await res.json();
 
                 if (Array.isArray(data)) {
                     data.forEach(game => {
+                        const gLower = game.external.toLowerCase();
+                        const contemExato = new RegExp(`\\b${qLower}\\b`, 'i').test(gLower);
+                        const comecaTermo = gLower.startsWith(qLower);
+                        const contemExp = siglaResolvida && gLower.includes(siglaResolvida.toLowerCase());
+                        const ehBuscaLonga = qLower.length >= 4 && gLower.includes(qLower);
+
+                        if (!contemExato && !comecaTermo && !contemExp && !ehBuscaLonga) {
+                            return; // Filtro anti-ruído CheapShark
+                        }
+
                         if (!sugestoesCombinadas.some(s => s.external.toLowerCase() === game.external.toLowerCase())) {
                             sugestoesCombinadas.push({
                                 external: game.external,
@@ -5645,7 +5738,7 @@
                 // Detecta aba indicada na URL ou abre em Minha Coleção Pessoal imediatamente
                 const params = new URLSearchParams(window.location.search);
                 const abaAlvo = params.get('tab') || params.get('aba') || window.location.hash.replace('#', '');
-                if (abaAlvo && ['mais_platinados', 'feed', 'minhas', 'cadastrar', 'api'].includes(abaAlvo)) {
+                if (abaAlvo && ['mais_platinados', 'feed', 'minhas', 'cadastrar', 'api', 'ranking_jogadores', 'ranking'].includes(abaAlvo)) {
                     alternarAba(abaAlvo);
                 } else {
                     alternarAba('minhas');
