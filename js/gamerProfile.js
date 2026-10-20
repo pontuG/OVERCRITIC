@@ -316,6 +316,9 @@
                                 <button type="button" class="og-btn-action og-btn-tier" id="gpBtnTierList" title="Criar sua Tier List personalizada com seus jogos e filmes">
                                     <span>🎯</span> Minha Tier List
                                 </button>
+                                <button type="button" class="og-btn-action og-btn-trophy" id="gpBtnInsignias" title="Visualizar Estante de Troféus Virtuais e Insígnias" style="border-color: rgba(255, 215, 0, 0.4); color: #ffd700;">
+                                    <span>🏆</span> Mural de Insígnias
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -349,6 +352,7 @@
                     <button class="gp-tab-btn active" data-tab="jogos" id="gpTabBtnJogos">🎮 Jogos (<span id="gpCountTabJogos">0</span>)</button>
                     <button class="gp-tab-btn" data-tab="platinas" id="gpTabBtnPlatinas">🏆 Platinas (<span id="gpCountTabPlatinas">0</span>)</button>
                     <button class="gp-tab-btn" data-tab="midias" id="gpTabBtnMidias">🎬 Cinema & Séries (<span id="gpCountTabMidias">0</span>)</button>
+                    <button class="gp-tab-btn" data-tab="insignias" id="gpTabBtnInsignias">🏆 Insígnias (<span id="gpCountTabInsignias">0</span>)</button>
                 </div>
 
                 <div class="gp-content" id="gpContentArea">
@@ -482,6 +486,12 @@
                     </div>
                 </div>
             `).join('') + `</div>`;
+        } else if (aba === 'insignias') {
+            if (window.OvercriticInsignias && typeof window.OvercriticInsignias.renderizarMuralTrofeusHtml === 'function') {
+                container.innerHTML = window.OvercriticInsignias.renderizarMuralTrofeusHtml(_dadosUsuarioAtual.username, _dadosUsuarioAtual);
+            } else {
+                container.innerHTML = `<div class="gp-empty-state">🏆 Carregando Estante de Troféus Virtuais...</div>`;
+            }
         }
     }
 
@@ -691,7 +701,16 @@
             }
         }
 
-        // Listeners para abrir o Gamer Card e Tier List
+        // 4. Atualiza contagem de insígnias desbloqueadas na aba
+        let countInsignias = 0;
+        if (window.OvercriticInsignias && typeof window.OvercriticInsignias.obterStatusInsigniasUsuario === 'function') {
+            const insList = window.OvercriticInsignias.obterStatusInsigniasUsuario(_dadosUsuarioAtual);
+            countInsignias = insList.filter(i => i.desbloqueada).length;
+        }
+        const elCountIns = document.getElementById('gpCountTabInsignias');
+        if (elCountIns) elCountIns.textContent = countInsignias;
+
+        // Listeners para abrir o Gamer Card, Tier List e Mural de Insígnias
         const btnCard = document.getElementById('gpBtnGamerCard');
         if (btnCard) {
             btnCard.onclick = () => {
@@ -706,6 +725,15 @@
                 if (window.abrirModalTierList) {
                     window.abrirModalTierList(_dadosUsuarioAtual);
                 }
+            };
+        }
+        const btnIns = document.getElementById('gpBtnInsignias');
+        if (btnIns) {
+            btnIns.onclick = () => {
+                document.querySelectorAll('.gp-tab-btn').forEach(b => b.classList.remove('active'));
+                const tabBtn = document.getElementById('gpTabBtnInsignias');
+                if (tabBtn) tabBtn.classList.add('active');
+                renderizarAbaAtual('insignias');
             };
         }
 

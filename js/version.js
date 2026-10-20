@@ -9,15 +9,28 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.8",
+    version: "26.10.9",
     year: "2026",
     month: "10",
-    build: 8,
-    releaseDate: "19/10/2026",
+    build: 9,
+    releaseDate: "20/10/2026",
     status: "Versão Estável",
-    codename: "Sincronização Oficial do Ranking Comunitário via Nuvem Supabase & XP Real Unificado",
+    codename: "Busca Global Instantânea Spotlight (Raycast/Ctrl+K), Scroll Lock Infalível & Estilização Imediata",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.9",
+            date: "20/10/2026",
+            title: "Busca Global Instantânea Spotlight (Raycast/Ctrl+K), Scroll Lock Infalível & Estilização Imediata",
+            highlights: [
+                "Busca Global Instantânea Spotlight (Ctrl + K ou clique na lupa): modal flutuante com estética Cyberpunk Glassmorphic e busca em tempo real simultânea em 6 categorias (Jogos, Críticas, Mídias, Platinas & Troféus, Jogadores e Ações Rápidas)",
+                "Navegação completa e fluida por teclado: percorra os resultados com as setas ↑ e ↓, selecione com Enter (↵), alterne chips de categorias com Tab e feche instantaneamente com Escape (ESC)",
+                "Feedback sonoro tecnológico e sutil via Web Audio API para abertura, navegação e seleção de itens",
+                "Scroll Lock Total e Infalível: bloqueio estrito de rolagem no <html> e <body> com supressão de eventos wheel e touchmove no overlay, eliminando 100% de qualquer vazamento de scroll para a página de fundo",
+                "Renderização imediata (0ms FOUC): estilos do botão de busca rápida incorporados e injetados de forma precoce, eliminando qualquer estado genérico antes da primeira abertura",
+                "PWA Service Worker atualizado (v26.10.9): inclusão do módulo Spotlight no APP_SHELL e renovação automática de cache para todos os dispositivos"
+            ]
+        },
         {
             version: "26.10.8",
             date: "19/10/2026",
@@ -29,7 +42,8 @@ const OVERCRITIC_APP = {
                 "Critério de desempate à prova de falhas: prioriza XP decrescente, total de platinas, análises e antiguidade da conta, impedindo que novas contas com 0 XP assumam o topo",
                 "Atualização assíncrona com botão 'Atualizar' inteligente e escuta de eventos em tempo real em todas as páginas e abas de ranking",
                 "Redesign Cyberpunk Glassmorphic dos dropdowns (<select>): tema escuro nativo (color-scheme: dark), seta neon SVG personalizada e ícones temáticos dedicados por plataforma e status de jogatina",
-                "Recuperação visual do ícone 🎮 com badge luminoso neon no cabeçalho e na barra de navegação ativa, eliminando o corte de transparência"
+                "Recuperação visual do ícone 🎮 com badge luminoso neon no cabeçalho e na barra de navegação ativa, eliminando o corte de transparência",
+                "Novo Motor de Gamer Card Exportável para Redes Sociais: formatos dedicados para Stories/TikTok (9:16 - 1080x1920) e Feed/Discord (4:5 - 1080x1350), com suporte a Compartilhar nativo (Web Share), Copiar Imagem para o clipboard (Ctrl+V) e renderização das capas e avatar reais em alta resolução"
             ]
         },
         {

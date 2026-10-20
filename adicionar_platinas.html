@@ -35,14 +35,15 @@
     </script>
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.8"></script>
-    <script src="js/gamerProfile.js?v=26.10.8"></script>
-    <script src="js/overcriticGamification.js?v=26.10.8"></script>
-    <script src="js/notifications.js?v=26.10.8"></script>
-    <script src="js/trofeusDatabase.js?v=26.10.8"></script>
-    <script src="js/version.js?v=26.10.8"></script>
-    <script src="js/avatarManager.js?v=26.10.8"></script>
-    <script src="js/pwaManager.js?v=26.10.8" defer></script>
+    <script src="supabaseClient.js?v=26.10.9"></script>
+    <script src="js/gamerProfile.js?v=26.10.9"></script>
+    <script src="js/overcriticGamification.js?v=26.10.9"></script>
+    <script src="js/overcriticSpotlight.js?v=26.10.9"></script>
+    <script src="js/notifications.js?v=26.10.9"></script>
+    <script src="js/trofeusDatabase.js?v=26.10.9"></script>
+    <script src="js/version.js?v=26.10.9"></script>
+    <script src="js/avatarManager.js?v=26.10.9"></script>
+    <script src="js/pwaManager.js?v=26.10.9" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -95,6 +96,110 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
+        }
+
+        /* ══════ SPOTLIGHT SEARCH & SCROLL LOCK NATIVOS ══════ */
+        html.og-spotlight-scroll-locked,
+        body.og-spotlight-scroll-locked {
+            overflow: hidden !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            overscroll-behavior: none !important;
+            touch-action: none !important;
+        }
+
+        .spotlight-quick-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 18px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(13, 18, 30, 0.92) 0%, rgba(20, 26, 44, 0.92) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: #cbd5e1;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 14px rgba(0, 240, 255, 0.12);
+            font-family: inherit;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            outline: none;
+            user-select: none;
+        }
+        .spotlight-quick-trigger:hover {
+            background: linear-gradient(135deg, rgba(18, 25, 42, 0.96) 0%, rgba(26, 35, 60, 0.96) 100%);
+            border-color: #00f0ff;
+            color: #ffffff;
+            box-shadow: 0 0 22px rgba(0, 240, 255, 0.35), 0 6px 20px rgba(0, 0, 0, 0.5);
+            transform: translateY(-1px);
+        }
+        .spotlight-quick-trigger:active {
+            transform: translateY(0);
+        }
+        .spotlight-quick-trigger .spotlight-quick-icon {
+            color: #00f0ff;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.65));
+        }
+        .spotlight-quick-trigger .spotlight-quick-text {
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .spotlight-quick-trigger:hover .spotlight-quick-text {
+            color: #f1f5f9;
+        }
+        .spotlight-quick-trigger .spotlight-quick-kbd {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 6px;
+            font-size: 0.72rem;
+            color: #64748b;
+        }
+        .spotlight-quick-trigger kbd {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #00f0ff;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-family: inherit;
+        }
+        body.light-mode .spotlight-quick-trigger {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #475569;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+        body.light-mode .spotlight-quick-trigger:hover {
+            background: #f8fafc;
+            border-color: #0284c7;
+            color: #0f172a;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);
+        }
+        body.light-mode .spotlight-quick-trigger .spotlight-quick-icon {
+            color: #0284c7;
+            filter: none;
+        }
+        body.light-mode .spotlight-quick-trigger .spotlight-quick-text {
+            color: #64748b;
+        }
+        body.light-mode .spotlight-quick-trigger:hover .spotlight-quick-text {
+            color: #0f172a;
+        }
+        body.light-mode .spotlight-quick-trigger kbd {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0284c7;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         body {
@@ -1940,6 +2045,7 @@
         </a>
         <nav class="nav-links">
             <a href="index.html" class="nav-item" data-tooltip="Início">🏠</a>
+            <button type="button" class="nav-item btn-spotlight-nav" id="btnOpenSpotlightNav" data-tooltip="Busca Global (Ctrl + K)" title="Busca Global (Ctrl + K)" onclick="if(window.OvercriticSpotlight) window.OvercriticSpotlight.abrir();">🔍</button>
             <a href="adicionar_jogos.html" class="nav-item" data-tooltip="Críticas de Jogos">🎮</a>
             <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
             <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
@@ -1968,6 +2074,13 @@
                 <p class="hero-desc">
                     Ranking mundial dos jogos mais platinados, catálogo classificado por dificuldades, acompanhamento pessoal e API de troféus ao vivo.
                 </p>
+                <div style="margin-top: 14px;">
+                    <button type="button" class="spotlight-quick-trigger" onclick="if(window.OvercriticSpotlight) window.OvercriticSpotlight.abrir();" title="Busca Global Instantânea (Ctrl + K)">
+                        <span class="spotlight-quick-icon">🔍</span>
+                        <span class="spotlight-quick-text">Busca Global (Jogos, Platinas, Troféus)...</span>
+                        <span class="spotlight-quick-kbd"><kbd>Ctrl</kbd> + <kbd>K</kbd></span>
+                    </button>
+                </div>
             </div>
 
             <div class="hero-stats">
@@ -3811,12 +3924,74 @@
         /* ═══════════════════════════════════
            BUSCA & AUTO-PREENCHER (FORMULÁRIO)
         ═══════════════════════════════════ */
-        const ALIASES_JOGOS = {
-            'gta': 'Grand Theft Auto',
-            'gta5': 'Grand Theft Auto V',
-            'gtav': 'Grand Theft Auto V',
+        var ALIASES_JOGOS = window.ALIASES_JOGOS = window.ALIASES_JOGOS || {
+            // Spider-Man & Marvel
+            'sm2': "Marvel's Spider-Man 2",
+            'sm 2': "Marvel's Spider-Man 2",
+            'sm': "Marvel's Spider-Man Remastered",
+            'spiderman': "Marvel's Spider-Man Remastered",
+            'spider-man': "Marvel's Spider-Man Remastered",
+            'spider man': "Marvel's Spider-Man Remastered",
+            'spider': "Marvel's Spider-Man 2",
+            'spider man 2': "Marvel's Spider-Man 2",
+            'spiderman 2': "Marvel's Spider-Man 2",
+            'spider-man 2': "Marvel's Spider-Man 2",
+            'marvels spider-man 2': "Marvel's Spider-Man 2",
+            'marvel spider man 2': "Marvel's Spider-Man 2",
+            'marvel spider-man 2': "Marvel's Spider-Man 2",
+            'homem aranha': "Marvel's Spider-Man 2",
+            'homem aranha 2': "Marvel's Spider-Man 2",
+            'homem-aranha 2': "Marvel's Spider-Man 2",
+            'spider man remastered': "Marvel's Spider-Man Remastered",
+            'spiderman remastered': "Marvel's Spider-Man Remastered",
+            'spider-man remastered': "Marvel's Spider-Man Remastered",
+            'marvels spider-man remastered': "Marvel's Spider-Man Remastered",
+            'marvel spider-man remastered': "Marvel's Spider-Man Remastered",
+            'marvels spider man remastered': "Marvel's Spider-Man Remastered",
+            'spider man 1': "Marvel's Spider-Man Remastered",
+
+            // Elden Ring & Soulsborne / FromSoftware
+            'er': 'Elden Ring',
+            'elden': 'Elden Ring',
+            'elden ring': 'Elden Ring',
+            'shadow of the erdtree': 'Elden Ring',
+            'erdtree': 'Elden Ring',
+            'ds1': 'Dark Souls Remastered',
+            'ds 1': 'Dark Souls Remastered',
+            'ds2': 'Dark Souls II',
+            'ds 2': 'Dark Souls II',
+            'ds3': 'Dark Souls III',
+            'ds 3': 'Dark Souls III',
+            'dark souls': 'Dark Souls Remastered',
+            'dark souls 3': 'Dark Souls III',
+            'dark souls iii': 'Dark Souls III',
+            'bb': 'Bloodborne',
+            'bloodborne': 'Bloodborne',
+            'sekiro': 'Sekiro: Shadows Die Twice',
+            'sekiro shadows die twice': 'Sekiro: Shadows Die Twice',
+            'ac6': 'Armored Core VI: Fires of Rubicon',
+            'armored core': 'Armored Core VI: Fires of Rubicon',
+            'armored core 6': 'Armored Core VI: Fires of Rubicon',
+            'lies of p': 'Lies of P',
+
+            // God of War
+            'gow': 'God of War Ragnarök',
+            'gowr': 'God of War Ragnarök',
+            'gow ragnarok': 'God of War Ragnarök',
+            'god of war ragnarok': 'God of War Ragnarök',
+            'god of war': 'God of War (2018)',
+            'gow 2018': 'God of War (2018)',
+            'gow 4': 'God of War (2018)',
+            'gow4': 'God of War (2018)',
+
+            // Grand Theft Auto & Rockstar
+            'gta': 'Grand Theft Auto V',
             'gta 5': 'Grand Theft Auto V',
             'gta v': 'Grand Theft Auto V',
+            'gta5': 'Grand Theft Auto V',
+            'gtav': 'Grand Theft Auto V',
+            'grand theft auto': 'Grand Theft Auto V',
+            'grand theft auto 5': 'Grand Theft Auto V',
             'gta sa': 'Grand Theft Auto: San Andreas',
             'gta 4': 'Grand Theft Auto IV',
             'gta iv': 'Grand Theft Auto IV',
@@ -3827,46 +4002,130 @@
             'rdr': 'Red Dead Redemption',
             'rdr2': 'Red Dead Redemption 2',
             'rdr 2': 'Red Dead Redemption 2',
-            'gow': 'God of War',
-            'gowr': 'God of War Ragnarök',
-            'gow ragnarok': 'God of War Ragnarök',
-            'tlou': 'The Last of Us',
-            'tlou2': 'The Last of Us Part II',
-            'tlou 2': 'The Last of Us Part II',
+            'red dead': 'Red Dead Redemption 2',
+            'red dead 2': 'Red Dead Redemption 2',
+            'red dead redemption': 'Red Dead Redemption 2',
+            'red dead redemption 2': 'Red Dead Redemption 2',
+
+            // The Last of Us
+            'tlou': 'The Last of Us Part I',
+            'tlou1': 'The Last of Us Part I',
+            'tlou 1': 'The Last of Us Part I',
+            'the last of us': 'The Last of Us Part I',
+            'the last of us part 1': 'The Last of Us Part I',
+            'the last of us part i': 'The Last of Us Part I',
+            'tlou2': 'The Last of Us Part II Remastered',
+            'tlou 2': 'The Last of Us Part II Remastered',
+            'the last of us 2': 'The Last of Us Part II Remastered',
+            'the last of us part 2': 'The Last of Us Part II Remastered',
+
+            // Resident Evil
+            're': 'Resident Evil',
+            're2': 'Resident Evil 2',
+            're2r': 'Resident Evil 2',
+            'resident evil 2': 'Resident Evil 2',
+            're3': 'Resident Evil 3',
+            're3r': 'Resident Evil 3',
+            'resident evil 3': 'Resident Evil 3',
+            're4': 'Resident Evil 4',
+            're 4': 'Resident Evil 4',
+            're4r': 'Resident Evil 4',
+            're4 remake': 'Resident Evil 4',
+            'resident evil 4': 'Resident Evil 4',
+            're7': 'Resident Evil 7 Biohazard',
+            're8': 'Resident Evil Village',
+            'village': 'Resident Evil Village',
+            'resident evil village': 'Resident Evil Village',
+
+            // Call of Duty & FPS
             'cod': 'Call of Duty',
             'mw': 'Call of Duty: Modern Warfare',
             'mw2': 'Call of Duty: Modern Warfare II',
             'mw3': 'Call of Duty: Modern Warfare III',
-            're4': 'Resident Evil 4',
-            're 4': 'Resident Evil 4',
-            're2': 'Resident Evil 2',
-            're3': 'Resident Evil 3',
-            're': 'Resident Evil',
-            'ff': 'Final Fantasy',
-            'ff7': 'Final Fantasy VII',
+            'cs': 'Counter-Strike',
+            'cs2': 'Counter-Strike 2',
+            'doom': 'DOOM Eternal',
+            'doom eternal': 'DOOM Eternal',
+
+            // RPGs & Aventura
             'bg3': "Baldur's Gate 3",
+            'bg 3': "Baldur's Gate 3",
+            'baldur': "Baldur's Gate 3",
+            'baldurs gate': "Baldur's Gate 3",
+            'baldur gate': "Baldur's Gate 3",
+            'baldurs gate 3': "Baldur's Gate 3",
             'cp2077': 'Cyberpunk 2077',
+            'cp 2077': 'Cyberpunk 2077',
+            'cyberpunk': 'Cyberpunk 2077',
+            'cyberpunk 2077': 'Cyberpunk 2077',
+            'phantom liberty': 'Cyberpunk 2077',
+            'tw3': 'The Witcher 3: Wild Hunt',
+            'witcher': 'The Witcher 3: Wild Hunt',
+            'witcher 3': 'The Witcher 3: Wild Hunt',
+            'the witcher': 'The Witcher 3: Wild Hunt',
+            'the witcher 3': 'The Witcher 3: Wild Hunt',
+            'ff': 'Final Fantasy',
+            'ff7': 'Final Fantasy VII Remake',
+            'ff7r': 'Final Fantasy VII Rebirth',
+            'final fantasy 7': 'Final Fantasy VII Remake',
+            'p5': 'Persona 5 Royal',
+            'p5r': 'Persona 5 Royal',
+            'persona 5': 'Persona 5 Royal',
+            'skyrim': 'The Elder Scrolls V: Skyrim',
+            'the elder scrolls': 'The Elder Scrolls V: Skyrim',
+            'fallout': 'Fallout 4',
+            'fallout 4': 'Fallout 4',
+            'botw': 'Breath of the Wild',
+            'totk': 'Tears of the Kingdom',
+            'zelda': 'The Legend of Zelda',
+
+            // Luta & Outros Gêneros
             'mk': 'Mortal Kombat',
             'mk1': 'Mortal Kombat 1',
             'mk11': 'Mortal Kombat 11',
             'sf6': 'Street Fighter 6',
             'ac': "Assassin's Creed",
-            'botw': 'Breath of the Wild',
-            'totk': 'Tears of the Kingdom',
-            'zelda': 'The Legend of Zelda',
-            'cs2': 'Counter-Strike 2',
-            'cs': 'Counter-Strike',
-            'sm2': "Marvel's Spider-Man 2",
-            'spider man': 'Spider-Man',
-            'spiderman': 'Spider-Man',
-            'spider': 'Spider-Man',
-            'er': 'Elden Ring',
-            'elden': 'Elden Ring',
+            'nfs': 'Need for Speed',
+
+            // Populares & Exclusivos
             'bmw': 'Black Myth: Wukong',
             'wukong': 'Black Myth: Wukong',
-            'bb': 'Bloodborne',
+            'black myth': 'Black Myth: Wukong',
+            'black myth wukong': 'Black Myth: Wukong',
+            'macaco': 'Black Myth: Wukong',
             'hd2': 'Helldivers 2',
-            'nfs': 'Need for Speed'
+            'hd 2': 'Helldivers 2',
+            'helldivers': 'Helldivers 2',
+            'helldivers 2': 'Helldivers 2',
+            'sb': 'Stellar Blade',
+            'stellar': 'Stellar Blade',
+            'stellar blade': 'Stellar Blade',
+            'got': 'Ghost of Tsushima',
+            'tsushima': 'Ghost of Tsushima',
+            'ghost of tsushima': 'Ghost of Tsushima',
+            'fantasma de tsushima': 'Ghost of Tsushima',
+            'astro': 'Astro Bot',
+            'astro bot': 'Astro Bot',
+            'hk': 'Hollow Knight',
+            'hollow': 'Hollow Knight',
+            'hollow knight': 'Hollow Knight',
+            'silksong': 'Hollow Knight: Silksong',
+            'hades': 'Hades',
+            'hades2': 'Hades II',
+            'hades 2': 'Hades II',
+            'palworld': 'Palworld',
+            'stray': 'Stray',
+            'gato': 'Stray',
+            'cuphead': 'Cuphead',
+            'celeste': 'Celeste',
+            'silent hill': 'Silent Hill 2',
+            'silent hill 2': 'Silent Hill 2',
+            'sh2': 'Silent Hill 2',
+            'death stranding': 'Death Stranding',
+            'alan wake': 'Alan Wake 2',
+            'alan wake 2': 'Alan Wake 2',
+            'batman': 'Batman: Arkham Knight',
+            'arkham knight': 'Batman: Arkham Knight'
         };
 
         let jogoSelecionadoSteamAppID = null;
@@ -4180,6 +4439,10 @@
 
             // Sincroniza imediatamente com a nuvem Supabase (passa isEdicao=true se for edição para update no banco)
             await salvarPlatinaNoSupabase(registroSalvar, !!editingId);
+
+            if (window.OvercriticInsignias && typeof window.OvercriticInsignias.verificarConquistas === 'function') {
+                setTimeout(() => window.OvercriticInsignias.verificarConquistas({ notificar: true }), 300);
+            }
 
             if (window.OvercriticGamification && typeof window.OvercriticGamification.recalcularEstatisticasGlobais === 'function') {
                 window.OvercriticGamification.recalcularEstatisticasGlobais();
@@ -4582,165 +4845,7 @@
             '413150': 40, 'stardew valley': 40
         };
 
-        // Mapeamento extensivo de siglas gamers, gírias e sinônimos
-        const ALIASES_JOGOS = {
-            'sm2': "Marvel's Spider-Man 2",
-            'sm 2': "Marvel's Spider-Man 2",
-            'sm': "Marvel's Spider-Man Remastered",
-            'spiderman': "Marvel's Spider-Man Remastered",
-            'spider-man': "Marvel's Spider-Man Remastered",
-            'spider man': "Marvel's Spider-Man Remastered",
-            'spider': "Marvel's Spider-Man 2",
-            'spider man 2': "Marvel's Spider-Man 2",
-            'spiderman 2': "Marvel's Spider-Man 2",
-            'spider-man 2': "Marvel's Spider-Man 2",
-            'marvels spider-man 2': "Marvel's Spider-Man 2",
-            'marvel spider man 2': "Marvel's Spider-Man 2",
-            'marvel spider-man 2': "Marvel's Spider-Man 2",
-            'homem aranha': "Marvel's Spider-Man 2",
-            'homem aranha 2': "Marvel's Spider-Man 2",
-            'homem-aranha 2': "Marvel's Spider-Man 2",
-            'spider man remastered': "Marvel's Spider-Man Remastered",
-            'spiderman remastered': "Marvel's Spider-Man Remastered",
-            'spider-man remastered': "Marvel's Spider-Man Remastered",
-            'marvels spider-man remastered': "Marvel's Spider-Man Remastered",
-            'marvel spider-man remastered': "Marvel's Spider-Man Remastered",
-            'marvels spider man remastered': "Marvel's Spider-Man Remastered",
-            'spider man 1': "Marvel's Spider-Man Remastered",
-            'er': 'Elden Ring',
-            'elden': 'Elden Ring',
-            'elden ring': 'Elden Ring',
-            'shadow of the erdtree': 'Elden Ring',
-            'erdtree': 'Elden Ring',
-            'gow': 'God of War Ragnarök',
-            'gowr': 'God of War Ragnarök',
-            'gow ragnarok': 'God of War Ragnarök',
-            'god of war ragnarok': 'God of War Ragnarök',
-            'god of war': 'God of War (2018)',
-            'gow 2018': 'God of War (2018)',
-            'gow 4': 'God of War (2018)',
-            'gow4': 'God of War (2018)',
-            'gta': 'Grand Theft Auto V',
-            'gta 5': 'Grand Theft Auto V',
-            'gta v': 'Grand Theft Auto V',
-            'gta5': 'Grand Theft Auto V',
-            'gtav': 'Grand Theft Auto V',
-            'grand theft auto': 'Grand Theft Auto V',
-            'grand theft auto 5': 'Grand Theft Auto V',
-            'rdr2': 'Red Dead Redemption 2',
-            'rdr 2': 'Red Dead Redemption 2',
-            'red dead': 'Red Dead Redemption 2',
-            'red dead 2': 'Red Dead Redemption 2',
-            'red dead redemption': 'Red Dead Redemption 2',
-            'red dead redemption 2': 'Red Dead Redemption 2',
-            'bg3': "Baldur's Gate 3",
-            'bg 3': "Baldur's Gate 3",
-            'baldur': "Baldur's Gate 3",
-            'baldurs gate': "Baldur's Gate 3",
-            'baldur gate': "Baldur's Gate 3",
-            'baldurs gate 3': "Baldur's Gate 3",
-            'cp2077': 'Cyberpunk 2077',
-            'cp 2077': 'Cyberpunk 2077',
-            'cyberpunk': 'Cyberpunk 2077',
-            'cyberpunk 2077': 'Cyberpunk 2077',
-            'phantom liberty': 'Cyberpunk 2077',
-            'tlou': 'The Last of Us Part I',
-            'tlou1': 'The Last of Us Part I',
-            'tlou 1': 'The Last of Us Part I',
-            'the last of us': 'The Last of Us Part I',
-            'the last of us part 1': 'The Last of Us Part I',
-            'the last of us part i': 'The Last of Us Part I',
-            'tlou2': 'The Last of Us Part II Remastered',
-            'tlou 2': 'The Last of Us Part II Remastered',
-            'the last of us 2': 'The Last of Us Part II Remastered',
-            'the last of us part 2': 'The Last of Us Part II Remastered',
-            're4': 'Resident Evil 4',
-            're4r': 'Resident Evil 4',
-            're4 remake': 'Resident Evil 4',
-            'resident evil 4': 'Resident Evil 4',
-            're2': 'Resident Evil 2',
-            're2r': 'Resident Evil 2',
-            'resident evil 2': 'Resident Evil 2',
-            're3': 'Resident Evil 3',
-            're3r': 'Resident Evil 3',
-            'resident evil 3': 'Resident Evil 3',
-            're7': 'Resident Evil 7 Biohazard',
-            're8': 'Resident Evil Village',
-            'village': 'Resident Evil Village',
-            'resident evil village': 'Resident Evil Village',
-            'bmw': 'Black Myth: Wukong',
-            'wukong': 'Black Myth: Wukong',
-            'black myth': 'Black Myth: Wukong',
-            'black myth wukong': 'Black Myth: Wukong',
-            'macaco': 'Black Myth: Wukong',
-            'bb': 'Bloodborne',
-            'bloodborne': 'Bloodborne',
-            'sekiro': 'Sekiro: Shadows Die Twice',
-            'sekiro shadows die twice': 'Sekiro: Shadows Die Twice',
-            'hades': 'Hades',
-            'hades2': 'Hades II',
-            'hades 2': 'Hades II',
-            'ds1': 'Dark Souls Remastered',
-            'ds 1': 'Dark Souls Remastered',
-            'ds2': 'Dark Souls II',
-            'ds 2': 'Dark Souls II',
-            'ds3': 'Dark Souls III',
-            'ds 3': 'Dark Souls III',
-            'dark souls': 'Dark Souls Remastered',
-            'dark souls 3': 'Dark Souls III',
-            'dark souls iii': 'Dark Souls III',
-            'hd2': 'Helldivers 2',
-            'hd 2': 'Helldivers 2',
-            'helldivers': 'Helldivers 2',
-            'helldivers 2': 'Helldivers 2',
-            'sb': 'Stellar Blade',
-            'stellar': 'Stellar Blade',
-            'stellar blade': 'Stellar Blade',
-            'got': 'Ghost of Tsushima',
-            'tsushima': 'Ghost of Tsushima',
-            'ghost of tsushima': 'Ghost of Tsushima',
-            'fantasma de tsushima': 'Ghost of Tsushima',
-            'astro': 'Astro Bot',
-            'astro bot': 'Astro Bot',
-            'tw3': 'The Witcher 3: Wild Hunt',
-            'witcher': 'The Witcher 3: Wild Hunt',
-            'witcher 3': 'The Witcher 3: Wild Hunt',
-            'the witcher': 'The Witcher 3: Wild Hunt',
-            'the witcher 3': 'The Witcher 3: Wild Hunt',
-            'hk': 'Hollow Knight',
-            'hollow': 'Hollow Knight',
-            'hollow knight': 'Hollow Knight',
-            'silksong': 'Hollow Knight: Silksong',
-            'ff7': 'Final Fantasy VII Remake',
-            'ff7r': 'Final Fantasy VII Rebirth',
-            'final fantasy 7': 'Final Fantasy VII Remake',
-            'p5r': 'Persona 5 Royal',
-            'p5': 'Persona 5 Royal',
-            'persona 5': 'Persona 5 Royal',
-            'ac6': 'Armored Core VI: Fires of Rubicon',
-            'armored core': 'Armored Core VI: Fires of Rubicon',
-            'armored core 6': 'Armored Core VI: Fires of Rubicon',
-            'palworld': 'Palworld',
-            'stray': 'Stray',
-            'gato': 'Stray',
-            'lies of p': 'Lies of P',
-            'cuphead': 'Cuphead',
-            'celeste': 'Celeste',
-            'silent hill': 'Silent Hill 2',
-            'silent hill 2': 'Silent Hill 2',
-            'sh2': 'Silent Hill 2',
-            'fallout': 'Fallout 4',
-            'fallout 4': 'Fallout 4',
-            'skyrim': 'The Elder Scrolls V: Skyrim',
-            'the elder scrolls': 'The Elder Scrolls V: Skyrim',
-            'death stranding': 'Death Stranding',
-            'alan wake': 'Alan Wake 2',
-            'alan wake 2': 'Alan Wake 2',
-            'batman': 'Batman: Arkham Knight',
-            'arkham knight': 'Batman: Arkham Knight',
-            'doom': 'DOOM Eternal',
-            'doom eternal': 'DOOM Eternal'
-        };
+        // Mapeamento extensivo de siglas gamers, gírias e sinônimos unificado globalmente em ALIASES_JOGOS (declarado acima)
 
         // Índice reverso por título para localização direta
         const TROFEUS_CURADOS_POR_NOME = {};

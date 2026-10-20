@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -37,14 +37,15 @@
     </script>
     <!-- Conexão com Supabase e Backend C# -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.8"></script>
-    <script src="js/apiClient.js?v=26.10.8"></script>
-    <script src="js/gamerProfile.js?v=26.10.8"></script>
-    <script src="js/overcriticGamification.js?v=26.10.8"></script>
-    <script src="js/notifications.js?v=26.10.8"></script>
-    <script src="js/version.js?v=26.10.8"></script>
-    <script src="js/avatarManager.js?v=26.10.8"></script>
-    <script src="js/pwaManager.js?v=26.10.8" defer></script>
+    <script src="supabaseClient.js?v=26.10.9"></script>
+    <script src="js/apiClient.js?v=26.10.9"></script>
+    <script src="js/gamerProfile.js?v=26.10.9"></script>
+    <script src="js/overcriticGamification.js?v=26.10.9"></script>
+    <script src="js/overcriticSpotlight.js?v=26.10.9"></script>
+    <script src="js/notifications.js?v=26.10.9"></script>
+    <script src="js/version.js?v=26.10.9"></script>
+    <script src="js/avatarManager.js?v=26.10.9"></script>
+    <script src="js/pwaManager.js?v=26.10.9" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -204,6 +205,110 @@
         }
 
         * { box-sizing: border-box; }
+
+        /* ══════ SPOTLIGHT SEARCH & SCROLL LOCK NATIVOS ══════ */
+        html.og-spotlight-scroll-locked,
+        body.og-spotlight-scroll-locked {
+            overflow: hidden !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            overscroll-behavior: none !important;
+            touch-action: none !important;
+        }
+
+        .spotlight-quick-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 18px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(13, 18, 30, 0.92) 0%, rgba(20, 26, 44, 0.92) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: #cbd5e1;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 14px rgba(0, 240, 255, 0.12);
+            font-family: inherit;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            outline: none;
+            user-select: none;
+        }
+        .spotlight-quick-trigger:hover {
+            background: linear-gradient(135deg, rgba(18, 25, 42, 0.96) 0%, rgba(26, 35, 60, 0.96) 100%);
+            border-color: #00f0ff;
+            color: #ffffff;
+            box-shadow: 0 0 22px rgba(0, 240, 255, 0.35), 0 6px 20px rgba(0, 0, 0, 0.5);
+            transform: translateY(-1px);
+        }
+        .spotlight-quick-trigger:active {
+            transform: translateY(0);
+        }
+        .spotlight-quick-trigger .spotlight-quick-icon {
+            color: #00f0ff;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.65));
+        }
+        .spotlight-quick-trigger .spotlight-quick-text {
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .spotlight-quick-trigger:hover .spotlight-quick-text {
+            color: #f1f5f9;
+        }
+        .spotlight-quick-trigger .spotlight-quick-kbd {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 6px;
+            font-size: 0.72rem;
+            color: #64748b;
+        }
+        .spotlight-quick-trigger kbd {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #00f0ff;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-family: inherit;
+        }
+        body.light-mode .spotlight-quick-trigger {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #475569;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+        body.light-mode .spotlight-quick-trigger:hover {
+            background: #f8fafc;
+            border-color: #0284c7;
+            color: #0f172a;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);
+        }
+        body.light-mode .spotlight-quick-trigger .spotlight-quick-icon {
+            color: #0284c7;
+            filter: none;
+        }
+        body.light-mode .spotlight-quick-trigger .spotlight-quick-text {
+            color: #64748b;
+        }
+        body.light-mode .spotlight-quick-trigger:hover .spotlight-quick-text {
+            color: #0f172a;
+        }
+        body.light-mode .spotlight-quick-trigger kbd {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0284c7;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
 
         body {
             margin: 0;
@@ -1947,6 +2052,7 @@
         </a>
         <nav class="nav-links">
             <a href="index.html" class="nav-item" data-tooltip="Início">🏠</a>
+            <button type="button" class="nav-item btn-spotlight-nav" id="btnOpenSpotlightNav" data-tooltip="Busca Global (Ctrl + K)" title="Busca Global (Ctrl + K)" onclick="if(window.OvercriticSpotlight) window.OvercriticSpotlight.abrir();">🔍</button>
             <a href="adicionar_jogos.html" class="nav-item active" data-tooltip="Críticas de Jogos">🎮</a>
             <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
             <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
@@ -1966,13 +2072,25 @@
 
     <!-- ══════ MAIN CONTENT ══════ -->
     <main class="main-content">
-        <header class="header-section">
-            <div class="header-top-tag">🎮 HUB DE CRÍTICAS & AVALIAÇÕES</div>
-            <h1 class="greeting">
-                <span class="greeting-icon-badge">🎮</span>
-                <span class="greeting-text">Críticas de Jogos</span>
-            </h1>
-            <div class="subtitle">Registre, avalie e compartilhe suas opiniões</div>
+        <header class="header-section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div>
+                <div class="header-top-tag">🎮 HUB DE CRÍTICAS & AVALIAÇÕES</div>
+                <h1 class="greeting">
+                    <span class="greeting-icon-badge">🎮</span>
+                    <span class="greeting-text">Críticas de Jogos</span>
+                </h1>
+                <div class="subtitle">Registre, avalie e compartilhe suas opiniões</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <button type="button" class="spotlight-quick-trigger" onclick="if(window.OvercriticSpotlight) window.OvercriticSpotlight.abrir();" title="Busca Global Instantânea (Ctrl + K)">
+                    <span class="spotlight-quick-icon">🔍</span>
+                    <span class="spotlight-quick-text">Busca Global...</span>
+                    <span class="spotlight-quick-kbd"><kbd>Ctrl</kbd> + <kbd>K</kbd></span>
+                </button>
+                <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal();" style="padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 240, 255, 0.08); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15); transition: all 0.25s ease;" title="Visualizar e exportar meu Gamer Card oficial para redes sociais">
+                    <span>🎴</span> <span>Gamer Card</span>
+                </button>
+            </div>
         </header>
 
         <!-- ABAS DE NAVEGAÇÃO MOBILE (CADASTRO / CRÍTICAS / EM ALTA) -->
@@ -2315,6 +2433,9 @@
         function salvarJogos(lista) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
             localStorage.setItem('overcritic_jogos', JSON.stringify(lista));
+            if (window.OvercriticInsignias && typeof window.OvercriticInsignias.verificarConquistas === 'function') {
+                setTimeout(() => window.OvercriticInsignias.verificarConquistas({ notificar: true }), 300);
+            }
         }
 
         /* ═══════════════════════════════════

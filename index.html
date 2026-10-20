@@ -35,15 +35,16 @@
     </script>
     <!-- Conexão com Supabase e Backend C# -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.8"></script>
-    <script src="js/apiClient.js?v=26.10.8"></script>
-    <script src="js/gamerProfile.js?v=26.10.8"></script>
-    <script src="js/overcriticGamification.js?v=26.10.8"></script>
-    <script src="js/notifications.js?v=26.10.8"></script>
-    <script src="js/version.js?v=26.10.8"></script>
-    <script src="js/avatarManager.js?v=26.10.8"></script>
-    <script src="js/geekNewsManager.js?v=26.10.8"></script>
-    <script src="js/pwaManager.js?v=26.10.8" defer></script>
+    <script src="supabaseClient.js?v=26.10.9"></script>
+    <script src="js/apiClient.js?v=26.10.9"></script>
+    <script src="js/gamerProfile.js?v=26.10.9"></script>
+    <script src="js/overcriticGamification.js?v=26.10.9"></script>
+    <script src="js/overcriticSpotlight.js?v=26.10.9"></script>
+    <script src="js/notifications.js?v=26.10.9"></script>
+    <script src="js/version.js?v=26.10.9"></script>
+    <script src="js/avatarManager.js?v=26.10.9"></script>
+    <script src="js/geekNewsManager.js?v=26.10.9"></script>
+    <script src="js/pwaManager.js?v=26.10.9" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -93,6 +94,110 @@
             background: radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.03), transparent 40%),
                         radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.04), transparent 40%),
                         var(--bg-color);
+        }
+
+        /* ══════ SPOTLIGHT SEARCH & SCROLL LOCK NATIVOS ══════ */
+        html.og-spotlight-scroll-locked,
+        body.og-spotlight-scroll-locked {
+            overflow: hidden !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            overscroll-behavior: none !important;
+            touch-action: none !important;
+        }
+
+        .spotlight-quick-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 18px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(13, 18, 30, 0.92) 0%, rgba(20, 26, 44, 0.92) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: #cbd5e1;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 14px rgba(0, 240, 255, 0.12);
+            font-family: inherit;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            outline: none;
+            user-select: none;
+        }
+        .spotlight-quick-trigger:hover {
+            background: linear-gradient(135deg, rgba(18, 25, 42, 0.96) 0%, rgba(26, 35, 60, 0.96) 100%);
+            border-color: #00f0ff;
+            color: #ffffff;
+            box-shadow: 0 0 22px rgba(0, 240, 255, 0.35), 0 6px 20px rgba(0, 0, 0, 0.5);
+            transform: translateY(-1px);
+        }
+        .spotlight-quick-trigger:active {
+            transform: translateY(0);
+        }
+        .spotlight-quick-trigger .spotlight-quick-icon {
+            color: #00f0ff;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.65));
+        }
+        .spotlight-quick-trigger .spotlight-quick-text {
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .spotlight-quick-trigger:hover .spotlight-quick-text {
+            color: #f1f5f9;
+        }
+        .spotlight-quick-trigger .spotlight-quick-kbd {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 6px;
+            font-size: 0.72rem;
+            color: #64748b;
+        }
+        .spotlight-quick-trigger kbd {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #00f0ff;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-family: inherit;
+        }
+        body.light-mode .spotlight-quick-trigger {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #475569;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+        body.light-mode .spotlight-quick-trigger:hover {
+            background: #f8fafc;
+            border-color: #0284c7;
+            color: #0f172a;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);
+        }
+        body.light-mode .spotlight-quick-trigger .spotlight-quick-icon {
+            color: #0284c7;
+            filter: none;
+        }
+        body.light-mode .spotlight-quick-trigger .spotlight-quick-text {
+            color: #64748b;
+        }
+        body.light-mode .spotlight-quick-trigger:hover .spotlight-quick-text {
+            color: #0f172a;
+        }
+        body.light-mode .spotlight-quick-trigger kbd {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0284c7;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         #bgParticlesCanvas {
@@ -1138,6 +1243,234 @@
             color: #ffffff;
             border-color: #d97706;
             box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35);
+        }
+
+        /* Missões Semanais & Troféus (Home) */
+        .og-btn-quests {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.16) 0%, rgba(34, 197, 94, 0.2) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            color: #00f0ff;
+            box-shadow: 0 2px 10px rgba(0, 240, 255, 0.15);
+        }
+        .og-btn-quests:hover {
+            background: linear-gradient(135deg, #00f0ff 0%, #22c55e 100%);
+            color: #05070d;
+            border-color: #00f0ff;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.6);
+            transform: translateY(-2px);
+        }
+        .og-btn-trophy {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.16) 0%, rgba(245, 158, 11, 0.2) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.15);
+        }
+        .og-btn-trophy:hover {
+            background: linear-gradient(135deg, #ffd700 0%, #f59e0b 100%);
+            color: #05070d;
+            border-color: #ffd700;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.6);
+            transform: translateY(-2px);
+        }
+        body.light-mode .og-btn-quests {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(22, 163, 74, 0.14) 100%);
+            border-color: #0284c7;
+            color: #0284c7;
+        }
+        body.light-mode .og-btn-quests:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #16a34a 100%);
+            color: #ffffff;
+        }
+        body.light-mode .og-btn-trophy {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(234, 88, 12, 0.14) 100%);
+            border-color: #d97706;
+            color: #d97706;
+        }
+        body.light-mode .og-btn-trophy:hover {
+            background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+            color: #ffffff;
+        }
+
+        /* ══════ BANNER LIVE: MISSÕES SEMANAIS & TEMPORIZADOR (HOME) ══════ */
+        .home-quests-live-strip {
+            width: 100%;
+            margin-bottom: 24px;
+            padding: 16px 22px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 14, 23, 0.98) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 25px rgba(0, 240, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            cursor: pointer;
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .home-quests-live-strip::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.12), transparent);
+            transform: skewX(-25deg);
+            animation: stripShimmer 6s infinite ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes stripShimmer {
+            0% { left: -100%; }
+            30%, 100% { left: 200%; }
+        }
+        .home-quests-live-strip:hover {
+            transform: translateY(-3px);
+            border-color: #00f0ff;
+            box-shadow: 0 14px 40px rgba(0, 240, 255, 0.25), inset 0 0 35px rgba(0, 240, 255, 0.12);
+        }
+        .quests-strip-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+        .quests-strip-icon-pulse {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(157, 78, 221, 0.25) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+            flex-shrink: 0;
+            animation: questIconPulse 2.5s infinite ease-in-out;
+        }
+        @keyframes questIconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+            50% { transform: scale(1.08); box-shadow: 0 0 25px rgba(0, 240, 255, 0.6); }
+        }
+        .quests-strip-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .quests-strip-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+        .quests-season-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: #00f0ff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+        .quests-strip-desc {
+            font-size: 0.84rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+        .quests-strip-desc strong {
+            color: #ffd700;
+        }
+        .quests-strip-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+        .quests-timer-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 215, 0, 0.45);
+            box-shadow: 0 0 18px rgba(255, 215, 0, 0.15);
+        }
+        .timer-pill-icon {
+            font-size: 1.25rem;
+        }
+        .timer-pill-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .timer-pill-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+        .timer-pill-time {
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: #ffd700;
+            letter-spacing: 0.8px;
+            font-variant-numeric: tabular-nums;
+        }
+        .quests-strip-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00f0ff 0%, #9d4edd 100%);
+            border: none;
+            color: #05070d;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+            white-space: nowrap;
+        }
+        .quests-strip-btn:hover {
+            transform: translateX(3px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.6);
+        }
+        body.light-mode .home-quests-live-strip {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-color: rgba(2, 132, 199, 0.35);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+        body.light-mode .quests-strip-title {
+            color: #0f172a;
+        }
+        body.light-mode .quests-strip-desc {
+            color: #475569;
+        }
+        body.light-mode .quests-timer-pill {
+            background: #fefce8;
+            border-color: rgba(217, 119, 6, 0.45);
+        }
+        body.light-mode .timer-pill-time {
+            color: #b45309;
+        }
+        @media (max-width: 860px) {
+            .home-quests-live-strip {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .quests-strip-right {
+                justify-content: space-between;
+                margin-top: 6px;
+            }
         }
 
         /* Notes Internal */
@@ -2431,6 +2764,7 @@
         </a>
         <nav class="nav-links">
             <a href="index.html" class="nav-item active" data-tooltip="Início">🏠</a>
+            <button type="button" class="nav-item btn-spotlight-nav" id="btnOpenSpotlightNav" data-tooltip="Busca Global (Ctrl + K)" title="Busca Global (Ctrl + K)" onclick="if(window.OvercriticSpotlight) window.OvercriticSpotlight.abrir();">🔍</button>
             <a href="adicionar_jogos.html" class="nav-item" data-tooltip="Críticas de Jogos">🎮</a>
             <a href="descobrir_jogos.html" class="nav-item" data-tooltip="Descobrir Jogos">🪐</a>
             <a href="adicionar_midias.html" class="nav-item" data-tooltip="Mídias (Filmes/Séries)">🎬</a>
@@ -2459,12 +2793,47 @@
                 <h1 class="greeting" id="dashboardGreeting">Olá, Jogador! 👋</h1>
                 <div class="subtitle">Seu portal diário de notícias, lançamentos em tempo real e críticas geek & gamer</div>
             </div>
-            <div id="authHeaderAction">
-                <a href="conta_login.html" id="btnAuthHeader" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:12px; background:rgba(0,240,255,0.08); border:1px solid var(--accent-cyan); color:var(--accent-cyan); text-decoration:none; font-weight:700; font-size:0.88rem; transition:all 0.25s ease; box-shadow:0 0 15px rgba(0,240,255,0.15);">
-                    <span>👤</span> <span id="authHeaderLabel">Entrar / Criar Conta</span>
-                </a>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <button type="button" class="spotlight-quick-trigger" onclick="if(window.OvercriticSpotlight) window.OvercriticSpotlight.abrir();" title="Busca Global Instantânea (Ctrl + K)">
+                    <span class="spotlight-quick-icon">🔍</span>
+                    <span class="spotlight-quick-text">Buscar jogos, filmes, críticas, platinas...</span>
+                    <span class="spotlight-quick-kbd"><kbd>Ctrl</kbd> + <kbd>K</kbd></span>
+                </button>
+                <div id="authHeaderAction">
+                    <a href="conta_login.html" id="btnAuthHeader" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:12px; background:rgba(0,240,255,0.08); border:1px solid var(--accent-cyan); color:var(--accent-cyan); text-decoration:none; font-weight:700; font-size:0.88rem; transition:all 0.25s ease; box-shadow:0 0 15px rgba(0,240,255,0.15);">
+                        <span>👤</span> <span id="authHeaderLabel">Entrar / Criar Conta</span>
+                    </a>
+                </div>
             </div>
         </header>
+
+        <!-- BANNER LIVE: MISSÕES SEMANAIS & TEMPORIZADOR DE TEMPORADA -->
+        <div class="home-quests-live-strip" id="homeQuestsLiveStrip" onclick="if(window.OvercriticGamification && window.OvercriticGamification.abrirModalMuralInsignias) { window.OvercriticGamification.abrirModalMuralInsignias('missoes'); } else if(window.abrirModalMuralInsignias) { window.abrirModalMuralInsignias('missoes'); }" title="Abrir Central de Missões Semanais">
+            <div class="quests-strip-left">
+                <div class="quests-strip-icon-pulse">⚡</div>
+                <div class="quests-strip-text">
+                    <div class="quests-strip-title">
+                        <span>DESAFIO SEMANAL OVERCRITIC</span>
+                        <span class="quests-season-badge" id="homeQuestsWeekCode">TEMPORADA ATIVA</span>
+                    </div>
+                    <div class="quests-strip-desc" id="homeQuestsSummaryText">
+                        Complete as 4 missões antes do timer expirar para garantir até <strong>+1.800 XP</strong> e acelerar no Ranking Geral!
+                    </div>
+                </div>
+            </div>
+            <div class="quests-strip-right">
+                <div class="quests-timer-pill">
+                    <span class="timer-pill-icon">⏳</span>
+                    <div class="timer-pill-info">
+                        <span class="timer-pill-label">REINICIA EM</span>
+                        <span class="timer-pill-time" id="homeQuestsCountdown">--d --h --m --s</span>
+                    </div>
+                </div>
+                <button type="button" class="quests-strip-btn">
+                    Ver Missões <span class="btn-arrow">→</span>
+                </button>
+            </div>
+        </div>
 
         <section class="bento-grid">
             <!-- LEFT SHOWCASE COLUMN (JOGOS & FILMES) -->
@@ -2628,13 +2997,21 @@
                     </div>
                 </div>
                 <div class="home-gamification-actions">
+                    <button type="button" class="og-btn-action og-btn-quests" onclick="if(window.OvercriticGamification && window.OvercriticGamification.abrirModalMuralInsignias) { window.OvercriticGamification.abrirModalMuralInsignias('missoes'); } else if(window.abrirModalMuralInsignias) { window.abrirModalMuralInsignias('missoes'); }" style="flex: 1;" title="Ver Missões Semanais e Desafios com Temporizador">
+                        <span class="btn-icon">⚡</span>
+                        <span>Missões</span>
+                    </button>
+                    <button type="button" class="og-btn-action og-btn-trophy" onclick="if(window.OvercriticGamification && window.OvercriticGamification.abrirModalMuralInsignias) { window.OvercriticGamification.abrirModalMuralInsignias('trofeus'); } else if(window.abrirModalMuralInsignias) { window.abrirModalMuralInsignias('trofeus'); }" style="flex: 1;" title="Abrir Estante de Troféus Virtuais e Insígnias">
+                        <span class="btn-icon">🏆</span>
+                        <span>Troféus</span>
+                    </button>
                     <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal();" style="flex: 1;" title="Gerar e compartilhar meu Gamer Card Oficial">
                         <span class="btn-icon">🎴</span>
-                        <span>Gamer Card</span>
+                        <span>Card</span>
                     </button>
                     <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList();" style="flex: 1;" title="Criar minha Tier List Pessoal com jogos e filmes">
                         <span class="btn-icon">🎯</span>
-                        <span>Tier List</span>
+                        <span>Tier</span>
                     </button>
                 </div>
             </div>
@@ -2807,6 +3184,12 @@
             } catch(e) { console.error('Erro ranking:', e); }
             try { atualizarCapasDinamicas(); } catch(e) {}
             try { if (typeof atualizarEstadoAuthHeader === 'function') atualizarEstadoAuthHeader(); } catch(e) {}
+            try {
+                if (typeof atualizarWidgetHomeQuests === 'function') atualizarWidgetHomeQuests();
+                else if (window.OvercriticGamification && typeof window.OvercriticGamification.atualizarWidgetHomeQuests === 'function') {
+                    window.OvercriticGamification.atualizarWidgetHomeQuests();
+                }
+            } catch(e) {}
 
             // 2. TAREFAS DE REDE EM SEGUNDO PLANO (Não bloqueiam a interface nem o Splash Screen)
             const rodarEmSegundoPlano = window.requestIdleCallback || function(cb) { setTimeout(cb, 100); };
@@ -2821,6 +3204,12 @@
             if (window.OvercriticGamification && typeof window.OvercriticGamification.renderizarRankingComunidade === 'function') {
                 window.OvercriticGamification.renderizarRankingComunidade('communityRankingContainer');
             }
+            try {
+                if (typeof atualizarWidgetHomeQuests === 'function') atualizarWidgetHomeQuests();
+                else if (window.OvercriticGamification && typeof window.OvercriticGamification.atualizarWidgetHomeQuests === 'function') {
+                    window.OvercriticGamification.atualizarWidgetHomeQuests();
+                }
+            } catch(e) {}
         });
 
         if (document.readyState === 'loading') {

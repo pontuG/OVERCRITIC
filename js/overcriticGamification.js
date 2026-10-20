@@ -459,7 +459,30 @@
             xpPlatinas = numPlatinas * 250;
         }
 
-        const xpTotal = xpJogos + xpMidias + xpPlatinas + (numInteracoes * 20);
+        // 4. Bônus de XP das Conquistas / Insígnias Desbloqueadas
+        let xpInsignias = 0;
+        if (Array.isArray(stats.insignias)) {
+            stats.insignias.forEach(ins => {
+                if (ins && ins.desbloqueada) xpInsignias += Number(ins.xpBonus || 0);
+            });
+        } else if (typeof obterStatusInsigniasUsuario === 'function') {
+            try {
+                const insList = obterStatusInsigniasUsuario(stats);
+                insList.forEach(ins => {
+                    if (ins && ins.desbloqueada) xpInsignias += Number(ins.xpBonus || 0);
+                });
+            } catch (e) {}
+        }
+
+        // 5. Bônus de XP das Missões Semanais Concluídas (Weekly Quests)
+        let xpMissoesSemanais = 0;
+        if (typeof obterTotalXpMissoesSemanaisUsuario === 'function') {
+            try {
+                xpMissoesSemanais = obterTotalXpMissoesSemanaisUsuario(stats);
+            } catch (e) {}
+        }
+
+        const xpTotal = xpJogos + xpMidias + xpPlatinas + xpInsignias + xpMissoesSemanais + (numInteracoes * 20);
 
         let infoNivel = NIVEIS_GAMER[0];
         let proximoNivel = NIVEIS_GAMER[1];
@@ -486,6 +509,11 @@
 
         return {
             xpTotal,
+            xpJogos,
+            xpMidias,
+            xpPlatinas,
+            xpInsignias,
+            xpMissoesSemanais,
             nivel: infoNivel.nivel,
             titulo: infoNivel.titulo,
             icone: infoNivel.icone,
@@ -508,9 +536,15 @@
         document.documentElement.classList.add('og-modal-scroll-lock');
         document.body.classList.add('og-modal-scroll-lock');
     }
-    function liberarScrollFundo() {
-        _ogModaisAbertosCount = Math.max(0, _ogModaisAbertosCount - 1);
-        if (_ogModaisAbertosCount === 0) {
+    function liberarScrollFundo(force = false) {
+        if (force) {
+            _ogModaisAbertosCount = 0;
+        } else {
+            _ogModaisAbertosCount = Math.max(0, _ogModaisAbertosCount - 1);
+        }
+        const anyModalActive = document.querySelector('.og-modal-overlay.active, .og-mural-overlay.active, .og-gamer-card-modal.active');
+        if (_ogModaisAbertosCount <= 0 || !anyModalActive) {
+            _ogModaisAbertosCount = 0;
             document.documentElement.classList.remove('og-modal-scroll-lock');
             document.body.classList.remove('og-modal-scroll-lock');
         }
@@ -531,8 +565,6 @@
             body.og-modal-scroll-lock {
                 overflow: hidden !important;
                 height: 100% !important;
-                touch-action: none !important;
-                -webkit-overflow-scrolling: auto !important;
             }
             /* Badge de Nível no Perfil e Header */
             .og-level-badge {
@@ -685,7 +717,7 @@
                 -webkit-backdrop-filter: blur(14px);
                 z-index: 100005;
                 display: flex;
-                align-items: flex-start;
+                align-items: center;
                 justify-content: center;
                 padding: 24px 16px;
                 box-sizing: border-box;
@@ -693,6 +725,7 @@
                 visibility: hidden;
                 transition: opacity 0.3s ease, visibility 0.3s;
                 overflow-y: auto;
+                overflow-x: hidden;
                 overscroll-behavior: contain;
                 -webkit-overflow-scrolling: touch;
             }
@@ -703,6 +736,8 @@
 
             /* Custom Scrollbars Elegantes */
             .og-modal-overlay::-webkit-scrollbar,
+            .og-mural-overlay::-webkit-scrollbar,
+            .og-mural-modal::-webkit-scrollbar,
             .og-card-preview::-webkit-scrollbar,
             .og-tier-body::-webkit-scrollbar,
             .og-tier-pool::-webkit-scrollbar,
@@ -711,6 +746,8 @@
                 height: 6px;
             }
             .og-modal-overlay::-webkit-scrollbar-track,
+            .og-mural-overlay::-webkit-scrollbar-track,
+            .og-mural-modal::-webkit-scrollbar-track,
             .og-card-preview::-webkit-scrollbar-track,
             .og-tier-body::-webkit-scrollbar-track,
             .og-tier-pool::-webkit-scrollbar-track,
@@ -719,6 +756,8 @@
                 border-radius: 8px;
             }
             .og-modal-overlay::-webkit-scrollbar-thumb,
+            .og-mural-overlay::-webkit-scrollbar-thumb,
+            .og-mural-modal::-webkit-scrollbar-thumb,
             .og-card-preview::-webkit-scrollbar-thumb,
             .og-tier-body::-webkit-scrollbar-thumb,
             .og-tier-pool::-webkit-scrollbar-thumb,
@@ -727,6 +766,8 @@
                 border-radius: 8px;
             }
             .og-modal-overlay::-webkit-scrollbar-thumb:hover,
+            .og-mural-overlay::-webkit-scrollbar-thumb:hover,
+            .og-mural-modal::-webkit-scrollbar-thumb:hover,
             .og-card-preview::-webkit-scrollbar-thumb:hover,
             .og-tier-body::-webkit-scrollbar-thumb:hover,
             .og-tier-pool::-webkit-scrollbar-thumb:hover,
@@ -737,15 +778,17 @@
             /* ── MODAL DO GAMER CARD ── */
             .og-gamer-card-modal {
                 width: 100%;
-                max-width: 480px;
+                max-width: 460px;
                 margin: auto;
                 display: flex;
                 flex-direction: column;
                 gap: 14px;
                 align-items: center;
+                justify-content: center;
                 transform: scale(0.92) translateY(20px);
                 transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 position: relative;
+                box-sizing: border-box;
             }
             .og-modal-overlay.active .og-gamer-card-modal {
                 transform: scale(1) translateY(0);
@@ -756,6 +799,7 @@
                 width: 100%;
                 max-height: calc(88vh - 60px);
                 overflow-y: auto;
+                overflow-x: hidden;
                 overscroll-behavior: contain;
                 background: linear-gradient(150deg, #090e1a 0%, #111a2e 50%, #0d1222 100%);
                 border: 2px solid rgba(0, 240, 255, 0.4);
@@ -771,13 +815,14 @@
             .og-card-preview::before {
                 content: '';
                 position: absolute;
-                top: -50%;
-                left: -50%;
-                width: 200%;
-                height: 200%;
-                background: radial-gradient(circle at 50% 20%, rgba(0, 240, 255, 0.12), transparent 45%),
-                            radial-gradient(circle at 80% 80%, rgba(157, 78, 221, 0.12), transparent 45%);
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: inherit;
+                background: radial-gradient(circle at 50% 20%, rgba(0, 240, 255, 0.12), transparent 50%),
+                            radial-gradient(circle at 80% 80%, rgba(157, 78, 221, 0.12), transparent 50%);
                 pointer-events: none;
+                z-index: 0;
             }
             .og-card-top {
                 display: flex;
@@ -918,18 +963,71 @@
                 text-transform: uppercase;
             }
             .og-card-fav-covers {
-                display: flex;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
                 gap: 8px;
-                overflow: hidden;
             }
             .og-card-fav-item {
-                flex: 1;
-                height: 48px;
-                border-radius: 8px;
-                background-size: cover;
+                aspect-ratio: 3 / 4;
+                min-height: 90px;
+                max-height: 120px;
+                border-radius: 10px;
+                background-size: contain;
+                background-repeat: no-repeat;
                 background-position: center;
-                border: 1px solid rgba(255, 255, 255, 0.15);
+                background-color: #080d1a;
+                border: 1px solid rgba(0, 240, 255, 0.35);
                 position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            }
+            .og-card-fav-badge {
+                align-self: flex-start;
+                background: rgba(0, 0, 0, 0.88);
+                border: 1px solid #ffd700;
+                color: #ffd700;
+                font-size: 0.62rem;
+                font-weight: 900;
+                padding: 2px 5px;
+                border-radius: 5px;
+                line-height: 1;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+            }
+            .og-card-fav-name {
+                background: rgba(0, 0, 0, 0.88);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                color: #ffffff;
+                font-size: 0.58rem;
+                font-weight: 800;
+                text-align: center;
+                padding: 3px 4px;
+                border-radius: 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.1;
+            }
+            .og-card-fav-empty {
+                aspect-ratio: 3 / 4;
+                min-height: 90px;
+                max-height: 120px;
+                border-radius: 10px;
+                background: rgba(0, 0, 0, 0.25);
+                border: 1px dashed rgba(255, 255, 255, 0.12);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #64748b;
+                font-size: 0.62rem;
+                font-weight: 700;
+                text-align: center;
+                gap: 4px;
+                padding: 4px;
             }
 
             /* Rodapé do Card */
@@ -1147,27 +1245,101 @@
                 background: rgba(0, 0, 0, 0.03);
             }
 
+            /* Barra de Formato Social (Stories / Feed) */
+            .og-social-format-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                gap: 10px;
+                background: rgba(0, 0, 0, 0.45);
+                border: 1px solid rgba(0, 240, 255, 0.22);
+                border-radius: 14px;
+                padding: 10px 14px;
+                box-sizing: border-box;
+                backdrop-filter: blur(10px);
+                flex-wrap: wrap;
+            }
+            .og-social-format-title {
+                font-size: 0.74rem;
+                font-weight: 800;
+                color: #94a3b8;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .og-social-format-pills {
+                display: flex;
+                gap: 8px;
+            }
+            .og-format-pill {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                color: #cbd5e1;
+                padding: 6px 12px;
+                border-radius: 10px;
+                font-size: 0.76rem;
+                font-weight: 700;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                transition: all 0.2s ease;
+                font-family: inherit;
+            }
+            .og-format-pill:hover {
+                border-color: rgba(0, 240, 255, 0.5);
+                color: #fff;
+                transform: translateY(-1px);
+            }
+            .og-format-pill.active {
+                background: linear-gradient(135deg, rgba(0, 240, 255, 0.22), rgba(157, 78, 221, 0.22));
+                border-color: #00f0ff;
+                color: #00f0ff;
+                box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+            }
+
             /* Barra de Ações do Modal */
             .og-modal-actions {
                 display: flex;
                 align-items: center;
-                gap: 12px;
+                gap: 8px;
                 width: 100%;
+                flex-wrap: wrap;
             }
             .og-modal-btn {
                 flex: 1;
-                padding: 12px 18px;
-                border-radius: 14px;
-                font-size: 0.92rem;
+                min-width: 105px;
+                padding: 10px 12px;
+                border-radius: 12px;
+                font-size: 0.82rem;
                 font-weight: 800;
                 cursor: pointer;
                 border: none;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
+                gap: 6px;
                 transition: all 0.25s ease;
                 font-family: inherit;
+                white-space: nowrap;
+            }
+            .og-btn-share {
+                background: linear-gradient(135deg, #10b981, #06b6d4);
+                color: #ffffff;
+                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+            }
+            .og-btn-share:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.55);
+            }
+            .og-btn-copy {
+                background: linear-gradient(135deg, #8b5cf6, #ec4899);
+                color: #ffffff;
+                box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+            }
+            .og-btn-copy:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(139, 92, 246, 0.55);
             }
             .og-btn-download {
                 background: linear-gradient(135deg, #0284c7, #00f0ff);
@@ -1179,9 +1351,11 @@
                 box-shadow: 0 6px 25px rgba(0, 240, 255, 0.6);
             }
             .og-btn-close {
-                background: rgba(255, 255, 255, 0.1);
-                color: #fff;
+                background: rgba(255, 255, 255, 0.08);
+                color: #cbd5e1;
                 border: 1px solid rgba(255, 255, 255, 0.15);
+                flex: 0 0 auto;
+                min-width: 65px;
             }
             .og-btn-close:hover {
                 background: rgba(239, 68, 68, 0.25);
@@ -2055,6 +2229,785 @@
             .og-podium-card-placeholder {
                 min-height: 200px;
             }
+
+            /* ══════ ESTILOS DO POPUP DE CONQUISTA DESBLOQUEADA ══════ */
+            .og-achievement-popup-container {
+                position: fixed;
+                top: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 10000000;
+                pointer-events: none;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+                width: 90%;
+                max-width: 480px;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+            .og-achievement-popup {
+                pointer-events: auto;
+                position: relative;
+                width: 100%;
+                padding: 16px 20px;
+                border-radius: 18px;
+                background: linear-gradient(135deg, rgba(13, 20, 36, 0.98), rgba(7, 10, 18, 0.98));
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1.5px solid rgba(255, 215, 0, 0.5);
+                box-shadow: 0 16px 45px rgba(0, 0, 0, 0.75), 0 0 30px rgba(255, 215, 0, 0.35);
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                transform: translateY(-80px) scale(0.92);
+                opacity: 0;
+                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+                overflow: hidden;
+                user-select: none;
+                cursor: pointer;
+            }
+            .og-achievement-popup.active {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            .og-achievement-popup.hiding {
+                transform: translateY(-50px) scale(0.9);
+                opacity: 0;
+                transition: transform 0.4s ease, opacity 0.3s ease;
+            }
+            .og-achievement-shimmer {
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(60deg, transparent 40%, rgba(255, 215, 0, 0.15) 50%, transparent 60%);
+                transform: rotate(25deg);
+                animation: ogAchShimmer 3.5s infinite;
+                pointer-events: none;
+            }
+            @keyframes ogAchShimmer {
+                0% { transform: translateX(-100%) rotate(25deg); }
+                100% { transform: translateX(100%) rotate(25deg); }
+            }
+            .og-achievement-icon-wrap {
+                width: 58px;
+                height: 58px;
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                flex-shrink: 0;
+                background: radial-gradient(circle, rgba(255, 215, 0, 0.25), rgba(0, 0, 0, 0.5));
+                border: 2px solid #ffd700;
+                box-shadow: 0 0 18px rgba(255, 215, 0, 0.45);
+                animation: ogAchPulse 2s infinite ease-in-out;
+            }
+            @keyframes ogAchPulse {
+                0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(255, 215, 0, 0.45); }
+                50% { transform: scale(1.06); box-shadow: 0 0 28px rgba(255, 215, 0, 0.7); }
+            }
+            .og-achievement-content {
+                flex: 1;
+                min-width: 0;
+            }
+            .og-achievement-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .og-achievement-badge-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.72rem;
+                font-weight: 900;
+                letter-spacing: 1px;
+                color: #ffd700;
+                text-transform: uppercase;
+            }
+            .og-achievement-xp-badge {
+                background: rgba(255, 215, 0, 0.18);
+                border: 1px solid rgba(255, 215, 0, 0.4);
+                color: #ffd700;
+                padding: 2px 7px;
+                border-radius: 8px;
+                font-size: 0.7rem;
+                font-weight: 800;
+            }
+            .og-achievement-title {
+                font-size: 1.05rem;
+                font-weight: 800;
+                color: #ffffff;
+                margin-top: 2px;
+                line-height: 1.25;
+            }
+            .og-achievement-desc {
+                font-size: 0.8rem;
+                color: #94a3b8;
+                margin-top: 3px;
+                line-height: 1.3;
+            }
+            .og-achievement-close {
+                background: transparent;
+                border: none;
+                color: #64748b;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 4px 8px;
+                transition: color 0.2s;
+                border-radius: 8px;
+            }
+            .og-achievement-close:hover {
+                color: #ffffff;
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            /* ══════ ESTILOS DA ESTANTE DE TROFÉUS / MURAL DE INSÍGNIAS ══════ */
+            .og-trophy-shelf-section {
+                width: 100%;
+                margin-top: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+            .og-shelf-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding-bottom: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .og-shelf-title-wrap {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .og-shelf-title {
+                font-size: 1.05rem;
+                font-weight: 800;
+                color: #ffffff;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            body.light-mode .og-shelf-title {
+                color: #0f172a;
+            }
+            .og-shelf-counter-badge {
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 800;
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+                border: 1px solid rgba(0, 240, 255, 0.3);
+            }
+            .og-shelf-rack {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 16px;
+                position: relative;
+            }
+            .og-trophy-card {
+                position: relative;
+                padding: 18px 16px;
+                border-radius: 18px;
+                background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(10, 14, 23, 0.95));
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+                cursor: pointer;
+                overflow: hidden;
+            }
+            body.light-mode .og-trophy-card {
+                background: #ffffff;
+                border-color: rgba(0, 0, 0, 0.08);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            }
+            .og-trophy-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
+            }
+            .og-trophy-card.unlocked {
+                border-color: var(--card-cor-borda, rgba(255, 215, 0, 0.4));
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px var(--card-glow, rgba(255, 215, 0, 0.15));
+            }
+            .og-trophy-card.unlocked:hover {
+                box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6), 0 0 30px var(--card-glow, rgba(255, 215, 0, 0.3));
+            }
+            .og-trophy-card.locked {
+                opacity: 0.72;
+                background: rgba(10, 14, 23, 0.75);
+                border-color: rgba(255, 255, 255, 0.05);
+            }
+            body.light-mode .og-trophy-card.locked {
+                background: #f8fafc;
+                opacity: 0.8;
+            }
+            .og-trophy-card-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 12px;
+            }
+            .og-trophy-icon-wrap {
+                width: 52px;
+                height: 52px;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.85rem;
+                flex-shrink: 0;
+                background: rgba(0, 0, 0, 0.4);
+                border: 1.5px solid rgba(255, 255, 255, 0.1);
+                transition: transform 0.25s ease;
+            }
+            .og-trophy-card.unlocked .og-trophy-icon-wrap {
+                background: radial-gradient(circle, var(--card-glow, rgba(255, 215, 0, 0.25)), rgba(0, 0, 0, 0.5));
+                border-color: var(--card-cor, #ffd700);
+                box-shadow: 0 0 15px var(--card-glow, rgba(255, 215, 0, 0.35));
+            }
+            .og-trophy-card.locked .og-trophy-icon-wrap {
+                filter: grayscale(1) opacity(0.5);
+            }
+            .og-trophy-card:hover .og-trophy-icon-wrap {
+                transform: scale(1.1) rotate(5deg);
+            }
+            .og-trophy-status-pill {
+                padding: 4px 9px;
+                border-radius: 8px;
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .og-trophy-status-pill.unlocked {
+                background: rgba(34, 197, 94, 0.15);
+                color: #22c55e;
+                border: 1px solid rgba(34, 197, 94, 0.4);
+            }
+            .og-trophy-status-pill.locked {
+                background: rgba(255, 255, 255, 0.06);
+                color: #94a3b8;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            body.light-mode .og-trophy-status-pill.locked {
+                background: rgba(0, 0, 0, 0.05);
+                color: #64748b;
+                border-color: rgba(0, 0, 0, 0.1);
+            }
+            .og-trophy-info {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .og-trophy-name {
+                font-size: 1rem;
+                font-weight: 800;
+                color: #ffffff;
+                line-height: 1.25;
+            }
+            body.light-mode .og-trophy-name {
+                color: #0f172a;
+            }
+            .og-trophy-card.locked .og-trophy-name {
+                color: #94a3b8;
+            }
+            .og-trophy-desc {
+                font-size: 0.78rem;
+                color: #94a3b8;
+                line-height: 1.35;
+            }
+            body.light-mode .og-trophy-desc {
+                color: #64748b;
+            }
+            .og-trophy-progress-wrap {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-top: auto;
+                padding-top: 6px;
+            }
+            .og-trophy-progress-labels {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.72rem;
+                font-weight: 700;
+            }
+            .og-trophy-progress-text {
+                color: #94a3b8;
+            }
+            body.light-mode .og-trophy-progress-text {
+                color: #64748b;
+            }
+            .og-trophy-xp-bonus {
+                color: #ffd700;
+                font-weight: 800;
+            }
+            .og-trophy-track {
+                width: 100%;
+                height: 7px;
+                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.08);
+                overflow: hidden;
+                position: relative;
+            }
+            body.light-mode .og-trophy-track {
+                background: rgba(0, 0, 0, 0.08);
+            }
+            .og-trophy-fill {
+                height: 100%;
+                border-radius: 4px;
+                background: linear-gradient(90deg, #00f0ff, #9d4edd);
+                transition: width 0.4s ease;
+            }
+            .og-trophy-card.unlocked .og-trophy-fill {
+                background: linear-gradient(90deg, #22c55e, #10b981);
+            }
+
+            /* ══════ MODAL DEDICADO DO MURAL DE TROFÉUS ══════ */
+            .og-mural-overlay {
+                position: fixed;
+                inset: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(4, 7, 14, 0.88);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                z-index: 100005;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px 16px;
+                box-sizing: border-box;
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+                overflow-y: auto;
+                overflow-x: hidden;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+            }
+            .og-mural-overlay.active {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+            .og-mural-modal {
+                position: relative;
+                width: 100%;
+                max-width: 860px;
+                max-height: 85vh;
+                background: #0b1120;
+                border: 1px solid rgba(255, 215, 0, 0.35);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(255, 215, 0, 0.2);
+                border-radius: 24px;
+                padding: 28px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                transform: scale(0.95);
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                touch-action: pan-y !important;
+            }
+            body.light-mode .og-mural-modal {
+                background: #ffffff;
+                border-color: rgba(255, 215, 0, 0.45);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 0 30px rgba(255, 215, 0, 0.15);
+            }
+            .og-mural-overlay.active .og-mural-modal {
+                transform: scale(1);
+            }
+            .og-mural-modal-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                padding-bottom: 16px;
+            }
+            .og-mural-modal-title {
+                font-size: 1.4rem;
+                font-weight: 900;
+                color: #ffffff;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            body.light-mode .og-mural-modal-title {
+                color: #0f172a;
+            }
+            .og-mural-modal-subtitle {
+                font-size: 0.85rem;
+                color: #94a3b8;
+                margin-top: 4px;
+            }
+            .og-mural-modal-close {
+                background: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #cbd5e1;
+                font-size: 1.1rem;
+                border-radius: 12px;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .og-mural-modal-close:hover {
+                background: rgba(255, 255, 255, 0.15);
+                color: #ffffff;
+            }
+
+            /* ══════ ABAS DO HUB GAMER (MISSÕES VS TROFÉUS) ══════ */
+            .og-hub-tab-bar {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                padding-bottom: 14px;
+                flex-wrap: wrap;
+            }
+            .og-hub-tab-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 18px;
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #94a3b8;
+                font-weight: 800;
+                font-size: 0.88rem;
+                cursor: pointer;
+                transition: all 0.25s ease;
+            }
+            .og-hub-tab-btn:hover {
+                background: rgba(255, 255, 255, 0.08);
+                color: #ffffff;
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+            .og-hub-tab-btn.active {
+                background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(157, 78, 221, 0.15) 100%);
+                border-color: #00f0ff;
+                color: #00f0ff;
+                box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            }
+            body.light-mode .og-hub-tab-btn {
+                background: #f1f5f9;
+                border-color: #e2e8f0;
+                color: #64748b;
+            }
+            body.light-mode .og-hub-tab-btn.active {
+                background: #e0f2fe;
+                border-color: #0284c7;
+                color: #0284c7;
+                box-shadow: 0 0 15px rgba(2, 132, 199, 0.15);
+            }
+            .og-hub-timer-badge {
+                font-size: 0.72rem;
+                padding: 3px 8px;
+                border-radius: 10px;
+                background: rgba(255, 215, 0, 0.12);
+                border: 1px solid rgba(255, 215, 0, 0.35);
+                color: #ffd700;
+                font-weight: 800;
+            }
+
+            /* ══════ DASHBOARD DE MISSÕES SEMANAIS COM TIMER ══════ */
+            .og-quests-container {
+                display: flex;
+                flex-direction: column;
+                gap: 18px;
+                width: 100%;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+            .og-quests-header-card {
+                padding: 22px;
+                border-radius: 20px;
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 14, 23, 0.98) 100%);
+                border: 1px solid rgba(0, 240, 255, 0.3);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 25px rgba(0, 240, 255, 0.05);
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            body.light-mode .og-quests-header-card {
+                background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+                border-color: rgba(2, 132, 199, 0.3);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            }
+            .og-quests-header-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .og-quests-season-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 0.78rem;
+                font-weight: 900;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                background: rgba(0, 240, 255, 0.12);
+                color: #00f0ff;
+                border: 1px solid rgba(0, 240, 255, 0.35);
+            }
+            body.light-mode .og-quests-season-tag {
+                background: rgba(2, 132, 199, 0.1);
+                color: #0284c7;
+                border-color: rgba(2, 132, 199, 0.35);
+            }
+            .og-quests-timer-wrap {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(0, 0, 0, 0.5);
+                border: 1px solid rgba(255, 215, 0, 0.4);
+                padding: 6px 16px;
+                border-radius: 14px;
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.18);
+            }
+            body.light-mode .og-quests-timer-wrap {
+                background: #fefce8;
+                border-color: rgba(217, 119, 6, 0.4);
+            }
+            .og-quests-timer-label {
+                font-size: 0.74rem;
+                font-weight: 800;
+                color: #94a3b8;
+                text-transform: uppercase;
+            }
+            .og-quests-timer-val {
+                font-size: 0.95rem;
+                font-weight: 900;
+                color: #ffd700;
+                letter-spacing: 0.8px;
+            }
+            body.light-mode .og-quests-timer-val {
+                color: #b45309;
+            }
+
+            .og-quests-alert-banner {
+                font-size: 0.8rem;
+                color: #cbd5e1;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 12px;
+                border-radius: 10px;
+                background: rgba(255, 215, 0, 0.06);
+                border: 1px dashed rgba(255, 215, 0, 0.25);
+            }
+            body.light-mode .og-quests-alert-banner {
+                color: #475569;
+                background: #fffbeb;
+                border-color: rgba(217, 119, 6, 0.25);
+            }
+
+            .og-quests-progress-summary {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .og-quests-progress-labels {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 0.84rem;
+                font-weight: 700;
+            }
+            .og-quests-track {
+                width: 100%;
+                height: 10px;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.06);
+                overflow: hidden;
+            }
+            body.light-mode .og-quests-track {
+                background: #e2e8f0;
+            }
+            .og-quests-fill {
+                height: 100%;
+                border-radius: 6px;
+                background: linear-gradient(90deg, #00f0ff, #9d4edd, #ffd700);
+                transition: width 0.4s ease;
+            }
+
+            .og-quests-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+                gap: 16px;
+            }
+            @media (max-width: 640px) {
+                .og-quests-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .og-quest-card {
+                padding: 20px;
+                border-radius: 18px;
+                background: linear-gradient(145deg, rgba(17, 24, 39, 0.9) 0%, rgba(10, 14, 23, 0.95) 100%);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                position: relative;
+                overflow: hidden;
+                transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            }
+            body.light-mode .og-quest-card {
+                background: #ffffff;
+                border-color: #e2e8f0;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            }
+            .og-quest-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+            }
+            .og-quest-card.completed {
+                border-color: rgba(34, 197, 94, 0.5);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 197, 94, 0.15);
+            }
+            .og-quest-card.expired {
+                opacity: 0.6;
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+
+            .og-quest-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 12px;
+            }
+            .og-quest-icon-wrap {
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.4rem;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--quest-cor, rgba(0, 240, 255, 0.4));
+                box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+            }
+            .og-quest-xp-badge {
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 0.78rem;
+                font-weight: 800;
+                background: rgba(255, 215, 0, 0.12);
+                border: 1px solid rgba(255, 215, 0, 0.4);
+                color: #ffd700;
+            }
+            .og-quest-title {
+                font-size: 1.05rem;
+                font-weight: 800;
+                color: #ffffff;
+            }
+            body.light-mode .og-quest-title {
+                color: #0f172a;
+            }
+            .og-quest-desc {
+                font-size: 0.84rem;
+                color: #94a3b8;
+                line-height: 1.45;
+            }
+            body.light-mode .og-quest-desc {
+                color: #475569;
+            }
+
+            .og-quest-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                margin-top: auto;
+                padding-top: 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            .og-quest-status-pill {
+                font-size: 0.74rem;
+                font-weight: 800;
+                padding: 4px 10px;
+                border-radius: 10px;
+                letter-spacing: 0.5px;
+            }
+            .og-quest-status-pill.concluida {
+                background: rgba(34, 197, 94, 0.15);
+                color: #22c55e;
+                border: 1px solid rgba(34, 197, 94, 0.4);
+            }
+            .og-quest-status-pill.andamento {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+                border: 1px solid rgba(0, 240, 255, 0.3);
+            }
+            .og-quest-status-pill.expirada {
+                background: rgba(239, 68, 68, 0.15);
+                color: #ef4444;
+                border: 1px solid rgba(239, 68, 68, 0.35);
+            }
+
+            .og-quest-action-btn {
+                padding: 6px 14px;
+                border-radius: 10px;
+                font-size: 0.78rem;
+                font-weight: 700;
+                text-decoration: none;
+                background: rgba(0, 240, 255, 0.08);
+                border: 1px solid rgba(0, 240, 255, 0.3);
+                color: var(--accent-cyan, #00f0ff);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                white-space: nowrap;
+            }
+            .og-quest-action-btn:hover {
+                background: rgba(0, 240, 255, 0.2);
+                border-color: #00f0ff;
+                color: #ffffff;
+            }
+
+            .og-perfect-week-card {
+                padding: 22px;
+                border-radius: 20px;
+                background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(157, 78, 221, 0.15) 100%);
+                border: 1px solid rgba(255, 215, 0, 0.4);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 215, 0, 0.15);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                flex-wrap: wrap;
+            }
+            body.light-mode .og-perfect-week-card {
+                background: linear-gradient(135deg, #fffbeb 0%, #faf5ff 100%);
+                border-color: rgba(217, 119, 6, 0.4);
+            }
         `;
         document.head.appendChild(style);
     }
@@ -2157,12 +3110,31 @@
                         <span id="ogCardTimestamp">2026</span>
                     </div>
                 </div>
+ 
+                <!-- BARRA DE SELEÇÃO DE FORMATO SOCIAL -->
+                <div class="og-social-format-bar">
+                    <span class="og-social-format-title">📐 Formato da Imagem:</span>
+                    <div class="og-social-format-pills">
+                        <button type="button" class="og-format-pill active" id="ogBtnFmtStories" data-format="stories" title="1080 x 1920 (9:16) • Ideal para Instagram Stories, TikTok e WhatsApp Status">
+                            <span>📱</span> Stories (9:16)
+                        </button>
+                        <button type="button" class="og-format-pill" id="ogBtnFmtPost" data-format="post" title="1080 x 1350 (4:5) • Ideal para Feed do Instagram, Discord e Twitter/X">
+                            <span>🖼️</span> Feed / Discord (4:5)
+                        </button>
+                    </div>
+                </div>
 
                 <div class="og-modal-actions">
-                    <button class="og-modal-btn og-btn-download" id="ogBtnDownloadCard">
-                        <span>📥</span> Baixar Imagem (PNG)
+                    <button type="button" class="og-modal-btn og-btn-share" id="ogBtnShareCard" title="Compartilhar direto no WhatsApp, Instagram ou redes sociais">
+                        <span>🚀</span> Compartilhar
                     </button>
-                    <button class="og-modal-btn og-btn-close" id="ogBtnCloseCard">
+                    <button type="button" class="og-modal-btn og-btn-copy" id="ogBtnCopyCard" title="Copiar imagem para colar no Discord ou WhatsApp (Ctrl + V)">
+                        <span>📋</span> Copiar Imagem
+                    </button>
+                    <button type="button" class="og-modal-btn og-btn-download" id="ogBtnDownloadCard" title="Baixar imagem em alta resolução (PNG)">
+                        <span>📥</span> Baixar PNG
+                    </button>
+                    <button type="button" class="og-modal-btn og-btn-close" id="ogBtnCloseCard">
                         ✕ Fechar
                     </button>
                 </div>
@@ -2177,7 +3149,39 @@
         document.getElementById('ogBtnCloseCard').addEventListener('click', fecharGamerCardModal);
         const btnFloatingClose = document.getElementById('ogBtnFloatingCloseCard');
         if (btnFloatingClose) btnFloatingClose.addEventListener('click', fecharGamerCardModal);
-        document.getElementById('ogBtnDownloadCard').addEventListener('click', exportarGamerCardPng);
+
+        // Gerenciamento de Formatos Sociais
+        let _formatoCardSelecionado = 'stories';
+        const btnFmtStories = document.getElementById('ogBtnFmtStories');
+        const btnFmtPost = document.getElementById('ogBtnFmtPost');
+        if (btnFmtStories && btnFmtPost) {
+            btnFmtStories.addEventListener('click', () => {
+                _formatoCardSelecionado = 'stories';
+                btnFmtStories.classList.add('active');
+                btnFmtPost.classList.remove('active');
+                preaquecerCanvasGamerCard('stories');
+            });
+            btnFmtPost.addEventListener('click', () => {
+                _formatoCardSelecionado = 'post';
+                btnFmtPost.classList.add('active');
+                btnFmtStories.classList.remove('active');
+                preaquecerCanvasGamerCard('post');
+            });
+        }
+
+        // Ações: Download, Compartilhar, Copiar
+        const btnDownload = document.getElementById('ogBtnDownloadCard');
+        if (btnDownload) {
+            btnDownload.addEventListener('click', () => processarExportacaoGamerCard('download', _formatoCardSelecionado));
+        }
+        const btnShare = document.getElementById('ogBtnShareCard');
+        if (btnShare) {
+            btnShare.addEventListener('click', () => processarExportacaoGamerCard('share', _formatoCardSelecionado));
+        }
+        const btnCopy = document.getElementById('ogBtnCopyCard');
+        if (btnCopy) {
+            btnCopy.addEventListener('click', () => processarExportacaoGamerCard('copy', _formatoCardSelecionado));
+        }
 
         // Listener do botão de alternar lista de rankings
         const btnToggleLadder = document.getElementById('ogBtnToggleLadder');
@@ -2224,6 +3228,9 @@
         };
 
         _dadosCardAtuais = dados;
+        invalidarCacheGamerCard();
+        preaquecerCanvasGamerCard('stories');
+        setTimeout(() => preaquecerCanvasGamerCard('post'), 300);
 
         const jogosArr = dados.jogos || [];
         const midiasArr = dados.midias || [];
@@ -2369,30 +3376,50 @@
             avatarEl.textContent = username.charAt(0).toUpperCase() || '🎮';
         }
 
-        // Favoritos (Top 3 Melhores Avaliados)
+        // Favoritos (Top 3 Melhores Avaliados) com visual idêntico ao Gamer Card Oficial
         const favContainer = document.getElementById('ogCardFavCovers');
-        favContainer.innerHTML = '';
-        const combinados = [
-            ...(dados.jogos || []).map(j => ({ titulo: j.titulo, capa: j.capaUrl || j.capa, nota: parseFloat(j.minhaNota || j.nota || 0) })),
-            ...(dados.midias || []).map(m => ({ titulo: m.title || m.titulo, capa: m.coverUrl || m.cover_url, nota: parseFloat(m.myRating || m.nota || 0) }))
-        ].sort((a, b) => b.nota - a.nota).slice(0, 3);
+        if (favContainer) {
+            favContainer.innerHTML = '';
+            const combinados = [
+                ...(dados.jogos || []).map(j => ({ titulo: j.titulo, capa: j.capaUrl || j.capa, nota: parseFloat(j.minhaNota || j.nota || 0) })),
+                ...(dados.midias || []).map(m => ({ titulo: m.title || m.titulo, capa: m.coverUrl || m.cover_url, nota: parseFloat(m.myRating || m.nota || 0) }))
+            ].sort((a, b) => b.nota - a.nota).slice(0, 3);
 
-        if (combinados.length > 0) {
-            document.getElementById('ogCardFavSection').style.display = 'flex';
-            combinados.forEach(c => {
-                const item = document.createElement('div');
-                item.className = 'og-card-fav-item';
-                if (c.capa) {
-                    item.style.backgroundImage = `url('${c.capa}')`;
+            const favSection = document.getElementById('ogCardFavSection');
+            if (favSection) favSection.style.display = 'flex';
+
+            for (let i = 0; i < 3; i++) {
+                const c = combinados[i];
+                if (c) {
+                    const item = document.createElement('div');
+                    item.className = 'og-card-fav-item';
+                    if (c.capa) {
+                        item.style.backgroundImage = `url('${c.capa}')`;
+                    }
+                    item.title = `${c.titulo} (Nota ${c.nota.toFixed(1)})`;
+                    const titCurto = c.titulo.length > 15 ? c.titulo.substring(0, 13) + '..' : c.titulo;
+                    item.innerHTML = `
+                        <span class="og-card-fav-badge">★ ${c.nota.toFixed(1)}</span>
+                        <span class="og-card-fav-name" title="${c.titulo}">${titCurto}</span>
+                    `;
+                    favContainer.appendChild(item);
+                } else {
+                    const empty = document.createElement('div');
+                    empty.className = 'og-card-fav-empty';
+                    empty.innerHTML = `<span>🎮</span><span>+ Avaliar</span>`;
+                    empty.title = 'Avalie mais obras para preencher este destaque!';
+                    favContainer.appendChild(empty);
                 }
-                item.title = `${c.titulo} (Nota ${c.nota})`;
-                favContainer.appendChild(item);
-            });
-        } else {
-            document.getElementById('ogCardFavSection').style.display = 'none';
+            }
         }
 
         document.getElementById('ogCardTimestamp').textContent = new Date().toLocaleDateString('pt-BR');
+
+        const cardPreviewEl = document.getElementById('ogCardPreview');
+        if (cardPreviewEl) {
+            cardPreviewEl.scrollLeft = 0;
+            cardPreviewEl.scrollTop = 0;
+        }
 
         overlay.classList.add('active');
         bloquearScrollFundo();
@@ -2407,9 +3434,238 @@
     }
 
     /**
-     * Exporta o Gamer Card como imagem PNG de alta resolução usando Canvas
+     * Carrega imagem de forma segura evitando bloqueios de CORS e quedas de rede
      */
-    function exportarGamerCardPng() {
+    function carregarImagemSegura(url, timeoutMs = 4000) {
+        return new Promise((resolve) => {
+            if (!url || typeof url !== 'string' || !url.trim()) return resolve(null);
+            const limpo = url.trim();
+
+            const timer = setTimeout(() => {
+                resolve(null);
+            }, timeoutMs);
+
+            const img = new Image();
+            if (!limpo.startsWith('data:image/')) {
+                img.crossOrigin = 'anonymous';
+            }
+            img.onload = () => {
+                clearTimeout(timer);
+                resolve(img);
+            };
+            img.onerror = () => {
+                clearTimeout(timer);
+                // Se falhou com crossOrigin e era URL de dados, tenta carregar direto
+                if (limpo.startsWith('data:image/')) {
+                    const img2 = new Image();
+                    img2.onload = () => resolve(img2);
+                    img2.onerror = () => resolve(null);
+                    img2.src = limpo;
+                } else {
+                    resolve(null);
+                }
+            };
+            img.src = limpo;
+        });
+    }
+
+    /**
+     * Auxiliar de desenho para retângulos arredondados com preenchimento e borda
+     */
+    function desenharRoundBox(ctx, x, y, w, h, r, fillStyle, strokeStyle, strokeWidth) {
+        ctx.save();
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(x, y, w, h, r);
+        } else {
+            ctx.rect(x, y, w, h);
+        }
+        if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        }
+        if (strokeStyle && strokeWidth) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = strokeWidth;
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    // Cache de renderização do Gamer Card em alta resolução (Stories e Post)
+    const _cacheCanvasGamerCard = {
+        stories: null,
+        post: null
+    };
+
+    function invalidarCacheGamerCard() {
+        _cacheCanvasGamerCard.stories = null;
+        _cacheCanvasGamerCard.post = null;
+    }
+
+    async function preaquecerCanvasGamerCard(formato = 'stories') {
+        try {
+            if (!_cacheCanvasGamerCard[formato]) {
+                const cv = await gerarCanvasGamerCardPro(formato);
+                _cacheCanvasGamerCard[formato] = cv;
+            }
+        } catch (e) {
+            console.warn('Pré-aquecimento do Gamer Card:', e);
+        }
+    }
+
+    /**
+     * Converte dataURL para File de forma 100% síncrona (preserva o User Gesture Token no Chrome)
+     */
+    function dataURLtoFileSync(dataUrl, fileName) {
+        const arr = dataUrl.split(',');
+        const mime = (arr[0].match(/:(.*?);/) || [])[1] || 'image/png';
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], fileName, { type: mime });
+    }
+
+    /**
+     * Desenha a capa da obra de forma inteligente, 100% centralizada e completa:
+     * - Imagens horizontais (como o banner do God of War 460x215) são exibidas INTEIRAS, sem cortes
+     * - Imagens verticais (pôsteres) ou quadradas também são exibidas completas e centralizadas
+     * - Fundo com textura atmosférica suave escurecida da própria obra para visual cinematográfico
+     */
+    function desenharCapaGamerCardPro(ctx, img, px, py, cardW, cardH, radius = 16, tituloFallback = '') {
+        ctx.save();
+
+        // 1. Recorte do card base com cantos arredondados
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(px, py, cardW, cardH, radius);
+        } else {
+            ctx.rect(px, py, cardW, cardH);
+        }
+        ctx.clip();
+
+        // Fundo escuro base do card
+        const gradFundo = ctx.createLinearGradient(px, py, px, py + cardH);
+        gradFundo.addColorStop(0, '#0c1527');
+        gradFundo.addColorStop(1, '#060913');
+        ctx.fillStyle = gradFundo;
+        ctx.fillRect(px, py, cardW, cardH);
+
+        if (img && img.width && img.height) {
+            // 2. Fundo atmosférico suave com a própria arte expandida (Ambient Glow)
+            ctx.save();
+            ctx.globalAlpha = 0.30;
+            const bgRatio = img.width / img.height;
+            const targetRatio = cardW / cardH;
+            let sW, sH, sx, sy;
+            if (bgRatio > targetRatio) {
+                sH = img.height;
+                sW = img.height * targetRatio;
+                sx = (img.width - sW) / 2;
+                sy = 0;
+            } else {
+                sW = img.width;
+                sH = img.width / targetRatio;
+                sx = 0;
+                sy = (img.height - sH) / 2;
+            }
+            ctx.drawImage(img, sx, sy, sW, sH, px, py, cardW, cardH);
+
+            // Escurece o fundo atmosférico para garantir contraste e foco na arte central
+            ctx.fillStyle = 'rgba(5, 8, 18, 0.78)';
+            ctx.fillRect(px, py, cardW, cardH);
+            ctx.restore();
+
+            // 3. A Imagem Principal Centralizada e COMPLETA (SEM NENHUM CORTE - CONTAIN)
+            const imgRatio = img.width / img.height;
+            const isWide = imgRatio > 1.05; // banners horizontais (ex: God of War Steam 460x215)
+
+            // Espaçamento de segurança para margem de vitrine
+            const margemX = isWide ? 4 : 8;
+            const maxW = cardW - (margemX * 2);
+            const maxH = cardH;
+
+            // Calcula proporção contain para aparecer 100% completa
+            const escala = Math.min(maxW / img.width, maxH / img.height);
+            const dw = Math.round(img.width * escala);
+            const dh = Math.round(img.height * escala);
+            const dx = Math.round(px + (cardW - dw) / 2);
+            const dy = Math.round(py + (cardH - dh) / 2);
+
+            // Sombra suave sob a imagem centralizada
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 24;
+            ctx.shadowOffsetY = 4;
+
+            // Desenha a imagem principal com cantos sutilmente arredondados
+            const imgRadius = 8;
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+                ctx.roundRect(dx, dy, dw, dh, imgRadius);
+            } else {
+                ctx.rect(dx, dy, dw, dh);
+            }
+            ctx.fillStyle = '#000000';
+            ctx.fill();
+            ctx.clip();
+            ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
+            ctx.restore();
+
+            // Borda sutil neon na arte centralizada para destacar o banner
+            if (isWide) {
+                desenharRoundBox(ctx, dx, dy, dw, dh, 8, null, 'rgba(0, 240, 255, 0.25)', 1);
+            }
+        } else {
+            // Fallback elegante cyberpunk caso imagem não carregue ou bloqueie CORS
+            const gradCapa = ctx.createLinearGradient(px, py, px, py + cardH);
+            gradCapa.addColorStop(0, '#1e293b');
+            gradCapa.addColorStop(1, '#0f172a');
+            desenharRoundBox(ctx, px, py, cardW, cardH, radius, gradCapa, 'rgba(0, 240, 255, 0.3)', 2);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.font = '60px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🎮', px + cardW / 2, py + cardH / 2 - 20);
+
+            if (tituloFallback) {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '800 18px "Inter", sans-serif';
+                const titAbrev = tituloFallback.length > 18 ? tituloFallback.substring(0, 16) + '...' : tituloFallback;
+                ctx.fillText(titAbrev, px + cardW / 2, py + cardH / 2 + 30);
+            }
+        }
+
+        ctx.restore();
+
+        // Moldura externa neon do card
+        desenharRoundBox(ctx, px, py, cardW, cardH, radius, null, 'rgba(0, 240, 255, 0.35)', 2);
+    }
+
+    /**
+     * Helper para download do Canvas gerado
+     */
+    function baixarCanvasComoArquivo(canvas, fileName) {
+        try {
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = dataUrl;
+            link.click();
+            if (window.showToast) window.showToast.success('Gamer Card baixado com sucesso!');
+        } catch (e) {
+            console.error('Erro ao baixar canvas:', e);
+            if (window.showToast) window.showToast.error('Não foi possível salvar o arquivo.');
+        }
+    }
+
+    /**
+     * Gera o Canvas Ultra-HD estilizado nos formatos Stories (9:16) ou Feed/Discord (4:5)
+     */
+    async function gerarCanvasGamerCardPro(formato = 'stories') {
         const dados = _dadosCardAtuais || {};
         const username = dados.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
         const jogosArr = dados.jogos || [];
@@ -2421,213 +3677,559 @@
 
         const prog = calcularProgressoGamer({ jogos: jogosArr, midias: midiasArr, platinas: platinasArr });
 
-        // Média
+        // Média de Notas
         let somaNotas = 0;
         let countNotas = 0;
-        (dados.jogos || []).forEach(j => {
+        jogosArr.forEach(j => {
             const n = parseFloat(j.minhaNota || j.nota || 0);
             if (n > 0) { somaNotas += n; countNotas++; }
         });
         const mediaFinal = countNotas > 0 ? (somaNotas / countNotas).toFixed(1) : '10.0';
 
-        // Cria canvas de alta resolução (1000 x 1300)
+        // Dimensões segundo o formato
+        const isStories = formato === 'stories';
+        const width = 1080;
+        const height = isStories ? 1920 : 1350;
+
         const canvas = document.createElement('canvas');
-        canvas.width = 1000;
-        canvas.height = 1300;
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext('2d');
 
-        // Fundo com Gradiente Futurista
-        const bgGrad = ctx.createLinearGradient(0, 0, 1000, 1300);
-        bgGrad.addColorStop(0, '#090e1a');
-        bgGrad.addColorStop(0.5, '#0e162a');
-        bgGrad.addColorStop(1, '#070a14');
+        // Carrega avatar em segundo plano
+        const userAvatarRaw = typeof window.getUsuarioAvatarAtual === 'function'
+            ? window.getUsuarioAvatarAtual()
+            : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+        
+        const avatarImgPromise = (userAvatarRaw && (userAvatarRaw.startsWith('http') || userAvatarRaw.startsWith('data:image/')))
+            ? carregarImagemSegura(userAvatarRaw, 3000)
+            : Promise.resolve(null);
+
+        // Seleciona as 3 principais obras avaliadas
+        const topObras = [
+            ...jogosArr.map(j => ({ titulo: j.titulo || 'Jogo', capa: j.capaUrl || j.capa, nota: parseFloat(j.minhaNota || j.nota || 0), tipo: 'jogo' })),
+            ...midiasArr.map(m => ({ titulo: m.title || m.titulo || 'Mídia', capa: m.coverUrl || m.cover_url, nota: parseFloat(m.myRating || m.nota || 0), tipo: 'midia' }))
+        ].sort((a, b) => b.nota - a.nota).slice(0, 3);
+
+        const capasPromises = topObras.map(o => carregarImagemSegura(o.capa, 3000));
+
+        // Aguarda carregamento de imagens com timeout seguro
+        const [avatarImg, ...capasImgs] = await Promise.all([avatarImgPromise, ...capasPromises]);
+
+        // ════════ 1. FUNDO CYBERPUNK GLASS ════════
+        const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+        bgGrad.addColorStop(0, '#040711');
+        bgGrad.addColorStop(0.35, '#0b1326');
+        bgGrad.addColorStop(0.75, '#0e1830');
+        bgGrad.addColorStop(1, '#050814');
         ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, 1000, 1300);
+        ctx.fillRect(0, 0, width, height);
 
-        // Brilhos radiais neon
-        const r1 = ctx.createRadialGradient(250, 250, 20, 250, 250, 500);
-        r1.addColorStop(0, 'rgba(0, 240, 255, 0.22)');
-        r1.addColorStop(1, 'transparent');
-        ctx.fillStyle = r1;
-        ctx.fillRect(0, 0, 1000, 1300);
+        // Brilhos Radiais Neon
+        const rTop = ctx.createRadialGradient(240, 240, 30, 240, 240, 650);
+        rTop.addColorStop(0, 'rgba(0, 240, 255, 0.28)');
+        rTop.addColorStop(1, 'transparent');
+        ctx.fillStyle = rTop;
+        ctx.fillRect(0, 0, width, height);
 
-        const r2 = ctx.createRadialGradient(800, 900, 20, 800, 900, 600);
-        r2.addColorStop(0, 'rgba(157, 78, 221, 0.22)');
-        r2.addColorStop(1, 'transparent');
-        ctx.fillStyle = r2;
-        ctx.fillRect(0, 0, 1000, 1300);
+        const rMid = ctx.createRadialGradient(850, 750, 40, 850, 750, 700);
+        rMid.addColorStop(0, 'rgba(157, 78, 221, 0.26)');
+        rMid.addColorStop(1, 'transparent');
+        ctx.fillStyle = rMid;
+        ctx.fillRect(0, 0, width, height);
 
-        // Borda externa neon
-        ctx.strokeStyle = 'rgba(0, 240, 255, 0.6)';
-        ctx.lineWidth = 8;
-        ctx.strokeRect(30, 30, 940, 1240);
+        const rBot = ctx.createRadialGradient(300, height - 200, 30, 300, height - 200, 650);
+        rBot.addColorStop(0, 'rgba(0, 240, 255, 0.18)');
+        rBot.addColorStop(1, 'transparent');
+        ctx.fillStyle = rBot;
+        ctx.fillRect(0, 0, width, height);
 
-        ctx.strokeStyle = 'rgba(157, 78, 221, 0.3)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(45, 45, 910, 1210);
+        // Molduras Holográficas Externas
+        desenharRoundBox(ctx, 30, 30, width - 60, height - 60, 28, null, 'rgba(0, 240, 255, 0.5)', 6);
+        desenharRoundBox(ctx, 44, 44, width - 88, height - 88, 22, null, 'rgba(157, 78, 221, 0.35)', 2);
 
-        // Header: Logo e Badge
+        // ════════ 2. HEADER: LOGO E BADGE ════════
         ctx.fillStyle = '#00f0ff';
-        ctx.font = '900 36px "Inter", sans-serif';
-        ctx.fillText('🎮 OVERCRITIC', 80, 110);
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.font = '700 20px "Inter", sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText('OFFICIAL GAMER CARD', 920, 110);
+        ctx.font = '900 42px "Inter", sans-serif';
         ctx.textAlign = 'left';
+        ctx.fillText('🎮 OVERCRITIC', 80, 115);
 
-        // Linha divisória
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(80, 140);
-        ctx.lineTo(920, 140);
-        ctx.stroke();
-
-        // Avatar Circle
-        ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
-        ctx.beginPath();
-        ctx.arc(160, 250, 70, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#00f0ff';
-        ctx.lineWidth = 4;
-        ctx.stroke();
-
+        // Tag oficial
+        desenharRoundBox(ctx, width - 360, 78, 280, 48, 12, 'rgba(0, 240, 255, 0.12)', 'rgba(0, 240, 255, 0.4)', 2);
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 60px "Inter", sans-serif';
+        ctx.font = '800 18px "Inter", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(username.charAt(0).toUpperCase() || '🎮', 160, 272);
+        ctx.fillText('PASSE GAMER OFICIAL', width - 220, 108);
         ctx.textAlign = 'left';
 
-        // Nome do Usuário
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '900 52px "Inter", sans-serif';
-        ctx.fillText(username, 260, 235);
-
-        // Patente e Nível
-        ctx.fillStyle = prog.cor;
-        ctx.font = '800 30px "Inter", sans-serif';
-        ctx.fillText(`${prog.icone} Nível ${prog.nivel} • ${prog.titulo}`, 260, 280);
-
-        // Barra de Progresso XP
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '700 22px "Inter", sans-serif';
-        ctx.fillText(`EXPERIÊNCIA GAMER: ${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`, 80, 385);
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        // Divisória do Topo
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(80, 400, 840, 18, 9);
-        ctx.fill();
+        ctx.moveTo(80, 148);
+        ctx.lineTo(width - 80, 148);
+        ctx.stroke();
 
-        ctx.fillStyle = '#00f0ff';
-        ctx.beginPath();
-        ctx.roundRect(80, 400, Math.max(30, 840 * (prog.porcentagem / 100)), 18, 9);
-        ctx.fill();
+        if (isStories) {
+            // ════════ LAYOUT STORIES (9:16 - 1080 x 1920) ════════
 
-        // Próximo Ranking & Meta
-        if (prog.proximoNivel) {
-            ctx.fillStyle = '#ffd700';
-            ctx.font = '800 19px "Inter", sans-serif';
-            ctx.fillText(`🎯 PRÓXIMO: ${prog.proximoNivel.icone} ${prog.proximoNivel.titulo.toUpperCase()} (NV. ${prog.proximoNivel.nivel}) • FALTAM ${prog.xpRestante.toLocaleString('pt-BR')} XP`, 80, 450);
-        } else {
-            ctx.fillStyle = '#ef4444';
-            ctx.font = '800 19px "Inter", sans-serif';
-            ctx.fillText(`🔥 PATENTE SUPREMA CONQUISTADA: NÍVEL MÁXIMO (LENDA DO OVERCRITIC)`, 80, 450);
-        }
+            // 1. Bloco de Perfil Centralizado
+            const avatarCenterY = 320;
+            const avatarRadius = 88;
 
-        // 4 Caixas de Estatísticas
-        const stats = [
-            { label: 'JOGOS AVALIADOS', val: numJogos, cor: '#ffffff', icone: '🎮' },
-            { label: 'FILMES & SÉRIES', val: numMidias, cor: '#ffffff', icone: '🎬' },
-            { label: 'PLATINAS (100%)', val: numPlatinas, cor: '#ffd700', icone: '🏆' },
-            { label: 'MÉDIA GERAL', val: mediaFinal, cor: '#00f0ff', icone: '⭐' }
-        ];
+            // Halo de brilho do avatar
+            const avatarHalo = ctx.createRadialGradient(width / 2, avatarCenterY, 60, width / 2, avatarCenterY, 130);
+            avatarHalo.addColorStop(0, 'rgba(0, 240, 255, 0.5)');
+            avatarHalo.addColorStop(1, 'transparent');
+            ctx.fillStyle = avatarHalo;
+            ctx.fillRect(width / 2 - 140, avatarCenterY - 140, 280, 280);
 
-        stats.forEach((s, idx) => {
-            const x = 80 + (idx * 218);
-            const y = 480;
-
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+            // Borda do Avatar
+            ctx.save();
             ctx.beginPath();
-            ctx.roundRect(x, y, 200, 170, 16);
+            ctx.arc(width / 2, avatarCenterY, avatarRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#0b1326';
             ctx.fill();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-            ctx.lineWidth = 2;
+            ctx.clip();
+
+            if (avatarImg) {
+                ctx.drawImage(avatarImg, width / 2 - avatarRadius, avatarCenterY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+            } else {
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
+                ctx.fillRect(width / 2 - avatarRadius, avatarCenterY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 80px "Inter", sans-serif';
+                ctx.textAlign = 'center';
+                const charFallback = (userAvatarRaw && userAvatarRaw.length <= 4) ? userAvatarRaw : (username.charAt(0).toUpperCase() || '🎮');
+                ctx.fillText(charFallback, width / 2, avatarCenterY + 28);
+            }
+            ctx.restore();
+
+            // Anel externo neon
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(width / 2, avatarCenterY, avatarRadius + 3, 0, Math.PI * 2);
             ctx.stroke();
 
-            ctx.font = '36px "Inter", sans-serif';
+            // Nome do Usuário
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 56px "Inter", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(s.icone, x + 100, y + 55);
+            ctx.fillText(username, width / 2, 475);
 
-            ctx.fillStyle = s.cor;
-            ctx.font = '900 44px "Inter", sans-serif';
-            ctx.fillText(String(s.val), x + 100, y + 115);
+            // Badge de Patente
+            desenharRoundBox(ctx, width / 2 - 250, 505, 500, 52, 26, 'rgba(15, 23, 42, 0.9)', prog.cor || '#00f0ff', 2);
+            ctx.fillStyle = prog.cor || '#00f0ff';
+            ctx.font = '800 24px "Inter", sans-serif';
+            ctx.fillText(`${prog.icone} NÍVEL ${prog.nivel} • ${prog.titulo.toUpperCase()}`, width / 2, 540);
+
+            // 2. Barra de Experiência XP
+            const xpBoxY = 590;
+            desenharRoundBox(ctx, 80, xpBoxY, width - 160, 110, 18, 'rgba(0, 0, 0, 0.4)', 'rgba(255, 255, 255, 0.1)', 1.5);
 
             ctx.fillStyle = '#94a3b8';
-            ctx.font = '800 15px "Inter", sans-serif';
-            ctx.fillText(s.label, x + 100, y + 148);
-        });
-        ctx.textAlign = 'left';
+            ctx.font = '800 20px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`EXPERIÊNCIA GAMER: ${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`, 110, xpBoxY + 40);
 
-        // Selo de Autenticidade e Carimbo
-        ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
-        ctx.beginPath();
-        ctx.roundRect(80, 700, 840, 420, 20);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+            // Barra Track
+            desenharRoundBox(ctx, 110, xpBoxY + 55, width - 220, 20, 10, 'rgba(255, 255, 255, 0.1)', null, 0);
+            const xpFillWidth = Math.max(30, (width - 220) * (prog.porcentagem / 100));
+            const xpFillGrad = ctx.createLinearGradient(110, 0, 110 + xpFillWidth, 0);
+            xpFillGrad.addColorStop(0, '#00f0ff');
+            xpFillGrad.addColorStop(1, '#9d4edd');
+            desenharRoundBox(ctx, 110, xpBoxY + 55, xpFillWidth, 20, 10, xpFillGrad, null, 0);
 
-        ctx.fillStyle = '#00f0ff';
-        ctx.font = '900 24px "Inter", sans-serif';
-        ctx.fillText('🛡️ CERTIFICADO DE AUTENTICIDADE OVERCRITIC', 110, 750);
+            // 3. Quatro Caixas de Estatísticas (Grid 2x2)
+            const stats = [
+                { label: 'JOGOS AVALIADOS', val: numJogos, cor: '#ffffff', icone: '🎮' },
+                { label: 'FILMES & SÉRIES', val: numMidias, cor: '#ffffff', icone: '🎬' },
+                { label: 'PLATINAS (100%)', val: numPlatinas, cor: '#ffd700', icone: '🏆' },
+                { label: 'MÉDIA PESSOAL', val: mediaFinal, cor: '#00f0ff', icone: '⭐' }
+            ];
 
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = '500 22px "Inter", sans-serif';
-        ctx.fillText(`Este Gamer Card certifica as avaliações técnicas e o progresso`, 110, 805);
-        ctx.fillText(`registrado por ${username} na comunidade geek & gamer Overcritic.`, 110, 845);
+            const gridY1 = 735;
+            const gridY2 = 895;
+            const cardW = 445;
+            const cardH = 135;
 
-        ctx.fillStyle = '#ffd166';
-        ctx.font = '800 25px "Inter", sans-serif';
-        ctx.fillText(`Status Atual: ${prog.icone} ${prog.titulo} (Nível ${prog.nivel})`, 110, 915);
+            stats.forEach((s, idx) => {
+                const isCol1 = idx % 2 === 0;
+                const isRow1 = idx < 2;
+                const cx = isCol1 ? 80 : 555;
+                const cy = isRow1 ? gridY1 : gridY2;
 
-        if (prog.proximoNivel) {
+                desenharRoundBox(ctx, cx, cy, cardW, cardH, 18, 'rgba(15, 23, 42, 0.85)', 'rgba(0, 240, 255, 0.25)', 2);
+
+                ctx.textAlign = 'left';
+                ctx.font = '40px "Inter", sans-serif';
+                ctx.fillText(s.icone, cx + 24, cy + 82);
+
+                ctx.fillStyle = s.cor;
+                ctx.font = '900 48px "Inter", sans-serif';
+                ctx.fillText(String(s.val), cx + 85, cy + 78);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '800 15px "Inter", sans-serif';
+                ctx.fillText(s.label, cx + 85, cy + 108);
+            });
+
+            // 4. Seção Top Obras & Capas Reais
+            const topY = 1065;
             ctx.fillStyle = '#00f0ff';
-            ctx.font = '700 21px "Inter", sans-serif';
-            ctx.fillText(`Meta Gamer: Faltam ${prog.xpRestante.toLocaleString('pt-BR')} XP para alcançar ${prog.proximoNivel.icone} ${prog.proximoNivel.titulo} (Nv. ${prog.proximoNivel.nivel})`, 110, 960);
+            ctx.font = '900 24px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('⭐ OBRAS & AVALIAÇÕES EM DESTAQUE', 80, topY);
+
+            const capaW = 286;
+            const capaH = 390;
+            const capaGap = 30;
+
+            for (let i = 0; i < 3; i++) {
+                const px = 80 + i * (capaW + capaGap);
+                const py = topY + 25;
+                const obra = topObras[i];
+                const capaImg = capasImgs[i];
+
+                if (obra) {
+                    desenharCapaGamerCardPro(ctx, capaImg, px, py, capaW, capaH, 16, obra.titulo);
+
+                    // Badge de Nota no Topo
+                    desenharRoundBox(ctx, px + 12, py + 12, 100, 34, 10, 'rgba(0, 0, 0, 0.88)', '#ffd700', 1.5);
+                    ctx.fillStyle = '#ffd700';
+                    ctx.font = '900 16px "Inter", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`★ ${obra.nota.toFixed(1)}`, px + 62, py + 35);
+
+                    // Título na base
+                    desenharRoundBox(ctx, px + 8, py + capaH - 46, capaW - 16, 38, 8, 'rgba(0, 0, 0, 0.88)', 'rgba(255, 255, 255, 0.12)', 1);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '800 15px "Inter", sans-serif';
+                    const titCurto = obra.titulo.length > 18 ? obra.titulo.substring(0, 16) + '..' : obra.titulo;
+                    ctx.fillText(titCurto, px + capaW / 2, py + capaH - 22);
+                } else {
+                    // Slot Vazio
+                    desenharRoundBox(ctx, px, py, capaW, capaH, 16, 'rgba(0, 0, 0, 0.3)', 'rgba(255, 255, 255, 0.08)', 2);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '700 16px "Inter", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('+ Avaliar Obra', px + capaW / 2, py + capaH / 2);
+                }
+            }
+
+            // 5. Certificado e Rodapé Oficial
+            const certY = 1530;
+            desenharRoundBox(ctx, 80, certY, width - 160, 260, 20, 'rgba(0, 240, 255, 0.05)', 'rgba(0, 240, 255, 0.25)', 2);
+
+            ctx.fillStyle = '#00f0ff';
+            ctx.font = '900 24px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('🛡️ CERTIFICADO DE AUTENTICIDADE OVERCRITIC', 110, certY + 50);
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '500 21px "Inter", sans-serif';
+            ctx.fillText(`Este Gamer Card certifica as críticas e conquistas registradas por`, 110, certY + 95);
+            ctx.fillText(`${username} na comunidade geek & gamer oficial do Overcritic.`, 110, certY + 130);
+
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '800 22px "Inter", sans-serif';
+            ctx.fillText(`Status Oficial: ${prog.icone} ${prog.titulo} • Temporada 2026`, 110, certY + 180);
+
             ctx.fillStyle = '#94a3b8';
             ctx.font = '600 18px "Inter", sans-serif';
-            ctx.fillText(`Emissão: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')} • overcritic.com`, 110, 1010);
+            ctx.fillText(`Acesse o portal e monte o seu: https://pontug.github.io/OVERCRITIC`, 110, certY + 225);
+
+            // Watermark Final
+            ctx.fillStyle = '#64748b';
+            ctx.font = '700 18px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('OVERCRITIC • SEU PORTAL DIÁRIO DE JOGOS, FILMES & PLATINAS', width / 2, height - 55);
+
         } else {
-            ctx.fillStyle = '#ef4444';
-            ctx.font = '700 21px "Inter", sans-serif';
-            ctx.fillText(`Meta Gamer: Patente Suprema 100% Conquistada na Temporada!`, 110, 960);
+            // ════════ LAYOUT POST / FEED (4:5 - 1080 x 1350) ════════
+
+            // 1. Perfil Horizontal
+            const avatarX = 145;
+            const avatarY = 245;
+            const avatarRadius = 65;
+
+            // Halo
+            const aHalo = ctx.createRadialGradient(avatarX, avatarY, 40, avatarX, avatarY, 95);
+            aHalo.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
+            aHalo.addColorStop(1, 'transparent');
+            ctx.fillStyle = aHalo;
+            ctx.fillRect(avatarX - 100, avatarY - 100, 200, 200);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#0b1326';
+            ctx.fill();
+            ctx.clip();
+
+            if (avatarImg) {
+                ctx.drawImage(avatarImg, avatarX - avatarRadius, avatarY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+            } else {
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
+                ctx.fillRect(avatarX - avatarRadius, avatarY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 64px "Inter", sans-serif';
+                ctx.textAlign = 'center';
+                const charFb = (userAvatarRaw && userAvatarRaw.length <= 4) ? userAvatarRaw : (username.charAt(0).toUpperCase() || '🎮');
+                ctx.fillText(charFb, avatarX, avatarY + 22);
+            }
+            ctx.restore();
+
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(avatarX, avatarY, avatarRadius + 2, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Textos do Perfil
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 50px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(username, 240, 230);
+
+            ctx.fillStyle = prog.cor || '#00f0ff';
+            ctx.font = '800 24px "Inter", sans-serif';
+            ctx.fillText(`${prog.icone} Nível ${prog.nivel} • ${prog.titulo}`, 240, 270);
+
+            // Barra de XP Compacta
+            const xpBarY = 330;
+            desenharRoundBox(ctx, 80, xpBarY, width - 160, 50, 12, 'rgba(0, 0, 0, 0.4)', 'rgba(255, 255, 255, 0.08)', 1);
+
             ctx.fillStyle = '#94a3b8';
-            ctx.font = '600 18px "Inter", sans-serif';
-            ctx.fillText(`Emissão: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')} • overcritic.com`, 110, 1010);
+            ctx.font = '700 16px "Inter", sans-serif';
+            ctx.fillText(`EXPERIÊNCIA: ${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`, 100, xpBarY + 32);
+
+            const xpWPost = Math.max(20, 420 * (prog.porcentagem / 100));
+            desenharRoundBox(ctx, width - 530, xpBarY + 16, 420, 16, 8, 'rgba(255, 255, 255, 0.1)', null, 0);
+            const xpGradPost = ctx.createLinearGradient(width - 530, 0, width - 530 + xpWPost, 0);
+            xpGradPost.addColorStop(0, '#00f0ff');
+            xpGradPost.addColorStop(1, '#9d4edd');
+            desenharRoundBox(ctx, width - 530, xpBarY + 16, xpWPost, 16, 8, xpGradPost, null, 0);
+
+            // 2. Quatro Estatísticas em Linha Única
+            const statsPost = [
+                { label: 'JOGOS', val: numJogos, cor: '#ffffff', icone: '🎮' },
+                { label: 'MÍDIAS', val: numMidias, cor: '#ffffff', icone: '🎬' },
+                { label: 'PLATINAS', val: numPlatinas, cor: '#ffd700', icone: '🏆' },
+                { label: 'MÉDIA', val: mediaFinal, cor: '#00f0ff', icone: '⭐' }
+            ];
+
+            const statBoxY = 405;
+            const sBoxW = 215;
+            const sBoxH = 130;
+            const sGap = 20;
+
+            statsPost.forEach((s, idx) => {
+                const sx = 80 + idx * (sBoxW + sGap);
+                desenharRoundBox(ctx, sx, statBoxY, sBoxW, sBoxH, 16, 'rgba(15, 23, 42, 0.85)', 'rgba(0, 240, 255, 0.22)', 2);
+
+                ctx.textAlign = 'center';
+                ctx.font = '32px "Inter", sans-serif';
+                ctx.fillText(s.icone, sx + sBoxW / 2, statBoxY + 45);
+
+                ctx.fillStyle = s.cor;
+                ctx.font = '900 38px "Inter", sans-serif';
+                ctx.fillText(String(s.val), sx + sBoxW / 2, statBoxY + 88);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '800 13px "Inter", sans-serif';
+                ctx.fillText(s.label, sx + sBoxW / 2, statBoxY + 114);
+            });
+
+            // 3. Top Obras em Destaque
+            const topPostY = 565;
+            ctx.fillStyle = '#00f0ff';
+            ctx.font = '900 22px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('⭐ TOP OBRAS AVALIADAS', 80, topPostY);
+
+            const cWPost = 290;
+            const cHPost = 380;
+            const cGapPost = 25;
+
+            for (let i = 0; i < 3; i++) {
+                const px = 80 + i * (cWPost + cGapPost);
+                const py = topPostY + 18;
+                const obra = topObras[i];
+                const capaImg = capasImgs[i];
+
+                if (obra) {
+                    desenharCapaGamerCardPro(ctx, capaImg, px, py, cWPost, cHPost, 16, obra.titulo);
+
+                    // Badge de Nota
+                    desenharRoundBox(ctx, px + 10, py + 10, 95, 32, 8, 'rgba(0, 0, 0, 0.85)', '#ffd700', 1.5);
+                    ctx.fillStyle = '#ffd700';
+                    ctx.font = '900 15px "Inter", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`★ ${obra.nota.toFixed(1)}`, px + 47, py + 31);
+
+                    // Faixa de Título
+                    desenharRoundBox(ctx, px + 8, py + cHPost - 42, cWPost - 16, 34, 8, 'rgba(0, 0, 0, 0.85)', 'rgba(255, 255, 255, 0.1)', 1);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '800 14px "Inter", sans-serif';
+                    const titCurto = obra.titulo.length > 18 ? obra.titulo.substring(0, 16) + '..' : obra.titulo;
+                    ctx.fillText(titCurto, px + cWPost / 2, py + cHPost - 20);
+                } else {
+                    desenharRoundBox(ctx, px, py, cWPost, cHPost, 16, 'rgba(0, 0, 0, 0.3)', 'rgba(255, 255, 255, 0.08)', 2);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '700 15px "Inter", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('+ Avaliar Obra', px + cWPost / 2, py + cHPost / 2);
+                }
+            }
+
+            // 4. Rodapé e Certificação
+            const botY = 1000;
+            desenharRoundBox(ctx, 80, botY, width - 160, 245, 18, 'rgba(0, 240, 255, 0.06)', 'rgba(0, 240, 255, 0.25)', 2);
+
+            ctx.fillStyle = '#00f0ff';
+            ctx.font = '900 22px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('🛡️ CERTIFICADO DE AUTENTICIDADE OVERCRITIC', 110, botY + 45);
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '500 19px "Inter", sans-serif';
+            ctx.fillText(`Passe Gamer Oficial emitido para ${username} na plataforma Overcritic.`, 110, botY + 85);
+
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '800 20px "Inter", sans-serif';
+            ctx.fillText(`Status: ${prog.icone} ${prog.titulo} • Temporada 2026`, 110, botY + 130);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '600 17px "Inter", sans-serif';
+            ctx.fillText(`https://pontug.github.io/OVERCRITIC`, 110, botY + 175);
+
+            // Watermark Final
+            ctx.fillStyle = '#64748b';
+            ctx.font = '700 16px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('OVERCRITIC • SEU PORTAL DIÁRIO DE JOGOS, FILMES & PLATINAS', width / 2, height - 35);
         }
 
-        ctx.fillText(`Portal Oficial: https://pontug.github.io/OVERCRITIC`, 110, 1050);
+        return canvas;
+    }
 
-        // Rodapé Final
-        ctx.fillStyle = '#64748b';
-        ctx.font = '700 20px "Inter", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('OVERCRITIC • SEU PORTAL DIÁRIO DE JOGOS, FILMES & PLATINAS', 500, 1220);
+    /**
+     * Processa a exportação inteligente do Gamer Card (download, compartilhamento social ou cópia)
+     */
+    async function processarExportacaoGamerCard(acao = 'download', formato = 'stories') {
+        const btnDownload = document.getElementById('ogBtnDownloadCard');
+        const btnShare = document.getElementById('ogBtnShareCard');
+        const btnCopy = document.getElementById('ogBtnCopyCard');
 
-        // Trigger Download
+        const btnAtivo = acao === 'share' ? btnShare : (acao === 'copy' ? btnCopy : btnDownload);
+        const textoOriginal = btnAtivo ? btnAtivo.innerHTML : '';
+        if (btnAtivo) {
+            btnAtivo.disabled = true;
+            btnAtivo.innerHTML = `<span>⏳</span> Processando...`;
+        }
+
         try {
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = `overcritic-card-${username.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png`;
-            link.href = dataUrl;
-            link.click();
-            if (window.showToast) window.showToast.success('Gamer Card baixado com sucesso!');
-        } catch (e) {
-            console.error('Erro ao exportar canvas:', e);
+            const dados = _dadosCardAtuais || {};
+            const username = dados.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+            const slug = username.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const fileName = `overcritic-card-${slug}-${formato}.png`;
+
+            // Utiliza o canvas pré-renderizado em cache ou gera instantaneamente
+            let canvas = _cacheCanvasGamerCard[formato];
+            if (!canvas) {
+                if (window.showToast) window.showToast.info('Renderizando Gamer Card em alta resolução...');
+                canvas = await gerarCanvasGamerCardPro(formato);
+                _cacheCanvasGamerCard[formato] = canvas;
+            }
+
+            if (acao === 'copy') {
+                if (navigator.clipboard && window.ClipboardItem && canvas.toBlob) {
+                    canvas.toBlob(async (blob) => {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            if (window.showToast) {
+                                window.showToast.success('Gamer Card copiado! Pressione Ctrl + V no Discord ou WhatsApp.');
+                            }
+                        } catch (err) {
+                            console.warn('Erro ao copiar blob:', err);
+                            if (window.showToast) {
+                                window.showToast.info('Seu navegador não permitiu copiar imagem diretamente. Use o botão "Baixar PNG".');
+                            }
+                        }
+                    }, 'image/png');
+                } else {
+                    if (window.showToast) {
+                        window.showToast.info('Cópia de imagem não suportada no seu navegador. Use o botão "Baixar PNG".');
+                    }
+                }
+            } else if (acao === 'share') {
+                // Conversão síncrona instantânea preservando o User Gesture Token do Chrome/Edge
+                const dataUrl = canvas.toDataURL('image/png');
+                const file = dataURLtoFileSync(dataUrl, fileName);
+
+                const shareDataComArquivo = {
+                    title: `Gamer Card de ${username} • OVERCRITIC`,
+                    text: `Confira meu perfil gamer oficial no OVERCRITIC! 🎮 Acesse: https://pontug.github.io/OVERCRITIC`,
+                    files: [file]
+                };
+
+                const shareDataTexto = {
+                    title: `Gamer Card de ${username} • OVERCRITIC`,
+                    text: `Confira meu perfil gamer oficial no OVERCRITIC! 🎮 Acesse: https://pontug.github.io/OVERCRITIC`,
+                    url: 'https://pontug.github.io/OVERCRITIC'
+                };
+
+                if (navigator.share) {
+                    try {
+                        if (navigator.canShare && navigator.canShare(shareDataComArquivo)) {
+                            await navigator.share(shareDataComArquivo);
+                            if (window.showToast) window.showToast.success('Compartilhado com sucesso!');
+                        } else if (navigator.canShare && navigator.canShare(shareDataTexto)) {
+                            await navigator.share(shareDataTexto);
+                            if (window.showToast) window.showToast.info('Link compartilhado! Para enviar a imagem, use "Copiar Imagem" ou "Baixar PNG".');
+                        } else {
+                            await navigator.share(shareDataComArquivo);
+                            if (window.showToast) window.showToast.success('Compartilhado com sucesso!');
+                        }
+                    } catch (e) {
+                        if (e.name === 'AbortError') {
+                            // Usuário cancelou ou fechou a janela nativa de compartilhamento: comportamento esperado, não faz nada
+                            return;
+                        }
+                        console.warn('Erro no compartilhamento nativo:', e);
+                        if (window.showToast) {
+                            window.showToast.info('Não foi possível abrir o compartilhador nativo agora. Use "Copiar Imagem" (Ctrl+V) ou "Baixar PNG".');
+                        }
+                    }
+                } else {
+                    if (window.showToast) {
+                        window.showToast.info('Compartilhamento nativo não suportado neste dispositivo. Use "Copiar Imagem" ou "Baixar PNG".');
+                    }
+                }
+            } else {
+                // Ação EXCLUSIVA de download de arquivo PNG
+                baixarCanvasComoArquivo(canvas, fileName);
+            }
+        } catch (error) {
+            console.error('Erro ao exportar Gamer Card:', error);
             if (window.showToast) window.showToast.error('Não foi possível gerar a imagem automaticamente.');
+        } finally {
+            if (btnAtivo) {
+                btnAtivo.disabled = false;
+                btnAtivo.innerHTML = textoOriginal;
+            }
         }
+    }
+
+    /**
+     * Atalho retrocompatível para download direto do Gamer Card
+     */
+    function exportarGamerCardPng() {
+        return processarExportacaoGamerCard('download', 'stories');
     }
 
     /* ════════════════════════════════════════════════════════
@@ -4356,12 +5958,1214 @@
         }
     }
 
+    /* ════════════════════════════════════════════════════════
+       7. MURAL DE INSÍGNIAS & CONQUISTAS DESBLOQUEÁVEIS
+       Popups animados de troféu estilo console, som triunfante
+       via Web Audio API e estante virtual interativa de troféus.
+    ════════════════════════════════════════════════════════ */
+    const CONFIG_INSIGNIAS = [
+        {
+            id: 'soulslike_slayer',
+            nome: 'Soulslike Slayer',
+            icone: '🗡️',
+            cor: '#ef4444',
+            corBorda: 'rgba(239, 68, 68, 0.5)',
+            glow: 'rgba(239, 68, 68, 0.35)',
+            descricao: 'Registrar 3 ou mais jogos com a tag Soulslike.',
+            detalhe: 'Avalie jogos do gênero Soulslike como Elden Ring, Dark Souls, Bloodborne, Sekiro, Lies of P, etc.',
+            xpBonus: 300,
+            meta: 3,
+            unidade: 'jogos',
+            obterProgresso: (dados) => {
+                const jogos = dados.jogos || [];
+                const termosSouls = [
+                    'soulslike', 'souls', 'elden ring', 'dark souls', 'bloodborne', 
+                    'sekiro', 'lies of p', "demon's souls", 'demons souls', 'nioh', 
+                    'lords of the fallen', 'wo long', 'mortal shell', 'black myth', 
+                    'wukong', 'stellar blade', 'hollow knight', 'remnant', 'blasphemous'
+                ];
+                return jogos.filter(j => {
+                    const genero = (j.genero || '').toLowerCase();
+                    const tags = Array.isArray(j.tags) ? j.tags.map(t => String(t).toLowerCase()).join(' ') : (j.tags || '').toLowerCase();
+                    const titulo = (j.titulo || j.nome || '').toLowerCase();
+                    const subtitulo = (j.subtitulo || '').toLowerCase();
+                    const textoFull = `${genero} ${tags} ${titulo} ${subtitulo}`;
+                    return termosSouls.some(termo => textoFull.includes(termo));
+                }).length;
+            }
+        },
+        {
+            id: 'platina_hunter',
+            nome: 'Caçador de Platinas',
+            icone: '👑',
+            cor: '#38bdf8',
+            corBorda: 'rgba(56, 189, 248, 0.5)',
+            glow: 'rgba(56, 189, 248, 0.35)',
+            descricao: 'Conquistar 3 platinas cadastradas.',
+            detalhe: 'Cadastre e registre 3 jogos 100% platinados no seu catálogo.',
+            xpBonus: 500,
+            meta: 3,
+            unidade: 'platinas',
+            obterProgresso: (dados) => {
+                return (dados.platinas || []).length;
+            }
+        },
+        {
+            id: 'critico_respeitado',
+            nome: 'Crítico Respeitado',
+            icone: '✍️',
+            cor: '#ffd700',
+            corBorda: 'rgba(255, 215, 0, 0.5)',
+            glow: 'rgba(255, 215, 0, 0.35)',
+            descricao: 'Publicar 5 resenhas detalhadas (+180 caracteres).',
+            detalhe: 'Escreva análises aprofundadas com argumentos críticos e mais de 180 caracteres.',
+            xpBonus: 400,
+            meta: 5,
+            unidade: 'resenhas',
+            obterProgresso: (dados) => {
+                const jogos = dados.jogos || [];
+                const midias = dados.midias || [];
+                const todos = [...jogos, ...midias];
+                return todos.filter(item => {
+                    const texto = (item.opiniao || item.review || item.texto || item.comentario || item.resenha || '').trim();
+                    return texto.length >= 180;
+                }).length;
+            }
+        },
+        {
+            id: 'cineasta',
+            nome: 'Cineasta',
+            icone: '🍿',
+            cor: '#a855f7',
+            corBorda: 'rgba(168, 85, 247, 0.5)',
+            glow: 'rgba(168, 85, 247, 0.35)',
+            descricao: 'Avaliar 5 filmes ou séries em adicionar_midias.html.',
+            detalhe: 'Registre suas opiniões e notas para produções cinematográficas e séries de TV.',
+            xpBonus: 350,
+            meta: 5,
+            unidade: 'mídias',
+            obterProgresso: (dados) => {
+                return (dados.midias || []).length;
+            }
+        }
+    ];
+
+    // Som Triunfante Gamer via Web Audio API (zero arquivos externos)
+    function tocarSomConquista() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            if (!window._ogAudioCtx) window._ogAudioCtx = new AudioCtx();
+            if (window._ogAudioCtx.state === 'suspended') {
+                window._ogAudioCtx.resume();
+            }
+            const ctx = window._ogAudioCtx;
+            const now = ctx.currentTime;
+            // Arpeggio de triunfo cristalino (Dó5, Mi5, Sol5, Dó6)
+            const notas = [523.25, 659.25, 783.99, 1046.50];
+            notas.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + i * 0.09);
+
+                gain.gain.setValueAtTime(0.0001, now + i * 0.09);
+                gain.gain.exponentialRampToValueAtTime(0.2, now + i * 0.09 + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.09 + 0.45);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now + i * 0.09);
+                osc.stop(now + i * 0.09 + 0.5);
+            });
+        } catch (e) {
+            // Silencioso se áudio não for permitido no navegador
+        }
+    }
+
+    // Fila e Exibição de Popups Animados de Conquista
+    let _filaPopupsConquistas = [];
+    let _popupConquistaAtivo = false;
+
+    function garantirContainerPopupConquista() {
+        injetarEstilosGamificacao();
+        let c = document.getElementById('ogAchievementPopupContainer');
+        if (!c) {
+            c = document.createElement('div');
+            c.id = 'ogAchievementPopupContainer';
+            c.className = 'og-achievement-popup-container';
+            document.body.appendChild(c);
+        }
+        return c;
+    }
+
+    function exibirPopupConquista(insignia) {
+        if (!insignia) return;
+        _filaPopupsConquistas.push(insignia);
+        processarProximoPopupConquista();
+    }
+
+    function processarProximoPopupConquista() {
+        if (_popupConquistaAtivo || _filaPopupsConquistas.length === 0) return;
+        _popupConquistaAtivo = true;
+
+        const insignia = _filaPopupsConquistas.shift();
+        const container = garantirContainerPopupConquista();
+
+        // Toca o som de celebração gamer
+        tocarSomConquista();
+
+        const popup = document.createElement('div');
+        popup.className = 'og-achievement-popup';
+        popup.style.borderColor = insignia.corBorda || '#ffd700';
+        popup.style.boxShadow = `0 16px 45px rgba(0, 0, 0, 0.75), 0 0 30px ${insignia.glow || 'rgba(255, 215, 0, 0.35)'}`;
+        popup.innerHTML = `
+            <div class="og-achievement-shimmer"></div>
+            <div class="og-achievement-icon-wrap" style="border-color:${insignia.cor}; box-shadow: 0 0 20px ${insignia.glow};">
+                <span>${insignia.icone}</span>
+            </div>
+            <div class="og-achievement-content">
+                <div class="og-achievement-header">
+                    <span class="og-achievement-badge-tag" style="color:${insignia.cor};">🏆 CONQUISTA DESBLOQUEADA!</span>
+                    <span class="og-achievement-xp-badge">+${insignia.xpBonus} XP</span>
+                </div>
+                <div class="og-achievement-title">${insignia.nome}</div>
+                <div class="og-achievement-desc">${insignia.descricao}</div>
+            </div>
+            <button type="button" class="og-achievement-close" title="Fechar">✕</button>
+        `;
+
+        container.appendChild(popup);
+
+        // Força reflow para animação fluida
+        void popup.offsetWidth;
+        popup.classList.add('active');
+
+        let timeoutDismiss = null;
+
+        const fechar = () => {
+            if (timeoutDismiss) clearTimeout(timeoutDismiss);
+            popup.classList.remove('active');
+            popup.classList.add('hiding');
+            setTimeout(() => {
+                if (popup.parentNode) popup.parentNode.removeChild(popup);
+                _popupConquistaAtivo = false;
+                processarProximoPopupConquista();
+            }, 400);
+        };
+
+        const btnClose = popup.querySelector('.og-achievement-close');
+        if (btnClose) btnClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fechar();
+        });
+
+        // Clique no popup abre o mural de troféus!
+        popup.addEventListener('click', () => {
+            fechar();
+            abrirModalMuralInsignias();
+        });
+
+        timeoutDismiss = setTimeout(fechar, 6000);
+    }
+
+    // Obter Status Completo das Insígnias do Jogador
+    function obterStatusInsigniasUsuario(dadosOuUsername) {
+        let username = '';
+        let dados = null;
+
+        if (typeof dadosOuUsername === 'string') {
+            username = dadosOuUsername.trim();
+            dados = obterDadosConsolidadosUsuario(username);
+        } else if (dadosOuUsername && typeof dadosOuUsername === 'object') {
+            dados = dadosOuUsername;
+            username = dados.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        } else {
+            username = localStorage.getItem('overcritic_currentUser') || 'Jogador';
+            dados = obterDadosConsolidadosUsuario(username);
+        }
+
+        const usernameLower = username.toLowerCase();
+        const storageKey = `overcritic_insignias_desbloqueadas_${usernameLower}`;
+        let registrosSalvos = {};
+        try {
+            registrosSalvos = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            if (Array.isArray(registrosSalvos)) {
+                // Retrocompatibilidade se tiver sido salvo como array
+                const map = {};
+                registrosSalvos.forEach(id => { map[id] = { unlockedAt: new Date().toISOString() }; });
+                registrosSalvos = map;
+            }
+        } catch (e) {
+            registrosSalvos = {};
+        }
+
+        return CONFIG_INSIGNIAS.map(cfg => {
+            const progressoAtual = typeof cfg.obterProgresso === 'function' ? cfg.obterProgresso(dados) : 0;
+            const atingiuMeta = progressoAtual >= cfg.meta;
+            const registro = registrosSalvos[cfg.id];
+            const desbloqueada = atingiuMeta || !!registro;
+
+            let porcentagem = Math.min(100, Math.floor((progressoAtual / cfg.meta) * 100));
+            if (desbloqueada) porcentagem = 100;
+
+            return {
+                id: cfg.id,
+                nome: cfg.nome,
+                icone: cfg.icone,
+                cor: cfg.cor,
+                corBorda: cfg.corBorda,
+                glow: cfg.glow,
+                descricao: cfg.descricao,
+                detalhe: cfg.detalhe,
+                xpBonus: cfg.xpBonus,
+                meta: cfg.meta,
+                progressoAtual: Math.min(cfg.meta, progressoAtual),
+                unidade: cfg.unidade,
+                porcentagem,
+                desbloqueada,
+                dataDesbloqueio: registro ? registro.unlockedAt : (desbloqueada ? new Date().toISOString() : null)
+            };
+        });
+    }
+
+    // Verificação em Tempo Real com Notificação de Novas Conquistas
+    function verificarConquistas(opcoes = { notificar: true }) {
+        const username = (localStorage.getItem('overcritic_currentUser') || 'Jogador').trim();
+        const usernameLower = username.toLowerCase();
+        const storageKey = `overcritic_insignias_desbloqueadas_${usernameLower}`;
+
+        let registrosSalvos = {};
+        try {
+            registrosSalvos = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            if (Array.isArray(registrosSalvos)) {
+                const map = {};
+                registrosSalvos.forEach(id => { map[id] = { unlockedAt: new Date().toISOString() }; });
+                registrosSalvos = map;
+            }
+        } catch (e) {
+            registrosSalvos = {};
+        }
+
+        const dados = obterDadosConsolidadosUsuario(username);
+        const listaStatus = obterStatusInsigniasUsuario(dados);
+        let houveNovidade = false;
+
+        listaStatus.forEach(ins => {
+            if (ins.progressoAtual >= ins.meta && !registrosSalvos[ins.id]) {
+                // Nova conquista desbloqueada!
+                registrosSalvos[ins.id] = {
+                    unlockedAt: new Date().toISOString()
+                };
+                houveNovidade = true;
+
+                if (opcoes.notificar) {
+                    exibirPopupConquista(ins);
+                }
+            }
+        });
+
+        if (houveNovidade) {
+            localStorage.setItem(storageKey, JSON.stringify(registrosSalvos));
+            atualizarBadgesNivelPagina();
+            console.log('🏆 [Overcritic] Novas conquistas sincronizadas no perfil do jogador!');
+        }
+
+        try {
+            if (typeof verificarMissoesSemanais === 'function') {
+                verificarMissoesSemanais(opcoes);
+            }
+        } catch(e) {}
+
+        return listaStatus;
+    }
+
+    // Renderizador HTML da Estante Virtual de Troféus (Para Perfil, Modais ou Hub)
+    function renderizarMuralTrofeusHtml(username, customDados) {
+        injetarEstilosGamificacao();
+        const lista = obterStatusInsigniasUsuario(customDados || username);
+        const totalDesbloqueadas = lista.filter(i => i.desbloqueada).length;
+        const totalXpInsignias = lista.filter(i => i.desbloqueada).reduce((acc, i) => acc + i.xpBonus, 0);
+
+        const cardsHtml = lista.map(ins => {
+            const statusClass = ins.desbloqueada ? 'unlocked' : 'locked';
+            const statusLabel = ins.desbloqueada ? '✓ DESBLOQUEADO' : '🔒 BLOQUEADO';
+            const statusPillClass = ins.desbloqueada ? 'unlocked' : 'locked';
+            const progressoTexto = ins.desbloqueada 
+                ? `Meta Completa (${ins.meta}/${ins.meta} ${ins.unidade})` 
+                : `${ins.progressoAtual} de ${ins.meta} ${ins.unidade} (${ins.porcentagem}%)`;
+
+            return `
+                <div class="og-trophy-card ${statusClass}" 
+                     style="--card-cor:${ins.cor}; --card-cor-borda:${ins.corBorda}; --card-glow:${ins.glow};"
+                     onclick="alert('🏆 Conquista: ${ins.nome}\\n\\n🎯 Objetivo: ${ins.descricao}\\n💡 Dica: ${ins.detalhe}\\n⚡ Recompensa: +${ins.xpBonus} XP\\n\\nStatus: ${ins.desbloqueada ? 'Desbloqueada!' : 'Em progresso (' + ins.progressoAtual + '/' + ins.meta + ')'}')"
+                     title="Clique para ver detalhes do troféu">
+                    <div class="og-trophy-card-header">
+                        <div class="og-trophy-icon-wrap">
+                            <span>${ins.icone}</span>
+                        </div>
+                        <span class="og-trophy-status-pill ${statusPillClass}">${statusLabel}</span>
+                    </div>
+                    <div class="og-trophy-info">
+                        <div class="og-trophy-name">${ins.nome}</div>
+                        <div class="og-trophy-desc">${ins.descricao}</div>
+                    </div>
+                    <div class="og-trophy-progress-wrap">
+                        <div class="og-trophy-progress-labels">
+                            <span class="og-trophy-progress-text">${progressoTexto}</span>
+                            <span class="og-trophy-xp-bonus">+${ins.xpBonus} XP</span>
+                        </div>
+                        <div class="og-trophy-track">
+                            <div class="og-trophy-fill" style="width: ${ins.porcentagem}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="og-trophy-shelf-section">
+                <div class="og-shelf-header">
+                    <div class="og-shelf-title-wrap">
+                        <div class="og-shelf-title">
+                            <span>🏆</span> Estante de Troféus & Insígnias Virtuais
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="og-shelf-counter-badge">
+                            ${totalDesbloqueadas} / ${lista.length} Conquistas (+${totalXpInsignias.toLocaleString('pt-BR')} XP)
+                        </span>
+                    </div>
+                </div>
+                <div class="og-shelf-rack">
+                    ${cardsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // ════════════════════════════════════════════════════════
+    // 5. MOTOR DE MISSÕES SEMANAIS COM TEMPORIZADOR (WEEKLY QUESTS)
+    // ════════════════════════════════════════════════════════
+
+    function extrairTimestampItem(item) {
+        if (!item) return null;
+        const raw = item.created_at || item.dataRegistro || item.data_registro || item.timestamp || item.dataConclusao || item.data;
+        if (!raw) return null;
+        if (typeof raw === 'number') return raw;
+        if (typeof raw === 'string') {
+            const rawTrim = raw.trim();
+            // Formato DD/MM/YYYY ou DD/MM/YYYY HH:mm
+            const ddmmyyyy = rawTrim.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (ddmmyyyy) {
+                const d = parseInt(ddmmyyyy[1], 10);
+                const m = parseInt(ddmmyyyy[2], 10) - 1;
+                const y = parseInt(ddmmyyyy[3], 10);
+                return new Date(y, m, d, 12, 0, 0).getTime();
+            }
+            const parsed = Date.parse(rawTrim);
+            if (!isNaN(parsed)) return parsed;
+        }
+        return null;
+    }
+
+    /**
+     * Calcula o ciclo semanal determinístico ISO-8601 (Segunda 00:00:00 até Domingo 23:59:59.999)
+     */
+    function obterCicloSemanaAtual(dataRef = new Date()) {
+        const d = new Date(dataRef);
+        const day = d.getDay();
+        const diffToMonday = (day === 0 ? -6 : 1) - day;
+
+        const monday = new Date(d);
+        monday.setDate(d.getDate() + diffToMonday);
+        monday.setHours(0, 0, 0, 0);
+
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        sunday.setHours(23, 59, 59, 999);
+
+        // Determinação da semana ISO
+        const tempDate = new Date(monday.valueOf());
+        tempDate.setDate(tempDate.getDate() + 3);
+        const firstThursday = tempDate.valueOf();
+        tempDate.setMonth(0, 1);
+        if (tempDate.getDay() !== 4) {
+            tempDate.setMonth(0, 1 + ((4 - tempDate.getDay() + 7) % 7));
+        }
+        const weekNumber = Math.max(1, 1 + Math.ceil((firstThursday - tempDate) / 604800000));
+        const year = monday.getFullYear();
+        const chaveSemana = `semana_${year}_w${String(weekNumber).padStart(2, '0')}`;
+
+        const now = Date.now();
+        const fimMs = sunday.getTime();
+        const inicioMs = monday.getTime();
+        const restanteMs = Math.max(0, fimMs - now);
+        const expirado = restanteMs <= 0;
+
+        const totalSec = Math.floor(restanteMs / 1000);
+        const dias = Math.floor(totalSec / 86400);
+        const horas = Math.floor((totalSec % 86400) / 3600);
+        const minutos = Math.floor((totalSec % 3600) / 60);
+        const segundos = totalSec % 60;
+        const formatadoRestante = `${dias}d ${String(horas).padStart(2, '0')}h ${String(minutos).padStart(2, '0')}m ${String(segundos).padStart(2, '0')}s`;
+
+        return {
+            ano: year,
+            semana: weekNumber,
+            chaveSemana,
+            inicioMs,
+            fimMs,
+            restanteMs,
+            expirado,
+            formatadoRestante
+        };
+    }
+
+    // Pool de Missões Semanais Rotativas
+    const POOL_MISSOES_SEMANAIS = [
+        {
+            id: 'semanal_analises_2',
+            nome: 'Maratona Crítica',
+            icone: '🎮',
+            cor: '#00f0ff',
+            glow: 'rgba(0, 240, 255, 0.4)',
+            descricao: 'Avaliar 2 jogos esta semana com resenha autêntica.',
+            detalhe: 'Cadastre ou analise 2 jogos com resenha crítica durante esta semana.',
+            xpBonus: 300,
+            meta: 2,
+            unidade: 'jogos',
+            actionUrl: 'adicionar_jogos.html',
+            actionLabel: 'Analisar Jogos',
+            verificarProgresso: (dados, ciclo) => {
+                const jogos = dados.jogos || [];
+                return jogos.filter(j => {
+                    const ts = extrairTimestampItem(j);
+                    if (!ts || ts < ciclo.inicioMs || ts > ciclo.fimMs) return false;
+                    const texto = (j.opiniao || j.review || j.texto || j.comentario || j.resenha || '').trim();
+                    return texto.length >= 40;
+                }).length;
+            }
+        },
+        {
+            id: 'semanal_platina_1',
+            nome: 'Caçador de Troféus',
+            icone: '🏆',
+            cor: '#ffd700',
+            glow: 'rgba(255, 215, 0, 0.4)',
+            descricao: 'Registrar 1 nova platina durante esta semana.',
+            detalhe: 'Complete e registre 1 jogo 100% platinado na sua estante virtual.',
+            xpBonus: 400,
+            meta: 1,
+            unidade: 'platina',
+            actionUrl: 'adicionar_platinas.html',
+            actionLabel: 'Registrar Platina',
+            verificarProgresso: (dados, ciclo) => {
+                const platinas = dados.platinas || [];
+                return platinas.filter(p => {
+                    const ts = extrairTimestampItem(p);
+                    return ts && ts >= ciclo.inicioMs && ts <= ciclo.fimMs;
+                }).length;
+            }
+        },
+        {
+            id: 'semanal_cinema_2',
+            nome: 'Sessão Pipoca',
+            icone: '🍿',
+            cor: '#ec4899',
+            glow: 'rgba(236, 72, 153, 0.4)',
+            descricao: 'Avaliar 2 filmes ou séries esta semana.',
+            detalhe: 'Registre suas opiniões e notas para 2 filmes ou séries nesta semana.',
+            xpBonus: 250,
+            meta: 2,
+            unidade: 'títulos',
+            actionUrl: 'adicionar_midias.html',
+            actionLabel: 'Avaliar Cinema',
+            verificarProgresso: (dados, ciclo) => {
+                const midias = dados.midias || [];
+                return midias.filter(m => {
+                    const ts = extrairTimestampItem(m);
+                    return ts && ts >= ciclo.inicioMs && ts <= ciclo.fimMs;
+                }).length;
+            }
+        },
+        {
+            id: 'semanal_critica_profunda_1',
+            nome: 'Mestre das Palavras',
+            icone: '✍️',
+            cor: '#a855f7',
+            glow: 'rgba(168, 85, 247, 0.4)',
+            descricao: 'Publicar 1 crítica aprofundada (+180 caracteres) esta semana.',
+            detalhe: 'Escreva ao menos 1 análise rica e fundamentada sobre jogos ou mídias audiovisuais.',
+            xpBonus: 350,
+            meta: 1,
+            unidade: 'crítica',
+            actionUrl: 'adicionar_jogos.html',
+            actionLabel: 'Escrever Crítica',
+            verificarProgresso: (dados, ciclo) => {
+                const todos = [...(dados.jogos || []), ...(dados.midias || [])];
+                return todos.filter(item => {
+                    const ts = extrairTimestampItem(item);
+                    if (!ts || ts < ciclo.inicioMs || ts > ciclo.fimMs) return false;
+                    const texto = (item.opiniao || item.review || item.texto || item.comentario || item.resenha || '').trim();
+                    return texto.length >= 180;
+                }).length;
+            }
+        },
+        {
+            id: 'semanal_indie_retro_1',
+            nome: 'Explorador dos Games',
+            icone: '🕹️',
+            cor: '#38bdf8',
+            glow: 'rgba(56, 189, 248, 0.4)',
+            descricao: 'Avaliar 1 jogo indie, clássico ou retrô esta semana.',
+            detalhe: 'Descubra ou resenhe um jogo independente ou clássico no seu catálogo.',
+            xpBonus: 250,
+            meta: 1,
+            unidade: 'jogo',
+            actionUrl: 'descobrir_jogos.html',
+            actionLabel: 'Explorar Jogos',
+            verificarProgresso: (dados, ciclo) => {
+                const jogos = dados.jogos || [];
+                return jogos.filter(j => {
+                    const ts = extrairTimestampItem(j);
+                    if (!ts || ts < ciclo.inicioMs || ts > ciclo.fimMs) return false;
+                    const str = `${j.titulo || ''} ${j.nome || ''} ${j.genero || ''} ${j.categoria || ''}`.toLowerCase();
+                    return str.includes('indie') || str.includes('retro') || str.includes('retrô') || str.includes('pixel') || str.includes('arcade') || str.includes('metroidvania') || (j.anoLancamento && Number(j.anoLancamento) < 2012);
+                }).length;
+            }
+        },
+        {
+            id: 'semanal_cineasta_resenha_1',
+            nome: 'Crítico Cinematográfico',
+            icone: '🎬',
+            cor: '#f59e0b',
+            glow: 'rgba(245, 158, 11, 0.4)',
+            descricao: 'Escrever resenha detalhada (+100 caracteres) para 1 filme ou série.',
+            detalhe: 'Compartilhe sua visão crítica para 1 produção cinematográfica nesta semana.',
+            xpBonus: 300,
+            meta: 1,
+            unidade: 'resenha',
+            actionUrl: 'adicionar_midias.html',
+            actionLabel: 'Avaliar Cinema',
+            verificarProgresso: (dados, ciclo) => {
+                const midias = dados.midias || [];
+                return midias.filter(m => {
+                    const ts = extrairTimestampItem(m);
+                    if (!ts || ts < ciclo.inicioMs || ts > ciclo.fimMs) return false;
+                    const texto = (m.opiniao || m.review || m.texto || m.comentario || m.resenha || '').trim();
+                    return texto.length >= 100;
+                }).length;
+            }
+        },
+        {
+            id: 'semanal_combo_gamer_2',
+            nome: 'Dose Dupla Gamer',
+            icone: '⚡',
+            cor: '#10b981',
+            glow: 'rgba(16, 185, 129, 0.4)',
+            descricao: 'Registrar 2 atividades gamers (análises ou platinas) esta semana.',
+            detalhe: 'Mantenha o ritmo gamer ativo registrando 2 jogos ou platinas no Overcritic.',
+            xpBonus: 350,
+            meta: 2,
+            unidade: 'atividades',
+            actionUrl: 'adicionar_jogos.html',
+            actionLabel: 'Acessar Jogos',
+            verificarProgresso: (dados, ciclo) => {
+                let count = 0;
+                (dados.jogos || []).forEach(j => {
+                    const ts = extrairTimestampItem(j);
+                    if (ts && ts >= ciclo.inicioMs && ts <= ciclo.fimMs) count++;
+                });
+                (dados.platinas || []).forEach(p => {
+                    const ts = extrairTimestampItem(p);
+                    if (ts && ts >= ciclo.inicioMs && ts <= ciclo.fimMs) count++;
+                });
+                return count;
+            }
+        },
+        {
+            id: 'semanal_polivalente_2',
+            nome: 'Crítico Multimídia',
+            icone: '🌟',
+            cor: '#8b5cf6',
+            glow: 'rgba(139, 92, 246, 0.4)',
+            descricao: 'Avaliar ao menos 1 jogo E 1 filme/série esta semana.',
+            detalhe: 'Demonstre versatilidade avaliando obras tanto no mundo dos games quanto do cinema.',
+            xpBonus: 400,
+            meta: 2,
+            unidade: 'obras',
+            actionUrl: 'adicionar_midias.html',
+            actionLabel: 'Mídias & Filmes',
+            verificarProgresso: (dados, ciclo) => {
+                const temJogo = (dados.jogos || []).some(j => {
+                    const ts = extrairTimestampItem(j);
+                    return ts && ts >= ciclo.inicioMs && ts <= ciclo.fimMs;
+                });
+                const temMidia = (dados.midias || []).some(m => {
+                    const ts = extrairTimestampItem(m);
+                    return ts && ts >= ciclo.inicioMs && ts <= ciclo.fimMs;
+                });
+                return (temJogo ? 1 : 0) + (temMidia ? 1 : 0);
+            }
+        }
+    ];
+
+    /**
+     * Retorna as 4 missões ativas da semana de forma determinística
+     */
+    function obterMissoesSemanaisAtivas(dataRef = new Date()) {
+        const ciclo = obterCicloSemanaAtual(dataRef);
+        const pool = POOL_MISSOES_SEMANAIS;
+        const offset = (ciclo.semana * 2) % pool.length;
+        const selecionadas = [];
+        for (let i = 0; i < 4; i++) {
+            selecionadas.push(pool[(offset + i) % pool.length]);
+        }
+        return {
+            ciclo,
+            missoes: selecionadas
+        };
+    }
+
+    /**
+     * Calcula todo o XP de missões semanais acumulado pelo jogador (em todas as semanas)
+     */
+    function obterTotalXpMissoesSemanaisUsuario(dadosOuUsername) {
+        let username = '';
+        if (typeof dadosOuUsername === 'string') {
+            username = dadosOuUsername.trim();
+        } else if (dadosOuUsername && typeof dadosOuUsername === 'object') {
+            username = dadosOuUsername.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        } else {
+            username = localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        }
+        const usernameLower = username.toLowerCase();
+        const storageKey = `overcritic_missoes_semanais_${usernameLower}`;
+        let registroSemanas = {};
+        try {
+            registroSemanas = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        } catch(e) {
+            return 0;
+        }
+
+        let totalXp = 0;
+        Object.values(registroSemanas).forEach(sem => {
+            if (sem && typeof sem.totalXpGanho === 'number') {
+                totalXp += sem.totalXpGanho;
+            } else if (sem && sem.concluidas) {
+                Object.values(sem.concluidas).forEach(c => {
+                    totalXp += Number(c.xpGanho || 0);
+                });
+                if (sem.bonusSemanaPerfeita) totalXp += 500;
+            }
+        });
+        return totalXp;
+    }
+
+    /**
+     * Retorna o status detalhado das missões da semana atual do jogador
+     */
+    function obterStatusMissoesSemanaisUsuario(dadosOuUsername) {
+        let username = '';
+        let dados = null;
+        if (typeof dadosOuUsername === 'string') {
+            username = dadosOuUsername.trim();
+            dados = obterDadosConsolidadosUsuario(username);
+        } else if (dadosOuUsername && typeof dadosOuUsername === 'object') {
+            dados = dadosOuUsername;
+            username = dados.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        } else {
+            username = localStorage.getItem('overcritic_currentUser') || 'Jogador';
+            dados = obterDadosConsolidadosUsuario(username);
+        }
+        const usernameLower = username.toLowerCase();
+        const { ciclo, missoes } = obterMissoesSemanaisAtivas();
+        const storageKey = `overcritic_missoes_semanais_${usernameLower}`;
+        let registroSemanas = {};
+        try {
+            registroSemanas = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        } catch(e) {
+            registroSemanas = {};
+        }
+        const regSemana = registroSemanas[ciclo.chaveSemana] || { concluidas: {}, bonusSemanaPerfeita: false, totalXpGanho: 0 };
+
+        let totalConcluidas = 0;
+        let totalXpSemana = 0;
+        let totalXpMaximoSemana = 500; // Inclui bônus de semana perfeita
+
+        const listaFormatada = missoes.map(m => {
+            totalXpMaximoSemana += m.xpBonus;
+            const jaConcluida = !!(regSemana.concluidas && regSemana.concluidas[m.id]);
+            const progressoCalculado = typeof m.verificarProgresso === 'function' ? m.verificarProgresso(dados, ciclo) : 0;
+            const progressoFinal = jaConcluida ? m.meta : Math.min(m.meta, progressoCalculado);
+            const estaConcluida = jaConcluida || progressoFinal >= m.meta;
+            if (estaConcluida) {
+                totalConcluidas++;
+                totalXpSemana += m.xpBonus;
+            }
+            const pct = Math.min(100, Math.floor((progressoFinal / m.meta) * 100));
+
+            return {
+                id: m.id,
+                nome: m.nome,
+                icone: m.icone,
+                cor: m.cor,
+                glow: m.glow,
+                descricao: m.descricao,
+                detalhe: m.detalhe,
+                xpBonus: m.xpBonus,
+                meta: m.meta,
+                unidade: m.unidade,
+                actionUrl: m.actionUrl,
+                actionLabel: m.actionLabel,
+                progressoAtual: progressoFinal,
+                porcentagem: pct,
+                concluida: estaConcluida,
+                expirada: ciclo.expirado && !estaConcluida
+            };
+        });
+
+        const todasConcluidas = totalConcluidas >= missoes.length;
+        const bonusConcedido = !!regSemana.bonusSemanaPerfeita || todasConcluidas;
+        if (bonusConcedido) {
+            totalXpSemana += 500;
+        }
+
+        return {
+            ciclo,
+            missoes: listaFormatada,
+            totalConcluidas,
+            todasConcluidas,
+            bonusConcedido,
+            bonusSemanaPerfeita: 500,
+            totalXpSemana,
+            totalXpMaximoSemana
+        };
+    }
+
+    /**
+     * Valida em tempo real se alguma missão foi concluída e salva no localStorage
+     */
+    function verificarMissoesSemanais(opcoes = { notificar: true }) {
+        const username = (localStorage.getItem('overcritic_currentUser') || 'Jogador').trim();
+        const usernameLower = username.toLowerCase();
+        const dados = obterDadosConsolidadosUsuario(username);
+        const { ciclo, missoes } = obterMissoesSemanaisAtivas();
+
+        const storageKey = `overcritic_missoes_semanais_${usernameLower}`;
+        let registroSemanas = {};
+        try {
+            registroSemanas = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        } catch(e) {
+            registroSemanas = {};
+        }
+
+        if (!registroSemanas[ciclo.chaveSemana]) {
+            registroSemanas[ciclo.chaveSemana] = {
+                ano: ciclo.ano,
+                semana: ciclo.semana,
+                concluidas: {},
+                bonusSemanaPerfeita: false,
+                totalXpGanho: 0
+            };
+        }
+
+        const regSemana = registroSemanas[ciclo.chaveSemana];
+        let houveNovoDesbloqueio = false;
+        let novoXpGanho = 0;
+
+        missoes.forEach(m => {
+            if (!regSemana.concluidas[m.id]) {
+                const progressoAtual = typeof m.verificarProgresso === 'function' ? m.verificarProgresso(dados, ciclo) : 0;
+                if (progressoAtual >= m.meta) {
+                    regSemana.concluidas[m.id] = {
+                        nome: m.nome,
+                        xpGanho: m.xpBonus,
+                        concluidoEm: new Date().toISOString()
+                    };
+                    regSemana.totalXpGanho = (regSemana.totalXpGanho || 0) + m.xpBonus;
+                    houveNovoDesbloqueio = true;
+                    novoXpGanho += m.xpBonus;
+
+                    if (opcoes.notificar) {
+                        exibirPopupMissaoConcluida(m);
+                    }
+                }
+            }
+        });
+
+        // Verifica Semana Perfeita (todas as 4 missões)
+        const numConcluidas = Object.keys(regSemana.concluidas).length;
+        if (numConcluidas >= missoes.length && !regSemana.bonusSemanaPerfeita) {
+            regSemana.bonusSemanaPerfeita = true;
+            regSemana.totalXpGanho = (regSemana.totalXpGanho || 0) + 500;
+            houveNovoDesbloqueio = true;
+            novoXpGanho += 500;
+
+            if (opcoes.notificar) {
+                exibirPopupMissaoConcluida({
+                    id: 'semana_perfeita',
+                    nome: '👑 SEMANA PERFEITA!',
+                    icone: '👑',
+                    cor: '#ffd700',
+                    glow: 'rgba(255, 215, 0, 0.5)',
+                    descricao: 'Você completou todas as missões semanais antes do timer expirar!',
+                    xpBonus: 500
+                });
+            }
+        }
+
+        if (houveNovoDesbloqueio) {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(registroSemanas));
+            } catch(e) {}
+
+            try {
+                sincronizarRankingNuvem(username);
+                atualizarBadgesNivelPagina();
+                atualizarWidgetHomeQuests();
+            } catch(e) {}
+        }
+
+        return {
+            houveNovoDesbloqueio,
+            novoXpGanho,
+            statusSemana: regSemana
+        };
+    }
+
+    /**
+     * Popup Cyberpunk de Missão Semanal Concluída
+     */
+    function exibirPopupMissaoConcluida(missao) {
+        if (!missao) return;
+        tocarSomConquista();
+        const container = garantirContainerPopupConquista();
+
+        const popup = document.createElement('div');
+        popup.className = 'og-achievement-popup';
+        popup.style.borderColor = missao.cor || '#00f0ff';
+        popup.style.boxShadow = `0 16px 45px rgba(0, 0, 0, 0.75), 0 0 30px ${missao.glow || 'rgba(0, 240, 255, 0.35)'}`;
+        popup.innerHTML = `
+            <div class="og-achievement-shimmer"></div>
+            <div class="og-achievement-icon-wrap" style="border-color:${missao.cor || '#00f0ff'}; box-shadow: 0 0 20px ${missao.glow || 'rgba(0, 240, 255, 0.35)'};">
+                <span>${missao.icone || '⚡'}</span>
+            </div>
+            <div class="og-achievement-content">
+                <div class="og-achievement-header">
+                    <span class="og-achievement-badge-tag" style="color:${missao.cor || '#00f0ff'};">⚡ MISSÃO SEMANAL CONCLUÍDA!</span>
+                    <span class="og-achievement-xp-badge">+${missao.xpBonus} XP</span>
+                </div>
+                <div class="og-achievement-title">${missao.nome}</div>
+                <div class="og-achievement-desc">${missao.descricao}</div>
+            </div>
+            <button type="button" class="og-achievement-close" title="Fechar">✕</button>
+        `;
+
+        container.appendChild(popup);
+        void popup.offsetWidth;
+        popup.classList.add('active');
+
+        let timeoutDismiss = null;
+        const fechar = () => {
+            if (timeoutDismiss) clearTimeout(timeoutDismiss);
+            popup.classList.remove('active');
+            popup.classList.add('hiding');
+            setTimeout(() => {
+                if (popup.parentNode) popup.parentNode.removeChild(popup);
+            }, 400);
+        };
+
+        const btnClose = popup.querySelector('.og-achievement-close');
+        if (btnClose) btnClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fechar();
+        });
+
+        popup.addEventListener('click', () => {
+            fechar();
+            abrirModalMuralInsignias('missoes');
+        });
+
+        timeoutDismiss = setTimeout(fechar, 6000);
+    }
+
+    /**
+     * Renderizador HTML do Dashboard de Missões Semanais
+     */
+    function renderizarMissoesSemanaisHtml(username) {
+        injetarEstilosGamificacao();
+        const user = username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        const status = obterStatusMissoesSemanaisUsuario(user);
+        const ciclo = status.ciclo;
+
+        const cardsHtml = status.missoes.map(m => {
+            const statusClass = m.concluida ? 'concluida' : (m.expirada ? 'expirada' : 'andamento');
+            const statusLabel = m.concluida ? '✓ Concluída' : (m.expirada ? '✕ Expirada' : '⏳ Em Andamento');
+
+            let actionHtml = '';
+            if (m.concluida) {
+                actionHtml = `<span style="font-size:0.75rem; color:#22c55e; font-weight:800; display:inline-flex; align-items:center; gap:4px;">✨ +${m.xpBonus} XP creditados</span>`;
+            } else if (m.expirada) {
+                actionHtml = `<span style="font-size:0.75rem; color:#ef4444; font-weight:700;">Prazo encerrado</span>`;
+            } else {
+                actionHtml = `<a href="${m.actionUrl || '#'}" class="og-quest-action-btn">${m.actionLabel || 'Cumprir Missão'} →</a>`;
+            }
+
+            return `
+                <div class="og-quest-card ${m.concluida ? 'completed' : (m.expirada ? 'expired' : '')}" style="--quest-cor:${m.cor};">
+                    <div class="og-quest-header">
+                        <div class="og-quest-icon-wrap" style="color:${m.cor};">
+                            <span>${m.icone}</span>
+                        </div>
+                        <span class="og-quest-xp-badge">+${m.xpBonus} XP</span>
+                    </div>
+                    <div>
+                        <div class="og-quest-title">${m.nome}</div>
+                        <div class="og-quest-desc" style="margin-top:4px;">${m.detalhe}</div>
+                    </div>
+                    <div style="margin-top:auto; display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.76rem; font-weight:700;">
+                            <span style="color:#94a3b8;">Progresso: ${m.progressoAtual} / ${m.meta} ${m.unidade}</span>
+                            <span style="color:${m.cor}; font-weight:800;">${m.porcentagem}%</span>
+                        </div>
+                        <div class="og-quests-track">
+                            <div class="og-quests-fill" style="width: ${m.porcentagem}%; background: ${m.cor};"></div>
+                        </div>
+                    </div>
+                    <div class="og-quest-footer">
+                        <span class="og-quest-status-pill ${statusClass}">${statusLabel}</span>
+                        ${actionHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const pctGeral = Math.min(100, Math.floor((status.totalConcluidas / status.missoes.length) * 100));
+
+        return `
+            <div class="og-quests-container">
+                <div class="og-quests-header-card">
+                    <div class="og-quests-header-top">
+                        <span class="og-quests-season-tag">
+                            ⚡ Temporada Ativa • Semana ${ciclo.semana} de ${ciclo.ano}
+                        </span>
+                        <div class="og-quests-timer-wrap">
+                            <span class="og-quests-timer-label">Reinicia em:</span>
+                            <span class="og-quests-timer-val" id="ogQuestsTimerVal">${ciclo.formatadoRestante}</span>
+                        </div>
+                    </div>
+
+                    <div class="og-quests-alert-banner">
+                        <span>⚠️</span>
+                        <span><b>Regra do Desafio:</b> As missões e o XP bônus reiniciam todo domingo às 23:59. Se não forem concluídas dentro do prazo semanal, o XP extra é perdido permanentemente!</span>
+                    </div>
+
+                    <div class="og-quests-progress-summary">
+                        <div class="og-quests-progress-labels">
+                            <span style="color:var(--text-main, #f8f9fa);">
+                                Concluídas: <strong style="color:#00f0ff;">${status.totalConcluidas} de ${status.missoes.length} Missões</strong>
+                            </span>
+                            <span style="color:#ffd700; font-weight:800;">
+                                +${status.totalXpSemana.toLocaleString('pt-BR')} XP obtidos esta semana
+                            </span>
+                        </div>
+                        <div class="og-quests-track">
+                            <div class="og-quests-fill" style="width: ${pctGeral}%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="og-perfect-week-card">
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <div style="font-size:2.2rem; filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.6));">👑</div>
+                        <div>
+                            <div style="font-size:1.05rem; font-weight:900; color:#ffd700;">
+                                Bônus de Semana Perfeita (+500 XP Extra)
+                            </div>
+                            <div style="font-size:0.82rem; color:#cbd5e1; max-width:540px; margin-top:2px;">
+                                Cumpra todos os 4 desafios semanais antes do timer zerar para desbloquear este mega bônus de XP e disparar no ranking!
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        ${status.todasConcluidas 
+                            ? '<span class="og-quest-status-pill concluida" style="font-size:0.85rem; padding:8px 16px;">✨ CONQUISTADO (+500 XP)</span>'
+                            : `<span class="og-quest-status-pill andamento" style="font-size:0.85rem; padding:8px 16px;">🔒 Faltam ${status.missoes.length - status.totalConcluidas} missão(ões)</span>`
+                        }
+                    </div>
+                </div>
+
+                <div class="og-quests-grid">
+                    ${cardsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // Modal Dedicado do Hub Gamer (Missões Semanais & Mural de Insígnias)
+    function garantirModalMuralInsignias() {
+        injetarEstilosGamificacao();
+        let overlay = document.getElementById('ogMuralInsigniasOverlay');
+        if (overlay) return overlay;
+
+        overlay = document.createElement('div');
+        overlay.id = 'ogMuralInsigniasOverlay';
+        overlay.className = 'og-mural-overlay';
+        overlay.innerHTML = `
+            <div class="og-mural-modal">
+                <div class="og-mural-modal-header">
+                    <div>
+                        <div class="og-mural-modal-title" id="ogMuralModalTitle">
+                            <span>⚡</span> Hub Gamer & Conquistas Overcritic
+                        </div>
+                        <div class="og-mural-modal-subtitle" id="ogMuralModalSubtitle">
+                            Missões dinâmicas com prazo, troféus virtuais e elevação de Nível Gamer!
+                        </div>
+                    </div>
+                    <button type="button" class="og-mural-modal-close" id="ogBtnCloseMural" title="Fechar (Esc)">✕</button>
+                </div>
+                <div class="og-hub-tab-bar" id="ogHubTabBar">
+                    <button type="button" class="og-hub-tab-btn active" id="ogTabBtnMissoes" onclick="if(window.OvercriticGamification) window.OvercriticGamification.alternarAbaHub('missoes');">
+                        <span>⚡</span> Missões da Semana
+                        <span class="og-hub-timer-badge" id="ogHubTabTimer">00d 00h</span>
+                    </button>
+                    <button type="button" class="og-hub-tab-btn" id="ogTabBtnTrofeus" onclick="if(window.OvercriticGamification) window.OvercriticGamification.alternarAbaHub('trofeus');">
+                        <span>🏆</span> Estante de Troféus
+                    </button>
+                </div>
+                <div id="ogMuralModalBody"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) fecharModalMuralInsignias();
+        });
+        document.getElementById('ogBtnCloseMural').addEventListener('click', fecharModalMuralInsignias);
+
+        return overlay;
+    }
+
+    function alternarAbaHub(aba = 'missoes', customUser) {
+        const overlay = document.getElementById('ogMuralInsigniasOverlay');
+        const user = customUser || (overlay ? overlay.getAttribute('data-current-user') : null) || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        const body = document.getElementById('ogMuralModalBody');
+        const tabMissoes = document.getElementById('ogTabBtnMissoes');
+        const tabTrofeus = document.getElementById('ogTabBtnTrofeus');
+
+        if (aba === 'trofeus') {
+            if (tabMissoes) tabMissoes.classList.remove('active');
+            if (tabTrofeus) tabTrofeus.classList.add('active');
+            if (body) body.innerHTML = renderizarMuralTrofeusHtml(user);
+        } else {
+            if (tabTrofeus) tabTrofeus.classList.remove('active');
+            if (tabMissoes) tabMissoes.classList.add('active');
+            if (body) body.innerHTML = renderizarMissoesSemanaisHtml(user);
+        }
+    }
+
+    function abrirModalMuralInsignias(abaOuUser = 'missoes', possivelUser) {
+        let abaInicial = 'missoes';
+        let user = localStorage.getItem('overcritic_currentUser') || 'Jogador';
+
+        if (abaOuUser === 'trofeus' || abaOuUser === 'missoes') {
+            abaInicial = abaOuUser;
+            if (possivelUser && typeof possivelUser === 'string') user = possivelUser.trim();
+        } else if (typeof abaOuUser === 'string' && abaOuUser.trim()) {
+            user = abaOuUser.trim();
+        }
+
+        const overlay = garantirModalMuralInsignias();
+        overlay.setAttribute('data-current-user', user);
+        alternarAbaHub(abaInicial, user);
+        iniciarContadorRegressivoSemanal();
+
+        overlay.classList.add('active');
+        bloquearScrollFundo();
+    }
+
+    function fecharModalMuralInsignias() {
+        const overlay = document.getElementById('ogMuralInsigniasOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
+        liberarScrollFundo(true);
+    }
+
+    // Temporizador Regressivo Global em Tempo Real
+    let _intervaloTimerSemanal = null;
+    function iniciarContadorRegressivoSemanal() {
+        if (_intervaloTimerSemanal) return;
+
+        function tick() {
+            const ciclo = obterCicloSemanaAtual();
+            const str = ciclo.formatadoRestante;
+
+            // Elementos no modal
+            const elTimerVal = document.getElementById('ogQuestsTimerVal');
+            if (elTimerVal) elTimerVal.textContent = str;
+
+            const elTabTimer = document.getElementById('ogHubTabTimer');
+            if (elTabTimer) {
+                const dias = Math.floor(ciclo.restanteMs / (1000 * 60 * 60 * 24));
+                const horas = Math.floor((ciclo.restanteMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                elTabTimer.textContent = `${dias}d ${horas}h`;
+            }
+
+            // Elemento na home page
+            const elHomeCountdown = document.getElementById('homeQuestsCountdown');
+            if (elHomeCountdown) elHomeCountdown.textContent = str;
+        }
+
+        tick();
+        _intervaloTimerSemanal = setInterval(tick, 1000);
+    }
+
+    /**
+     * Atualiza dados do Widget / Faixa de Missões na Home Page
+     */
+    function atualizarWidgetHomeQuests() {
+        const elStrip = document.getElementById('homeQuestsLiveStrip');
+        const elWeekCode = document.getElementById('homeQuestsWeekCode');
+        const elSummary = document.getElementById('homeQuestsSummaryText');
+        const elCountdown = document.getElementById('homeQuestsCountdown');
+
+        if (!elStrip && !elWeekCode && !elSummary && !elCountdown) return;
+
+        const status = obterStatusMissoesSemanaisUsuario();
+        const ciclo = status.ciclo;
+
+        if (elWeekCode) {
+            elWeekCode.textContent = `SEMANA ${ciclo.semana} • ${ciclo.ano}`;
+        }
+
+        if (elCountdown) {
+            elCountdown.textContent = ciclo.formatadoRestante;
+        }
+
+        if (elSummary) {
+            if (status.todasConcluidas) {
+                elSummary.innerHTML = `🎉 <strong>SEMANA PERFEITA CONQUISTADA!</strong> Todas as 4 missões foram cumpridas (+${status.totalXpSemana} XP somados ao seu Nível Gamer).`;
+            } else if (status.totalConcluidas > 0) {
+                elSummary.innerHTML = `Progresso: <strong>${status.totalConcluidas} de 4 missões</strong> (+${status.totalXpSemana} XP garantidos). Complete as restantes antes do timer expirar para o Bônus Perfeito (+500 XP)!`;
+            } else {
+                elSummary.innerHTML = `Complete as 4 missões antes do timer zerar para garantir até <strong>+${status.totalXpMaximoSemana} XP</strong> e acelerar no Ranking Geral!`;
+            }
+        }
+    }
+
     // Listener Global de Tecla Escape para Fechamento Seguro de Modais
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const tierOverlay = document.getElementById('ogTierListOverlay');
             const cardOverlay = document.getElementById('ogGamerCardOverlay');
-            if (tierOverlay && tierOverlay.classList.contains('active')) {
+            const muralOverlay = document.getElementById('ogMuralInsigniasOverlay');
+            if (muralOverlay && muralOverlay.classList.contains('active')) {
+                fecharModalMuralInsignias();
+            } else if (tierOverlay && tierOverlay.classList.contains('active')) {
                 fecharModalTierList();
             } else if (cardOverlay && cardOverlay.classList.contains('active')) {
                 fecharGamerCardModal();
@@ -4369,9 +7173,21 @@
         }
     });
 
+    // Inicialização suave ao carregar a página
+    setTimeout(() => {
+        try {
+            verificarConquistas({ notificar: true });
+            verificarMissoesSemanais({ notificar: false });
+            iniciarContadorRegressivoSemanal();
+            atualizarWidgetHomeQuests();
+        } catch(e) {}
+    }, 1500);
+
     // Exporta globalmente
     window.OvercriticGamification = {
         NIVEIS_GAMER,
+        CONFIG_INSIGNIAS,
+        POOL_MISSOES_SEMANAIS,
         calcularProgressoGamer,
         calcularXpPlatina,
         avaliarQualidadeReview,
@@ -4383,13 +7199,50 @@
         executarLimpezaGeralDados,
         abrirGamerCardModal,
         fecharGamerCardModal,
+        gerarCanvasGamerCardPro,
+        processarExportacaoGamerCard,
+        exportarGamerCardPng,
         abrirModalTierList,
         fecharModalTierList,
         atualizarBadgesNivelPagina,
         registrarNovoJogadorNoRanking,
         obterRankingGeralComunidade,
         obterPosicaoRankingUsuario,
-        renderizarRankingComunidade
+        renderizarRankingComunidade,
+        // Conquistas e Insígnias
+        obterStatusInsigniasUsuario,
+        verificarConquistas,
+        exibirPopupConquista,
+        tocarSomConquista,
+        renderizarMuralTrofeusHtml,
+        // Missões Semanais (Weekly Quests)
+        obterCicloSemanaAtual,
+        obterMissoesSemanaisAtivas,
+        obterStatusMissoesSemanaisUsuario,
+        obterTotalXpMissoesSemanaisUsuario,
+        verificarMissoesSemanais,
+        exibirPopupMissaoConcluida,
+        renderizarMissoesSemanaisHtml,
+        alternarAbaHub,
+        iniciarContadorRegressivoSemanal,
+        atualizarWidgetHomeQuests,
+        abrirModalMuralInsignias,
+        fecharModalMuralInsignias
+    };
+
+    window.OvercriticInsignias = {
+        CONFIG_INSIGNIAS,
+        POOL_MISSOES_SEMANAIS,
+        obterStatusInsigniasUsuario,
+        verificarConquistas,
+        exibirPopupConquista,
+        tocarSomConquista,
+        renderizarMuralTrofeusHtml,
+        obterStatusMissoesSemanaisUsuario,
+        verificarMissoesSemanais,
+        alternarAbaHub,
+        abrirModalMuralInsignias,
+        fecharModalMuralInsignias
     };
 
     window.NIVEIS_GAMER = NIVEIS_GAMER;
@@ -4398,6 +7251,9 @@
     window.calcularXpReview = calcularXpReview;
     window.abrirGamerCardModal = abrirGamerCardModal;
     window.fecharGamerCardModal = fecharGamerCardModal;
+    window.gerarCanvasGamerCardPro = gerarCanvasGamerCardPro;
+    window.processarExportacaoGamerCard = processarExportacaoGamerCard;
+    window.exportarGamerCardPng = exportarGamerCardPng;
     window.abrirModalTierList = abrirModalTierList;
     window.fecharModalTierList = fecharModalTierList;
     window.vincularDadosLegadosUsuario = vincularDadosLegadosUsuario;
@@ -4409,7 +7265,12 @@
     window.obterRankingGeralComunidade = obterRankingGeralComunidade;
     window.obterPosicaoRankingUsuario = obterPosicaoRankingUsuario;
     window.renderizarRankingComunidade = renderizarRankingComunidade;
+    window.abrirModalMuralInsignias = abrirModalMuralInsignias;
+    window.fecharModalMuralInsignias = fecharModalMuralInsignias;
+    window.verificarMissoesSemanais = verificarMissoesSemanais;
+    window.atualizarWidgetHomeQuests = atualizarWidgetHomeQuests;
 
-    console.log('🎮 [Overcritic] Motor de Gamificação, Níveis, Ranking Comunitário & Tier List carregado!');
+    console.log('🎮 [Overcritic] Motor de Gamificação, Missões Semanais com Temporizador & Mural Gamer carregado!');
 })();
+
 

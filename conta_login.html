@@ -36,13 +36,14 @@
     </script>
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.8"></script>
-    <script src="js/apiClient.js?v=26.10.8"></script>
-    <script src="js/notifications.js?v=26.10.8"></script>
-    <script src="js/version.js?v=26.10.8"></script>
-    <script src="js/avatarManager.js?v=26.10.8"></script>
-    <script src="js/overcriticGamification.js?v=26.10.8"></script>
-    <script src="js/pwaManager.js?v=26.10.8" defer></script>
+    <script src="supabaseClient.js?v=26.10.9"></script>
+    <script src="js/apiClient.js?v=26.10.9"></script>
+    <script src="js/notifications.js?v=26.10.9"></script>
+    <script src="js/version.js?v=26.10.9"></script>
+    <script src="js/avatarManager.js?v=26.10.9"></script>
+    <script src="js/overcriticGamification.js?v=26.10.9"></script>
+    <script src="js/overcriticSpotlight.js?v=26.10.9"></script>
+    <script src="js/pwaManager.js?v=26.10.9" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -644,16 +645,22 @@
 
                     <!-- Ações Gamificadas -->
                     <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap;">
-                        <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal(window._dadosUsuarioPerfil);" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
-                            <span>✨</span> Gerar Gamer Card
+                        <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal(window._dadosUsuarioPerfil);" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;" title="Exportar e compartilhar seu Gamer Card nas redes sociais">
+                            <span>🎴</span> Exportar Gamer Card
                         </button>
                         <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList(window._dadosUsuarioPerfil);" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
                             <span>🎯</span> Minha Tier List
                         </button>
-                        <button type="button" class="og-btn-action" onclick="alternarTab('ranking')" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.4); color: #ffd700;">
-                            <span>🏆</span> Ranking Geral
+                        <button type="button" class="og-btn-action" onclick="if(window.OvercriticInsignias) window.OvercriticInsignias.abrirModalMuralInsignias();" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.4); color: #ffd700;" title="Abrir Mural de Troféus Virtuais & Insígnias">
+                            <span>🏆</span> Mural de Insígnias
+                        </button>
+                        <button type="button" class="og-btn-action" onclick="alternarTab('ranking')" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.4); color: var(--accent-cyan);">
+                            <span>🎖️</span> Ranking Geral
                         </button>
                     </div>
+
+                    <!-- 🏆 ESTANTE VIRTUAL DE TROFÉUS & MURAL DE INSÍGNIAS -->
+                    <div id="profMuralInsigniasContainer" style="margin-top: 14px; margin-bottom: 20px;"></div>
 
                     <div class="profile-actions" style="margin-bottom: 14px;">
                         <a href="index.html" class="btn-home">🏠 Ir para o Hub</a>
@@ -971,6 +978,14 @@
                 }
             }
 
+            // Renderiza Estante de Troféus Virtuais
+            if (window.OvercriticInsignias && typeof window.OvercriticInsignias.renderizarMuralTrofeusHtml === 'function') {
+                const elMural = document.getElementById('profMuralInsigniasContainer');
+                if (elMural) {
+                    elMural.innerHTML = window.OvercriticInsignias.renderizarMuralTrofeusHtml(cleanName, window._dadosUsuarioPerfil);
+                }
+            }
+
             // 2. Sincronização bidirecional completa com a nuvem Supabase
             if (window.OvercriticGamification && typeof window.OvercriticGamification.sincronizarDadosCompletosUsuario === 'function') {
                 try {
@@ -1021,6 +1036,14 @@
                             const posObj = window.OvercriticGamification.obterPosicaoRankingUsuario(cleanName);
                             const elPos = document.getElementById('profRankingPos');
                             if (elPos) elPos.textContent = (posObj && posObj.posicao) ? `#${posObj.posicao}` : '#1';
+                        }
+
+                        // Atualiza Estante de Troféus Virtuais com dados sincronizados da nuvem
+                        if (window.OvercriticInsignias && typeof window.OvercriticInsignias.renderizarMuralTrofeusHtml === 'function') {
+                            const elMural = document.getElementById('profMuralInsigniasContainer');
+                            if (elMural) {
+                                elMural.innerHTML = window.OvercriticInsignias.renderizarMuralTrofeusHtml(cleanName, window._dadosUsuarioPerfil);
+                            }
                         }
                     }
                 } catch(e) {}
