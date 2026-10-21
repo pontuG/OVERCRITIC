@@ -1,6 +1,12 @@
-// js/apiClient.js - Camada de integração com o Backend C# e Supabase
+// js/apiClient.js - Camada de integração com o Backend C# (.NET 8) e Supabase
 (function () {
-    const API_BASE_URL = 'http://localhost:5000/api';
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // URL do Backend C# em produção no Render (permite substituição personalizada via localStorage)
+    const RENDER_API_URL = (localStorage.getItem('overcritic_api_url') || 'https://overcritic-backend.onrender.com/api').replace(/\/+$/, '');
+    const LOCAL_API_URL = 'http://localhost:5000/api';
+
+    const API_BASE_URL = isLocal ? LOCAL_API_URL : RENDER_API_URL;
 
     let _backendDisponivel = null;
 
@@ -8,10 +14,13 @@
         if (_backendDisponivel !== null) return _backendDisponivel;
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1500);
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
             const res = await fetch(`${API_BASE_URL}/estatisticas`, { signal: controller.signal });
             clearTimeout(timeoutId);
             _backendDisponivel = res.ok;
+            if (_backendDisponivel) {
+                console.log(`🚀 [API C#] Conectado com sucesso ao Backend: ${API_BASE_URL}`);
+            }
         } catch (e) {
             _backendDisponivel = false;
         }

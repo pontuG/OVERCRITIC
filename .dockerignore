@@ -1,0 +1,9 @@
+.git
+.github
+.agents
+.gemini
+node_modules
+**/bin/
+**/obj/
+*.bat
+*.ps1

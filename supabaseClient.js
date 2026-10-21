@@ -2,24 +2,30 @@
 const SUPABASE_URL = 'https://lvvihjivyniqsmihnkof.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_fMxN0GsGQDTuvQjc9wvPzw_yYA9efcd';
 
-// Configuração Oficial do Administrador do Overcritic
+// Configuração Oficial de Moderação do Overcritic (Credencial Protegida)
+const _ADMIN_UID = '958a1b5f-4151-42c7-97f2-caf0e59fbb86';
+const _isAdminEmail = (email) => {
+    if (!email) return false;
+    const clean = String(email).trim().toLowerCase();
+    return clean === atob('bWVzcXVpdGFnYWJyaWVsMjU1QGdtYWlsLmNvbQ==');
+};
+
 window.OVERCRITIC_ADMIN = {
-    uid: '958a1b5f-4151-42c7-97f2-caf0e59fbb86',
-    email: 'mesquitagabriel255@gmail.com'
+    uid: _ADMIN_UID,
+    username: 'pontuG'
 };
 
 window.isAdminUser = function(user) {
     if (!user) {
-        const storedAdmin = localStorage.getItem('overcritic_is_admin');
         const storedEmail = (localStorage.getItem('overcritic_user_email') || '').toLowerCase();
         const storedUid = localStorage.getItem('overcritic_user_id');
         const storedUser = (localStorage.getItem('overcritic_currentUser') || '').toLowerCase();
-        return storedAdmin === 'true' || storedEmail === window.OVERCRITIC_ADMIN.email || storedUid === window.OVERCRITIC_ADMIN.uid || storedUser === 'pontug' || storedUser === 'admin';
+        return storedUid === _ADMIN_UID || _isAdminEmail(storedEmail) || storedUser === 'pontug';
     }
     const uid = typeof user === 'string' ? user : (user.id || user.uid);
     const email = typeof user === 'object' ? (user.email || '').toLowerCase() : null;
     const name = typeof user === 'object' ? (user.user_metadata?.username || user.username || '').toLowerCase() : (typeof user === 'string' ? user.toLowerCase() : '');
-    return uid === window.OVERCRITIC_ADMIN.uid || email === window.OVERCRITIC_ADMIN.email || name === 'pontug' || name === 'admin';
+    return uid === _ADMIN_UID || _isAdminEmail(email) || name === 'pontug';
 };
 
 // Inicializa o cliente Supabase disponível globalmente com suporte a fluxo de autenticação universal (implicit)

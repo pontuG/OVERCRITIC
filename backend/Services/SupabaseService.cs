@@ -16,8 +16,15 @@ public class SupabaseService : ISupabaseService
         _http = http;
         _logger = logger;
         
-        var url = config["Supabase:Url"]?.TrimEnd('/') ?? "https://lvvihjivyniqsmihnkof.supabase.co";
-        var key = config["Supabase:SecretKey"] ?? config["Supabase:PublishableKey"] ?? "";
+        var url = Environment.GetEnvironmentVariable("SUPABASE_URL")
+            ?? config["Supabase:Url"]?.TrimEnd('/') 
+            ?? "https://lvvihjivyniqsmihnkof.supabase.co";
+
+        var key = Environment.GetEnvironmentVariable("SUPABASE_SECRET_KEY")
+            ?? config["Supabase:SecretKey"]
+            ?? Environment.GetEnvironmentVariable("SUPABASE_PUBLISHABLE_KEY")
+            ?? config["Supabase:PublishableKey"]
+            ?? "";
 
         _http.BaseAddress = new Uri(url);
         _http.DefaultRequestHeaders.Clear();

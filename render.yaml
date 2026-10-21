@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: overcritic-backend
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: SUPABASE_URL
+        value: https://lvvihjivyniqsmihnkof.supabase.co
+      - key: SUPABASE_PUBLISHABLE_KEY
+        value: sb_publishable_fMxN0GsGQDTuvQjc9wvPzw_yYA9efcd
+      - key: SUPABASE_SECRET_KEY
+        sync: false

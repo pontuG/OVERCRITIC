@@ -59,10 +59,12 @@ app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 Console.WriteLine("=================================================");
 Console.WriteLine("🚀 [OVERCRITIC C# BACKEND] INICIADO COM SUCESSO!");
-Console.WriteLine("👉 Acesse o Site:    http://localhost:5000");
-Console.WriteLine("👉 Acesse o Swagger: http://localhost:5000/swagger");
+Console.WriteLine($"👉 Porta Ativa:      {port}");
+Console.WriteLine($"👉 Acesse a API:     http://0.0.0.0:{port}");
+Console.WriteLine($"👉 Acesse o Swagger: http://localhost:{port}/swagger");
 Console.WriteLine("=================================================");
 
-app.Run("http://localhost:5000");
+app.Run($"http://0.0.0.0:{port}");
