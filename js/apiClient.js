@@ -2,8 +2,8 @@
 (function () {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     
-    // URL do Backend C# em produção no Render (permite substituição personalizada via localStorage)
-    const RENDER_API_URL = (localStorage.getItem('overcritic_api_url') || 'https://overcritic-backend.onrender.com/api').replace(/\/+$/, '');
+    // URL oficial do Backend C# em produção no Render
+    const RENDER_API_URL = (localStorage.getItem('overcritic_api_url') || 'https://overcritic.onrender.com/api').replace(/\/+$/, '');
     const LOCAL_API_URL = 'http://localhost:5000/api';
 
     const API_BASE_URL = isLocal ? LOCAL_API_URL : RENDER_API_URL;
