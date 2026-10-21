@@ -48,17 +48,39 @@
        1. TABELA DE NÍVEIS & PROGRESSÃO DE XP
     ════════════════════════════════════════════════════════ */
     const NIVEIS_GAMER = [
-        { nivel: 1, titulo: "Recruta Gamer", minXp: 0, maxXp: 499, icone: "🌱", cor: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)" },
-        { nivel: 2, titulo: "Aventureiro Geek", minXp: 500, maxXp: 1499, icone: "⚡", cor: "#38bdf8", bg: "rgba(56, 189, 248, 0.15)" },
-        { nivel: 3, titulo: "Crítico de Bronze", minXp: 1500, maxXp: 3499, icone: "🥉", cor: "#cd7f32", bg: "rgba(205, 127, 50, 0.15)" },
-        { nivel: 4, titulo: "Crítico de Prata", minXp: 3500, maxXp: 6999, icone: "🥈", cor: "#cbd5e1", bg: "rgba(203, 213, 225, 0.15)" },
-        { nivel: 5, titulo: "Mestre dos Troféus", minXp: 7000, maxXp: 11999, icone: "🏆", cor: "#fbbf24", bg: "rgba(251, 191, 36, 0.15)" },
-        { nivel: 6, titulo: "Cineasta & Gamer Ouro", minXp: 12000, maxXp: 18999, icone: "🥇", cor: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)" },
-        { nivel: 7, titulo: "Veterano Overcritic", minXp: 19000, maxXp: 27999, icone: "🛡️", cor: "#a855f7", bg: "rgba(168, 85, 247, 0.15)" },
-        { nivel: 8, titulo: "Caçador Platina Lendário", minXp: 28000, maxXp: 37999, icone: "💎", cor: "#00f0ff", bg: "rgba(0, 240, 255, 0.15)" },
-        { nivel: 9, titulo: "Grão-Mestre Geek", minXp: 38000, maxXp: 49999, icone: "👑", cor: "#ec4899", bg: "rgba(236, 72, 153, 0.15)" },
-        { nivel: 10, titulo: "Lenda do Overcritic", minXp: 50000, maxXp: 999999, icone: "🔥", cor: "#ef4444", bg: "rgba(239, 68, 68, 0.2)" }
+        { nivel: 1, titulo: "Recruta Gamer", xpNecessario: 500, minXp: 0, maxXp: 499, icone: "🌱", cor: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)" },
+        { nivel: 2, titulo: "Aventureiro Geek", xpNecessario: 1500, minXp: 500, maxXp: 1999, icone: "⚡", cor: "#38bdf8", bg: "rgba(56, 189, 248, 0.15)" },
+        { nivel: 3, titulo: "Crítico de Bronze", xpNecessario: 3500, minXp: 2000, maxXp: 5499, icone: "🥉", cor: "#cd7f32", bg: "rgba(205, 127, 50, 0.15)" },
+        { nivel: 4, titulo: "Crítico de Prata", xpNecessario: 7000, minXp: 5500, maxXp: 12499, icone: "🥈", cor: "#cbd5e1", bg: "rgba(203, 213, 225, 0.15)" },
+        { nivel: 5, titulo: "Mestre dos Troféus", xpNecessario: 12000, minXp: 12500, maxXp: 24499, icone: "🏆", cor: "#fbbf24", bg: "rgba(251, 191, 36, 0.15)" },
+        { nivel: 6, titulo: "Cineasta & Gamer Ouro", xpNecessario: 19000, minXp: 24500, maxXp: 43499, icone: "🥇", cor: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)" },
+        { nivel: 7, titulo: "Veterano Overcritic", xpNecessario: 28000, minXp: 43500, maxXp: 71499, icone: "🛡️", cor: "#a855f7", bg: "rgba(168, 85, 247, 0.15)" },
+        { nivel: 8, titulo: "Caçador Platina Lendário", xpNecessario: 38000, minXp: 71500, maxXp: 109499, icone: "💎", cor: "#00f0ff", bg: "rgba(0, 240, 255, 0.15)" },
+        { nivel: 9, titulo: "Grão-Mestre Geek", xpNecessario: 50000, minXp: 109500, maxXp: 159499, icone: "👑", cor: "#ec4899", bg: "rgba(236, 72, 153, 0.15)" },
+        { nivel: 10, titulo: "Lenda do Overcritic", xpNecessario: 0, minXp: 159500, maxXp: 999999, icone: "🔥", cor: "#ef4444", bg: "rgba(239, 68, 68, 0.2)" }
     ];
+
+    /**
+     * Identifica se um usuário/dados pertence à equipe de Desenvolvimento e Moderação do Overcritic.
+     * Desenvolvedores possuem a patente exclusiva "DEV" (inalcançável) e não competem no Ranking Geral da Comunidade.
+     */
+    function isUsuarioDevOuStaff(usernameOrDados) {
+        if (!usernameOrDados) {
+            const current = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim().toLowerCase();
+            const email = (localStorage.getItem('overcritic_user_email') || '').trim().toLowerCase();
+            return current === 'pontug' || current === 'admin' || email === 'mesquitagabriel255@gmail.com' || localStorage.getItem('overcritic_is_admin') === 'true';
+        }
+        let u = '';
+        if (typeof usernameOrDados === 'string') {
+            u = usernameOrDados.trim().toLowerCase();
+        } else if (typeof usernameOrDados === 'object') {
+            u = (usernameOrDados.username || '').trim().toLowerCase();
+            if (usernameOrDados.role && (usernameOrDados.role.includes('Admin') || usernameOrDados.role.includes('DEV') || usernameOrDados.role.includes('Fundador'))) return true;
+            if (usernameOrDados.email && usernameOrDados.email.toLowerCase() === 'mesquitagabriel255@gmail.com') return true;
+            if (usernameOrDados.userId === '958a1b5f-4151-42c7-97f2-caf0e59fbb86' || usernameOrDados.user_id === '958a1b5f-4151-42c7-97f2-caf0e59fbb86') return true;
+        }
+        return u === 'pontug' || u === 'admin';
+    }
 
     /**
      * Calcula o XP individual de uma platina com base na sua dificuldade:
@@ -482,7 +504,38 @@
             } catch (e) {}
         }
 
-        const xpTotal = xpJogos + xpMidias + xpPlatinas + xpInsignias + xpMissoesSemanais + (numInteracoes * 20);
+        // 6. Bônus de XP dos Duelos Diários da Comunidade (+25 XP por dia votado)
+        let xpDuelosDiarios = 0;
+        if (typeof obterTotalXpDuelosDiariosUsuario === 'function') {
+            try {
+                xpDuelosDiarios = obterTotalXpDuelosDiariosUsuario(stats);
+            } catch (e) {}
+        }
+
+        const xpTotal = xpJogos + xpMidias + xpPlatinas + xpInsignias + xpMissoesSemanais + xpDuelosDiarios + (numInteracoes * 20);
+
+        // Se for o Desenvolvedor / Criador / Moderação (pontuG / admin), atribui a patente exclusiva e inalcançável "DEV"
+        if (isUsuarioDevOuStaff(stats)) {
+            return {
+                xpTotal,
+                xpJogos,
+                xpMidias,
+                xpPlatinas,
+                xpInsignias,
+                xpMissoesSemanais,
+                nivel: 'DEV',
+                titulo: 'Criador & Desenvolvedor',
+                icone: '🛠️',
+                cor: '#00f0ff',
+                bg: 'rgba(0, 240, 255, 0.2)',
+                porcentagem: 100,
+                xpNoNivel: xpTotal,
+                faixaXp: xpTotal,
+                xpRestante: 0,
+                proximoNivel: null,
+                isDev: true
+            };
+        }
 
         let infoNivel = NIVEIS_GAMER[0];
         let proximoNivel = NIVEIS_GAMER[1];
@@ -495,17 +548,16 @@
             }
         }
 
-        if (xpTotal >= 50000) {
+        if (xpTotal >= NIVEIS_GAMER[NIVEIS_GAMER.length - 1].minXp) {
             infoNivel = NIVEIS_GAMER[NIVEIS_GAMER.length - 1];
             proximoNivel = null;
         }
 
         const xpBase = infoNivel.minXp;
-        const xpTeto = proximoNivel ? proximoNivel.minXp : infoNivel.maxXp;
         const xpNoNivel = xpTotal - xpBase;
-        const faixaXp = xpTeto - xpBase;
+        const faixaXp = infoNivel.xpNecessario || (proximoNivel ? (proximoNivel.minXp - xpBase) : 1);
         const porcentagem = proximoNivel ? Math.min(100, Math.max(0, Math.floor((xpNoNivel / faixaXp) * 100))) : 100;
-        const xpRestante = proximoNivel ? Math.max(0, proximoNivel.minXp - xpTotal) : 0;
+        const xpRestante = proximoNivel ? Math.max(0, faixaXp - xpNoNivel) : 0;
 
         return {
             xpTotal,
@@ -3050,8 +3102,8 @@
 
                     <div class="og-xp-bar-wrap" style="margin: 0; padding: 10px 14px; background: rgba(0, 0, 0, 0.25); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.06);">
                         <div class="og-xp-header" style="margin-bottom: 6px;">
-                            <span>Progresso de Reputação</span>
-                            <span id="ogCardXpText" style="color:#00f0ff; font-weight: 800;">2.450 XP</span>
+                            <span id="ogCardXpHeaderLabel">Progresso do Nível</span>
+                            <span id="ogCardXpText" style="color:#00f0ff; font-weight: 800;">0 / 500 XP</span>
                         </div>
                         <div class="og-xp-track">
                             <div class="og-xp-fill" id="ogCardXpFill" style="width: 75%;"></div>
@@ -3111,8 +3163,8 @@
                     </div>
                 </div>
  
-                <!-- BARRA DE SELEÇÃO DE FORMATO SOCIAL -->
-                <div class="og-social-format-bar">
+                <!-- BARRA DE SELEÇÃO DE FORMATO SOCIAL (EXCLUSIVO PARA O TITULAR) -->
+                <div class="og-social-format-bar" id="ogCardSocialFormatBar">
                     <span class="og-social-format-title">📐 Formato da Imagem:</span>
                     <div class="og-social-format-pills">
                         <button type="button" class="og-format-pill active" id="ogBtnFmtStories" data-format="stories" title="1080 x 1920 (9:16) • Ideal para Instagram Stories, TikTok e WhatsApp Status">
@@ -3124,7 +3176,13 @@
                     </div>
                 </div>
 
-                <div class="og-modal-actions">
+                <!-- AVISO DE VISUALIZAÇÃO DE MEMBRO DA COMUNIDADE -->
+                <div id="ogCardViewingNotice" style="display: none; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 14px; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: 12px; font-size: 0.82rem; color: #94a3b8; text-align: center;">
+                    <span>👁️</span>
+                    <span id="ogCardViewingNoticeText">Modo de visualização da comunidade</span>
+                </div>
+
+                <div class="og-modal-actions" id="ogCardModalActions">
                     <button type="button" class="og-modal-btn og-btn-share" id="ogBtnShareCard" title="Compartilhar direto no WhatsApp, Instagram ou redes sociais">
                         <span>🚀</span> Compartilhar
                     </button>
@@ -3208,20 +3266,69 @@
     function abrirGamerCardModal(dados = {}) {
         const overlay = garantirModalGamerCard();
 
-        // Sempre busca consolidação fresca para recalcular exatamente o estado atual
-        const consolidados = obterDadosConsolidadosUsuario(dados?.username, dados?.userId);
-        const isSelf = !dados?.username || dados.username.toLowerCase() === (consolidados.username || '').toLowerCase();
-        
-        let jogos = isSelf ? consolidados.jogos : ((dados && Array.isArray(dados.jogos)) ? dados.jogos : consolidados.jogos);
-        let midias = isSelf ? consolidados.midias : ((dados && Array.isArray(dados.midias)) ? dados.midias : consolidados.midias);
-        let platinas = isSelf ? consolidados.platinas : ((dados && Array.isArray(dados.platinas)) ? dados.platinas : consolidados.platinas);
+        let targetUsername = '';
+        let targetUid = '';
+        let targetAvatar = '';
+        let customJogos = null;
+        let customMidias = null;
+        let customPlatinas = null;
 
-        const username = dados?.username || consolidados.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
-        const uid = dados?.userId || consolidados.userId || localStorage.getItem('overcritic_user_id') || '';
+        if (typeof dados === 'string') {
+            targetUsername = dados.trim();
+        } else if (dados && typeof dados === 'object') {
+            targetUsername = (dados.username || '').trim();
+            targetUid = (dados.userId || dados.user_id || '').trim();
+            targetAvatar = dados.avatar || '';
+            if (Array.isArray(dados.jogos)) customJogos = dados.jogos;
+            if (Array.isArray(dados.midias)) customMidias = dados.midias;
+            if (Array.isArray(dados.platinas)) customPlatinas = dados.platinas;
+        }
+
+        const currentLoggedUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim();
+        const isSelf = !targetUsername || (currentLoggedUser && targetUsername.toLowerCase() === currentLoggedUser.toLowerCase());
+
+        const username = targetUsername || currentLoggedUser || 'Jogador';
+        const uid = targetUid || (isSelf ? (localStorage.getItem('overcritic_user_id') || '') : '');
+
+        // Sempre busca consolidação fresca para recalcular exatamente o estado do usuário solicitado
+        const consolidados = obterDadosConsolidadosUsuario(username, uid);
+        
+        let jogos = customJogos || consolidados.jogos || [];
+        let midias = customMidias || consolidados.midias || [];
+        let platinas = customPlatinas || consolidados.platinas || [];
+
+        // Avatar específico do usuário alvo
+        let userAvatar = targetAvatar;
+        if (!userAvatar) {
+            if (isSelf) {
+                userAvatar = typeof window.getUsuarioAvatarAtual === 'function'
+                    ? window.getUsuarioAvatarAtual()
+                    : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+            } else {
+                try {
+                    const rankingLista = JSON.parse(localStorage.getItem('overcritic_ranking_comunidade_v26_10') || '[]');
+                    const m = rankingLista.find(x => (x.username || '').toLowerCase() === username.toLowerCase());
+                    if (m && m.avatar) userAvatar = m.avatar;
+                } catch(e) {}
+                if (!userAvatar) {
+                    try {
+                        const contas = JSON.parse(localStorage.getItem('overcritic_contas_diretorio_v26_10') || '[]');
+                        const c = contas.find(x => (x.username || '').toLowerCase() === username.toLowerCase());
+                        if (c && c.avatar) userAvatar = c.avatar;
+                    } catch(e) {}
+                }
+                if (!userAvatar && username.toLowerCase() === 'pontug') {
+                    userAvatar = '👑';
+                }
+                if (!userAvatar) userAvatar = '🎮';
+            }
+        }
 
         dados = {
             username,
             userId: uid,
+            avatar: userAvatar,
+            isSelf,
             jogos,
             midias,
             platinas
@@ -3229,8 +3336,10 @@
 
         _dadosCardAtuais = dados;
         invalidarCacheGamerCard();
-        preaquecerCanvasGamerCard('stories');
-        setTimeout(() => preaquecerCanvasGamerCard('post'), 300);
+        if (isSelf) {
+            preaquecerCanvasGamerCard('stories');
+            setTimeout(() => preaquecerCanvasGamerCard('post'), 300);
+        }
 
         const jogosArr = dados.jogos || [];
         const midiasArr = dados.midias || [];
@@ -3240,25 +3349,76 @@
         const numPlatinas = platinasArr.length;
 
         const prog = calcularProgressoGamer({
+            username,
             jogos: jogosArr,
             midias: midiasArr,
             platinas: platinasArr
         });
 
         // Preenche campos do Card
+        const chipEl = document.getElementById('ogCardChip');
+        if (chipEl) {
+            chipEl.textContent = prog.isDev ? 'PASSE EXCLUSIVO DEV' : 'PASSE GAMER OFICIAL';
+            if (prog.isDev) {
+                chipEl.style.background = 'rgba(0, 240, 255, 0.15)';
+                chipEl.style.color = '#00f0ff';
+                chipEl.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+            } else {
+                chipEl.style.background = '';
+                chipEl.style.color = '';
+                chipEl.style.borderColor = '';
+            }
+        }
+
         document.getElementById('ogCardUsername').textContent = username;
         document.getElementById('ogCardRankIcon').textContent = prog.icone;
         document.getElementById('ogCardRankTitle').textContent = prog.titulo;
         document.getElementById('ogCardRankTitle').style.color = prog.cor;
-        document.getElementById('ogCardRankNv').textContent = `• Nv. ${prog.nivel}`;
-        document.getElementById('ogCardXpText').textContent = `${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+        document.getElementById('ogCardRankNv').textContent = prog.isDev ? `• DEV` : `• Nv. ${prog.nivel}`;
+        const xpHeaderLabel = document.getElementById('ogCardXpHeaderLabel');
+        if (xpHeaderLabel) {
+            if (prog.isDev) {
+                xpHeaderLabel.innerHTML = `Patente Exclusiva de Desenvolvedor <span style="font-size: 0.72rem; color: var(--text-muted, #94a3b8); font-weight: 600;">(Total: ${prog.xpTotal.toLocaleString('pt-BR')} XP)</span>`;
+            } else {
+                xpHeaderLabel.innerHTML = `Progresso do Nível ${prog.nivel} <span style="font-size: 0.72rem; color: var(--text-muted, #94a3b8); font-weight: 600;">(Total: ${prog.xpTotal.toLocaleString('pt-BR')} XP)</span>`;
+            }
+        }
+        const xpTextEl = document.getElementById('ogCardXpText');
+        if (xpTextEl) {
+            if (prog.isDev) {
+                xpTextEl.textContent = `ACESSO TOTAL (DEV)`;
+                xpTextEl.title = `Patente exclusiva do Criador e Desenvolvedor do Overcritic (Inalcançável para outros membros).`;
+            } else {
+                xpTextEl.textContent = prog.proximoNivel
+                    ? `${prog.xpNoNivel.toLocaleString('pt-BR')} / ${prog.faixaXp.toLocaleString('pt-BR')} XP`
+                    : `${prog.xpTotal.toLocaleString('pt-BR')} XP (MÁX)`;
+                xpTextEl.title = `Progresso no Nível ${prog.nivel}: ${prog.xpNoNivel.toLocaleString('pt-BR')} XP conquistados de ${prog.faixaXp.toLocaleString('pt-BR')} XP necessários para o próximo nível. Reputação Total: ${prog.xpTotal.toLocaleString('pt-BR')} XP.`;
+            }
+        }
         document.getElementById('ogCardXpFill').style.width = `${prog.porcentagem}%`;
+        if (prog.isDev) {
+            document.getElementById('ogCardXpFill').style.background = 'linear-gradient(90deg, #00f0ff, #a855f7)';
+        } else {
+            document.getElementById('ogCardXpFill').style.background = '';
+        }
 
         // Indicador de quanto falta para o próximo ranking
         const nextRankDesc = document.getElementById('ogCardNextRankDesc');
         const missingXpEl = document.getElementById('ogCardMissingXp');
 
-        if (prog.proximoNivel) {
+        if (prog.isDev) {
+            if (nextRankDesc) {
+                nextRankDesc.innerHTML = `🛠️ <strong>Patente Suprema de Desenvolvedor</strong> (Inalcançável)`;
+            }
+            if (missingXpEl) {
+                missingXpEl.textContent = `DEV`;
+                missingXpEl.style.display = 'inline-block';
+                missingXpEl.style.color = '#00f0ff';
+                missingXpEl.style.background = 'rgba(0, 240, 255, 0.15)';
+                missingXpEl.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+                missingXpEl.title = 'Patente exclusiva do criador e desenvolvedor do Overcritic';
+            }
+        } else if (prog.proximoNivel) {
             const faltam = prog.xpRestante;
             const eqPlat = Math.ceil(faltam / 400);
             const eqAv = Math.ceil(faltam / 100);
@@ -3288,7 +3448,14 @@
         // Mini Resumo Rápido da Trilha (Nível Atual -> Próximo Nível)
         const quickSummary = document.getElementById('ogLadderQuickSummary');
         if (quickSummary) {
-            if (prog.proximoNivel) {
+            if (prog.isDev) {
+                quickSummary.innerHTML = `
+                    <div class="og-ladder-pill current" style="border-color:#00f0ff; color:#00f0ff; width: 100%; justify-content: center; background: rgba(0, 240, 255, 0.12); box-shadow: 0 0 14px rgba(0, 240, 255, 0.2);">
+                        <span>🛠️</span>
+                        <span>Patente Exclusiva: DEV • Criador & Desenvolvedor (Inalcançável)</span>
+                    </div>
+                `;
+            } else if (prog.proximoNivel) {
                 quickSummary.innerHTML = `
                     <div class="og-ladder-pill current" title="Patente Atual">
                         <span>${prog.icone}</span>
@@ -3323,7 +3490,7 @@
 
                 if (isCurrent) {
                     itemClass = 'is-current';
-                    badgeHtml = `<span class="og-ladder-item-badge" style="background:${lvl.bg}; color:${lvl.cor}; border:1px solid ${lvl.cor};">📍 Nível Atual (${prog.xpTotal.toLocaleString('pt-BR')} XP)</span>`;
+                    badgeHtml = `<span class="og-ladder-item-badge" style="background:${lvl.bg}; color:${lvl.cor}; border:1px solid ${lvl.cor};">📍 Nível Atual (${prog.xpNoNivel.toLocaleString('pt-BR')} / ${prog.faixaXp.toLocaleString('pt-BR')} XP)</span>`;
                 } else if (isConquered) {
                     itemClass = 'is-conquered';
                     badgeHtml = `<span class="og-ladder-item-badge" style="background:rgba(34, 197, 94, 0.12); color:#22c55e; border:1px solid rgba(34, 197, 94, 0.3);">✓ Conquistado</span>`;
@@ -3333,8 +3500,12 @@
                 } else {
                     itemClass = 'is-locked';
                     const diff = Math.max(0, lvl.minXp - prog.xpTotal);
-                    badgeHtml = `<span class="og-ladder-item-badge" style="background:rgba(255, 255, 255, 0.05); color:#94a3b8; border:1px solid rgba(255, 255, 255, 0.08);">🔒 Faltam ${diff.toLocaleString('pt-BR')} XP</span>`;
+                    badgeHtml = `<span class="og-ladder-item-badge" style="background:rgba(255, 255, 255, 0.05); color:#94a3b8; border:1px solid rgba(255, 255, 255, 0.08);">🔒 Faltam ${diff.toLocaleString('pt-BR')} XP no total</span>`;
                 }
+
+                const reqTexto = lvl.xpNecessario > 0
+                    ? `Requisito: ${lvl.xpNecessario.toLocaleString('pt-BR')} XP no nível <span style="opacity:0.75; font-size:0.68rem;">(Total acumulado: ${lvl.minXp.toLocaleString('pt-BR')} XP)</span>`
+                    : `Patente Suprema <span style="opacity:0.75; font-size:0.68rem;">(Acima de ${lvl.minXp.toLocaleString('pt-BR')} XP)</span>`;
 
                 return `
                     <div class="og-ladder-item ${itemClass}">
@@ -3342,7 +3513,7 @@
                             <span class="og-ladder-item-icon">${lvl.icone}</span>
                             <div>
                                 <div class="og-ladder-item-title" style="color: ${isCurrent ? lvl.cor : ''}">${lvl.titulo} <span style="font-size:0.68rem; opacity:0.8;">• Nv. ${lvl.nivel}</span></div>
-                                <div class="og-ladder-item-sub">Requisito: ${lvl.minXp.toLocaleString('pt-BR')} XP</div>
+                                <div class="og-ladder-item-sub">${reqTexto}</div>
                             </div>
                         </div>
                         <div>${badgeHtml}</div>
@@ -3367,11 +3538,9 @@
 
         // Avatar
         const avatarEl = document.getElementById('ogCardAvatar');
-        const userAvatar = typeof window.getUsuarioAvatarAtual === 'function'
-            ? window.getUsuarioAvatarAtual()
-            : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+        const userAvatarParaExibir = dados.avatar || '🎮';
         if (typeof window.renderizarAvatarHtml === 'function') {
-            avatarEl.innerHTML = window.renderizarAvatarHtml(userAvatar, username.charAt(0).toUpperCase() || '🎮');
+            avatarEl.innerHTML = window.renderizarAvatarHtml(userAvatarParaExibir, username.charAt(0).toUpperCase() || '🎮');
         } else {
             avatarEl.textContent = username.charAt(0).toUpperCase() || '🎮';
         }
@@ -3414,6 +3583,44 @@
         }
 
         document.getElementById('ogCardTimestamp').textContent = new Date().toLocaleDateString('pt-BR');
+
+        // Configuração de Ações (Apenas o próprio titular do Gamer Card pode exportar e compartilhar)
+        const formatBarEl = document.getElementById('ogCardSocialFormatBar');
+        const viewingNoticeEl = document.getElementById('ogCardViewingNotice');
+        const viewingNoticeText = document.getElementById('ogCardViewingNoticeText');
+        const btnShare = document.getElementById('ogBtnShareCard');
+        const btnCopy = document.getElementById('ogBtnCopyCard');
+        const btnDownload = document.getElementById('ogBtnDownloadCard');
+        const btnClose = document.getElementById('ogBtnCloseCard');
+
+        if (isSelf) {
+            if (formatBarEl) formatBarEl.style.display = 'flex';
+            if (viewingNoticeEl) viewingNoticeEl.style.display = 'none';
+            if (btnShare) btnShare.style.display = 'inline-flex';
+            if (btnCopy) btnCopy.style.display = 'inline-flex';
+            if (btnDownload) btnDownload.style.display = 'inline-flex';
+            if (btnClose) {
+                btnClose.style.flex = '0 0 auto';
+                btnClose.style.minWidth = '65px';
+                btnClose.textContent = '✕ Fechar';
+            }
+        } else {
+            if (formatBarEl) formatBarEl.style.display = 'none';
+            if (viewingNoticeEl) {
+                viewingNoticeEl.style.display = 'flex';
+                if (viewingNoticeText) {
+                    viewingNoticeText.innerHTML = `Visualizando Passe Gamer Oficial de <strong>${username}</strong>`;
+                }
+            }
+            if (btnShare) btnShare.style.display = 'none';
+            if (btnCopy) btnCopy.style.display = 'none';
+            if (btnDownload) btnDownload.style.display = 'none';
+            if (btnClose) {
+                btnClose.style.flex = '1';
+                btnClose.style.minWidth = '100%';
+                btnClose.textContent = '✕ Fechar Visualização';
+            }
+        }
 
         const cardPreviewEl = document.getElementById('ogCardPreview');
         if (cardPreviewEl) {
@@ -3668,6 +3875,7 @@
     async function gerarCanvasGamerCardPro(formato = 'stories') {
         const dados = _dadosCardAtuais || {};
         const username = dados.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        const isSelf = !dados.username || dados.username.toLowerCase() === (localStorage.getItem('overcritic_currentUser') || '').toLowerCase();
         const jogosArr = dados.jogos || [];
         const midiasArr = dados.midias || [];
         const platinasArr = (dados.platinas || []);
@@ -3675,7 +3883,7 @@
         const numMidias = midiasArr.length;
         const numPlatinas = platinasArr.length;
 
-        const prog = calcularProgressoGamer({ jogos: jogosArr, midias: midiasArr, platinas: platinasArr });
+        const prog = calcularProgressoGamer({ username, jogos: jogosArr, midias: midiasArr, platinas: platinasArr });
 
         // Média de Notas
         let somaNotas = 0;
@@ -3697,9 +3905,12 @@
         const ctx = canvas.getContext('2d');
 
         // Carrega avatar em segundo plano
-        const userAvatarRaw = typeof window.getUsuarioAvatarAtual === 'function'
-            ? window.getUsuarioAvatarAtual()
-            : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+        let userAvatarRaw = dados.avatar;
+        if (!userAvatarRaw) {
+            userAvatarRaw = (isSelf && typeof window.getUsuarioAvatarAtual === 'function')
+                ? window.getUsuarioAvatarAtual()
+                : (localStorage.getItem('overcritic_user_avatar') || '🎮');
+        }
         
         const avatarImgPromise = (userAvatarRaw && (userAvatarRaw.startsWith('http') || userAvatarRaw.startsWith('data:image/')))
             ? carregarImagemSegura(userAvatarRaw, 3000)
@@ -3822,7 +4033,8 @@
             desenharRoundBox(ctx, width / 2 - 250, 505, 500, 52, 26, 'rgba(15, 23, 42, 0.9)', prog.cor || '#00f0ff', 2);
             ctx.fillStyle = prog.cor || '#00f0ff';
             ctx.font = '800 24px "Inter", sans-serif';
-            ctx.fillText(`${prog.icone} NÍVEL ${prog.nivel} • ${prog.titulo.toUpperCase()}`, width / 2, 540);
+            const textoBadgeCanvas = prog.isDev ? `${prog.icone} PATENTE EXCLUSIVA • ${prog.titulo.toUpperCase()}` : `${prog.icone} NÍVEL ${prog.nivel} • ${prog.titulo.toUpperCase()}`;
+            ctx.fillText(textoBadgeCanvas, width / 2, 540);
 
             // 2. Barra de Experiência XP
             const xpBoxY = 590;
@@ -3831,7 +4043,7 @@
             ctx.fillStyle = '#94a3b8';
             ctx.font = '800 20px "Inter", sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText(`EXPERIÊNCIA GAMER: ${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`, 110, xpBoxY + 40);
+            ctx.fillText(`XP NO NÍVEL: ${prog.xpNoNivel.toLocaleString('pt-BR')} / ${prog.faixaXp.toLocaleString('pt-BR')} XP (${prog.porcentagem}%) • TOTAL: ${prog.xpTotal.toLocaleString('pt-BR')} XP`, 110, xpBoxY + 40);
 
             // Barra Track
             desenharRoundBox(ctx, 110, xpBoxY + 55, width - 220, 20, 10, 'rgba(255, 255, 255, 0.1)', null, 0);
@@ -3995,7 +4207,8 @@
 
             ctx.fillStyle = prog.cor || '#00f0ff';
             ctx.font = '800 24px "Inter", sans-serif';
-            ctx.fillText(`${prog.icone} Nível ${prog.nivel} • ${prog.titulo}`, 240, 270);
+            const textoPostCanvas = prog.isDev ? `${prog.icone} PATENTE EXCLUSIVA • ${prog.titulo}` : `${prog.icone} Nível ${prog.nivel} • ${prog.titulo}`;
+            ctx.fillText(textoPostCanvas, 240, 270);
 
             // Barra de XP Compacta
             const xpBarY = 330;
@@ -4003,7 +4216,7 @@
 
             ctx.fillStyle = '#94a3b8';
             ctx.font = '700 16px "Inter", sans-serif';
-            ctx.fillText(`EXPERIÊNCIA: ${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`, 100, xpBarY + 32);
+            ctx.fillText(`XP NO NÍVEL: ${prog.xpNoNivel.toLocaleString('pt-BR')}/${prog.faixaXp.toLocaleString('pt-BR')} XP (${prog.porcentagem}%) • TOTAL: ${prog.xpTotal.toLocaleString('pt-BR')} XP`, 100, xpBarY + 32);
 
             const xpWPost = Math.max(20, 420 * (prog.porcentagem / 100));
             desenharRoundBox(ctx, width - 530, xpBarY + 16, 420, 16, 8, 'rgba(255, 255, 255, 0.1)', null, 0);
@@ -4132,6 +4345,12 @@
 
         try {
             const dados = _dadosCardAtuais || {};
+            if (dados.isSelf === false) {
+                if (window.showToast) {
+                    window.showToast.info('Você só pode exportar ou compartilhar o seu próprio Gamer Card oficial.');
+                }
+                return;
+            }
             const username = dados.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
             const slug = username.toLowerCase().replace(/[^a-z0-9]/g, '_');
             const fileName = `overcritic-card-${slug}-${formato}.png`;
@@ -4367,6 +4586,9 @@
     let _filtroPoolTier = 'todas';
 
     function abrirModalTierList(dados = {}) {
+        if (typeof dados === 'string') {
+            dados = { username: dados };
+        }
         const overlay = garantirModalTierList();
 
         // Sempre busca consolidação completa para garantir que todas as obras reais apareçam
@@ -5048,18 +5270,21 @@
      * no Gamer Card, Tier List, Níveis e Estatísticas do Perfil.
      */
     function obterDadosConsolidadosUsuario(customUsername, customUid) {
-        const username = (customUsername || localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || 'Jogador').trim();
-        const uid = (customUid || localStorage.getItem('overcritic_user_id') || '').trim();
-
+        const currentUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim();
+        const username = (customUsername || currentUser || 'Jogador').trim();
         const usernameLower = username.toLowerCase();
-        const email = (localStorage.getItem('overcritic_user_email') || '').trim().toLowerCase();
-        const isAdmin = (window.isAdminUser && window.isAdminUser())
-            || email === 'mesquitagabriel255@gmail.com'
-            || usernameLower === 'pontug'
-            || usernameLower === 'admin'
-            || localStorage.getItem('overcritic_is_admin') === 'true';
+        const isSelf = !customUsername || (currentUser && usernameLower === currentUser.toLowerCase());
 
-        const effectiveUid = uid || (isAdmin ? '958a1b5f-4151-42c7-97f2-caf0e59fbb86' : '');
+        // Atenção: isTargetAdmin deve ser relativo ao usuário CONSULTADO, NÃO ao visualizador logado!
+        const isTargetAdmin = usernameLower === 'pontug' 
+            || usernameLower === 'admin'
+            || (isSelf && (
+                (typeof window.isAdminUser === 'function' && window.isAdminUser()) ||
+                ((localStorage.getItem('overcritic_user_email') || '').trim().toLowerCase() === 'mesquitagabriel255@gmail.com') ||
+                (localStorage.getItem('overcritic_is_admin') === 'true')
+            ));
+
+        const effectiveUid = (customUid || '').trim() || (isSelf ? (localStorage.getItem('overcritic_user_id') || '').trim() : (isTargetAdmin ? '958a1b5f-4151-42c7-97f2-caf0e59fbb86' : ''));
 
         // 1. Jogos do usuário (Lê caches da nuvem e local)
         let jogos = [];
@@ -5076,7 +5301,7 @@
                 if (isSeed || fakeReviewIds.includes(idNum)) return;
                 const dono = (j.autor || '').toLowerCase();
                 const eDoUsuario = dono === usernameLower 
-                    || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
+                    || (isTargetAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
                     || (effectiveUid && (j.userId === effectiveUid || j.user_id === effectiveUid));
                 if (eDoUsuario) {
                     const key = j.titulo.trim().toLowerCase();
@@ -5097,7 +5322,7 @@
                 if (!m) return;
                 const dono = (m.autor || '').toLowerCase();
                 const eDoUsuario = dono === usernameLower 
-                    || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
+                    || (isTargetAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
                     || (effectiveUid && (m.userId === effectiveUid || m.user_id === effectiveUid));
                 if (eDoUsuario) {
                     const key = (m.titulo || '').trim().toLowerCase();
@@ -5124,7 +5349,7 @@
                 if (idsExpurgados.includes(idNum)) return; // Expurgo definitivo da temporada anterior
                 const dono = (p.user || p.usuario || '').toLowerCase();
                 const eDoUsuario = dono === usernameLower 
-                    || (isAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
+                    || (isTargetAdmin && ['admin', 'administrador', 'adm', 'pontug'].includes(dono)) 
                     || (effectiveUid && (p.userId === effectiveUid || p.user_id === effectiveUid));
 
                 if (eDoUsuario) {
@@ -5136,6 +5361,7 @@
         } catch(e) {}
 
         const progresso = calcularProgressoGamer({
+            username: username,
             jogos: jogos,
             midias: midias,
             platinas: platinas
@@ -5166,13 +5392,23 @@
         // Atualiza status no header da Home (se existir elemento .header-user-status)
         const headerStatusEl = document.querySelector('.header-user-status');
         if (headerStatusEl) {
-            headerStatusEl.innerHTML = `<span style="color:${prog.cor}; font-weight:800;">${prog.icone} Nv. ${prog.nivel} ${prog.titulo}</span>`;
+            if (prog.isDev) {
+                headerStatusEl.innerHTML = `<span style="color:${prog.cor}; font-weight:800;">${prog.icone} DEV • ${prog.titulo}</span>`;
+            } else {
+                headerStatusEl.innerHTML = `<span style="color:${prog.cor}; font-weight:800;">${prog.icone} Nv. ${prog.nivel} ${prog.titulo}</span>`;
+            }
         }
 
         // Atualiza badge pill se presente no DOM
         const pill = document.getElementById('profLevelBadgePill');
         if (pill) {
-            pill.innerHTML = `${prog.icone} Nv. ${prog.nivel} ${prog.titulo} • ${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+            if (prog.isDev) {
+                pill.innerHTML = `🛠️ <b>PATENTE EXCLUSIVA DEV</b> • Criador & Admin`;
+                pill.title = `Patente exclusiva do Desenvolvedor e Criador do Overcritic • Reputação Total: ${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+            } else {
+                pill.innerHTML = `${prog.icone} Nv. ${prog.nivel} ${prog.titulo} • ${prog.xpNoNivel.toLocaleString('pt-BR')}/${prog.faixaXp.toLocaleString('pt-BR')} XP`;
+                pill.title = `Progresso no Nível ${prog.nivel}: ${prog.xpNoNivel.toLocaleString('pt-BR')} de ${prog.faixaXp.toLocaleString('pt-BR')} XP conquistados • Reputação Total: ${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+            }
             pill.style.color = prog.cor;
             pill.style.borderColor = prog.cor;
             pill.style.background = prog.bg;
@@ -5603,30 +5839,18 @@
             const uName = membro.username;
             const uNameLower = keyUser;
 
-            // Filtra acervo do jogador com verificação cruzada de autor e ID único de pontuG/Admin
-            let jogosDoUser = todosJogos.filter(j => {
-                const autor = (j.autor || '').toLowerCase();
-                if (autor === uNameLower) return true;
-                if (uNameLower === 'pontug' && (['admin', 'administrador', 'adm'].includes(autor) || j.userId === '958a1b5f-4151-42c7-97f2-caf0e59fbb86' || j.user_id === '958a1b5f-4151-42c7-97f2-caf0e59fbb86')) return true;
-                return false;
-            });
+            // Moderadores, Administradores e Desenvolvedores (como pontuG/admin) possuem patente exclusiva DEV e não competem no Ranking Geral
+            if (isUsuarioDevOuStaff(uName) || isUsuarioDevOuStaff(membro)) {
+                continue;
+            }
 
-            let platinasDoUser = todasPlatinas.filter(p => {
-                const autor = (p.user || p.usuario || '').toLowerCase();
-                if (autor === uNameLower) return true;
-                if (uNameLower === 'pontug' && (['admin', 'administrador', 'adm'].includes(autor) || p.userId === '958a1b5f-4151-42c7-97f2-caf0e59fbb86' || p.user_id === '958a1b5f-4151-42c7-97f2-caf0e59fbb86')) return true;
-                return false;
-            });
+            // Filtra acervo do jogador com verificação cruzada de autor
+            let jogosDoUser = todosJogos.filter(j => (j.autor || '').toLowerCase() === uNameLower);
+            let platinasDoUser = todasPlatinas.filter(p => (p.user || p.usuario || '').toLowerCase() === uNameLower);
+            let midiasDoUser = todasMidias.filter(m => (m.autor || '').toLowerCase() === uNameLower);
 
-            let midiasDoUser = todasMidias.filter(m => {
-                const autor = (m.autor || '').toLowerCase();
-                if (autor === uNameLower) return true;
-                if (uNameLower === 'pontug' && (['admin', 'administrador', 'adm'].includes(autor) || m.userId === '958a1b5f-4151-42c7-97f2-caf0e59fbb86' || m.user_id === '958a1b5f-4151-42c7-97f2-caf0e59fbb86')) return true;
-                return false;
-            });
-
-            // Se for pontuG / Admin ou o usuário logado, utiliza a consolidação detalhada do perfil
-            if (uNameLower === 'pontug' || (userAtivo && uNameLower === userAtivo.toLowerCase())) {
+            // Se for o usuário logado, utiliza a consolidação detalhada do perfil
+            if (userAtivo && uNameLower === userAtivo.toLowerCase()) {
                 const dadosConsolidados = obterDadosConsolidadosUsuario(uName);
                 if (dadosConsolidados) {
                     if (dadosConsolidados.jogos.length > 0) jogosDoUser = dadosConsolidados.jogos;
@@ -5636,6 +5860,7 @@
             }
 
             const progresso = calcularProgressoGamer({
+                username: uName,
                 jogos: jogosDoUser,
                 midias: midiasDoUser,
                 platinas: platinasDoUser
@@ -5644,7 +5869,7 @@
             ranking.push({
                 username: uName,
                 avatar: membro.avatar || '🎮',
-                role: membro.role || (uNameLower === 'pontug' ? 'Fundador & Admin' : 'Membro da Comunidade'),
+                role: membro.role || 'Membro da Comunidade',
                 email: membro.email || '',
                 xp: progresso.xpTotal || 0,
                 nivel: progresso.nivel || 1,
@@ -5661,21 +5886,16 @@
             });
         }
 
-        // 5. Ordenação do Ranking:
+        // 5. Ordenação do Ranking da Comunidade:
         // 1º XP Total (quem tem mais pontos fica no topo)
         // 2º Total de Platinas (desempate)
         // 3º Total de Análises (desempate)
-        // 4º Prioridade do Fundador & Admin (evita que contas zeradas assumam a coroa)
-        // 5º Membro mais antigo por data de cadastro
-        // 6º Ordem Alfabética
+        // 4º Membro mais antigo por data de cadastro
+        // 5º Ordem Alfabética
         ranking.sort((a, b) => {
             if (b.xp !== a.xp) return b.xp - a.xp;
             if (b.totalPlatinas !== a.totalPlatinas) return b.totalPlatinas - a.totalPlatinas;
             if (b.totalAnalises !== a.totalAnalises) return b.totalAnalises - a.totalAnalises;
-            const aIsAdmin = a.role === 'Fundador & Admin' || (a.username || '').toLowerCase() === 'pontug';
-            const bIsAdmin = b.role === 'Fundador & Admin' || (b.username || '').toLowerCase() === 'pontug';
-            if (aIsAdmin && !bIsAdmin) return -1;
-            if (!aIsAdmin && bIsAdmin) return 1;
             const dataA = new Date(a.dataCadastro || 0).getTime();
             const dataB = new Date(b.dataCadastro || 0).getTime();
             if (dataA !== dataB) return dataA - dataB;
@@ -5706,17 +5926,27 @@
      * Retorna a posição e os dados no ranking de um usuário específico.
      */
     function obterPosicaoRankingUsuario(nomeUsuario) {
-        const ranking = obterRankingGeralComunidade();
         const target = (nomeUsuario || localStorage.getItem('overcritic_currentUser') || '').toLowerCase().trim();
+        if (isUsuarioDevOuStaff(target)) {
+            return {
+                isDev: true,
+                posicao: 'DEV',
+                totalJogadores: 0,
+                jogador: null
+            };
+        }
+        const ranking = obterRankingGeralComunidade();
         const encontrado = ranking.find(j => j.username.toLowerCase() === target);
         if (encontrado) {
             return {
+                isDev: false,
                 posicao: encontrado.rank,
                 totalJogadores: ranking.length,
                 jogador: encontrado
             };
         }
         return {
+            isDev: false,
             posicao: ranking.length + 1,
             totalJogadores: ranking.length,
             jogador: null
@@ -5766,7 +5996,7 @@
                     <span>•</span>
                     <span>📝 <b>${jogador.totalAnalises}</b> críticas</span>
                 </div>
-                <button type="button" class="og-rank-btn-view" style="margin-top: 14px; width: 100%;" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal('${jogador.username}');">
+                <button type="button" class="og-rank-btn-view" style="margin-top: 14px; width: 100%;" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal({ username: '${jogador.username.replace(/'/g, "\\'")}', avatar: '${(jogador.avatar || '🎮').replace(/'/g, "\\'")}' });">
                     🎴 Ver Gamer Card
                 </button>
             </div>
@@ -5827,8 +6057,8 @@
                 <td>
                     <div class="og-rank-xp-bar-wrap">
                         <div class="og-rank-xp-text">
-                            <span style="color:var(--text-main, #f8f9fa); font-weight:800;">${jogador.xp.toLocaleString('pt-BR')} XP</span>
-                            <span style="color:var(--text-muted, #adb5bd); font-size:0.7rem;">${pct}%</span>
+                            <span style="color:var(--text-main, #f8f9fa); font-weight:800;">${jogador.xp.toLocaleString('pt-BR')} XP Total</span>
+                            <span style="color:var(--text-muted, #adb5bd); font-size:0.7rem;">${prog.xpNoNivel !== undefined ? `${prog.xpNoNivel.toLocaleString('pt-BR')}/${prog.faixaXp.toLocaleString('pt-BR')} XP` : ''} (${pct}%)</span>
                         </div>
                         <div class="og-rank-xp-track">
                             <div class="og-rank-xp-fill" style="width: ${Math.min(100, Math.max(5, pct))}%;"></div>
@@ -5836,7 +6066,7 @@
                     </div>
                 </td>
                 <td style="text-align: center;">
-                    <button type="button" class="og-rank-btn-view" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal('${jogador.username}');" title="Ver Gamer Card Oficial">
+                    <button type="button" class="og-rank-btn-view" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal({ username: '${jogador.username.replace(/'/g, "\\'")}', avatar: '${(jogador.avatar || '🎮').replace(/'/g, "\\'")}' });" title="Ver Gamer Card Oficial">
                         🎴 Card
                     </button>
                 </td>
@@ -6665,6 +6895,29 @@
     }
 
     /**
+     * Retorna o total de XP acumulado em Duelos Diários da Comunidade (+25 XP por voto diário)
+     */
+    function obterTotalXpDuelosDiariosUsuario(dadosOuUsername) {
+        let username = '';
+        if (typeof dadosOuUsername === 'string') {
+            username = dadosOuUsername.trim();
+        } else if (dadosOuUsername && typeof dadosOuUsername === 'object') {
+            username = dadosOuUsername.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        } else {
+            username = localStorage.getItem('overcritic_currentUser') || 'Jogador';
+        }
+        const usernameLower = username.toLowerCase();
+        const storageKey = `overcritic_duelos_xp_${usernameLower}`;
+        try {
+            const historico = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            if (Array.isArray(historico)) {
+                return historico.length * 25;
+            }
+        } catch(e) {}
+        return 0;
+    }
+
+    /**
      * Retorna o status detalhado das missões da semana atual do jogador
      */
     function obterStatusMissoesSemanaisUsuario(dadosOuUsername) {
@@ -7188,6 +7441,7 @@
         NIVEIS_GAMER,
         CONFIG_INSIGNIAS,
         POOL_MISSOES_SEMANAIS,
+        isUsuarioDevOuStaff,
         calcularProgressoGamer,
         calcularXpPlatina,
         avaliarQualidadeReview,
@@ -7220,6 +7474,7 @@
         obterMissoesSemanaisAtivas,
         obterStatusMissoesSemanaisUsuario,
         obterTotalXpMissoesSemanaisUsuario,
+        obterTotalXpDuelosDiariosUsuario,
         verificarMissoesSemanais,
         exibirPopupMissaoConcluida,
         renderizarMissoesSemanaisHtml,

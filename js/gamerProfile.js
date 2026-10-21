@@ -677,6 +677,7 @@
         // 3. Atualiza Nível Gamer, XP e Botões Gamificados
         if (window.OvercriticGamification) {
             const prog = window.OvercriticGamification.calcularProgressoGamer({
+                username: targetUsername,
                 jogos: jogos,
                 midias: midias,
                 platinas: platinas
@@ -684,7 +685,7 @@
 
             const levelBadge = document.getElementById('gpLevelBadge');
             if (levelBadge) {
-                levelBadge.innerHTML = `${prog.icone} Nv. ${prog.nivel} ${prog.titulo}`;
+                levelBadge.innerHTML = prog.isDev ? `🛠️ <b>PATENTE DEV</b> • ${prog.titulo}` : `${prog.icone} Nv. ${prog.nivel} ${prog.titulo}`;
                 levelBadge.style.color = prog.cor;
                 levelBadge.style.borderColor = prog.cor;
                 levelBadge.style.background = prog.bg;
@@ -692,7 +693,9 @@
 
             const xpText = document.getElementById('gpXpText');
             if (xpText) {
-                xpText.textContent = `${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`;
+                xpText.textContent = prog.proximoNivel 
+                    ? `${prog.xpNoNivel.toLocaleString('pt-BR')} / ${prog.faixaXp.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`
+                    : `${prog.xpTotal.toLocaleString('pt-BR')} XP (${prog.porcentagem}%)`;
             }
 
             const xpFill = document.getElementById('gpXpFill');

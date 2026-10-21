@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -36,14 +36,14 @@
     </script>
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.9"></script>
-    <script src="js/apiClient.js?v=26.10.9"></script>
-    <script src="js/notifications.js?v=26.10.9"></script>
-    <script src="js/version.js?v=26.10.9"></script>
-    <script src="js/avatarManager.js?v=26.10.9"></script>
-    <script src="js/overcriticGamification.js?v=26.10.9"></script>
-    <script src="js/overcriticSpotlight.js?v=26.10.9"></script>
-    <script src="js/pwaManager.js?v=26.10.9" defer></script>
+    <script src="supabaseClient.js?v=26.10.10"></script>
+    <script src="js/apiClient.js?v=26.10.10"></script>
+    <script src="js/notifications.js?v=26.10.10"></script>
+    <script src="js/version.js?v=26.10.10"></script>
+    <script src="js/avatarManager.js?v=26.10.10"></script>
+    <script src="js/overcriticGamification.js?v=26.10.10"></script>
+    <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
+    <script src="js/pwaManager.js?v=26.10.10" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -59,15 +59,19 @@
             --warning: #f59e0b;
         }
 
-        /* --- TEMA BRANCO PURO & TECNOLÓGICO (WHITE MODE PREMIUM) --- */
+        /* ═══════════════════════════════════════════════════════════
+           TEMA AZUL-PETRÓLEO ARDÓSIA (SLATE PETROL GAMER)
+        ═══════════════════════════════════════════════════════════ */
         body.light-mode {
-            --bg-color: #f8fafc;
-            --accent-cyan: #0284c7;
-            --accent-purple: #7c3aed;
-            --card-bg: #ffffff;
-            --glass-border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
+            --bg-color: #8da4b5;
+            --accent-cyan: #0891b2;
+            --accent-purple: #6d28d9;
+            --card-bg: rgba(182, 199, 212, 0.90);
+            --glass-border: rgba(14, 116, 144, 0.38);
+            --text-main: #05101a;
+            --text-muted: #223647;
+            background-color: #8da4b5 !important;
+            color: #05101a !important;
         }
 
         * {
@@ -598,10 +602,32 @@
             <!-- TABS DE NAVEGAÇÃO SUPERIORES -->
             <div class="auth-tabs" id="authTabsContainer">
                 <button class="tab-btn" id="tabProfile" onclick="alternarTab('profile')">👤 MEU PERFIL</button>
-                <button class="tab-btn active" id="tabLogin" onclick="alternarTab('login')">🔑 ENTRAR</button>
+                <button class="tab-btn" id="tabLogin" onclick="alternarTab('login')">🔑 ENTRAR</button>
                 <button class="tab-btn" id="tabRegister" onclick="alternarTab('register')">✨ CRIAR CONTA</button>
                 <button class="tab-btn" id="tabRanking" onclick="alternarTab('ranking')">🏆 RANKING GERAL</button>
             </div>
+            <script>
+                (function() {
+                    try {
+                        var u = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim();
+                        var uid = (localStorage.getItem('overcritic_user_id') || '').trim();
+                        var em = (localStorage.getItem('overcritic_user_email') || '').trim();
+                        var isLogged = (u && !['visitante', 'anônimo', 'anonimo', 'null', 'undefined'].includes(u.toLowerCase())) || uid || (em && em.indexOf('@') !== -1);
+                        var tl = document.getElementById('tabLogin');
+                        var tr = document.getElementById('tabRegister');
+                        var tp = document.getElementById('tabProfile');
+                        if (isLogged) {
+                            if (tl) tl.style.display = 'none';
+                            if (tr) tr.style.display = 'none';
+                            if (tp) tp.classList.add('active');
+                            if (tl) tl.classList.remove('active');
+                        } else {
+                            if (tl) tl.classList.add('active');
+                            if (tp) tp.classList.remove('active');
+                        }
+                    } catch(e) {}
+                })();
+            </script>
 
             <!-- ALERTA DE STATUS / FEEDBACK -->
             <div id="authAlert" class="auth-alert"></div>
@@ -614,7 +640,10 @@
                         <div class="profile-avatar-large" id="profAvatar" onclick="window.abrirModalSeletorAvatar()" title="Clique para trocar sua foto ou avatar de perfil">🎮</div>
                         <button type="button" class="btn-avatar-edit-floating" onclick="window.abrirModalSeletorAvatar()" title="Alterar Foto ou Ícone">📷</button>
                     </div>
-                    <h2 class="profile-name" id="profName">Jogador</h2>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2px;">
+                        <h2 class="profile-name" id="profName" style="margin: 0;">Jogador</h2>
+                        <button type="button" class="btn-edit-username-icon" onclick="abrirModalEditarUsername()" title="Alterar Nome de Usuário" style="background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.3); color: var(--accent-cyan); border-radius: 8px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; font-size: 0.88rem;">✏️</button>
+                    </div>
                     <div class="profile-email" id="profEmail">jogador@email.com</div>
                     <div class="profile-badge-status" id="profStatusBadge">
                         <span>🛡️</span> E-mail Autenticado no Supabase
@@ -664,6 +693,8 @@
 
                     <div class="profile-actions" style="margin-bottom: 14px;">
                         <a href="index.html" class="btn-home">🏠 Ir para o Hub</a>
+                        <button type="button" class="btn-home" onclick="abrirModalEditarUsername()" style="border-color: rgba(0, 240, 255, 0.4); color: var(--accent-cyan);" title="Alterar seu nome de usuário único">✏️ Alterar Usuário</button>
+                        <button type="button" class="btn-home" onclick="alternarTab('recovery')" style="border-color: rgba(0, 240, 255, 0.4); color: var(--accent-cyan);" title="Alterar ou redefinir sua senha de acesso">🔑 Alterar Senha</button>
                         <a href="suporte_overcritic.html?tab=admin" id="btnAdminAccess" class="btn-home" style="display: none; border-color: #ffd700; color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.25); text-decoration: none;">👑 Painel Admin</a>
                         <button type="button" class="btn-logout" onclick="realizarLogout()">🚪 Desconectar</button>
                     </div>
@@ -705,42 +736,50 @@
                 </div>
 
                 <!-- Formulário de Login -->
-                <form id="formLogin" onsubmit="realizarLogin(event)">
+                <form id="formLogin" name="loginForm" method="post" action="javascript:void(0);" autocomplete="on" onsubmit="realizarLogin(event)">
                     <div class="form-group">
-                        <label class="form-label">E-MAIL CADASTRADO</label>
-                        <input type="email" id="loginEmail" class="form-input" placeholder="seu@email.com" required autocomplete="email">
+                        <label class="form-label" for="loginEmail">E-MAIL OU NOME DE USUÁRIO</label>
+                        <input type="text" id="loginEmail" name="username" class="form-input" placeholder="seu@email.com ou usuário (ex: pontuG)" required autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">SUA SENHA</label>
-                        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <label class="form-label" for="loginPassword">SUA SENHA</label>
+                            <a href="javascript:void(0)" onclick="alternarTab('forgot')" style="font-size: 0.78rem; color: var(--accent-cyan); text-decoration: none; font-weight: 700; transition: opacity 0.2s ease;">Esqueceu a senha?</a>
+                        </div>
+                        <input type="password" id="loginPassword" name="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
                     </div>
-                    <button type="submit" id="btnLoginSubmit" class="btn-submit">ENTRAR NO OVERCRITIC</button>
+                    <button type="submit" id="btnLoginSubmit" name="loginSubmitBtn" class="btn-submit">ENTRAR NO OVERCRITIC</button>
 
-                    <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted);">
-                        Ainda não tem conta? 
-                        <a href="javascript:void(0)" onclick="alternarTab('register')" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">Cadastre-se grátis</a>
+                    <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                        <span>Ainda não tem conta? <a href="javascript:void(0)" onclick="alternarTab('register')" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">Cadastre-se grátis</a></span>
+                        <span>•</span>
+                        <span><a href="javascript:void(0)" onclick="alternarTab('forgot')" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Redefinir senha</a></span>
                     </div>
                 </form>
             </div>
 
             <!-- ══════ ABA 3: CRIAR CONTA (CADASTRO) ══════ -->
             <div id="registerTabContent" style="display: none;">
-                <form id="formRegister" onsubmit="realizarCadastro(event)">
+                <form id="formRegister" name="registerForm" method="post" action="javascript:void(0);" autocomplete="on" onsubmit="realizarCadastro(event)">
                     <div class="form-group">
-                        <label class="form-label">NOME DE JOGADOR / USUÁRIO</label>
-                        <input type="text" id="regUsername" class="form-input" placeholder="Ex: pontuG" required autocomplete="username">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <label class="form-label" for="regUsername">NOME DE USUÁRIO (ÚNICO)</label>
+                            <span id="regUsernameStatus" style="font-size: 0.74rem; font-weight: 700; display: none;"></span>
+                        </div>
+                        <input type="text" id="regUsername" name="nickname" class="form-input" placeholder="Ex: pontuG" required autocomplete="nickname" maxlength="24" oninput="validarUsernameEmTempoReal(this.value)">
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">Identificador exclusivo para login e exibido no Ranking Geral.</div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">E-MAIL VÁLIDO (RECEBERÁ CONFIRMAÇÃO)</label>
-                        <input type="email" id="regEmail" class="form-input" placeholder="seu@email.com" required autocomplete="email">
+                        <label class="form-label" for="regEmail">E-MAIL VÁLIDO (RECEBERÁ CONFIRMAÇÃO)</label>
+                        <input type="email" id="regEmail" name="username" class="form-input" placeholder="seu@email.com" required autocomplete="username email" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">SENHA (MÍNIMO 6 CARACTERES)</label>
-                        <input type="password" id="regPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+                        <label class="form-label" for="regPassword">SENHA (MÍNIMO 6 CARACTERES)</label>
+                        <input type="password" id="regPassword" name="password" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">CONFIRME A SENHA</label>
-                        <input type="password" id="regConfirmPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+                        <label class="form-label" for="regConfirmPassword">CONFIRME A SENHA</label>
+                        <input type="password" id="regConfirmPassword" name="confirmPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
                     </div>
                     <div class="form-group" style="text-align: center; margin-top: 15px; margin-bottom: 22px;">
                         <label class="form-label" style="display: block; text-align: center; margin-bottom: 10px;">FOTO OU ÍCONE DE PERFIL</label>
@@ -753,11 +792,12 @@
                         <input type="hidden" id="regSelectedAvatar" value="🎮">
                     </div>
 
-                    <button type="submit" id="btnRegSubmit" class="btn-submit">CRIAR CONTA & ENVIAR CONFIRMAÇÃO</button>
+                    <button type="submit" id="btnRegSubmit" name="regSubmitBtn" class="btn-submit">CRIAR CONTA & ENVIAR CONFIRMAÇÃO</button>
 
-                    <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted);">
-                        Já tem uma conta cadastrada? 
-                        <a href="javascript:void(0)" onclick="alternarTab('login')" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">Entrar agora</a>
+                    <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                        <span>Já tem uma conta cadastrada? <a href="javascript:void(0)" onclick="alternarTab('login')" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">Entrar agora</a></span>
+                        <span>•</span>
+                        <span><a href="javascript:void(0)" onclick="alternarTab('forgot')" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Esqueci minha senha</a></span>
                     </div>
                 </form>
             </div>
@@ -767,6 +807,101 @@
                 <div id="communityRankingContainerAuth"></div>
             </div>
 
+            <!-- ══════ ABA 5: REDEFINIR SENHA ══════ -->
+            <div id="forgotTabContent" style="display: none;">
+                <!-- Modo 1: Solicitar Link de Redefinição por E-mail -->
+                <div id="forgotRequestView">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 2.8rem; margin-bottom: 8px;">🔐</div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--text-main);">Recuperação de Acesso</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+                            Digite o e-mail cadastrado na sua conta. Enviaremos um link de recuperação para você redefinir sua senha com segurança.
+                        </p>
+                    </div>
+                    <form id="formForgotRequest" name="forgotForm" method="post" action="javascript:void(0);" autocomplete="on" onsubmit="solicitarRedefinicaoSenha(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="forgotEmail">E-MAIL OU NOME DE USUÁRIO</label>
+                            <input type="text" id="forgotEmail" name="username" class="form-input" placeholder="seu@email.com ou usuário (ex: pontuG)" required autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        </div>
+                        <button type="submit" id="btnForgotSubmit" name="forgotSubmitBtn" class="btn-submit">ENVIAR LINK DE REDEFINIÇÃO 📩</button>
+
+                        <div style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                            <a href="javascript:void(0)" onclick="alternarTab('login')" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">← Voltar ao Login</a>
+                            <span>•</span>
+                            <a href="javascript:void(0)" onclick="alternarTab('register')" style="color: var(--text-muted); text-decoration: none;">Criar nova conta</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Modo 2: Digitar Nova Senha (Após validação do link ou via Perfil) -->
+                <div id="forgotNewPasswordView" style="display: none;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 2.8rem; margin-bottom: 8px;">✨</div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--text-main);">Criar Nova Senha</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+                            Digite sua nova senha abaixo para atualizar suas credenciais de acesso no Overcritic.
+                        </p>
+                    </div>
+                    <form id="formNewPassword" name="newPasswordForm" method="post" action="javascript:void(0);" autocomplete="on" onsubmit="salvarNovaSenha(event)">
+                        <input type="hidden" id="resetPasswordEmailHidden" name="username" autocomplete="username">
+                        <div class="form-group">
+                            <label class="form-label" for="inputNewPassword">NOVA SENHA (MÍNIMO 6 CARACTERES)</label>
+                            <input type="password" id="inputNewPassword" name="password" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="inputConfirmNewPassword">CONFIRME A NOVA SENHA</label>
+                            <input type="password" id="inputConfirmNewPassword" name="confirmPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+                        </div>
+                        <button type="submit" id="btnNewPasswordSubmit" name="newPasswordSubmitBtn" class="btn-submit">ATUALIZAR E SALVAR NOVA SENHA 🔒</button>
+
+                        <div style="text-align: center; margin-top: 18px; font-size: 0.85rem;">
+                            <a href="javascript:void(0)" onclick="alternarTab('login')" style="color: var(--text-muted); text-decoration: none;">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════ MODAL: ALTERAR NOME DE USUÁRIO (SEGURO COM VALIDAÇÃO DE UNICIDADE) ══════ -->
+    <div id="modalEditarUsername" style="display: none; position: fixed; inset: 0; background: rgba(3, 6, 12, 0.85); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: rgba(13, 17, 27, 0.96); border: 1px solid rgba(0, 240, 255, 0.28); border-radius: 20px; max-width: 440px; width: 100%; padding: 26px; box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 30px rgba(0,240,255,0.15); animation: fadeIn 0.25s ease;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.4rem;">✏️</span>
+                    <h3 style="font-size: 1.18rem; color: var(--text-main); font-weight: 800; margin: 0;">Alterar Nome de Usuário</h3>
+                </div>
+                <button type="button" onclick="fecharModalEditarUsername()" style="background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 4px;">&times;</button>
+            </div>
+
+            <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                Seu nome de usuário é o seu identificador único no <b>Ranking Geral</b> e é usado para fazer login com sua senha.
+            </p>
+
+            <div id="alertEditarUsername" class="auth-alert" style="display: none; margin-bottom: 14px;"></div>
+
+            <form id="formEditarUsername" onsubmit="salvarNovoNomeUsuario(event)">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label">NOME DE USUÁRIO ATUAL</label>
+                    <input type="text" id="inputUsernameAtual" class="form-input" disabled style="opacity: 0.7; cursor: not-allowed; background: rgba(255,255,255,0.03);">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <label class="form-label" for="inputNovoUsername">NOVO NOME DE USUÁRIO (ÚNICO)</label>
+                        <span id="novoUsernameStatus" style="font-size: 0.74rem; font-weight: 700; display: none;"></span>
+                    </div>
+                    <input type="text" id="inputNovoUsername" class="form-input" placeholder="Ex: novoNomeGamer" required maxlength="24" autocomplete="off" oninput="validarNovoUsernameEmTempoReal(this.value)">
+                    <div style="font-size: 0.73rem; color: var(--text-muted); margin-top: 4px;">De 3 a 24 caracteres (letras, números, pontos e traços).</div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn-home" onclick="fecharModalEditarUsername()" style="margin: 0; padding: 10px 18px;">Cancelar</button>
+                    <button type="submit" id="btnSalvarUsernameSubmit" class="btn-submit" style="margin: 0; width: auto; padding: 10px 22px;">SALVAR ALTERAÇÃO</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -782,9 +917,44 @@
 
         let usuarioAtualSessao = null;
 
+        function isUsuarioLogado() {
+            if (usuarioAtualSessao) return true;
+            const localUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim();
+            if (localUser && !['visitante', 'anônimo', 'anonimo', 'null', 'undefined', ''].includes(localUser.toLowerCase())) {
+                return true;
+            }
+            const localUid = (localStorage.getItem('overcritic_user_id') || '').trim();
+            const localEmail = (localStorage.getItem('overcritic_user_email') || '').trim();
+            if (localUid || (localEmail && localEmail.includes('@'))) {
+                return true;
+            }
+            return false;
+        }
+
+        function atualizarVisibilidadeAbas() {
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const tabProfile = document.getElementById('tabProfile');
+            const tabRanking = document.getElementById('tabRanking');
+
+            const logado = isUsuarioLogado();
+
+            if (tabLogin) tabLogin.style.display = logado ? 'none' : '';
+            if (tabRegister) tabRegister.style.display = logado ? 'none' : '';
+            if (tabProfile) tabProfile.style.display = '';
+            if (tabRanking) tabRanking.style.display = '';
+        }
+
         // Alternância entre as Abas
         function alternarTab(modo) {
             esconderAlerta();
+            atualizarVisibilidadeAbas();
+
+            // Se o usuário já estiver logado, não deve ter acesso às abas de login e cadastro
+            if (isUsuarioLogado() && (modo === 'login' || modo === 'register')) {
+                modo = 'profile';
+            }
+
             const tabProfile = document.getElementById('tabProfile');
             const tabLogin = document.getElementById('tabLogin');
             const tabRegister = document.getElementById('tabRegister');
@@ -794,6 +964,7 @@
             const contentLogin = document.getElementById('loginTabContent');
             const contentRegister = document.getElementById('registerTabContent');
             const contentRanking = document.getElementById('rankingTabContent');
+            const contentForgot = document.getElementById('forgotTabContent');
 
             const title = document.getElementById('authSectionTitle');
             const subtitle = document.getElementById('authSectionSubtitle');
@@ -802,7 +973,7 @@
 
             // Reset classes
             [tabProfile, tabLogin, tabRegister, tabRanking].forEach(b => { if (b) b.classList.remove('active'); });
-            [contentProfile, contentLogin, contentRegister, contentRanking].forEach(c => { if (c) c.style.display = 'none'; });
+            [contentProfile, contentLogin, contentRegister, contentRanking, contentForgot].forEach(c => { if (c) c.style.display = 'none'; });
 
             if (authContainer) {
                 if (modo === 'ranking') authContainer.classList.add('wide-ranking');
@@ -837,6 +1008,28 @@
                         });
                     }
                 }
+            } else if (modo === 'forgot') {
+                if (contentForgot) contentForgot.style.display = 'block';
+                const reqView = document.getElementById('forgotRequestView');
+                const newView = document.getElementById('forgotNewPasswordView');
+                if (reqView) reqView.style.display = 'block';
+                if (newView) newView.style.display = 'none';
+                badge.innerText = 'RECUPERAÇÃO DE ACESSO';
+                title.innerText = 'Redefinir sua Senha';
+                subtitle.innerText = 'Digite seu e-mail para receber um link seguro de redefinição.';
+            } else if (modo === 'recovery') {
+                if (contentForgot) contentForgot.style.display = 'block';
+                const reqView = document.getElementById('forgotRequestView');
+                const newView = document.getElementById('forgotNewPasswordView');
+                if (reqView) reqView.style.display = 'none';
+                if (newView) newView.style.display = 'block';
+                const hiddenEmail = document.getElementById('resetPasswordEmailHidden');
+                if (hiddenEmail) {
+                    hiddenEmail.value = (usuarioAtualSessao?.email || localStorage.getItem('overcritic_user_email') || document.getElementById('forgotEmail')?.value || '').trim();
+                }
+                badge.innerText = 'NOVA SENHA SEGURA';
+                title.innerText = 'Definir Nova Senha';
+                subtitle.innerText = 'Digite e confirme sua nova senha de acesso abaixo.';
             } else {
                 tabRegister.classList.add('active');
                 contentRegister.style.display = 'block';
@@ -959,13 +1152,20 @@
             // Atualiza Gamificação (Nível, Ícone e XP)
             if (window.OvercriticGamification) {
                 const prog = window.OvercriticGamification.calcularProgressoGamer({
+                    username: cleanName,
                     jogos: consolidados.jogos,
                     midias: consolidados.midias,
                     platinas: consolidados.platinas
                 });
                 const pill = document.getElementById('profLevelBadgePill');
                 if (pill) {
-                    pill.innerHTML = `${prog.icone} Nv. ${prog.nivel} ${prog.titulo} • ${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+                    if (prog.isDev) {
+                        pill.innerHTML = `🛠️ <b>PATENTE EXCLUSIVA DEV</b> • Criador & Admin`;
+                        pill.title = `Patente exclusiva do Desenvolvedor e Criador do Overcritic • Reputação Total: ${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+                    } else {
+                        pill.innerHTML = `${prog.icone} Nv. ${prog.nivel} ${prog.titulo} • ${prog.xpNoNivel.toLocaleString('pt-BR')}/${prog.faixaXp.toLocaleString('pt-BR')} XP`;
+                        pill.title = `Progresso do Nível ${prog.nivel}: ${prog.xpNoNivel.toLocaleString('pt-BR')} de ${prog.faixaXp.toLocaleString('pt-BR')} XP conquistados • Reputação Total: ${prog.xpTotal.toLocaleString('pt-BR')} XP`;
+                    }
                     pill.style.color = prog.cor;
                     pill.style.borderColor = prog.cor;
                     pill.style.background = prog.bg;
@@ -974,7 +1174,21 @@
                 if (typeof window.OvercriticGamification.obterPosicaoRankingUsuario === 'function') {
                     const posObj = window.OvercriticGamification.obterPosicaoRankingUsuario(cleanName);
                     const elPos = document.getElementById('profRankingPos');
-                    if (elPos) elPos.textContent = (posObj && posObj.posicao) ? `#${posObj.posicao}` : '#1';
+                    if (elPos) {
+                        if (posObj && posObj.isDev) {
+                            elPos.textContent = 'DEV';
+                            elPos.style.color = '#00f0ff';
+                            elPos.title = 'Patente Exclusiva: Criador & Desenvolvedor • Isento do Ranking da Comunidade';
+                            const labelEl = elPos.nextElementSibling;
+                            if (labelEl) labelEl.textContent = 'Cargo Oficial';
+                        } else {
+                            elPos.textContent = (posObj && posObj.posicao) ? `#${posObj.posicao}` : '#1';
+                            elPos.style.color = '#ffd700';
+                            elPos.title = 'Sua posição no Ranking Geral';
+                            const labelEl = elPos.nextElementSibling;
+                            if (labelEl) labelEl.textContent = 'Ranking Geral';
+                        }
+                    }
                 }
             }
 
@@ -1020,13 +1234,20 @@
                         };
 
                         const progNuvem = window.OvercriticGamification.calcularProgressoGamer({
+                            username: cleanName,
                             jogos: finalJogos,
                             midias: finalMidias,
                             platinas: finalPlatinas
                         });
                         const pill = document.getElementById('profLevelBadgePill');
                         if (pill) {
-                            pill.innerHTML = `${progNuvem.icone} Nv. ${progNuvem.nivel} ${progNuvem.titulo} • ${progNuvem.xpTotal.toLocaleString('pt-BR')} XP`;
+                            if (progNuvem.isDev) {
+                                pill.innerHTML = `🛠️ <b>PATENTE EXCLUSIVA DEV</b> • Criador & Admin`;
+                                pill.title = `Patente exclusiva do Desenvolvedor e Criador do Overcritic • Reputação Total: ${progNuvem.xpTotal.toLocaleString('pt-BR')} XP`;
+                            } else {
+                                pill.innerHTML = `${progNuvem.icone} Nv. ${progNuvem.nivel} ${progNuvem.titulo} • ${progNuvem.xpNoNivel.toLocaleString('pt-BR')}/${progNuvem.faixaXp.toLocaleString('pt-BR')} XP`;
+                                pill.title = `Progresso do Nível ${progNuvem.nivel}: ${progNuvem.xpNoNivel.toLocaleString('pt-BR')} de ${progNuvem.faixaXp.toLocaleString('pt-BR')} XP conquistados • Reputação Total: ${progNuvem.xpTotal.toLocaleString('pt-BR')} XP`;
+                            }
                             pill.style.color = progNuvem.cor;
                             pill.style.borderColor = progNuvem.cor;
                             pill.style.background = progNuvem.bg;
@@ -1035,7 +1256,21 @@
                         if (typeof window.OvercriticGamification.obterPosicaoRankingUsuario === 'function') {
                             const posObj = window.OvercriticGamification.obterPosicaoRankingUsuario(cleanName);
                             const elPos = document.getElementById('profRankingPos');
-                            if (elPos) elPos.textContent = (posObj && posObj.posicao) ? `#${posObj.posicao}` : '#1';
+                            if (elPos) {
+                                if (posObj && posObj.isDev) {
+                                    elPos.textContent = 'DEV';
+                                    elPos.style.color = '#00f0ff';
+                                    elPos.title = 'Patente Exclusiva: Criador & Desenvolvedor • Isento do Ranking da Comunidade';
+                                    const labelEl = elPos.nextElementSibling;
+                                    if (labelEl) labelEl.textContent = 'Cargo Oficial';
+                                } else {
+                                    elPos.textContent = (posObj && posObj.posicao) ? `#${posObj.posicao}` : '#1';
+                                    elPos.style.color = '#ffd700';
+                                    elPos.title = 'Sua posição no Ranking Geral';
+                                    const labelEl = elPos.nextElementSibling;
+                                    if (labelEl) labelEl.textContent = 'Ranking Geral';
+                                }
+                            }
                         }
 
                         // Atualiza Estante de Troféus Virtuais com dados sincronizados da nuvem
@@ -1089,6 +1324,450 @@
             el.style.display = 'none';
         }
 
+        // ══════════════════════════════════════════════════════════════════
+        // DIRETÓRIO DE CONTAS & SUPORTE A LOGIN COM NOME DE USUÁRIO OU E-MAIL
+        // ══════════════════════════════════════════════════════════════════
+        const CHAVE_STORAGE_DIRETORIO_CONTAS = 'overcritic_contas_diretorio_v26_10';
+
+        function obterDiretorioContas() {
+            let contas = [];
+            try {
+                contas = JSON.parse(localStorage.getItem(CHAVE_STORAGE_DIRETORIO_CONTAS) || '[]');
+                if (!Array.isArray(contas)) contas = [];
+            } catch(e) { contas = []; }
+
+            // Garante o Administrador oficial pontuG
+            if (!contas.some(c => (c.username || '').toLowerCase() === 'pontug')) {
+                contas.push({
+                    username: 'pontuG',
+                    email: 'mesquitagabriel255@gmail.com',
+                    avatar: '👑'
+                });
+            }
+
+            // Sincroniza com a base de membros do ranking
+            try {
+                const membrosRanking = JSON.parse(localStorage.getItem('overcritic_ranking_comunidade_v26_10') || '[]');
+                if (Array.isArray(membrosRanking)) {
+                    membrosRanking.forEach(m => {
+                        if (m.username && m.email) {
+                            const uLower = m.username.toLowerCase();
+                            if (!contas.some(c => (c.username || '').toLowerCase() === uLower)) {
+                                contas.push({
+                                    username: m.username,
+                                    email: m.email.trim().toLowerCase(),
+                                    avatar: m.avatar || '🎮'
+                                });
+                            }
+                        }
+                    });
+                }
+            } catch(e) {}
+
+            return contas;
+        }
+
+        function salvarContaNoDiretorio(username, email, avatar) {
+            if (!username || !email) return;
+            const uClean = username.trim();
+            const eClean = email.trim().toLowerCase();
+            if (!uClean || !eClean || ['visitante', 'anônimo', 'anonimo', 'jogador'].includes(uClean.toLowerCase())) return;
+
+            const contas = obterDiretorioContas();
+            const idx = contas.findIndex(c => (c.username || '').toLowerCase() === uClean.toLowerCase());
+            if (idx >= 0) {
+                contas[idx].email = eClean;
+                if (avatar) contas[idx].avatar = avatar;
+            } else {
+                contas.push({
+                    username: uClean,
+                    email: eClean,
+                    avatar: avatar || '🎮'
+                });
+            }
+            try {
+                localStorage.setItem(CHAVE_STORAGE_DIRETORIO_CONTAS, JSON.stringify(contas));
+            } catch(e) {}
+        }
+
+        function resolverEmailPorUsername(identificador) {
+            if (!identificador) return null;
+            const idClean = identificador.trim();
+            const idLower = idClean.toLowerCase();
+
+            // 1. Admin & Fundador pontuG
+            if (idLower === 'pontug' || idLower === 'admin') {
+                return 'mesquitagabriel255@gmail.com';
+            }
+
+            // 2. Diretório oficial de contas cadastradas
+            const contas = obterDiretorioContas();
+            const encontrada = contas.find(c => (c.username || '').toLowerCase() === idLower);
+            if (encontrada && encontrada.email) {
+                return encontrada.email.trim();
+            }
+
+            // 3. Fallback: Usuário atualmente logado ou em cache no navegador
+            const localUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').toLowerCase().trim();
+            const localEmail = (localStorage.getItem('overcritic_user_email') || '').trim();
+            if (localUser === idLower && localEmail) {
+                return localEmail;
+            }
+
+            return null;
+        }
+
+        async function verificarUnicidadeUsername(username, emailAtual = '') {
+            if (!username) return { disponivel: false, motivo: 'Por favor, informe um nome de usuário.' };
+            const uClean = username.trim();
+            const uLower = uClean.toLowerCase();
+            const eLower = (emailAtual || '').trim().toLowerCase();
+
+            // 1. Termos reservados
+            const reservados = ['visitante', 'anônimo', 'anonimo', 'jogador', 'admin', 'suporte', 'overcritic'];
+            if (reservados.includes(uLower)) {
+                return { disponivel: false, motivo: `O termo "<b>${uClean}</b>" é reservado do sistema. Escolha outro nome.` };
+            }
+
+            // 2. pontuG exclusivo do fundador
+            if (uLower === 'pontug' && eLower !== 'mesquitagabriel255@gmail.com') {
+                return { disponivel: false, motivo: `O nome de usuário <b>pontuG</b> é reservado da administração oficial.` };
+            }
+
+            // 3. Checa diretório de contas cadastradas
+            const contas = obterDiretorioContas();
+            const duplicado = contas.find(c => (c.username || '').toLowerCase() === uLower);
+            if (duplicado) {
+                if (!eLower || (duplicado.email && duplicado.email.toLowerCase() !== eLower)) {
+                    return { disponivel: false, motivo: `O nome de usuário "<b>${uClean}</b>" já está em uso por outro membro. Por favor, escolha um nome diferente.` };
+                }
+            }
+
+            // 4. Checa ranking geral da comunidade
+            try {
+                const membros = JSON.parse(localStorage.getItem('overcritic_ranking_comunidade_v26_10') || '[]');
+                if (Array.isArray(membros)) {
+                    const dupMembro = membros.find(m => (m.username || '').toLowerCase() === uLower);
+                    if (dupMembro && dupMembro.email && eLower && dupMembro.email.toLowerCase() !== eLower) {
+                        return { disponivel: false, motivo: `O nome de usuário "<b>${uClean}</b>" já está em uso no Ranking Geral.` };
+                    }
+                }
+            } catch(e) {}
+
+            // 5. Checagem em tempo real na nuvem Supabase (reviews e platinas)
+            if (window.sbClient) {
+                try {
+                    const [resJogos, resPlat] = await Promise.all([
+                        window.sbClient.from('reviews_jogos').select('autor, user_id').ilike('autor', uClean).limit(1),
+                        window.sbClient.from('platinas').select('autor, user_id').ilike('autor', uClean).limit(1)
+                    ]);
+
+                    const userIdLogado = localStorage.getItem('overcritic_user_id') || usuarioAtualSessao?.id;
+                    if (resJogos.data && resJogos.data.length > 0) {
+                        if (!userIdLogado || resJogos.data[0].user_id !== userIdLogado) {
+                            return { disponivel: false, motivo: `O nome de usuário "<b>${uClean}</b>" já pertence a outro jogador no Overcritic.` };
+                        }
+                    }
+                    if (resPlat.data && resPlat.data.length > 0) {
+                        if (!userIdLogado || resPlat.data[0].user_id !== userIdLogado) {
+                            return { disponivel: false, motivo: `O nome de usuário "<b>${uClean}</b>" já pertence a outro jogador no Overcritic.` };
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            return { disponivel: true };
+        }
+
+        let _timerDebounceUsername = null;
+        function validarUsernameEmTempoReal(val) {
+            const statusEl = document.getElementById('regUsernameStatus');
+            if (!statusEl) return;
+            const inputClean = (val || '').trim();
+            if (!inputClean) {
+                statusEl.style.display = 'none';
+                return;
+            }
+            clearTimeout(_timerDebounceUsername);
+            _timerDebounceUsername = setTimeout(async () => {
+                if (inputClean.length < 3) {
+                    statusEl.style.display = 'inline-block';
+                    statusEl.style.color = 'var(--warning)';
+                    statusEl.innerText = '⚠️ Mínimo 3 caracteres';
+                    return;
+                }
+                const res = await verificarUnicidadeUsername(inputClean);
+                statusEl.style.display = 'inline-block';
+                if (!res.disponivel) {
+                    statusEl.style.color = 'var(--error)';
+                    statusEl.innerText = '❌ Indisponível';
+                } else {
+                    statusEl.style.color = 'var(--success)';
+                    statusEl.innerText = '✅ Disponível!';
+                }
+            }, 300);
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // MODAL & LÓGICA DE ALTERAÇÃO SEGURA DE NOME DE USUÁRIO
+        // ══════════════════════════════════════════════════════════════════
+
+        function abrirModalEditarUsername() {
+            const modal = document.getElementById('modalEditarUsername');
+            const alertEl = document.getElementById('alertEditarUsername');
+            const inputAtual = document.getElementById('inputUsernameAtual');
+            const inputNovo = document.getElementById('inputNovoUsername');
+            const statusEl = document.getElementById('novoUsernameStatus');
+
+            if (!modal) return;
+            if (alertEl) alertEl.style.display = 'none';
+            if (statusEl) statusEl.style.display = 'none';
+
+            const userAtual = usuarioAtualSessao?.user_metadata?.username || localStorage.getItem('overcritic_currentUser') || 'Jogador';
+            if (inputAtual) inputAtual.value = userAtual;
+            if (inputNovo) {
+                inputNovo.value = '';
+                setTimeout(() => inputNovo.focus(), 150);
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function fecharModalEditarUsername() {
+            const modal = document.getElementById('modalEditarUsername');
+            if (modal) modal.style.display = 'none';
+        }
+
+        let _timerDebounceNovoUsername = null;
+        function validarNovoUsernameEmTempoReal(val) {
+            const statusEl = document.getElementById('novoUsernameStatus');
+            if (!statusEl) return;
+            const inputClean = (val || '').trim();
+            if (!inputClean) {
+                statusEl.style.display = 'none';
+                return;
+            }
+
+            const userAtual = (usuarioAtualSessao?.user_metadata?.username || localStorage.getItem('overcritic_currentUser') || '').trim();
+            if (inputClean.toLowerCase() === userAtual.toLowerCase()) {
+                statusEl.style.display = 'inline-block';
+                statusEl.style.color = 'var(--text-muted)';
+                statusEl.innerText = '(Seu nome atual)';
+                return;
+            }
+
+            clearTimeout(_timerDebounceNovoUsername);
+            _timerDebounceNovoUsername = setTimeout(async () => {
+                if (inputClean.length < 3) {
+                    statusEl.style.display = 'inline-block';
+                    statusEl.style.color = 'var(--warning)';
+                    statusEl.innerText = '⚠️ Mínimo 3 caracteres';
+                    return;
+                }
+                const emailAtual = (usuarioAtualSessao?.email || localStorage.getItem('overcritic_user_email') || '').trim().toLowerCase();
+                const res = await verificarUnicidadeUsername(inputClean, emailAtual);
+                statusEl.style.display = 'inline-block';
+                if (!res.disponivel) {
+                    statusEl.style.color = 'var(--error)';
+                    statusEl.innerText = '❌ Indisponível';
+                } else {
+                    statusEl.style.color = 'var(--success)';
+                    statusEl.innerText = '✅ Disponível!';
+                }
+            }, 300);
+        }
+
+        async function salvarNovoNomeUsuario(e) {
+            if (e) e.preventDefault();
+
+            const alertEl = document.getElementById('alertEditarUsername');
+            const btnSubmit = document.getElementById('btnSalvarUsernameSubmit');
+            const inputNovo = document.getElementById('inputNovoUsername');
+            const novoUsername = (inputNovo?.value || '').trim();
+
+            function mostrarAlertaModal(msg, tipo = 'error') {
+                if (!alertEl) return;
+                alertEl.className = `auth-alert ${tipo}`;
+                alertEl.innerHTML = msg;
+                alertEl.style.display = 'block';
+            }
+
+            if (alertEl) alertEl.style.display = 'none';
+
+            // 1. Identificação do usuário atual
+            const usernameAntigo = (usuarioAtualSessao?.user_metadata?.username || localStorage.getItem('overcritic_currentUser') || '').trim();
+            const emailAtual = (usuarioAtualSessao?.email || localStorage.getItem('overcritic_user_email') || '').trim().toLowerCase();
+            const userId = usuarioAtualSessao?.id || localStorage.getItem('overcritic_user_id') || '';
+
+            if (!usernameAntigo || !emailAtual) {
+                mostrarAlertaModal('⚠️ Não foi possível identificar sua sessão. Faça login novamente.', 'error');
+                return;
+            }
+
+            // 2. Validações básicas de formato
+            if (novoUsername.toLowerCase() === usernameAntigo.toLowerCase()) {
+                mostrarAlertaModal('⚠️ O novo nome de usuário é idêntico ao seu nome atual.', 'warning');
+                return;
+            }
+
+            if (novoUsername.length < 3) {
+                mostrarAlertaModal('⚠️ O nome de usuário deve conter no mínimo 3 caracteres.', 'warning');
+                return;
+            }
+
+            if (novoUsername.length > 24) {
+                mostrarAlertaModal('⚠️ O nome de usuário deve conter no máximo 24 caracteres.', 'warning');
+                return;
+            }
+
+            const regexValido = /^[a-zA-Z0-9_\.\-]+$/;
+            if (!regexValido.test(novoUsername)) {
+                mostrarAlertaModal('⚠️ O nome de usuário deve conter apenas letras, números, pontos e traços/underlines (sem espaços ou caracteres especiais).', 'warning');
+                return;
+            }
+
+            // 3. Verificação segura de unicidade
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = 'VERIFICANDO DISPONIBILIDADE...';
+
+            const checagem = await verificarUnicidadeUsername(novoUsername, emailAtual);
+            if (!checagem.disponivel) {
+                mostrarAlertaModal(checagem.motivo, 'warning');
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = 'SALVAR ALTERAÇÃO';
+                return;
+            }
+
+            btnSubmit.innerText = 'ATUALIZANDO PERFIL...';
+
+            try {
+                // 4. Atualização segura no Supabase Auth (User Metadata)
+                if (window.sbClient && usuarioAtualSessao) {
+                    const { data, error } = await window.sbClient.auth.updateUser({
+                        data: {
+                            username: novoUsername
+                        }
+                    });
+
+                    if (error) {
+                        mostrarAlertaModal(`❌ Falha ao atualizar no servidor Supabase: ${error.message}`, 'error');
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerText = 'SALVAR ALTERAÇÃO';
+                        return;
+                    }
+
+                    if (data && data.user) {
+                        usuarioAtualSessao = data.user;
+                    }
+                }
+
+                // 5. Atualização no Diretório Oficial de Contas
+                salvarContaNoDiretorio(novoUsername, emailAtual, localStorage.getItem('overcritic_user_avatar') || '🎮');
+                try {
+                    const contas = JSON.parse(localStorage.getItem('overcritic_contas_diretorio_v26_10') || '[]');
+                    if (Array.isArray(contas)) {
+                        const filtradas = contas.filter(c => (c.username || '').toLowerCase() !== usernameAntigo.toLowerCase() || (c.email || '').toLowerCase() === emailAtual);
+                        localStorage.setItem('overcritic_contas_diretorio_v26_10', JSON.stringify(filtradas));
+                    }
+                } catch(e) {}
+
+                // 6. Atualização nos storages locais da sessão
+                localStorage.setItem('overcritic_currentUser', novoUsername);
+                localStorage.setItem('overcritic_user', novoUsername);
+
+                // 7. Atualização no Ranking Comunitário
+                try {
+                    const membros = JSON.parse(localStorage.getItem('overcritic_ranking_comunidade_v26_10') || '[]');
+                    if (Array.isArray(membros)) {
+                        const idx = membros.findIndex(m => (m.username || '').toLowerCase() === usernameAntigo.toLowerCase() || (m.email && m.email.toLowerCase() === emailAtual));
+                        if (idx >= 0) {
+                            membros[idx].username = novoUsername;
+                            membros[idx].ultimaAtividade = new Date().toISOString();
+                            localStorage.setItem('overcritic_ranking_comunidade_v26_10', JSON.stringify(membros));
+                        }
+                    }
+                } catch(e) {}
+
+                // 8. Atualização do autor nas críticas, mídias e platinas locais
+                ['overcritic_reviews', 'overcritic_jogos', 'OVERCRITIC_MIDIAS', 'overcritic_midias', 'overcritic_minhas_platinas', 'overcritic_platinas_feed'].forEach(chave => {
+                    try {
+                        const raw = localStorage.getItem(chave);
+                        if (raw) {
+                            const lista = JSON.parse(raw);
+                            if (Array.isArray(lista)) {
+                                let alterou = false;
+                                lista.forEach(item => {
+                                    if ((item.autor || '').toLowerCase() === usernameAntigo.toLowerCase() || (userId && item.user_id === userId)) {
+                                        item.autor = novoUsername;
+                                        alterou = true;
+                                    }
+                                });
+                                if (alterou) localStorage.setItem(chave, JSON.stringify(lista));
+                            }
+                        }
+                    } catch(e) {}
+                });
+
+                // 9. Atualização assíncrona nas tabelas da nuvem Supabase (se logado com ID)
+                if (window.sbClient && userId) {
+                    try {
+                        Promise.all([
+                            window.sbClient.from('reviews_jogos').update({ autor: novoUsername }).eq('user_id', userId),
+                            window.sbClient.from('reviews_midias').update({ autor: novoUsername }).eq('user_id', userId),
+                            window.sbClient.from('platinas').update({ autor: novoUsername }).eq('user_id', userId),
+                            window.sbClient.from('suporte_tickets').update({ autor: novoUsername }).eq('user_id', userId)
+                        ]).catch(err => console.warn('Aviso na atualização de autorias na nuvem:', err));
+                    } catch(e) {}
+                }
+
+                // 10. Atualiza visualmente na página e no motor de gamificação
+                const profNameEl = document.getElementById('profName');
+                if (profNameEl) profNameEl.innerText = novoUsername;
+
+                if (window.OvercriticGamification) {
+                    if (typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
+                        window.OvercriticGamification.registrarNovoJogadorNoRanking({
+                            username: novoUsername,
+                            avatar: localStorage.getItem('overcritic_user_avatar') || '🎮',
+                            email: emailAtual
+                        });
+                    }
+                    if (typeof window.OvercriticGamification.atualizarBadgesNivelPagina === 'function') {
+                        window.OvercriticGamification.atualizarBadgesNivelPagina();
+                    }
+                }
+
+                window.dispatchEvent(new CustomEvent('overcritic_ranking_atualizado', { detail: { username: novoUsername } }));
+                window.dispatchEvent(new CustomEvent('overcritic_usuario_atualizado', { detail: { username: novoUsername } }));
+
+                mostrarAlertaModal(`🎉 <b>Nome de usuário alterado com sucesso para "${novoUsername}"!</b>`, 'success');
+                mostrarAlerta(`🎉 Seu nome de usuário foi atualizado para <b>${novoUsername}</b> com sucesso!`, 'success');
+
+                setTimeout(() => {
+                    fecharModalEditarUsername();
+                    carregarDadosPerfil();
+                }, 1300);
+
+            } catch (err) {
+                mostrarAlertaModal(`Erro inesperado ao alterar nome: ${err.message}`, 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = 'SALVAR ALTERAÇÃO';
+            }
+        }
+
+        window.abrirModalEditarUsername = abrirModalEditarUsername;
+        window.fecharModalEditarUsername = fecharModalEditarUsername;
+        window.salvarNovoNomeUsuario = salvarNovoNomeUsuario;
+        window.validarNovoUsernameEmTempoReal = validarNovoUsernameEmTempoReal;
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') fecharModalEditarUsername();
+        });
+        document.getElementById('modalEditarUsername')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modalEditarUsername') fecharModalEditarUsername();
+        });
+
         // ══════════════════════════════════════
         // AUTENTICAÇÃO COM O SUPABASE AUTH
         // ══════════════════════════════════════
@@ -1115,11 +1794,28 @@
                 return;
             }
 
+            // Detecta se o usuário veio de um link de redefinição de senha do Supabase
+            if (hash.includes('type=recovery') || tabParam === 'recovery' || tabParam === 'reset') {
+                alternarTab('recovery');
+                mostrarAlerta('🔑 <b>Identidade verificada com sucesso!</b> Digite sua nova senha de acesso abaixo.', 'warning');
+                return;
+            } else if (tabParam === 'forgot' || tabParam === 'redefinir') {
+                alternarTab('forgot');
+                return;
+            }
+
             if (!window.sbClient) {
                 console.warn('Supabase Client não inicializado.');
-                if (tabParam === 'perfil' || tabParam === 'profile') alternarTab('profile');
-                else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
-                else alternarTab('login');
+                atualizarVisibilidadeAbas();
+                if (isUsuarioLogado()) {
+                    if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
+                    else alternarTab('profile');
+                } else {
+                    if (tabParam === 'perfil' || tabParam === 'profile') alternarTab('profile');
+                    else if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
+                    else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
+                    else alternarTab('login');
+                }
                 return;
             }
 
@@ -1144,7 +1840,8 @@
                     const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
                     localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
 
-                    // Registra / atualiza no ranking da comunidade
+                    // Registra / atualiza no diretório de contas e no ranking da comunidade
+                    salvarContaNoDiretorio(username, session.user.email, metaAvatar || '🎮');
                     if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
                         window.OvercriticGamification.registrarNovoJogadorNoRanking({
                             username: username,
@@ -1153,25 +1850,38 @@
                         });
                     }
 
+                    atualizarVisibilidadeAbas();
                     if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
-                    else if (tabParam === 'login') alternarTab('login');
-                    else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
-                    else alternarTab('profile'); // Padrão quando logado: ir direto ao Perfil!
+                    else alternarTab('profile'); // Padrão quando logado: ir direto ao Perfil! (Login e Cadastro bloqueados)
                 } else {
-                    usuarioAtualSessao = null;
-                    if (tabParam === 'perfil' || tabParam === 'profile') alternarTab('profile');
-                    else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
-                    else alternarTab('login'); // Padrão quando deslogado: ir ao Login!
+                    if (!isUsuarioLogado()) {
+                        usuarioAtualSessao = null;
+                    }
+                    atualizarVisibilidadeAbas();
+                    if (isUsuarioLogado()) {
+                        if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
+                        else alternarTab('profile');
+                    } else {
+                        if (tabParam === 'perfil' || tabParam === 'profile') alternarTab('profile');
+                        else if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
+                        else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
+                        else alternarTab('login'); // Padrão quando deslogado: ir ao Login!
+                    }
                 }
             } catch (err) {
                 console.error('Erro ao verificar sessão:', err);
-                alternarTab('login');
+                atualizarVisibilidadeAbas();
+                if (isUsuarioLogado()) alternarTab('profile');
+                else alternarTab('login');
             }
         }
 
         // FUNÇÃO PARA REENVIAR E-MAIL DE CONFIRMAÇÃO
         async function reenviarEmailConfirmacao(emailAlvo) {
-            const email = (emailAlvo || document.getElementById('loginEmail')?.value || document.getElementById('regEmail')?.value || '').trim();
+            let email = (emailAlvo || document.getElementById('loginEmail')?.value || document.getElementById('regEmail')?.value || '').trim();
+            if (email && !email.includes('@')) {
+                email = resolverEmailPorUsername(email) || email;
+            }
             if (!email || !email.includes('@')) {
                 mostrarAlerta('⚠️ Por favor, digite seu e-mail no campo correspondente para podermos reenviar a confirmação.', 'warning');
                 return;
@@ -1232,6 +1942,154 @@
         }
         window.reenviarEmailConfirmacao = reenviarEmailConfirmacao;
 
+        // ══════════════════════════════════════
+        // REDEFINIÇÃO DE SENHA (SUPABASE AUTH)
+        // ══════════════════════════════════════
+
+        // SOLICITAR LINK DE REDEFINIÇÃO POR E-MAIL
+        async function solicitarRedefinicaoSenha(e) {
+            if (e) e.preventDefault();
+            esconderAlerta();
+
+            const inputIdentificador = (document.getElementById('forgotEmail')?.value || document.getElementById('loginEmail')?.value || '').trim();
+            const btn = document.getElementById('btnForgotSubmit');
+
+            if (!inputIdentificador) {
+                mostrarAlerta('⚠️ Por favor, digite seu e-mail ou nome de usuário cadastrado.', 'warning');
+                return;
+            }
+
+            let emailAlvo = inputIdentificador;
+            if (!inputIdentificador.includes('@')) {
+                emailAlvo = resolverEmailPorUsername(inputIdentificador);
+                if (!emailAlvo) {
+                    mostrarAlerta(`⚠️ Não encontramos nenhuma conta cadastrada com o nome de usuário <b>${inputIdentificador}</b>.<br>Por favor, digite seu endereço de e-mail cadastrado.`, 'warning');
+                    return;
+                }
+            }
+
+            if (!window.sbClient) {
+                mostrarAlerta('❌ Erro: Conexão com o Supabase não encontrada.', 'error');
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'ENVIANDO LINK...';
+            }
+
+            try {
+                // Redireciona para conta_login.html?tab=recovery
+                const redirectUrl = window.location.origin.includes('github.io')
+                    ? 'https://pontug.github.io/OVERCRITIC/conta_login.html?tab=recovery'
+                    : `${window.location.origin}${window.location.pathname}?tab=recovery`;
+
+                const { data, error } = await window.sbClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: redirectUrl
+                });
+
+                if (error) {
+                    if (error.status === 429 || error.message.toLowerCase().includes('rate limit') || error.message.toLowerCase().includes('over_email_send_rate_limit')) {
+                        mostrarAlerta(`
+                            ⏳ <b>Limite temporário de envio atingido:</b><br>
+                            Muitas tentativas em pouco tempo. Por favor, aguarde alguns minutos antes de solicitar novamente.<br>
+                            Verifique também a pasta de <b>Spam</b> ou <b>Lixo Eletrônico</b> do seu e-mail para <b>${email}</b>.
+                        `, 'warning');
+                    } else {
+                        mostrarAlerta(`❌ <b>Não foi possível enviar o link:</b> ${error.message}`, 'error');
+                    }
+                } else {
+                    mostrarAlerta(`
+                        <div style="font-size: 1.1rem; margin-bottom: 8px;">📩 <b>Link de redefinição enviado com sucesso!</b></div>
+                        Enviamos as instruções de recuperação para <b>${email}</b>.<br>
+                        Abra seu e-mail (verifique também a pasta de <b>Spam / Lixeira</b>) e clique no link para cadastrar sua nova senha.<br><br>
+                        <div style="font-size: 0.82rem; background: rgba(0,240,255,0.08); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">
+                            💡 <b>Dica:</b> O e-mail do Supabase pode levar até 1 ou 2 minutos para ser entregue na sua caixa de entrada.
+                        </div>
+                    `, 'success');
+                }
+            } catch (err) {
+                mostrarAlerta(`Erro inesperado ao solicitar redefinição: ${err.message}`, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'ENVIAR LINK DE REDEFINIÇÃO 📩';
+                }
+            }
+        }
+        window.solicitarRedefinicaoSenha = solicitarRedefinicaoSenha;
+
+        // SALVAR NOVA SENHA DEFINITIVA
+        async function salvarNovaSenha(e) {
+            if (e) e.preventDefault();
+            esconderAlerta();
+
+            const newPass = document.getElementById('inputNewPassword')?.value || '';
+            const confirmPass = document.getElementById('inputConfirmNewPassword')?.value || '';
+            const btn = document.getElementById('btnNewPasswordSubmit');
+
+            if (!newPass || newPass.length < 6) {
+                mostrarAlerta('⚠️ A nova senha deve ter no mínimo 6 caracteres.', 'warning');
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                mostrarAlerta('⚠️ As senhas digitadas não coincidem. Verifique e tente novamente.', 'error');
+                return;
+            }
+
+            if (!window.sbClient) {
+                mostrarAlerta('❌ Erro: Conexão com o Supabase não encontrada.', 'error');
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'ATUALIZANDO SENHA...';
+            }
+
+            try {
+                const { data, error } = await window.sbClient.auth.updateUser({
+                    password: newPass
+                });
+
+                if (error) {
+                    mostrarAlerta(`❌ <b>Não foi possível atualizar a senha:</b> ${error.message}`, 'error');
+                } else {
+                    mostrarAlerta(`
+                        <div style="font-size: 1.15rem; margin-bottom: 6px;">🎉 <b>Senha alterada com sucesso!</b></div>
+                        Sua nova senha de acesso foi salva no Overcritic. Conectando...
+                    `, 'success');
+
+                    const form = document.getElementById('formNewPassword');
+                    // Atualiza no gerenciador nativo de senhas (Google Password Manager)
+                    if (window.PasswordCredential && navigator.credentials && navigator.credentials.store && form) {
+                        try {
+                            const cred = new PasswordCredential(form);
+                            navigator.credentials.store(cred).catch(() => {});
+                        } catch(e) {}
+                    }
+                    if (form) form.reset();
+
+                    setTimeout(() => {
+                        if (usuarioAtualSessao || localStorage.getItem('overcritic_user_id')) {
+                            alternarTab('profile');
+                        } else {
+                            alternarTab('login');
+                        }
+                    }, 1500);
+                }
+            } catch (err) {
+                mostrarAlerta(`Erro inesperado ao atualizar senha: ${err.message}`, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'ATUALIZAR E SALVAR NOVA SENHA 🔒';
+                }
+            }
+        }
+        window.salvarNovaSenha = salvarNovaSenha;
+
         // CADASTRO
         async function realizarCadastro(e) {
             e.preventDefault();
@@ -1243,6 +2101,18 @@
             const confirmPassInput = document.getElementById('regConfirmPassword');
             const confirmPass = confirmPassInput ? confirmPassInput.value : pass;
             const btn = document.getElementById('btnRegSubmit');
+
+            if (!username || username.length < 3) {
+                mostrarAlerta('⚠️ O nome de usuário deve ter no mínimo 3 caracteres.', 'warning');
+                return;
+            }
+
+            // Validação de unicidade do nome de usuário
+            const checagem = await verificarUnicidadeUsername(username, email);
+            if (!checagem.disponivel) {
+                mostrarAlerta(checagem.motivo, 'warning');
+                return;
+            }
 
             if (pass !== confirmPass) {
                 mostrarAlerta('⚠️ As senhas digitadas não coincidem. Verifique e tente novamente.', 'error');
@@ -1350,18 +2220,37 @@
             }
         }
 
-        // LOGIN
+        // LOGIN (SUPORTA E-MAIL OU NOME DE USUÁRIO)
         async function realizarLogin(e) {
             e.preventDefault();
             esconderAlerta();
 
-            const email = document.getElementById('loginEmail').value.trim();
+            const identificador = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPassword').value;
             const btn = document.getElementById('btnLoginSubmit');
+
+            if (!identificador) {
+                mostrarAlerta('⚠️ Por favor, digite seu e-mail ou nome de usuário.', 'warning');
+                return;
+            }
 
             if (!window.sbClient) {
                 mostrarAlerta('❌ Erro: Conexão com o Supabase não encontrada.', 'error');
                 return;
+            }
+
+            // Se digitou nome de usuário (não possui @), resolve para o e-mail correspondente
+            let emailFinal = identificador;
+            if (!identificador.includes('@')) {
+                emailFinal = resolverEmailPorUsername(identificador);
+                if (!emailFinal) {
+                    mostrarAlerta(`
+                        <div style="font-size: 1rem; margin-bottom: 4px;">❌ <b>Nome de usuário não encontrado!</b></div>
+                        Não encontramos nenhuma conta com o nome de usuário "<b>${identificador}</b>".<br>
+                        Verifique a grafia correta ou tente entrar utilizando o seu endereço de <b>e-mail cadastrado</b>.
+                    `, 'error');
+                    return;
+                }
             }
 
             btn.disabled = true;
@@ -1369,7 +2258,7 @@
 
             try {
                 const { data, error } = await window.sbClient.auth.signInWithPassword({
-                    email: email,
+                    email: emailFinal,
                     password: pass
                 });
 
@@ -1377,21 +2266,21 @@
                     if (error.message.toLowerCase().includes('email not confirmed')) {
                         mostrarAlerta(`
                             <div style="font-size: 1.05rem; margin-bottom: 6px;">⚠️ <b>E-mail ainda não confirmado!</b></div>
-                            Você precisa clicar no link de confirmação enviado para <b>${email}</b> antes de poder entrar.<br>
+                            Você precisa clicar no link de confirmação enviado para <b>${emailFinal}</b> antes de poder entrar.<br>
                             Não recebeu o e-mail ou o link expirou?<br>
-                            <button type="button" id="btnReenviarEmailLogin" onclick="reenviarEmailConfirmacao('${email}')" class="btn-submit" style="margin-top: 10px; width: auto; padding: 9px 18px; background: linear-gradient(135deg, #00f0ff, #9d4edd); color: #000; font-weight: 800;">
+                            <button type="button" id="btnReenviarEmailLogin" onclick="reenviarEmailConfirmacao('${emailFinal}')" class="btn-submit" style="margin-top: 10px; width: auto; padding: 9px 18px; background: linear-gradient(135deg, #00f0ff, #9d4edd); color: #000; font-weight: 800;">
                                 📩 REENVIAR NOVO LINK DE CONFIRMAÇÃO
                             </button>
                         `, 'warning');
                     } else {
-                        mostrarAlerta(`❌ <b>Erro ao entrar:</b> E-mail ou senha incorretos (${error.message}).`, 'error');
+                        mostrarAlerta(`❌ <b>Erro ao entrar:</b> Credenciais incorretas (${error.message}).`, 'error');
                     }
                 } else if (data && data.user) {
                     usuarioAtualSessao = data.user;
-                    const username = data.user.user_metadata?.username || email.split('@')[0];
+                    const username = data.user.user_metadata?.username || (!identificador.includes('@') ? identificador : emailFinal.split('@')[0]);
                     localStorage.setItem('overcritic_currentUser', username);
                     localStorage.setItem('overcritic_user', username);
-                    localStorage.setItem('overcritic_user_email', email);
+                    localStorage.setItem('overcritic_user_email', emailFinal);
                     localStorage.setItem('overcritic_user_id', data.user.id);
 
                     const metaAvatar = data.user.user_metadata?.avatar_url;
@@ -1405,15 +2294,30 @@
                     const isAdmin = window.isAdminUser ? window.isAdminUser(data.user) : false;
                     localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
 
+                    // Salva a associação nome de usuário <-> e-mail no diretório
+                    salvarContaNoDiretorio(username, emailFinal, metaAvatar || '🎮');
+
                     // Registra / atualiza no ranking comunitário
                     if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
                         window.OvercriticGamification.registrarNovoJogadorNoRanking({
                             username: username,
                             avatar: metaAvatar || '🎮',
-                            email: email
+                            email: emailFinal
                         });
                     }
 
+                    // Salva ou atualiza as credenciais nativas no Google Password Manager / Credential API
+                    if (window.PasswordCredential && navigator.credentials && navigator.credentials.store) {
+                        try {
+                            const formLoginEl = document.getElementById('formLogin');
+                            if (formLoginEl) {
+                                const cred = new PasswordCredential(formLoginEl);
+                                navigator.credentials.store(cred).catch(() => {});
+                            }
+                        } catch(e) {}
+                    }
+
+                    atualizarVisibilidadeAbas();
                     mostrarAlerta(`🎉 <b>Bem-vindo de volta, ${username}!</b> Sessão conectada com sucesso!`, 'success');
                     setTimeout(() => {
                         alternarTab('profile');
@@ -1440,6 +2344,7 @@
             localStorage.removeItem('overcritic_user_email');
             localStorage.removeItem('overcritic_user_id');
             localStorage.removeItem('overcritic_is_admin');
+            atualizarVisibilidadeAbas();
             mostrarAlerta('Você se desconectou com sucesso.', 'warning');
             setTimeout(() => {
                 alternarTab('login');
@@ -1453,7 +2358,10 @@
             // Escuta mudanças de autenticação (ex: tokens no hash da URL retornando do e-mail)
             if (window.sbClient) {
                 window.sbClient.auth.onAuthStateChange((event, session) => {
-                    if (event === 'SIGNED_IN' && session) {
+                    if (event === 'PASSWORD_RECOVERY') {
+                        alternarTab('recovery');
+                        mostrarAlerta('🔑 <b>Identidade verificada pelo link!</b> Digite sua nova senha de acesso abaixo para concluir.', 'warning');
+                    } else if (event === 'SIGNED_IN' && session) {
                         usuarioAtualSessao = session.user;
                         const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
                         localStorage.setItem('overcritic_currentUser', username);
@@ -1461,17 +2369,25 @@
                         localStorage.setItem('overcritic_user_email', session.user.email);
                         localStorage.setItem('overcritic_user_id', session.user.id);
 
+                        salvarContaNoDiretorio(username, session.user.email, session.user.user_metadata?.avatar_url);
+
                         const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
                         localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
 
+                        atualizarVisibilidadeAbas();
                         mostrarAlerta(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${username}!`, 'success');
                         alternarTab('profile');
                     } else if (event === 'SIGNED_OUT') {
                         usuarioAtualSessao = null;
+                        localStorage.setItem('overcritic_currentUser', 'Visitante');
+                        localStorage.removeItem('overcritic_user');
+                        localStorage.removeItem('overcritic_user_email');
                         localStorage.removeItem('overcritic_user_id');
                         localStorage.removeItem('overcritic_is_admin');
+                        atualizarVisibilidadeAbas();
                         renderizarVisualPerfil();
                         renderizarVisualLogin();
+                        alternarTab('login');
                     }
                 });
             }

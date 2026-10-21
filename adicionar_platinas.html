@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -35,15 +35,15 @@
     </script>
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.9"></script>
-    <script src="js/gamerProfile.js?v=26.10.9"></script>
-    <script src="js/overcriticGamification.js?v=26.10.9"></script>
-    <script src="js/overcriticSpotlight.js?v=26.10.9"></script>
-    <script src="js/notifications.js?v=26.10.9"></script>
-    <script src="js/trofeusDatabase.js?v=26.10.9"></script>
-    <script src="js/version.js?v=26.10.9"></script>
-    <script src="js/avatarManager.js?v=26.10.9"></script>
-    <script src="js/pwaManager.js?v=26.10.9" defer></script>
+    <script src="supabaseClient.js?v=26.10.10"></script>
+    <script src="js/gamerProfile.js?v=26.10.10"></script>
+    <script src="js/overcriticGamification.js?v=26.10.10"></script>
+    <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
+    <script src="js/notifications.js?v=26.10.10"></script>
+    <script src="js/trofeusDatabase.js?v=26.10.10"></script>
+    <script src="js/version.js?v=26.10.10"></script>
+    <script src="js/avatarManager.js?v=26.10.10"></script>
+    <script src="js/pwaManager.js?v=26.10.10" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -69,26 +69,33 @@
             --diff-lendaria: #ff0055;
         }
 
-        /* --- TEMA BRANCO PURO & TECNOLÓGICO (WHITE MODE PREMIUM) --- */
+        /* ═══════════════════════════════════════════════════════════
+           TEMA AZUL-PETRÓLEO ARDÓSIA (SLATE PETROL GAMER)
+        ═══════════════════════════════════════════════════════════ */
         body.light-mode {
-            --bg-color: #f8fafc;
-            --accent-cyan: #0284c7;
-            --accent-purple: #7c3aed;
-            --accent-gold: #d97706;
-            --accent-platinum: #0284c7;
-            --accent-silver: #64748b;
-            --accent-bronze: #b45309;
-            --glass-bg: #ffffff;
-            --glass-border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --sidebar-bg: #ffffff;
-            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --card-hover-shadow: 0 12px 30px rgba(2, 132, 199, 0.15);
-            --diff-facil: #16a34a;
-            --diff-moderada: #d97706;
-            --diff-dificil: #ea580c;
-            --diff-lendaria: #e11d48;
+            --bg-color: #8da4b5;
+            --accent-cyan: #0891b2;
+            --accent-purple: #6d28d9;
+            --accent-gold: #b45309;
+            --accent-platinum: #0891b2;
+            --accent-silver: #475569;
+            --accent-bronze: #92400e;
+            --glass-bg: rgba(182, 199, 212, 0.90);
+            --glass-border: rgba(14, 116, 144, 0.38);
+            --text-main: #05101a;
+            --text-muted: #223647;
+            --sidebar-bg: rgba(132, 153, 170, 0.96);
+            --card-shadow: 0 8px 25px rgba(5, 16, 26, 0.18);
+            --card-hover-shadow: 0 14px 34px rgba(8, 145, 178, 0.3);
+            --diff-facil: #15803d;
+            --diff-moderada: #b45309;
+            --diff-dificil: #c2410c;
+            --diff-lendaria: #be123c;
+            background: radial-gradient(circle at 15% 40%, rgba(8, 145, 178, 0.2), transparent 45%),
+                radial-gradient(circle at 85% 25%, rgba(109, 40, 217, 0.14), transparent 45%),
+                radial-gradient(circle at 50% 90%, rgba(13, 148, 136, 0.15), transparent 50%),
+                #8da4b5 !important;
+            color: #05101a !important;
         }
 
         * {
@@ -2595,7 +2602,7 @@
            CATÁLOGO DE CAPAS OFICIAIS DE JOGOS & MOTOR INTELIGENTE
         ═══════════════════════════════════ */
         const MAPA_CAPAS_OFICIAIS_JOGOS = {
-            'astro bot': 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
+            'astro bot': 'https://upload.wikimedia.org/wikipedia/en/a/a9/Astro_Bot_cover_art.jpg',
             "marvel's spider-man 2": 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg',
             'spider-man 2': 'https://cdn.akamai.steamstatic.com/steam/apps/2651280/header.jpg',
             "marvel's spider-man": 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg',
@@ -2719,7 +2726,7 @@
             {
                 rank: 1,
                 title: 'Astro Bot',
-                cover: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
+                cover: 'https://upload.wikimedia.org/wikipedia/en/a/a9/Astro_Bot_cover_art.jpg',
                 platform: 'PlayStation 5',
                 difficultyCategory: 'facil',
                 difficultyLabel: '3/10 - Tranquila 🌿',
@@ -4579,12 +4586,12 @@
             },
             'astro_bot_ps5': { // Astro Bot
                 title: 'Astro Bot',
-                cover: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg',
+                cover: 'https://upload.wikimedia.org/wikipedia/en/a/a9/Astro_Bot_cover_art.jpg',
                 total: 44,
                 achievements: [
-                    { name: 'Astro-nômico', desc: 'Resgate todos os 300 bots VIP e conquiste todos os 44 troféus da nave estelar.', icon: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg', percent: '38.2%', type: 'platina' },
-                    { name: 'Memória Recuperada', desc: 'Derrote os chefes principais e restaure todos os componentes perdidos da nave-mãe.', icon: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg', percent: '62.1%', type: 'gold' },
-                    { name: 'Colecionador de Ouro', desc: 'Destranque todas as figuras lendárias no Laboratório de Gatcha utilizando moedas estelares.', icon: 'https://upload.wikimedia.org/wikipedia/en/e/e3/Astro_Bot_cover_art.jpg', percent: '45.0%', type: 'silver' }
+                    { name: 'Astro-nômico', desc: 'Resgate todos os 300 bots VIP e conquiste todos os 44 troféus da nave estelar.', icon: 'https://upload.wikimedia.org/wikipedia/en/a/a9/Astro_Bot_cover_art.jpg', percent: '38.2%', type: 'platina' },
+                    { name: 'Memória Recuperada', desc: 'Derrote os chefes principais e restaure todos os componentes perdidos da nave-mãe.', icon: 'https://upload.wikimedia.org/wikipedia/en/a/a9/Astro_Bot_cover_art.jpg', percent: '62.1%', type: 'gold' },
+                    { name: 'Colecionador de Ouro', desc: 'Destranque todas as figuras lendárias no Laboratório de Gatcha utilizando moedas estelares.', icon: 'https://upload.wikimedia.org/wikipedia/en/a/a9/Astro_Bot_cover_art.jpg', percent: '45.0%', type: 'silver' }
                 ]
             },
             '2215430': { // Ghost of Tsushima

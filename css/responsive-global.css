@@ -1219,9 +1219,9 @@ body.light-mode .version-btn-ok {
     }
 
     body.light-mode .mobile-drawer {
-        background: #ffffff !important;
-        border-right-color: rgba(197, 27, 41, 0.25) !important;
-        box-shadow: 10px 0 35px rgba(0, 0, 0, 0.2) !important;
+        background: #9ab0bf !important;
+        border-right-color: rgba(14, 116, 144, 0.45) !important;
+        box-shadow: 10px 0 35px rgba(5, 16, 26, 0.3) !important;
     }
 
     /* Cabeçalho do Drawer */
@@ -1566,7 +1566,8 @@ body.light-mode .version-btn-ok {
         margin: 0 auto !important;
     }
 
-    .poster-box-wrapper {
+    /* Preview de mídias (filmes/séries com layout em coluna lado a lado) */
+    .cover-preview-container .poster-box-wrapper {
         position: relative !important;
         width: 125px !important;
         height: 180px !important;
@@ -1577,7 +1578,7 @@ body.light-mode .version-btn-ok {
         flex-shrink: 0 !important;
     }
 
-    .cover-preview {
+    .cover-preview-container .cover-preview {
         width: 125px !important;
         height: 180px !important;
         margin: 0 auto !important;
@@ -1587,6 +1588,49 @@ body.light-mode .version-btn-ok {
         object-fit: cover !important;
         border: 1px solid rgba(0, 240, 255, 0.3) !important;
         box-shadow: 0 0 20px rgba(0, 240, 255, 0.2) !important;
+    }
+
+    /* Preview de Jogos (Showcase responsivo com espaço total do card) */
+    .game-cover-showcase,
+    #gameCoverPreviewWrapper,
+    .form-column-card .poster-box-wrapper {
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: clamp(190px, 52vw, 245px) !important;
+        margin: 10px 0 16px 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        flex-shrink: 0 !important;
+    }
+
+    .game-cover-showcase .cover-preview,
+    #gameCoverPreviewWrapper .cover-preview,
+    .form-column-card .cover-preview {
+        width: auto !important;
+        height: auto !important;
+        max-width: 94% !important;
+        max-height: 90% !important;
+        object-fit: contain !important;
+        border-radius: 12px !important;
+        display: block !important;
+        margin: 0 auto !important;
+        position: relative !important;
+        z-index: 3 !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 240, 255, 0.3) !important;
+    }
+
+    .poster-box-wrapper:not(.game-cover-showcase) {
+        position: relative !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .cover-preview:not([src]),

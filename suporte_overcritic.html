@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -36,14 +36,14 @@
     </script>
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js?v=26.10.9"></script>
-    <script src="js/gamerProfile.js?v=26.10.9"></script>
-    <script src="js/overcriticGamification.js?v=26.10.9"></script>
-    <script src="js/overcriticSpotlight.js?v=26.10.9"></script>
-    <script src="js/notifications.js?v=26.10.9"></script>
-    <script src="js/version.js?v=26.10.9"></script>
-    <script src="js/avatarManager.js?v=26.10.9"></script>
-    <script src="js/pwaManager.js?v=26.10.9" defer></script>
+    <script src="supabaseClient.js?v=26.10.10"></script>
+    <script src="js/gamerProfile.js?v=26.10.10"></script>
+    <script src="js/overcriticGamification.js?v=26.10.10"></script>
+    <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
+    <script src="js/notifications.js?v=26.10.10"></script>
+    <script src="js/version.js?v=26.10.10"></script>
+    <script src="js/avatarManager.js?v=26.10.10"></script>
+    <script src="js/pwaManager.js?v=26.10.10" defer></script>
     <style>
         :root {
             --bg-color: #07090f;
@@ -59,18 +59,22 @@
             --status-resolved: #10b981;
         }
 
-        /* --- TEMA BRANCO PURO & TECNOLÓGICO (WHITE MODE PREMIUM) --- */
+        /* ═══════════════════════════════════════════════════════════
+           TEMA AZUL-PETRÓLEO ARDÓSIA (SLATE PETROL GAMER)
+        ═══════════════════════════════════════════════════════════ */
         body.light-mode {
-            --bg-color: #f8fafc;
-            --accent-cyan: #0284c7;
-            --accent-purple: #7c3aed;
-            --card-bg: #ffffff;
-            --glass-border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --status-open: #d97706;
-            --status-review: #0284c7;
-            --status-resolved: #10b981;
+            --bg-color: #8da4b5;
+            --accent-cyan: #0891b2;
+            --accent-purple: #6d28d9;
+            --card-bg: rgba(182, 199, 212, 0.90);
+            --glass-border: rgba(14, 116, 144, 0.38);
+            --text-main: #05101a;
+            --text-muted: #223647;
+            --status-open: #b45309;
+            --status-review: #0891b2;
+            --status-resolved: #15803d;
+            background-color: #8da4b5 !important;
+            color: #05101a !important;
         }
 
         * {

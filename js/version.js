@@ -9,15 +9,31 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.9",
+    version: "26.10.10",
     year: "2026",
     month: "10",
-    build: 9,
-    releaseDate: "20/10/2026",
+    build: 10,
+    releaseDate: "21/10/2026",
     status: "Versão Estável",
-    codename: "Busca Global Instantânea Spotlight (Raycast/Ctrl+K), Scroll Lock Infalível & Estilização Imediata",
+    codename: "Patente Exclusiva DEV, Isenção do Ranking, Gamer Card Privativo, Login por Usuário & Duelos Diários",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.10",
+            date: "21/10/2026",
+            title: "Patente Exclusiva DEV, Isenção do Ranking, Gamer Card Privativo, Login por Usuário & Duelos Diários",
+            highlights: [
+                "Patente Exclusiva e Inalcançável DEV (🛠️ DEV • Criador & Desenvolvedor): insígnia oficial e neon ciano com privilégios e identidade dedicada para a moderação e criador do projeto",
+                "Isenção de Moderadores no Ranking Geral: criadores e moderadores não ocupam mais o pódio ou posições competitivas, reservando a competição e a Coroa 👑 100% aos jogadores da comunidade",
+                "Isolamento e Privacidade do Gamer Card: resolução completa de vazamento de dados ao inspecionar outros usuários e restrição dos botões de exportação (Stories, Feed, Download e Compartilhar) apenas para o titular da conta",
+                "Progressão Dinâmica de Níveis e XP: reformulação do cálculo para zerar o XP a cada novo nível alcançado, exigindo a meta do nível seguinte de forma limpa e transparente",
+                "Login Multi-Identificador: autenticação flexível com e-mail ou nome de usuário único, com suporte aprimorado ao preenchimento automático do Google Password Manager",
+                "Gerenciamento Seguro de Credenciais: fluxo de alteração de nome de usuário com validação de unicidade e integração direta de redefinição de senha",
+                "Navegação de Sessão Otimizada: ocultação automática das abas 'Entrar' e 'Cadastrar' para usuários logados, focando a experiência nas abas da conta",
+                "Duelo Diário da Comunidade na Home: votação interativa diária entre dois títulos lendários com recompensas de XP e estatísticas em tempo real",
+                "PWA Service Worker atualizado (v26.10.10): renovação do cache (overcritic-pwa-v26.10.10) e garantia de atualização sem interrupções em todos os dispositivos"
+            ]
+        },
         {
             version: "26.10.9",
             date: "20/10/2026",
