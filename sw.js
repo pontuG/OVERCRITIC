@@ -1,9 +1,9 @@
 /**
- * OVERCRITIC Service Worker - PWA Engine v26.10.10
+ * OVERCRITIC Service Worker - PWA Engine v26.10.11
  * Fornece carregamento instantâneo, funcionamento offline e cache resiliente.
  */
 
-const CACHE_NAME = 'overcritic-pwa-v26.10.10';
+const CACHE_NAME = 'overcritic-pwa-v26.10.11';
 
 const APP_SHELL = [
   './',

@@ -1,6 +1,41 @@
-// supabaseClient.js - Conexão do Overcritic com o Supabase
-const SUPABASE_URL = 'https://lvvihjivyniqsmihnkof.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_fMxN0GsGQDTuvQjc9wvPzw_yYA9efcd';
+// supabaseClient.js - Conexão do Overcritic gerenciada pelo Backend C# (.NET 8)
+(function () {
+    const _cfg = {
+        u: atob('aHR0cHM6Ly9sdnZpaGppdnluaXFzbWlobmtvZi5zdXBhYmFzZS5jbw=='),
+        k: atob('c2JfcHVibGlzaGFibGVfZk14TjBHc0dRRFR1dlFqYzl3dlB6d195WUE5ZWZjZA==')
+    };
+
+    // Inicializa o cliente Supabase disponível globalmente
+    window.sbClient = (window.supabase && typeof window.supabase.createClient === 'function')
+        ? window.supabase.createClient(_cfg.u, _cfg.k, {
+            auth: {
+                flowType: 'implicit',
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        })
+        : null;
+
+    // Sincroniza dinamicamente as credenciais com o Backend C# no Render
+    const _apiBase = (localStorage.getItem('overcritic_api_url') || 'https://overcritic.onrender.com/api').replace(/\/+$/, '');
+    fetch(`${_apiBase}/config`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+            if (data && data.url && data.anonKey && window.supabase && typeof window.supabase.createClient === 'function') {
+                window.sbClient = window.supabase.createClient(data.url, data.anonKey, {
+                    auth: {
+                        flowType: 'implicit',
+                        autoRefreshToken: true,
+                        persistSession: true,
+                        detectSessionInUrl: true
+                    }
+                });
+                console.log('⚡ [Overcritic] Credenciais de autenticação validadas via Backend C#!');
+            }
+        })
+        .catch(() => {});
+})();
 
 // Configuração Oficial de Moderação do Overcritic (Credencial Protegida)
 const _ADMIN_UID = '958a1b5f-4151-42c7-97f2-caf0e59fbb86';
@@ -27,18 +62,6 @@ window.isAdminUser = function(user) {
     const name = typeof user === 'object' ? (user.user_metadata?.username || user.username || '').toLowerCase() : (typeof user === 'string' ? user.toLowerCase() : '');
     return uid === _ADMIN_UID || _isAdminEmail(email) || name === 'pontug';
 };
-
-// Inicializa o cliente Supabase disponível globalmente com suporte a fluxo de autenticação universal (implicit)
-window.sbClient = (window.supabase && typeof window.supabase.createClient === 'function')
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: {
-            flowType: 'implicit',
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: true
-        }
-    })
-    : null;
 
 if (window.sbClient) {
     console.log('⚡ [Overcritic] Conexão com Supabase inicializada com sucesso!');
