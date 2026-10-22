@@ -109,7 +109,9 @@ Index/
 │   ├── gamerProfile.js      # Sistema de perfil de jogador e cartões gamer
 │   ├── geekNewsManager.js   # Feed e gerenciador de notícias geek
 │   ├── notifications.js     # Sistema de notificações em tempo real
-│   ├── overcriticGamification.js # Motor de XP, níveis e badges
+│   ├── overcriticAudio.js   # Efeitos sonoros sci-fi de interface via Web Audio API (PS5/Switch)
+│   ├── overcriticBacklogOracle.js # Organizador de backlog, gráfico e Oráculo Gamer
+│   ├── overcriticGamification.js # Motor de XP, Gamer Card 3D holográfico, níveis e badges
 │   ├── pwaManager.js        # Ciclo de vida do Service Worker e instalação PWA
 │   └── trofeusDatabase.js   # Banco local e mapeador de conquistas
 ├── index.html               # Painel principal e feed do Overcritic

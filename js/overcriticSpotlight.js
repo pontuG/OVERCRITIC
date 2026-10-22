@@ -501,6 +501,40 @@
             {
                 categoria: 'acoes',
                 categoriaLabel: 'Ações Rápidas',
+                icone: '⏳',
+                cor: '#ff007f',
+                titulo: 'Minha Fila de Jogos (Organizador de Backlog)',
+                sub: 'Gerenciar jogos em: Jogando Agora, Zerados, Platinados, Pausados e Fila da Vergonha',
+                metaExtra: 'Backlog Pro',
+                executar: () => {
+                    fecharSpotlight();
+                    if (window.abrirModalFilaDeJogos) {
+                        window.abrirModalFilaDeJogos();
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }
+            },
+            {
+                categoria: 'acoes',
+                categoriaLabel: 'Ações Rápidas',
+                icone: '🔮',
+                cor: '#00f0ff',
+                titulo: 'Oráculo Gamer • Roleta "O que eu jogo hoje?"',
+                sub: 'Sorteio estilo cyberpunk com filtros rápidos de tempo, gênero e vibe com Metacritic',
+                metaExtra: 'Roleta IA',
+                executar: () => {
+                    fecharSpotlight();
+                    if (window.abrirOraculoGamer) {
+                        window.abrirOraculoGamer();
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }
+            },
+            {
+                categoria: 'acoes',
+                categoriaLabel: 'Ações Rápidas',
                 icone: '🎮',
                 cor: '#00f0ff',
                 titulo: 'Adicionar Crítica de Jogo',

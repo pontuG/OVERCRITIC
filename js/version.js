@@ -9,15 +9,35 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.10",
+    version: "26.10.11",
     year: "2026",
     month: "10",
-    build: 10,
-    releaseDate: "21/10/2026",
+    build: 11,
+    releaseDate: "22/10/2026",
     status: "Versão Estável",
-    codename: "Patente Exclusiva DEV, Isenção do Ranking, Gamer Card Privativo, Login por Usuário & Duelos Diários",
+    codename: "Ecossistema Hardcore de Platinas, Medidor 1-10, Dica de Ouro nos Troféus & Redesign Gamer",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.11",
+            date: "22/10/2026",
+            title: "Ecossistema Hardcore de Platinas, Medidor 1-10, Dica de Ouro nos Troféus & Redesign Gamer",
+            highlights: [
+                "4.1 Medidor de Dificuldade de Platina (Hardcore Hunter Meter): classificação oficial e comunitária de 1 a 10 com termômetro dinâmico, tempo estimado, playthroughs e contagem de troféus perdíveis",
+                "Votação Comunitária 1 a 10 em Tempo Real: régua interativa para caçadores de troféus avaliarem a dificuldade da platina com média ponderada instantânea, persistência e feedback sonoro",
+                "4.2 Dica de Ouro Colaborativa nos Troféus: jogadores compartilham e curtem dicas rápidas em texto diretamente abaixo de troféus difíceis ou perdíveis para alcançar o 100% com colaboração mútua",
+                "Tags Estratégicas e Votos de Utilidade: categorização com '💡 Dica de Ouro', '⚠️ Perdível', '⚔️ Chefe Difícil', '🧩 Colecionável' e botão de likes dinâmico",
+                "Filtros Exclusivos no Explorador de Troféus: novos chips '💡 Com Dica de Ouro' e '⚠️ Perdíveis' para localização imediata dos troféus cruciais de qualquer título",
+                "Redesign Dual-Zone no Footer dos Cards: layout premium sem aperto, pill badge estilizada para aplausos (sem quebra de linha estranha), botão dedicado de Troféus e botões de gestão 50/50",
+                "Selects 100% no Tema Gamer: estilização profunda dos dropdowns com color-scheme: dark e options estilizados (#0d1424 / ciano neon) no Dark Mode e Slate Petrol no Light Mode",
+                "Bloqueio Inteligente de Jogo Verificado: trava de segurança com badge '🔒 Jogo Verificado' no título após a busca, prevenindo incoerências, com botão '🔓 Trocar / Editar' para liberação manual",
+                "Blindagem Contra Falsos Positivos de Missables: salvaguarda soberana de jogos com 0 perdíveis (God of War, Spider-Man, Astro Bot) e fim de detecções acidentais por junção de palavras",
+                "Auto-preenchimento Inteligente de Playthroughs e Perdíveis: preenchimento automático sincronizado com a curadoria verificada ao buscar jogos",
+                "Oráculo do Backlog & Central de Áudio Gamer: módulos integrados para recomendação e imersão sonora retro/cyberpunk",
+                "Harmonização do Gamer Card: eliminação de overflow de botões e vazamento de emojis em todas as escalas de tela",
+                "PWA Service Worker atualizado (v26.10.11): renovação de cache imediata para ativação de toda a suíte de platinas em todos os dispositivos"
+            ]
+        },
         {
             version: "26.10.10",
             date: "21/10/2026",

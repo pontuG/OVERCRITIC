@@ -37,6 +37,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js?v=26.10.11"></script>
     <script src="js/apiClient.js?v=26.10.10"></script>
+    <script src="js/overcriticAudio.js?v=26.10.10"></script>
+    <script src="js/overcriticBacklogOracle.js?v=26.10.10"></script>
     <script src="js/gamerProfile.js?v=26.10.10"></script>
     <script src="js/overcriticGamification.js?v=26.10.10"></script>
     <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
@@ -1140,8 +1142,67 @@
         }
 
         /* ════════════════════════════════════════════════════════
-           BOTÕES GAMER CARD & TIER LIST (RESUMO RÁPIDO - HOME)
+           BOTÃO NOBRE CENTRAL & RECURSOS GAMER (RESUMO RÁPIDO - HOME)
         ════════════════════════════════════════════════════════ */
+        .home-central-gamer-btn {
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 14px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(157, 78, 221, 0.16) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            color: #f8f9fa;
+            font-size: 0.82rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            letter-spacing: 0.2px;
+        }
+        .home-central-gamer-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(157, 78, 221, 0.3) 100%);
+            border-color: rgba(0, 240, 255, 0.6);
+            box-shadow: 0 4px 18px rgba(0, 240, 255, 0.25);
+            color: #ffffff;
+        }
+        .home-central-gamer-btn .central-gamer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .home-central-gamer-btn .central-gamer-icon {
+            font-size: 0.95rem;
+            display: inline-block;
+            transition: transform 0.25s ease;
+        }
+        .home-central-gamer-btn:hover .central-gamer-icon {
+            transform: scale(1.22) rotate(8deg);
+        }
+        .home-central-gamer-btn .action-arrow {
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            transition: transform 0.2s ease;
+        }
+        .home-central-gamer-btn:hover .action-arrow {
+            transform: translateX(4px);
+        }
+        body.light-mode .home-central-gamer-btn {
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.12) 0%, rgba(109, 40, 217, 0.12) 100%);
+            border-color: rgba(8, 145, 178, 0.4);
+            color: #05101a;
+        }
+        body.light-mode .home-central-gamer-btn:hover {
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.2) 0%, rgba(109, 40, 217, 0.2) 100%);
+            border-color: #0891b2;
+            color: #05101a;
+        }
+
         .home-gamification-actions {
             display: flex;
             gap: 8px;
@@ -3446,7 +3507,14 @@
                             <span class="stat-arrow">›</span>
                         </div>
                     </a>
-                    <div class="stat-item" style="cursor: pointer; background: rgba(0, 240, 255, 0.05); border-color: rgba(0, 240, 255, 0.2);" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal();" title="Gerar e compartilhar meu Gamer Card Oficial">
+                    <div class="stat-item" style="cursor: pointer;" onclick="if(window.abrirModalFilaDeJogos) window.abrirModalFilaDeJogos();" title="Minha Fila de Jogos & Backlog">
+                        <span class="stat-label">⏳ Na Fila</span>
+                        <div class="stat-val-wrapper">
+                            <span class="val" id="statBacklog" style="color: #ff007f;">0</span>
+                            <span class="stat-arrow" style="color: #ff007f; opacity: 0.7;">›</span>
+                        </div>
+                    </div>
+                    <div class="stat-item" style="cursor: pointer; background: rgba(0, 240, 255, 0.05); border-color: rgba(0, 240, 255, 0.2);" onclick="const u = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim(); const uid = (localStorage.getItem('overcritic_user_id') || '').trim(); if(window.abrirPerfilGamerModal) { window.abrirPerfilGamerModal(u, uid); } else if(window.abrirGamerCardModal) { window.abrirGamerCardModal({ username: u, userId: uid }); }" title="Ver Meu Perfil Gamer e Conquistas">
                         <span class="stat-label" id="homeGamificationLabel" style="color:var(--text-main); font-weight:700;">🌱 Recruta Gamer</span>
                         <div class="stat-val-wrapper">
                             <span class="val" id="statNivelGamer" style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 800;">Nv. 1</span>
@@ -3454,24 +3522,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="home-gamification-actions">
-                    <button type="button" class="og-btn-action og-btn-quests" onclick="if(window.OvercriticGamification && window.OvercriticGamification.abrirModalMuralInsignias) { window.OvercriticGamification.abrirModalMuralInsignias('missoes'); } else if(window.abrirModalMuralInsignias) { window.abrirModalMuralInsignias('missoes'); }" style="flex: 1;" title="Ver Missões Semanais e Desafios com Temporizador">
-                        <span class="btn-icon">⚡</span>
-                        <span>Missões</span>
-                    </button>
-                    <button type="button" class="og-btn-action og-btn-trophy" onclick="if(window.OvercriticGamification && window.OvercriticGamification.abrirModalMuralInsignias) { window.OvercriticGamification.abrirModalMuralInsignias('trofeus'); } else if(window.abrirModalMuralInsignias) { window.abrirModalMuralInsignias('trofeus'); }" style="flex: 1;" title="Abrir Estante de Troféus Virtuais e Insígnias">
-                        <span class="btn-icon">🏆</span>
-                        <span>Troféus</span>
-                    </button>
-                    <button type="button" class="og-btn-action og-btn-card" onclick="if(window.abrirGamerCardModal) window.abrirGamerCardModal();" style="flex: 1;" title="Gerar e compartilhar meu Gamer Card Oficial">
-                        <span class="btn-icon">🎴</span>
-                        <span>Card</span>
-                    </button>
-                    <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList();" style="flex: 1;" title="Criar minha Tier List Pessoal com jogos e filmes">
-                        <span class="btn-icon">🎯</span>
-                        <span>Tier</span>
-                    </button>
-                </div>
+                <button type="button" class="home-central-gamer-btn" onclick="const u = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim(); const uid = (localStorage.getItem('overcritic_user_id') || '').trim(); if(window.abrirPerfilGamerModal) { window.abrirPerfilGamerModal(u, uid); } else { window.location.href='conta_login.html?tab=perfil'; }" title="Acessar Central Gamer: Gamer Card, Tier List, Backlog, Oráculo e Insígnias">
+                    <span class="central-gamer-left">
+                        <span class="central-gamer-icon">✨</span>
+                        <span class="central-gamer-text">Central & Recursos Gamer</span>
+                    </span>
+                    <span class="action-arrow">→</span>
+                </button>
             </div>
 
             <!-- NOTES -->
@@ -3822,6 +3879,7 @@
                 animarNumero('statJogos', 0);
                 animarNumero('statMidias', 0);
                 animarNumero('statPlatinas', 0);
+                animarNumero('statBacklog', 0);
                 return;
             }
 
@@ -3867,6 +3925,17 @@
             animarNumero('statMidias', countMidias);
             animarNumero('statPlatinas', countPlatinas);
 
+            let countBacklog = 0;
+            if (window.OvercriticBacklog && typeof window.OvercriticBacklog.obterEstatisticas === 'function') {
+                countBacklog = window.OvercriticBacklog.obterEstatisticas(currentUser).totalJogos;
+            } else {
+                try {
+                    const rawB = localStorage.getItem(`overcritic_backlog_v1_${currentUser.toLowerCase()}`);
+                    countBacklog = rawB ? JSON.parse(rawB).length : 0;
+                } catch(e) {}
+            }
+            animarNumero('statBacklog', countBacklog);
+
             if (window.OvercriticGamification) {
                 const prog = window.OvercriticGamification.calcularProgressoGamer({
                     jogos: (consolidados && consolidados.jogos) ? consolidados.jogos : countJogos,
@@ -3900,6 +3969,7 @@
                 animarNumero('statJogos', 0);
                 animarNumero('statMidias', 0);
                 animarNumero('statPlatinas', 0);
+                animarNumero('statBacklog', 0);
                 return;
             }
 
@@ -3914,6 +3984,17 @@
                         animarNumero('statJogos', finalJ);
                         animarNumero('statMidias', finalM);
                         animarNumero('statPlatinas', finalP);
+
+                        let countBacklog = 0;
+                        if (window.OvercriticBacklog && typeof window.OvercriticBacklog.obterEstatisticas === 'function') {
+                            countBacklog = window.OvercriticBacklog.obterEstatisticas(currentUser).totalJogos;
+                        } else {
+                            try {
+                                const rawB = localStorage.getItem(`overcritic_backlog_v1_${currentUser.toLowerCase()}`);
+                                countBacklog = rawB ? JSON.parse(rawB).length : 0;
+                            } catch(e) {}
+                        }
+                        animarNumero('statBacklog', countBacklog);
 
                         const prog = window.OvercriticGamification.calcularProgressoGamer({
                             jogos: dadosCompletos.jogos || finalJ,
@@ -3958,6 +4039,11 @@
             carregarEstatisticas();
             atualizarCapasDinamicas();
             if (typeof atualizarEstadoAuthHeader === 'function') atualizarEstadoAuthHeader();
+        });
+        window.addEventListener('overcritic_backlog_updated', (e) => {
+            if (e.detail && typeof e.detail.total !== 'undefined') {
+                animarNumero('statBacklog', e.detail.total);
+            }
         });
 
         // Notes

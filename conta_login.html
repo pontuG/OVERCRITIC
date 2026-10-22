@@ -38,6 +38,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js?v=26.10.11"></script>
     <script src="js/apiClient.js?v=26.10.10"></script>
+    <script src="js/overcriticAudio.js?v=26.10.10"></script>
+    <script src="js/overcriticBacklogOracle.js?v=26.10.10"></script>
+    <script src="js/gamerProfile.js?v=26.10.10"></script>
     <script src="js/notifications.js?v=26.10.10"></script>
     <script src="js/version.js?v=26.10.10"></script>
     <script src="js/avatarManager.js?v=26.10.10"></script>
@@ -658,6 +661,10 @@
                             <div class="stat-mini-number" id="profJogosCount">0</div>
                             <div class="stat-mini-label">Jogos</div>
                         </div>
+                        <div class="stat-mini-card" onclick="if(window.abrirModalFilaDeJogos) window.abrirModalFilaDeJogos();" style="cursor: pointer; border-color: rgba(255, 0, 127, 0.4);" title="Ver Minha Fila de Jogos e Backlog">
+                            <div class="stat-mini-number" id="profBacklogCount" style="color: #ff007f;">0</div>
+                            <div class="stat-mini-label">Na Fila ⏳</div>
+                        </div>
                         <div class="stat-mini-card">
                             <div class="stat-mini-number" id="profMidiasCount">0</div>
                             <div class="stat-mini-label">Mídias</div>
@@ -679,6 +686,12 @@
                         </button>
                         <button type="button" class="og-btn-action og-btn-tier" onclick="if(window.abrirModalTierList) window.abrirModalTierList(window._dadosUsuarioPerfil);" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer;">
                             <span>🎯</span> Minha Tier List
+                        </button>
+                        <button type="button" class="og-btn-action" onclick="if(window.abrirModalFilaDeJogos) window.abrirModalFilaDeJogos();" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer; background: rgba(255, 0, 127, 0.08); border: 1px solid rgba(255, 0, 127, 0.45); color: #ff007f;" title="Organizador de Backlog e Fila de Jogos">
+                            <span>⏳</span> Minha Fila
+                        </button>
+                        <button type="button" class="og-btn-action" onclick="if(window.abrirOraculoGamer) window.abrirOraculoGamer();" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.45); color: var(--accent-cyan);" title="Oráculo Gamer • Roleta O que eu jogo hoje?">
+                            <span>🔮</span> Oráculo
                         </button>
                         <button type="button" class="og-btn-action" onclick="if(window.OvercriticInsignias) window.OvercriticInsignias.abrirModalMuralInsignias();" style="flex: 1; min-width: 140px; justify-content: center; padding: 10px; font-size: 0.82rem; border-radius: 12px; cursor: pointer; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.4); color: #ffd700;" title="Abrir Mural de Troféus Virtuais & Insígnias">
                             <span>🏆</span> Mural de Insígnias
@@ -1135,11 +1148,24 @@
             let countP = consolidados.platinas.length;
 
             const elJ = document.getElementById('profJogosCount');
+            const elB = document.getElementById('profBacklogCount');
             const elM = document.getElementById('profMidiasCount');
             const elP = document.getElementById('profPlatinasCount');
             if (elJ) elJ.textContent = countJ;
             if (elM) elM.textContent = countM;
             if (elP) elP.textContent = countP;
+            if (elB) {
+                if (window.OvercriticBacklog && typeof window.OvercriticBacklog.obterEstatisticas === 'function') {
+                    elB.textContent = window.OvercriticBacklog.obterEstatisticas(cleanName).totalJogos;
+                } else {
+                    try {
+                        const rawB = localStorage.getItem(`overcritic_backlog_v1_${cleanName.toLowerCase()}`);
+                        elB.textContent = rawB ? JSON.parse(rawB).length : '0';
+                    } catch(e) {
+                        elB.textContent = '0';
+                    }
+                }
+            }
 
             window._dadosUsuarioPerfil = {
                 username: cleanName,
@@ -2354,6 +2380,17 @@
         // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             checarSessaoAtiva();
+
+            // Sincronização em tempo real do Backlog com a aba do perfil
+            window.addEventListener('overcritic_backlog_updated', (e) => {
+                const elBacklog = document.getElementById('profBacklogCount');
+                if (elBacklog && e.detail && typeof e.detail.total !== 'undefined') {
+                    elBacklog.textContent = e.detail.total;
+                    elBacklog.style.transform = 'scale(1.25)';
+                    elBacklog.style.transition = 'transform 0.2s ease';
+                    setTimeout(() => { if (elBacklog) elBacklog.style.transform = 'scale(1)'; }, 200);
+                }
+            });
 
             // Escuta mudanças de autenticação (ex: tokens no hash da URL retornando do e-mail)
             if (window.sbClient) {

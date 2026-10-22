@@ -841,12 +841,14 @@
                 transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 position: relative;
                 box-sizing: border-box;
+                perspective: 1200px;
+                perspective-origin: center center;
             }
             .og-modal-overlay.active .og-gamer-card-modal {
                 transform: scale(1) translateY(0);
             }
 
-            /* Card Holográfico Exibido na Tela */
+            /* Card Holográfico Exibido na Tela (Efeito Carta Rara Lendária 3D) */
             .og-card-preview {
                 width: 100%;
                 max-height: calc(88vh - 60px);
@@ -854,7 +856,7 @@
                 overflow-x: hidden;
                 overscroll-behavior: contain;
                 background: linear-gradient(150deg, #090e1a 0%, #111a2e 50%, #0d1222 100%);
-                border: 2px solid rgba(0, 240, 255, 0.4);
+                border: 2px solid rgba(0, 240, 255, 0.45);
                 border-radius: 20px;
                 padding: 20px 20px;
                 box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 240, 255, 0.25);
@@ -863,6 +865,16 @@
                 flex-direction: column;
                 gap: 12px;
                 box-sizing: border-box;
+                transform-style: preserve-3d;
+                transform: perspective(1200px) rotateX(var(--og-tilt-x, 0deg)) rotateY(var(--og-tilt-y, 0deg)) scale3d(1, 1, 1);
+                transition: transform 0.12s ease-out, box-shadow 0.2s ease-out, border-color 0.25s ease;
+                will-change: transform, box-shadow;
+            }
+            .og-card-preview.is-tilting {
+                transition: none; /* Resposta imediata e sem lag ao movimento do mouse / giroscópio */
+            }
+            .og-card-preview.is-resetting {
+                transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease;
             }
             .og-card-preview::before {
                 content: '';
@@ -876,12 +888,101 @@
                 pointer-events: none;
                 z-index: 0;
             }
+
+            /* Camada 1: Foil Furta-cor Holográfico (Arco-íris Prismatic Foil de Colecionador) */
+            .og-card-holo-foil {
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                pointer-events: none;
+                z-index: 8;
+                mix-blend-mode: color-dodge;
+                opacity: var(--og-holo-opacity, 0);
+                background-image: linear-gradient(
+                    var(--og-holo-angle, 135deg),
+                    rgba(255, 0, 128, 0.55) 0%,
+                    rgba(255, 140, 0, 0.5) 15%,
+                    rgba(255, 230, 0, 0.5) 30%,
+                    rgba(0, 240, 255, 0.6) 50%,
+                    rgba(157, 78, 221, 0.55) 70%,
+                    rgba(255, 0, 128, 0.55) 85%,
+                    rgba(0, 240, 255, 0.6) 100%
+                );
+                background-size: 260% 260%;
+                background-position: var(--og-pointer-x, 50%) var(--og-pointer-y, 50%);
+                filter: brightness(1.15) contrast(1.25) saturate(1.4);
+                transition: opacity 0.3s ease;
+            }
+
+            /* Camada 2: Reflexo Especular de Feixe de Luz (Specular Glare) */
+            .og-card-holo-glare {
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                pointer-events: none;
+                z-index: 9;
+                mix-blend-mode: overlay;
+                opacity: var(--og-glare-opacity, 0);
+                background: radial-gradient(
+                    farthest-corner circle at var(--og-pointer-x, 50%) var(--og-pointer-y, 50%),
+                    rgba(255, 255, 255, 0.95) 0%,
+                    rgba(255, 255, 255, 0.45) 20%,
+                    rgba(0, 240, 255, 0.25) 45%,
+                    transparent 75%
+                );
+                transition: opacity 0.25s ease;
+            }
+
+            /* Camada 3: Micro-ranhuras Prismáticas de Colecionador (Sparkle / Prismatic Ribbon) */
+            .og-card-holo-sparkles {
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                pointer-events: none;
+                z-index: 7;
+                mix-blend-mode: color-dodge;
+                opacity: calc(var(--og-holo-opacity, 0) * 0.7);
+                background-image: repeating-linear-gradient(
+                    calc(var(--og-holo-angle, 135deg) + 45deg),
+                    rgba(255, 255, 255, 0.12) 0px,
+                    rgba(255, 255, 255, 0.12) 2px,
+                    transparent 2px,
+                    transparent 7px
+                );
+                transition: opacity 0.3s ease;
+            }
+
+            /* Badge/Dica Discreta de Efeito Holográfico */
+            .og-card-holo-hint {
+                font-size: 0.72rem;
+                font-weight: 700;
+                color: rgba(0, 240, 255, 0.9);
+                text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+                text-align: center;
+                pointer-events: none;
+                opacity: 0.85;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                margin-top: -4px;
+                animation: ogHoloHintPulse 3s ease-in-out infinite;
+                z-index: 3;
+            }
+            @keyframes ogHoloHintPulse {
+                0%, 100% { opacity: 0.65; transform: translateY(0); }
+                50% { opacity: 1; transform: translateY(-2px); }
+            }
+
+            /* Parallax Z nos elementos internos da carta */
             .og-card-top {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 position: relative;
                 z-index: 2;
+                transform: translateZ(16px);
+                transform-style: preserve-3d;
             }
             .og-card-brand {
                 display: flex;
@@ -931,6 +1032,8 @@
                 gap: 14px;
                 position: relative;
                 z-index: 2;
+                transform: translateZ(24px);
+                transform-style: preserve-3d;
             }
             .og-card-avatar {
                 width: 54px;
@@ -947,11 +1050,14 @@
                 color: #fff;
                 flex-shrink: 0;
                 overflow: hidden;
+                transform: translateZ(36px);
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
             }
             .og-card-user-info {
                 display: flex;
                 flex-direction: column;
                 gap: 3px;
+                transform: translateZ(22px);
             }
             .og-card-username {
                 font-size: 1.25rem;
@@ -968,13 +1074,15 @@
                 gap: 5px;
             }
 
-            /* Grid de Stats no Card */
+            /* Grid de Stats no Card com Parallax 3D */
             .og-card-stats {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
                 gap: 6px;
                 position: relative;
                 z-index: 2;
+                transform: translateZ(20px);
+                transform-style: preserve-3d;
             }
             .og-card-stat-box {
                 background: rgba(0, 0, 0, 0.35);
@@ -985,6 +1093,12 @@
                 display: flex;
                 flex-direction: column;
                 gap: 2px;
+                transform: translateZ(14px);
+                transition: transform 0.2s ease, border-color 0.2s ease;
+            }
+            .og-card-stat-box:hover {
+                transform: translateZ(26px) scale(1.04);
+                border-color: rgba(0, 240, 255, 0.5);
             }
             .og-card-stat-num {
                 font-size: 1.05rem;
@@ -999,13 +1113,15 @@
                 letter-spacing: 0.4px;
             }
 
-            /* Mini Vitrine de Favoritos */
+            /* Mini Vitrine de Favoritos com Elevação 3D */
             .og-card-favorites {
                 display: flex;
                 flex-direction: column;
                 gap: 6px;
                 position: relative;
                 z-index: 2;
+                transform: translateZ(20px);
+                transform-style: preserve-3d;
             }
             .og-card-fav-title {
                 font-size: 0.68rem;
@@ -1036,6 +1152,12 @@
                 justify-content: space-between;
                 padding: 6px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                transform: translateZ(16px);
+                transition: transform 0.22s ease, box-shadow 0.22s ease;
+            }
+            .og-card-fav-item:hover {
+                transform: translateZ(28px) scale(1.05);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 240, 255, 0.4);
             }
             .og-card-fav-badge {
                 align-self: flex-start;
@@ -1337,6 +1459,15 @@
                 gap: 6px;
                 transition: all 0.2s ease;
                 font-family: inherit;
+                box-sizing: border-box;
+                white-space: nowrap;
+            }
+            .og-format-pill span {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+                flex-shrink: 0;
             }
             .og-format-pill:hover {
                 border-color: rgba(0, 240, 255, 0.5);
@@ -1350,69 +1481,163 @@
                 box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
             }
 
-            /* Barra de Ações do Modal */
+            /* Barra de Ações do Gamer Card */
             .og-modal-actions {
-                display: flex;
-                align-items: center;
-                gap: 8px;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 9px;
                 width: 100%;
-                flex-wrap: wrap;
+                box-sizing: border-box;
             }
             .og-modal-btn {
-                flex: 1;
-                min-width: 105px;
-                padding: 10px 12px;
+                box-sizing: border-box;
+                padding: 10px 14px;
                 border-radius: 12px;
-                font-size: 0.82rem;
+                font-size: 0.84rem;
                 font-weight: 800;
                 cursor: pointer;
                 border: none;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
-                transition: all 0.25s ease;
+                gap: 8px;
+                transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
                 font-family: inherit;
                 white-space: nowrap;
+                position: relative;
+                user-select: none;
+                -webkit-user-select: none;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .og-modal-btn span {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.05rem;
+                line-height: 1;
+                flex-shrink: 0;
+            }
+            .og-modal-actions .og-btn-download {
+                grid-column: 1 / -1;
+                padding: 13px 20px;
+                font-size: 0.94rem;
+                background: linear-gradient(135deg, #0284c7 0%, #00f0ff 100%);
+                color: #07090f;
+                font-weight: 900;
+                letter-spacing: 0.3px;
+                box-shadow: 0 4px 20px rgba(0, 240, 255, 0.45);
+            }
+            .og-modal-actions .og-btn-download:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 28px rgba(0, 240, 255, 0.65);
+                filter: brightness(1.08);
+            }
+            .og-modal-actions .og-btn-download:active {
+                transform: translateY(0);
             }
             .og-btn-share {
-                background: linear-gradient(135deg, #10b981, #06b6d4);
+                background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
                 color: #ffffff;
                 box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
             }
             .og-btn-share:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 20px rgba(16, 185, 129, 0.55);
+                filter: brightness(1.08);
+            }
+            .og-btn-share:active {
+                transform: translateY(0);
             }
             .og-btn-copy {
-                background: linear-gradient(135deg, #8b5cf6, #ec4899);
+                background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
                 color: #ffffff;
                 box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
             }
             .og-btn-copy:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 20px rgba(139, 92, 246, 0.55);
+                filter: brightness(1.08);
             }
-            .og-btn-download {
-                background: linear-gradient(135deg, #0284c7, #00f0ff);
-                color: #07090f;
-                box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+            .og-btn-copy:active {
+                transform: translateY(0);
             }
-            .og-btn-download:hover {
+            .og-btn-trilha {
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+                color: #00f0ff;
+                border: 1px solid rgba(0, 240, 255, 0.45);
+                box-shadow: 0 4px 14px rgba(0, 240, 255, 0.2);
+            }
+            .og-btn-trilha:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 6px 25px rgba(0, 240, 255, 0.6);
+                background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+                border-color: #00f0ff;
+                box-shadow: 0 6px 20px rgba(0, 240, 255, 0.45);
+                color: #ffffff;
             }
-            .og-btn-close {
+            .og-btn-trilha:active {
+                transform: translateY(0);
+            }
+            .og-modal-actions .og-btn-close {
                 background: rgba(255, 255, 255, 0.08);
                 color: #cbd5e1;
                 border: 1px solid rgba(255, 255, 255, 0.15);
-                flex: 0 0 auto;
-                min-width: 65px;
             }
-            .og-btn-close:hover {
+            .og-modal-actions .og-btn-close:hover {
                 background: rgba(239, 68, 68, 0.25);
                 color: #ff6b6b;
                 border-color: #ef4444;
+            }
+            .og-modal-actions .og-btn-close:active {
+                transform: translateY(0);
+            }
+
+            /* ── MODAL DEDICADO DA TRILHA DE PATENTES (ESTÁTICO & SEM PARALLAX) ── */
+            .og-trilha-modal {
+                width: 100%;
+                max-width: 580px;
+                max-height: 88vh;
+                margin: auto;
+                background: linear-gradient(145deg, #0d1222 0%, #070a14 100%);
+                border: 1px solid rgba(0, 240, 255, 0.35);
+                border-radius: 20px;
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 240, 255, 0.2);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                box-sizing: border-box;
+                animation: ogScaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .og-trilha-modal-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.02);
+            }
+            .og-trilha-modal-body {
+                padding: 18px 20px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .og-trilha-modal-body::-webkit-scrollbar {
+                width: 6px;
+            }
+            .og-trilha-modal-body::-webkit-scrollbar-thumb {
+                background: rgba(0, 240, 255, 0.4);
+                border-radius: 4px;
+            }
+            body.light-mode .og-trilha-modal {
+                background: #ffffff;
+                border-color: rgba(0, 240, 255, 0.4);
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            }
+            body.light-mode .og-trilha-modal-header {
+                background: #f8fafc;
+                border-color: #e2e8f0;
             }
 
             /* ── MODAL DO CRIADOR DE TIER LIST ── */
@@ -1793,12 +2018,18 @@
                     font-size: 0.95rem;
                 }
                 .og-modal-actions {
-                    flex-direction: column;
                     width: 100%;
                 }
                 .og-modal-btn {
                     width: 100%;
                     justify-content: center;
+                }
+            }
+
+            @media (max-width: 460px) {
+                .og-modal-actions {
+                    grid-template-columns: 1fr;
+                    gap: 8px;
                 }
             }
 
@@ -3078,6 +3309,11 @@
         overlay.innerHTML = `
             <div class="og-gamer-card-modal">
                 <div class="og-card-preview" id="ogCardPreview">
+                    <!-- Camadas Holográficas Furta-Cor e Especular (Carta Rara 3D) -->
+                    <div class="og-card-holo-foil" aria-hidden="true"></div>
+                    <div class="og-card-holo-glare" aria-hidden="true"></div>
+                    <div class="og-card-holo-sparkles" aria-hidden="true"></div>
+
                     <div class="og-card-top">
                         <div class="og-card-brand">
                             <span>🎮</span> OVERCRITIC
@@ -3133,25 +3369,6 @@
                         </div>
                     </div>
 
-                    <!-- ══════ NOVA SEÇÃO: TRILHA DE RANKINGS & REQUISITOS ══════ -->
-                    <div class="og-card-ladder-section" id="ogCardLadderSection">
-                        <div class="og-ladder-header">
-                            <div class="og-ladder-title">
-                                <span>🧭</span>
-                                <span>Trilha de Patentes</span>
-                            </div>
-                            <button type="button" class="og-btn-ladder-toggle" id="ogBtnToggleLadder" title="Exibir ou ocultar todos os 10 níveis do Overcritic">
-                                <span id="ogLadderToggleText">Ver Todos (10)</span>
-                                <span id="ogLadderToggleIcon">▾</span>
-                            </button>
-                        </div>
-                        <div class="og-ladder-quick-summary" id="ogLadderQuickSummary"></div>
-                        <div class="og-ladder-list" id="ogLadderList" style="display: none;"></div>
-                        <div class="og-ladder-hints">
-                            <span>💡 <strong>Recálculo dinâmico:</strong> +150 a 600 XP por Platina • +100 a 200 XP por Análise (bônus de resenha)</span>
-                        </div>
-                    </div>
-
                     <div class="og-card-favorites" id="ogCardFavSection">
                         <div class="og-card-fav-title">⭐ Obras em Destaque</div>
                         <div class="og-card-fav-covers" id="ogCardFavCovers"></div>
@@ -3163,6 +3380,11 @@
                     </div>
                 </div>
  
+                <!-- Dica Flutuante de Interação 3D -->
+                <div class="og-card-holo-hint" aria-hidden="true">
+                    <span>✨</span> Incline o mouse ou o celular para refletir a luz holográfica
+                </div>
+
                 <!-- BARRA DE SELEÇÃO DE FORMATO SOCIAL (EXCLUSIVO PARA O TITULAR) -->
                 <div class="og-social-format-bar" id="ogCardSocialFormatBar">
                     <span class="og-social-format-title">📐 Formato da Imagem:</span>
@@ -3183,17 +3405,20 @@
                 </div>
 
                 <div class="og-modal-actions" id="ogCardModalActions">
+                    <button type="button" class="og-modal-btn og-btn-download" id="ogBtnDownloadCard" title="Baixar imagem em alta resolução (PNG)">
+                        <span>📥</span> Baixar Imagem (PNG)
+                    </button>
                     <button type="button" class="og-modal-btn og-btn-share" id="ogBtnShareCard" title="Compartilhar direto no WhatsApp, Instagram ou redes sociais">
                         <span>🚀</span> Compartilhar
                     </button>
                     <button type="button" class="og-modal-btn og-btn-copy" id="ogBtnCopyCard" title="Copiar imagem para colar no Discord ou WhatsApp (Ctrl + V)">
                         <span>📋</span> Copiar Imagem
                     </button>
-                    <button type="button" class="og-modal-btn og-btn-download" id="ogBtnDownloadCard" title="Baixar imagem em alta resolução (PNG)">
-                        <span>📥</span> Baixar PNG
+                    <button type="button" class="og-modal-btn og-btn-trilha" id="ogBtnVerTrilhaModal" title="Consultar detalhes de todos os 10 níveis do Overcritic em modal fixo">
+                        <span>🧭</span> Trilha de Patentes
                     </button>
-                    <button type="button" class="og-modal-btn og-btn-close" id="ogBtnCloseCard">
-                        ✕ Fechar
+                    <button type="button" class="og-modal-btn og-btn-close" id="ogBtnCloseCard" title="Fechar modal (Esc)">
+                        <span>✕</span> Fechar
                     </button>
                 </div>
             </div>
@@ -3241,27 +3466,204 @@
             btnCopy.addEventListener('click', () => processarExportacaoGamerCard('copy', _formatoCardSelecionado));
         }
 
-        // Listener do botão de alternar lista de rankings
-        const btnToggleLadder = document.getElementById('ogBtnToggleLadder');
-        if (btnToggleLadder) {
-            btnToggleLadder.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const list = document.getElementById('ogLadderList');
-                const text = document.getElementById('ogLadderToggleText');
-                const icon = document.getElementById('ogLadderToggleIcon');
-                if (list) {
-                    const isVisible = list.style.display !== 'none';
-                    list.style.display = isVisible ? 'none' : 'flex';
-                    if (text) text.textContent = isVisible ? 'Ver Todos (10)' : 'Ocultar';
-                    if (icon) icon.textContent = isVisible ? '▾' : '▴';
-                }
+        // Listener do botão para consultar a Trilha de Patentes sem distorção 3D
+        const btnVerTrilha = document.getElementById('ogBtnVerTrilhaModal');
+        if (btnVerTrilha) {
+            btnVerTrilha.addEventListener('click', () => {
+                abrirModalTrilhaPatentes(_ultimoProgressoCard || _dadosCardAtuais);
             });
         }
 
         return overlay;
     }
 
+    /* ════════════════════════════════════════════════════════
+       3.1 MOTOR DE FÍSICA & EFEITO HOLOGRÁFICO 3D (PARALLAX TILT)
+    ════════════════════════════════════════════════════════ */
+    let _holoTiltState = {
+        cardEl: null,
+        rafId: null,
+        currentX: 0,
+        currentY: 0,
+        targetX: 0,
+        targetY: 0,
+        isHovered: false,
+        rect: null
+    };
+
+    function configurarGamerCardHoloTilt(cardEl) {
+        if (!cardEl) return;
+        _holoTiltState.cardEl = cardEl;
+
+        const maxAngle = 18; // Ângulo máximo de inclinação em graus
+
+        function updateRect() {
+            if (_holoTiltState.cardEl) {
+                _holoTiltState.rect = _holoTiltState.cardEl.getBoundingClientRect();
+            }
+        }
+
+        function renderFrame() {
+            // Lerp para suavização cinemática
+            const lerpFactor = _holoTiltState.isHovered ? 0.16 : 0.08;
+            _holoTiltState.currentX += (_holoTiltState.targetX - _holoTiltState.currentX) * lerpFactor;
+            _holoTiltState.currentY += (_holoTiltState.targetY - _holoTiltState.currentY) * lerpFactor;
+
+            const cX = _holoTiltState.currentX;
+            const cY = _holoTiltState.currentY;
+
+            const rotX = -cY * maxAngle;
+            const rotY = cX * maxAngle;
+
+            const pointerX = ((cX + 1) * 50);
+            const pointerY = ((cY + 1) * 50);
+
+            // Ângulo do prisma/foil holográfico
+            const angleRad = Math.atan2(cY, cX);
+            const angleDeg = (angleRad * (180 / Math.PI)) + 90;
+
+            // Distância normalizada do centro
+            const dist = Math.min(1, Math.hypot(cX, cY));
+
+            const holoOpacity = _holoTiltState.isHovered ? (0.45 + dist * 0.45) : (dist * 0.65);
+            const glareOpacity = _holoTiltState.isHovered ? (0.35 + dist * 0.45) : (dist * 0.55);
+
+            cardEl.style.setProperty('--og-tilt-x', `${rotX.toFixed(2)}deg`);
+            cardEl.style.setProperty('--og-tilt-y', `${rotY.toFixed(2)}deg`);
+            cardEl.style.setProperty('--og-pointer-x', `${pointerX.toFixed(1)}%`);
+            cardEl.style.setProperty('--og-pointer-y', `${pointerY.toFixed(1)}%`);
+            cardEl.style.setProperty('--og-holo-angle', `${angleDeg.toFixed(1)}deg`);
+            cardEl.style.setProperty('--og-holo-opacity', `${holoOpacity.toFixed(2)}`);
+            cardEl.style.setProperty('--og-glare-opacity', `${glareOpacity.toFixed(2)}`);
+
+            // Sombra reativa à luz dinâmica
+            const shadowX = (-cX * 24).toFixed(1);
+            const shadowY = (30 + -cY * 20).toFixed(1);
+            cardEl.style.boxShadow = `0 ${shadowY}px 70px rgba(0, 0, 0, 0.85), ${shadowX}px 10px 45px rgba(0, 240, 255, 0.28)`;
+
+            if (_holoTiltState.isHovered || dist > 0.005) {
+                _holoTiltState.rafId = requestAnimationFrame(renderFrame);
+            } else {
+                _holoTiltState.rafId = null;
+                cardEl.classList.remove('is-tilting');
+            }
+        }
+
+        function startLoop() {
+            if (!_holoTiltState.rafId) {
+                cardEl.classList.add('is-tilting');
+                cardEl.classList.remove('is-resetting');
+                _holoTiltState.rafId = requestAnimationFrame(renderFrame);
+            }
+        }
+
+        if (!cardEl.__holoConfigured) {
+            cardEl.__holoConfigured = true;
+
+            cardEl.addEventListener('mouseenter', () => {
+                _holoTiltState.isHovered = true;
+                updateRect();
+                startLoop();
+            });
+
+            cardEl.addEventListener('mousemove', (e) => {
+                if (!_holoTiltState.rect) updateRect();
+                const r = _holoTiltState.rect;
+                if (!r || r.width === 0 || r.height === 0) return;
+
+                const mouseX = e.clientX - r.left;
+                const mouseY = e.clientY - r.top;
+
+                _holoTiltState.targetX = Math.max(-1, Math.min(1, (mouseX / r.width) * 2 - 1));
+                _holoTiltState.targetY = Math.max(-1, Math.min(1, (mouseY / r.height) * 2 - 1));
+                _holoTiltState.isHovered = true;
+                startLoop();
+            });
+
+            cardEl.addEventListener('mouseleave', () => {
+                _holoTiltState.isHovered = false;
+                _holoTiltState.targetX = 0;
+                _holoTiltState.targetY = 0;
+                cardEl.classList.remove('is-tilting');
+                cardEl.classList.add('is-resetting');
+                startLoop();
+            });
+
+            cardEl.addEventListener('touchmove', (e) => {
+                if (e.touches && e.touches.length > 0) {
+                    if (!_holoTiltState.rect) updateRect();
+                    const r = _holoTiltState.rect;
+                    if (!r) return;
+                    const touch = e.touches[0];
+                    const touchX = touch.clientX - r.left;
+                    const touchY = touch.clientY - r.top;
+                    _holoTiltState.targetX = Math.max(-1, Math.min(1, (touchX / r.width) * 2 - 1));
+                    _holoTiltState.targetY = Math.max(-1, Math.min(1, (touchY / r.height) * 2 - 1));
+                    _holoTiltState.isHovered = true;
+                    startLoop();
+                }
+            }, { passive: true });
+
+            cardEl.addEventListener('touchend', () => {
+                _holoTiltState.isHovered = false;
+                _holoTiltState.targetX = 0;
+                _holoTiltState.targetY = 0;
+                startLoop();
+            }, { passive: true });
+
+            window.addEventListener('resize', updateRect);
+            window.addEventListener('scroll', updateRect, { passive: true });
+
+            // Giroscópio para celulares (Mobile Gyroscope Parallax)
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', (e) => {
+                    const overlay = document.getElementById('ogGamerCardOverlay');
+                    if (!overlay || !overlay.classList.contains('active')) return;
+                    if (e.gamma === null && e.beta === null) return;
+
+                    const gamma = e.gamma || 0; // -90 a 90
+                    const beta = e.beta || 45;  // -180 a 180
+
+                    const normX = Math.max(-1, Math.min(1, gamma / 28));
+                    const normY = Math.max(-1, Math.min(1, (beta - 45) / 28));
+
+                    _holoTiltState.targetX = normX;
+                    _holoTiltState.targetY = normY;
+                    startLoop();
+                }, { passive: true });
+            }
+        }
+
+        updateRect();
+        startLoop();
+    }
+
+    function pararGamerCardHoloTilt() {
+        if (_holoTiltState.rafId) {
+            cancelAnimationFrame(_holoTiltState.rafId);
+            _holoTiltState.rafId = null;
+        }
+        if (_holoTiltState.cardEl) {
+            _holoTiltState.cardEl.classList.remove('is-tilting');
+            _holoTiltState.cardEl.classList.remove('is-resetting');
+            _holoTiltState.cardEl.style.removeProperty('--og-tilt-x');
+            _holoTiltState.cardEl.style.removeProperty('--og-tilt-y');
+            _holoTiltState.cardEl.style.removeProperty('--og-pointer-x');
+            _holoTiltState.cardEl.style.removeProperty('--og-pointer-y');
+            _holoTiltState.cardEl.style.removeProperty('--og-holo-angle');
+            _holoTiltState.cardEl.style.removeProperty('--og-holo-opacity');
+            _holoTiltState.cardEl.style.removeProperty('--og-glare-opacity');
+            _holoTiltState.cardEl.style.removeProperty('box-shadow');
+        }
+        _holoTiltState.currentX = 0;
+        _holoTiltState.currentY = 0;
+        _holoTiltState.targetX = 0;
+        _holoTiltState.targetY = 0;
+        _holoTiltState.isHovered = false;
+    }
+
     let _dadosCardAtuais = null;
+    let _ultimoProgressoCard = null;
 
     function abrirGamerCardModal(dados = {}) {
         const overlay = garantirModalGamerCard();
@@ -3354,6 +3756,7 @@
             midias: midiasArr,
             platinas: platinasArr
         });
+        _ultimoProgressoCard = prog;
 
         // Preenche campos do Card
         const chipEl = document.getElementById('ogCardChip');
@@ -3626,17 +4029,192 @@
         if (cardPreviewEl) {
             cardPreviewEl.scrollLeft = 0;
             cardPreviewEl.scrollTop = 0;
+            configurarGamerCardHoloTilt(cardPreviewEl);
         }
 
         overlay.classList.add('active');
         bloquearScrollFundo();
+
+        if (window.OvercriticAudio) {
+            window.OvercriticAudio.play('modal_open');
+        }
     }
 
     function fecharGamerCardModal() {
+        pararGamerCardHoloTilt();
         const overlay = document.getElementById('ogGamerCardOverlay');
         if (overlay && overlay.classList.contains('active')) {
             overlay.classList.remove('active');
             liberarScrollFundo();
+            if (window.OvercriticAudio) {
+                window.OvercriticAudio.play('modal_close');
+            }
+        }
+    }
+
+    /* ════════════════════════════════════════════════════════
+       3.0 MODAL DEDICADO DA TRILHA DE PATENTES (ESTÁTICO & SEM PARALLAX)
+    ════════════════════════════════════════════════════════ */
+    function garantirModalTrilhaPatentes() {
+        injetarEstilosGamificacao();
+        let overlay = document.getElementById('ogTrilhaPatentesOverlay');
+        if (overlay) return overlay;
+
+        overlay = document.createElement('div');
+        overlay.id = 'ogTrilhaPatentesOverlay';
+        overlay.className = 'og-modal-overlay og-trilha-overlay';
+        overlay.style.zIndex = '100020';
+        overlay.innerHTML = `
+            <div class="og-trilha-modal">
+                <div class="og-trilha-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.4rem;">🧭</span>
+                        <div>
+                            <div style="font-weight: 900; font-size: 1.05rem; color: #f1f5f9; letter-spacing: 0.5px;">Trilha de Patentes do Overcritic</div>
+                            <div style="font-size: 0.74rem; color: #94a3b8;">Consulte todos os 10 níveis do ranking gamer, critérios e requisitos de XP</div>
+                        </div>
+                    </div>
+                    <button type="button" class="og-card-close-btn" id="ogBtnCloseTrilhaPatentes" title="Fechar (Esc)">✕</button>
+                </div>
+                <div class="og-trilha-modal-body" id="ogTrilhaPatentesBody"></div>
+                <div class="og-trilha-modal-footer" style="padding: 12px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end; background: rgba(0,0,0,0.25);">
+                    <button type="button" class="og-modal-btn og-btn-close" id="ogBtnCloseTrilhaPatentesFooter" style="min-width: 110px;">✕ Fechar</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) fecharModalTrilhaPatentes();
+        });
+        const closeBtn1 = document.getElementById('ogBtnCloseTrilhaPatentes');
+        if (closeBtn1) closeBtn1.addEventListener('click', fecharModalTrilhaPatentes);
+        const closeBtn2 = document.getElementById('ogBtnCloseTrilhaPatentesFooter');
+        if (closeBtn2) closeBtn2.addEventListener('click', fecharModalTrilhaPatentes);
+
+        return overlay;
+    }
+
+    function abrirModalTrilhaPatentes(dadosOuProg) {
+        const overlay = garantirModalTrilhaPatentes();
+        let prog = null;
+        if (dadosOuProg && dadosOuProg.nivel !== undefined) {
+            prog = dadosOuProg;
+        } else {
+            const username = (dadosOuProg && dadosOuProg.username) || localStorage.getItem('overcritic_currentUser') || 'pontuG';
+            prog = calcularProgressoGamer({ username });
+        }
+
+        const bodyEl = document.getElementById('ogTrilhaPatentesBody');
+        if (bodyEl && prog) {
+            bodyEl.innerHTML = `
+                <!-- RESUMO DO STATUS ATUAL DO JOGADOR -->
+                <div class="og-trilha-user-card" style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Sua Reputação Atual</span>
+                        <span style="font-size: 0.78rem; font-weight: 900; color: #00f0ff;">${prog.xpTotal.toLocaleString('pt-BR')} XP Total</span>
+                    </div>
+                    ${prog.isDev ? `
+                        <div class="og-ladder-pill current" style="border-color:#00f0ff; color:#00f0ff; width: 100%; justify-content: center; background: rgba(0, 240, 255, 0.15); box-shadow: 0 0 14px rgba(0, 240, 255, 0.25); padding: 8px 12px; font-size: 0.82rem;">
+                            <span>🛠️</span>
+                            <span>Patente Exclusiva: DEV • Criador & Desenvolvedor (Inalcançável)</span>
+                        </div>
+                    ` : `
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                            <div class="og-ladder-pill current" style="padding: 6px 12px; font-size: 0.8rem;">
+                                <span>${prog.icone}</span>
+                                <span>Nv. ${prog.nivel} ${prog.titulo}</span>
+                            </div>
+                            ${prog.proximoNivel ? `
+                                <span class="og-ladder-bridge">${prog.porcentagem}% ➔</span>
+                                <div class="og-ladder-pill next" style="padding: 6px 12px; font-size: 0.8rem;">
+                                    <span>${prog.proximoNivel.icone}</span>
+                                    <span>Nv. ${prog.proximoNivel.nivel} ${prog.proximoNivel.titulo} (Faltam ${prog.xpRestante.toLocaleString('pt-BR')} XP)</span>
+                                </div>
+                            ` : `
+                                <div class="og-ladder-pill current" style="border-color:#ef4444; color:#ef4444; padding: 6px 12px; font-size: 0.8rem;">
+                                    <span>🔥</span>
+                                    <span>Nv. 10 Lenda • Patente Suprema!</span>
+                                </div>
+                            `}
+                        </div>
+                        <div class="og-xp-track" style="height: 10px; background: rgba(255, 255, 255, 0.08); border-radius: 5px; overflow: hidden; margin-top: 4px;">
+                            <div class="og-xp-fill" style="width: ${prog.porcentagem}%; height: 100%; background: linear-gradient(90deg, #00f0ff, #9d4edd);"></div>
+                        </div>
+                    `}
+                </div>
+
+                <!-- LISTA COMPLETA DOS 10 NÍVEIS -->
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 0.76rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Todas as Patentes & Requisitos</div>
+                    ${NIVEIS_GAMER.map(lvl => {
+                        const isCurrent = lvl.nivel === prog.nivel;
+                        const isConquered = lvl.nivel < prog.nivel;
+                        const isNext = prog.proximoNivel && lvl.nivel === prog.proximoNivel.nivel;
+
+                        let itemClass = '';
+                        let badgeHtml = '';
+
+                        if (isCurrent) {
+                            itemClass = 'is-current';
+                            badgeHtml = `<span class="og-ladder-item-badge" style="background:${lvl.bg}; color:${lvl.cor}; border:1px solid ${lvl.cor};">📍 Patente Atual</span>`;
+                        } else if (isConquered) {
+                            itemClass = 'is-conquered';
+                            badgeHtml = `<span class="og-ladder-item-badge" style="background:rgba(34, 197, 94, 0.12); color:#22c55e; border:1px solid rgba(34, 197, 94, 0.3);">✓ Conquistada</span>`;
+                        } else if (isNext) {
+                            itemClass = 'is-next';
+                            badgeHtml = `<span class="og-ladder-item-badge" style="background:rgba(255, 215, 0, 0.15); color:#ffd700; border:1px solid rgba(255, 215, 0, 0.4); box-shadow:0 0 8px rgba(255, 215, 0, 0.2);">🎯 Próximo Alvo</span>`;
+                        } else {
+                            itemClass = 'is-locked';
+                            const diff = Math.max(0, lvl.minXp - prog.xpTotal);
+                            badgeHtml = `<span class="og-ladder-item-badge" style="background:rgba(255, 255, 255, 0.05); color:#94a3b8; border:1px solid rgba(255, 255, 255, 0.08);">🔒 Faltam ${diff.toLocaleString('pt-BR')} XP</span>`;
+                        }
+
+                        const reqTexto = lvl.xpNecessario > 0
+                            ? `Requisito: ${lvl.xpNecessario.toLocaleString('pt-BR')} XP no nível <span style="opacity:0.75; font-size:0.7rem;">(Total acumulado: ${lvl.minXp.toLocaleString('pt-BR')} XP)</span>`
+                            : `Patente Suprema <span style="opacity:0.75; font-size:0.7rem;">(Acima de ${lvl.minXp.toLocaleString('pt-BR')} XP)</span>`;
+
+                        return `
+                            <div class="og-ladder-item ${itemClass}" style="padding: 10px 12px;">
+                                <div class="og-ladder-item-left" style="gap: 12px;">
+                                    <span class="og-ladder-item-icon" style="font-size: 1.35rem; width: 28px;">${lvl.icone}</span>
+                                    <div>
+                                        <div class="og-ladder-item-title" style="font-size: 0.88rem; color: ${isCurrent ? lvl.cor : ''}">${lvl.titulo} <span style="font-size:0.72rem; opacity:0.8;">• Nv. ${lvl.nivel}</span></div>
+                                        <div class="og-ladder-item-sub" style="font-size: 0.72rem; margin-top: 2px;">${reqTexto}</div>
+                                    </div>
+                                </div>
+                                <div>${badgeHtml}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <!-- DICAS DE GANHO DE XP -->
+                <div class="og-ladder-hints" style="font-size: 0.76rem; color: #94a3b8; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; padding: 10px 14px; margin-top: 4px; line-height: 1.5;">
+                    💡 <strong>Como subir na Trilha:</strong><br>
+                    • <strong>Platinas (100%):</strong> +150 a 600 XP (conforme a dificuldade do jogo)<br>
+                    • <strong>Críticas & Resenhas:</strong> +100 a 200 XP por análise detalhada<br>
+                    • <strong>Missões Semanais & Duelos:</strong> bônus extras de reputação no Hub Gamer
+                </div>
+            `;
+        }
+
+        overlay.classList.add('active');
+        bloquearScrollFundo();
+        if (window.OvercriticAudio) {
+            window.OvercriticAudio.play('modal_open');
+        }
+    }
+
+    function fecharModalTrilhaPatentes() {
+        const overlay = document.getElementById('ogTrilhaPatentesOverlay');
+        if (overlay && overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+            liberarScrollFundo();
+            if (window.OvercriticAudio) {
+                window.OvercriticAudio.play('modal_close');
+            }
         }
     }
 
@@ -6282,6 +6860,11 @@
 
     // Som Triunfante Gamer via Web Audio API (zero arquivos externos)
     function tocarSomConquista() {
+        if (window.OvercriticAudio) {
+            if (window.OvercriticAudio.isMuted()) return;
+            window.OvercriticAudio.play('trophy');
+            return;
+        }
         try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) return;
@@ -7413,10 +7996,13 @@
     // Listener Global de Tecla Escape para Fechamento Seguro de Modais
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            const trilhaOverlay = document.getElementById('ogTrilhaPatentesOverlay');
             const tierOverlay = document.getElementById('ogTierListOverlay');
             const cardOverlay = document.getElementById('ogGamerCardOverlay');
             const muralOverlay = document.getElementById('ogMuralInsigniasOverlay');
-            if (muralOverlay && muralOverlay.classList.contains('active')) {
+            if (trilhaOverlay && trilhaOverlay.classList.contains('active')) {
+                fecharModalTrilhaPatentes();
+            } else if (muralOverlay && muralOverlay.classList.contains('active')) {
                 fecharModalMuralInsignias();
             } else if (tierOverlay && tierOverlay.classList.contains('active')) {
                 fecharModalTierList();
@@ -7453,6 +8039,8 @@
         executarLimpezaGeralDados,
         abrirGamerCardModal,
         fecharGamerCardModal,
+        abrirModalTrilhaPatentes,
+        fecharModalTrilhaPatentes,
         gerarCanvasGamerCardPro,
         processarExportacaoGamerCard,
         exportarGamerCardPng,
@@ -7506,6 +8094,8 @@
     window.calcularXpReview = calcularXpReview;
     window.abrirGamerCardModal = abrirGamerCardModal;
     window.fecharGamerCardModal = fecharGamerCardModal;
+    window.abrirModalTrilhaPatentes = abrirModalTrilhaPatentes;
+    window.fecharModalTrilhaPatentes = fecharModalTrilhaPatentes;
     window.gerarCanvasGamerCardPro = gerarCanvasGamerCardPro;
     window.processarExportacaoGamerCard = processarExportacaoGamerCard;
     window.exportarGamerCardPng = exportarGamerCardPng;

@@ -36,6 +36,8 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js?v=26.10.11"></script>
+    <script src="js/overcriticAudio.js?v=26.10.10"></script>
+    <script src="js/overcriticBacklogOracle.js?v=26.10.10"></script>
     <script src="js/gamerProfile.js?v=26.10.10"></script>
     <script src="js/overcriticGamification.js?v=26.10.10"></script>
     <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
@@ -1715,6 +1717,14 @@
                     <span class="search-icon-fixed">🔍</span>
                     <input type="text" id="gameSearchInput" placeholder="Buscar qualquer jogo (Steam, PS, Xbox, Switch)..." oninput="tratarEntradaBusca(this.value)">
                     <button type="button" id="btnClearSearch" class="btn-clear-search" onclick="limparBusca()" style="display: none;" title="Limpar busca">✕</button>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <button type="button" class="og-btn-action" onclick="if(window.abrirModalFilaDeJogos) window.abrirModalFilaDeJogos();" style="padding:10px 16px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; background:rgba(255,0,127,0.12); border:1px solid rgba(255,0,127,0.45); color:#ff007f; box-shadow:0 0 15px rgba(255,0,127,0.25);" title="Abrir Minha Fila de Jogos e Backlog">
+                        <span>⏳</span> Minha Fila de Jogos
+                    </button>
+                    <button type="button" class="og-btn-action" onclick="if(window.abrirOraculoGamer) window.abrirOraculoGamer();" style="padding:10px 16px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; background:linear-gradient(135deg, rgba(0,240,255,0.2), rgba(157,78,221,0.25)); border:1px solid rgba(0,240,255,0.45); color:var(--accent-cyan); box-shadow:0 0 15px rgba(0,240,255,0.25);" title="Oráculo Gamer • Roleta O que eu jogo hoje?">
+                        <span>🔮</span> Oráculo Gamer
+                    </button>
                 </div>
             </div>
         </header>

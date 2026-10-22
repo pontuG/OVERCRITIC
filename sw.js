@@ -19,6 +19,8 @@ const APP_SHELL = [
   './css/responsive-global.css',
   './js/version.js',
   './js/notifications.js',
+  './js/overcriticAudio.js',
+  './js/overcriticBacklogOracle.js',
   './js/gamerProfile.js',
   './js/overcriticGamification.js',
   './js/overcriticSpotlight.js',

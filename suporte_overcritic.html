@@ -37,6 +37,8 @@
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js?v=26.10.11"></script>
+    <script src="js/overcriticAudio.js?v=26.10.10"></script>
+    <script src="js/overcriticBacklogOracle.js?v=26.10.10"></script>
     <script src="js/gamerProfile.js?v=26.10.10"></script>
     <script src="js/overcriticGamification.js?v=26.10.10"></script>
     <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
@@ -1309,6 +1311,16 @@
         .kanban-empty-dropzone p {
             font-size: 0.78rem;
             margin: 0;
+        }
+
+        /* ─── CONTROLE DE SCROLL LOCK PARA MODAIS ─── */
+        html.og-modal-scroll-lock,
+        body.og-modal-scroll-lock,
+        html.modal-open-scroll-locked,
+        body.modal-open-scroll-locked {
+            overflow: hidden !important;
+            height: 100% !important;
+            touch-action: none;
         }
 
         /* ─── MODAL DE RESPOSTA DO ADMIN ─── */
@@ -2614,6 +2626,13 @@
 
             if (modal) {
                 modal.style.display = 'flex';
+                document.documentElement.classList.add('og-modal-scroll-lock');
+                document.body.classList.add('og-modal-scroll-lock');
+                document.documentElement.classList.add('modal-open-scroll-locked');
+                document.body.classList.add('modal-open-scroll-locked');
+                if (typeof window.bloquearScrollFundo === 'function') {
+                    window.bloquearScrollFundo();
+                }
                 setTimeout(() => textarea && textarea.focus(), 60);
             }
         }
@@ -2622,7 +2641,24 @@
             const modal = document.getElementById('modalAdminReply');
             if (modal) modal.style.display = 'none';
             currentReplyingTicketId = null;
+            document.documentElement.classList.remove('og-modal-scroll-lock');
+            document.body.classList.remove('og-modal-scroll-lock');
+            document.documentElement.classList.remove('modal-open-scroll-locked');
+            document.body.classList.remove('modal-open-scroll-locked');
+            if (typeof window.liberarScrollFundo === 'function') {
+                window.liberarScrollFundo(true);
+            }
         }
+
+        // Fecha modal ao pressionar ESC e libera scroll
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modalAdminReply');
+                if (modal && modal.style.display === 'flex') {
+                    fecharModalRespostaAdmin();
+                }
+            }
+        });
 
         function fecharModalRespostaBackdrop(e) {
             if (e.target.id === 'modalAdminReply') {

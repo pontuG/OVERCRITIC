@@ -36,6 +36,8 @@
     <!-- Conexão com Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js?v=26.10.11"></script>
+    <script src="js/overcriticAudio.js?v=26.10.10"></script>
+    <script src="js/overcriticBacklogOracle.js?v=26.10.10"></script>
     <script src="js/gamerProfile.js?v=26.10.10"></script>
     <script src="js/overcriticGamification.js?v=26.10.10"></script>
     <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
@@ -903,105 +905,157 @@
 
         .platina-footer {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
             border-top: 1px solid var(--glass-border);
             padding-top: 12px;
             margin-top: auto;
         }
 
-        .btn-applause {
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: var(--accent-gold);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            cursor: pointer;
+        .platina-footer-primary {
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-applause {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            color: var(--accent-gold);
+            padding: 7px 13px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            user-select: none;
+        }
+
+        .btn-applause .applause-icon {
+            font-size: 1rem;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-applause:hover .applause-icon {
+            transform: scale(1.22) rotate(-8deg);
+        }
+
+        .btn-applause .applause-label {
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-applause .applause-badge {
+            background: rgba(255, 215, 0, 0.18);
+            color: var(--accent-gold);
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            min-width: 18px;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            line-height: 1.2;
         }
 
         .btn-applause:hover {
-            background: var(--accent-gold);
-            color: #000;
-            transform: scale(1.05);
-        }
-
-        .btn-applause.active {
-            background: var(--accent-gold);
-            color: #07090f;
+            background: rgba(255, 215, 0, 0.18);
             border-color: var(--accent-gold);
-            box-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
-        }
-
-        .btn-applause.active:hover {
-            background: rgba(255, 215, 0, 0.85);
-            color: #07090f;
-            transform: scale(1.05);
-        }
-
-        body.light-mode .btn-applause {
-            background: rgba(179, 134, 0, 0.08);
-            border-color: rgba(179, 134, 0, 0.3);
-            color: var(--accent-gold);
-        }
-
-        body.light-mode .btn-applause:hover {
-            background: var(--accent-gold);
-            color: #ffffff;
-        }
-
-        body.light-mode .btn-applause.active {
-            background: var(--accent-gold);
-            color: #ffffff;
-            border-color: var(--accent-gold);
-            box-shadow: 0 2px 10px rgba(179, 134, 0, 0.35);
-        }
-
-        .btn-edit-mine {
-            background: rgba(0, 240, 255, 0.08);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            color: var(--accent-cyan);
-            cursor: pointer;
-            font-size: 0.78rem;
-            font-weight: 700;
-            padding: 5px 10px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-edit-mine:hover {
-            background: rgba(0, 240, 255, 0.2);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+            box-shadow: 0 0 14px rgba(255, 215, 0, 0.3);
             transform: translateY(-1px);
         }
 
-        .btn-delete-mine {
-            background: rgba(255, 51, 102, 0.08);
-            border: 1px solid rgba(255, 51, 102, 0.25);
-            color: var(--danger-color);
-            cursor: pointer;
-            font-size: 0.78rem;
-            font-weight: 700;
-            padding: 5px 9px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+        .btn-applause.active {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #07090f;
+            border-color: #ffe066;
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
         }
 
-        .btn-delete-mine:hover {
+        .btn-applause.active .applause-badge {
+            background: rgba(0, 0, 0, 0.28);
+            color: #ffffff;
+            border-color: transparent;
+        }
+
+        .btn-card-trophies {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            color: var(--accent-cyan);
+            padding: 7px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            user-select: none;
+        }
+
+        .btn-card-trophies:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .platina-footer-manage {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-card-manage, .btn-edit-mine, .btn-delete-mine {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-card-edit, .btn-edit-mine {
+            background: rgba(0, 240, 255, 0.06);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            color: var(--accent-cyan);
+        }
+
+        .btn-card-edit:hover, .btn-edit-mine:hover {
+            background: rgba(0, 240, 255, 0.18);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-card-delete, .btn-delete-mine {
+            background: rgba(255, 51, 102, 0.06);
+            border: 1px solid rgba(255, 51, 102, 0.25);
+            color: #fca5a5;
+        }
+
+        .btn-card-delete:hover, .btn-delete-mine:hover {
             background: rgba(255, 51, 102, 0.2);
             border-color: var(--danger-color);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.35);
             transform: translateY(-1px);
         }
 
@@ -1027,15 +1081,72 @@
             box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
         }
 
-        body.light-mode .btn-edit-mine {
-            background: rgba(0, 150, 214, 0.1);
-            border-color: rgba(0, 150, 214, 0.4);
-            color: #007799;
+        /* Suporte Slate Petrol - Light Mode */
+        body.light-mode .platina-footer-manage {
+            border-top: 1px dashed rgba(0, 0, 0, 0.1);
         }
 
+        body.light-mode .btn-applause {
+            background: rgba(217, 119, 6, 0.08);
+            border-color: rgba(217, 119, 6, 0.35);
+            color: #b45309;
+        }
+
+        body.light-mode .btn-applause .applause-badge {
+            background: rgba(217, 119, 6, 0.15);
+            color: #92400e;
+            border-color: rgba(217, 119, 6, 0.3);
+        }
+
+        body.light-mode .btn-applause:hover {
+            background: rgba(217, 119, 6, 0.16);
+            border-color: #b45309;
+            box-shadow: 0 2px 10px rgba(217, 119, 6, 0.25);
+        }
+
+        body.light-mode .btn-applause.active {
+            background: #d97706;
+            color: #ffffff;
+            border-color: #b45309;
+            box-shadow: 0 2px 12px rgba(217, 119, 6, 0.35);
+        }
+
+        body.light-mode .btn-card-trophies {
+            background: rgba(2, 132, 199, 0.08);
+            border-color: rgba(2, 132, 199, 0.35);
+            color: #0284c7;
+        }
+
+        body.light-mode .btn-card-trophies:hover {
+            background: rgba(2, 132, 199, 0.18);
+            border-color: #0284c7;
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.25);
+        }
+
+        body.light-mode .btn-card-edit,
+        body.light-mode .btn-edit-mine {
+            background: rgba(2, 132, 199, 0.08);
+            border-color: rgba(2, 132, 199, 0.3);
+            color: #0369a1;
+        }
+
+        body.light-mode .btn-card-edit:hover,
         body.light-mode .btn-edit-mine:hover {
-            background: rgba(0, 150, 214, 0.22);
-            color: #005577;
+            background: rgba(2, 132, 199, 0.18);
+            color: #0284c7;
+        }
+
+        body.light-mode .btn-card-delete,
+        body.light-mode .btn-delete-mine {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #dc2626;
+        }
+
+        body.light-mode .btn-card-delete:hover,
+        body.light-mode .btn-delete-mine:hover {
+            background: rgba(239, 68, 68, 0.18);
+            color: #b91c1c;
         }
 
         body.light-mode .btn-cancelar-edicao {
@@ -1331,12 +1442,72 @@
             transition: all 0.3s ease;
         }
 
+        .form-select {
+            color-scheme: dark;
+            background-color: #0b111e;
+            cursor: pointer;
+        }
+
+        .form-select option {
+            background-color: #0d1424 !important;
+            color: #f1f5f9 !important;
+            padding: 12px 16px;
+            font-size: 0.92rem;
+        }
+
+        .form-select option:hover,
+        .form-select option:checked {
+            background-color: #1a253c !important;
+            color: var(--accent-cyan) !important;
+        }
+
         body.light-mode .form-input, 
         body.light-mode .form-select, 
         body.light-mode .form-textarea {
             background: rgba(255, 255, 255, 0.8);
             border-color: rgba(0, 0, 0, 0.15);
             color: #0e121a;
+        }
+
+        body.light-mode .form-select {
+            color-scheme: light;
+            background-color: #e2eaf0;
+            color: #05101a;
+        }
+
+        body.light-mode .form-select option {
+            background-color: #e2eaf0 !important;
+            color: #05101a !important;
+        }
+
+        body.light-mode .form-select option:hover,
+        body.light-mode .form-select option:checked {
+            background-color: #cbd5e1 !important;
+            color: #0891b2 !important;
+        }
+
+        .form-input.input-locked,
+        .form-input[readonly] {
+            background: rgba(0, 240, 255, 0.05) !important;
+            border-color: rgba(0, 240, 255, 0.4) !important;
+            color: var(--accent-cyan) !important;
+            font-weight: 700;
+            cursor: not-allowed;
+            padding-right: 125px;
+        }
+
+        body.light-mode .form-input.input-locked,
+        body.light-mode .form-input[readonly] {
+            background: rgba(8, 145, 178, 0.08) !important;
+            border-color: rgba(8, 145, 178, 0.45) !important;
+            color: #0891b2 !important;
+        }
+
+        #btnDestravarTitulo:hover {
+            background: rgba(0, 240, 255, 0.25) !important;
+            border-color: var(--accent-cyan) !important;
+            color: #ffffff !important;
+            transform: scale(1.03);
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -1932,6 +2103,403 @@
             font-weight: 600;
         }
 
+        /* ═══════════════════════════════════════════════════════════
+           4.1 MEDIDOR DE DIFICULDADE DE PLATINA (HARDCORE HUNTER METER)
+        ═══════════════════════════════════════════════════════════ */
+        .platina-difficulty-meter-card {
+            background: linear-gradient(135deg, rgba(13, 18, 30, 0.95) 0%, rgba(7, 10, 18, 0.98) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            border-radius: 18px;
+            padding: 22px 24px;
+            margin-bottom: 22px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.12);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeIn 0.35s ease;
+        }
+
+        body.light-mode .platina-difficulty-meter-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 245, 250, 0.95) 100%);
+            border-color: rgba(14, 116, 144, 0.4);
+            box-shadow: 0 10px 30px rgba(5, 16, 26, 0.15);
+        }
+
+        .meter-top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+        }
+
+        .meter-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meter-title-wrap h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            letter-spacing: 0.3px;
+        }
+
+        .meter-verified-tag {
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            color: var(--accent-cyan);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Grade Bento com as 4 estatísticas centrais */
+        .meter-bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+        }
+
+        .meter-bento-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            transition: all 0.25s ease;
+        }
+
+        body.light-mode .meter-bento-item {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .meter-bento-item:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 240, 255, 0.15);
+        }
+
+        .meter-bento-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meter-bento-val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meter-bento-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        /* Barra Termômetro 1 a 10 de Dificuldade */
+        .meter-bar-track {
+            height: 9px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 4px;
+            position: relative;
+        }
+
+        .meter-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .meter-bar-fill.diff-1-3 { background: linear-gradient(90deg, #22c55e, #10b981); box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+        .meter-bar-fill.diff-4-6 { background: linear-gradient(90deg, #eab308, #f59e0b); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+        .meter-bar-fill.diff-7-8 { background: linear-gradient(90deg, #f97316, #ef4444); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+        .meter-bar-fill.diff-9-10 { background: linear-gradient(90deg, #ec4899, #9d4edd, #00f0ff); box-shadow: 0 0 12px rgba(157, 78, 221, 0.6); }
+
+        /* Votação Comunitária Interativa */
+        .meter-vote-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+            font-size: 0.8rem;
+        }
+
+        body.light-mode .meter-vote-strip {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .meter-stars-selector {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meter-vote-num-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .meter-vote-num-btn:hover, .meter-vote-num-btn.active {
+            background: var(--accent-gold);
+            color: #07090f;
+            border-color: var(--accent-gold);
+            transform: scale(1.1);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           4.2 "DICA DE OURO" NOS TROFÉUS (GOLDEN TIPS COMMUNITY SUITE)
+        ═══════════════════════════════════════════════════════════ */
+        .trophy-item-card {
+            align-items: flex-start !important;
+        }
+
+        .trophy-golden-tip-box {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.07) 0%, rgba(255, 136, 0, 0.05) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.8rem;
+            position: relative;
+            box-shadow: 0 4px 14px rgba(255, 215, 0, 0.08);
+            transition: all 0.25s ease;
+        }
+
+        body.light-mode .trophy-golden-tip-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 136, 0, 0.08) 100%);
+            border-color: rgba(180, 83, 9, 0.45);
+        }
+
+        .tip-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tip-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #ffd700, #ff8800);
+            color: #07090f;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+        }
+
+        .tip-tag-pill {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.66rem;
+            font-weight: 700;
+        }
+
+        .tip-tag-pill.missable {
+            background: rgba(239, 68, 68, 0.18);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .tip-tag-pill.boss {
+            background: rgba(168, 85, 247, 0.18);
+            border-color: rgba(168, 85, 247, 0.4);
+            color: #d8b4fe;
+        }
+
+        .tip-author {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .tip-content-text {
+            color: #f1f5f9;
+            line-height: 1.45;
+            font-weight: 500;
+            margin: 2px 0;
+        }
+
+        body.light-mode .tip-content-text {
+            color: #0f172a;
+        }
+
+        .tip-actions-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 4px;
+            padding-top: 6px;
+            border-top: 1px dashed rgba(255, 215, 0, 0.2);
+        }
+
+        .tip-btn-like {
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: var(--accent-gold);
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .tip-btn-like:hover, .tip-btn-like.liked {
+            background: var(--accent-gold);
+            color: #07090f;
+            transform: scale(1.04);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
+        .tip-btn-add {
+            background: transparent;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            color: var(--text-muted);
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tip-btn-add:hover {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.08);
+        }
+
+        .tip-composer-form {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        body.light-mode .tip-composer-form {
+            background: #ffffff;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .tip-composer-form textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: var(--text-main);
+            font-size: 0.78rem;
+            resize: vertical;
+            min-height: 50px;
+            font-family: inherit;
+        }
+
+        body.light-mode .tip-composer-form textarea {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #cbd5e1;
+        }
+
+        .tip-composer-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tip-composer-btn-submit {
+            background: linear-gradient(135deg, #ffd700, #ff8800);
+            border: none;
+            color: #07090f;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.74rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .tip-composer-btn-submit:hover {
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+            transform: scale(1.02);
+        }
+
+        .tip-composer-btn-cancel {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            cursor: pointer;
+            padding: 6px 10px;
+        }
+        .tip-composer-btn-cancel:hover {
+            color: #ff6b6b;
+        }
+
         /* ══════ BARRA MOBILE ══════ */
         .mobile-bottom-nav {
             display: none;
@@ -2327,8 +2895,19 @@
 
                         <!-- TÍTULO DO JOGO -->
                         <div class="form-group">
-                            <label class="form-label" for="platinaTitle">Nome do Jogo *</label>
-                            <input type="text" id="platinaTitle" class="form-input" placeholder="Ex: Elden Ring" required>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <label class="form-label" for="platinaTitle" style="margin-bottom: 0;">Nome do Jogo *</label>
+                                <span id="platinaTitleStatusBadge" class="diff-chip-status" style="display: none;">🔒 Jogo Verificado</span>
+                            </div>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="text" id="platinaTitle" class="form-input" style="width: 100%;" placeholder="Ex: Elden Ring" required>
+                                <button type="button" id="btnDestravarTitulo" onclick="destravarTituloManual()" title="Desbloquear para alterar nome manualmente" style="display: none; position: absolute; right: 8px; background: rgba(0, 240, 255, 0.12); border: 1px solid rgba(0, 240, 255, 0.35); color: var(--accent-cyan); border-radius: 8px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+                                    🔓 Trocar / Editar
+                                </button>
+                            </div>
+                            <div id="platinaTitleVerifiedHint" style="display: none; font-size: 0.72rem; color: var(--accent-cyan); margin-top: 5px; font-weight: 600;">
+                                🔒 Título oficial fixado para garantir integridade do catálogo e conquistas.
+                            </div>
                         </div>
 
                         <!-- PLATAFORMA -->
@@ -2379,6 +2958,26 @@
                         <div class="form-group">
                             <label class="form-label" for="platinaHours">Horas Investidas na Platina</label>
                             <input type="number" id="platinaHours" class="form-input" placeholder="Ex: 85" min="1" max="9999" value="60">
+                        </div>
+
+                        <!-- PLAYTHROUGHS NECESSÁRIOS (GUIA HARDCORE) -->
+                        <div class="form-group">
+                            <label class="form-label" for="platinaPlaythroughs">Playthroughs / Zeradas Necessárias</label>
+                            <select id="platinaPlaythroughs" class="form-select">
+                                <option value="1 Playthrough">🔄 1 Playthrough (Platina Direta)</option>
+                                <option value="2 Playthroughs necessários" selected>🔄 2 Playthroughs necessários (NG+ / Finais)</option>
+                                <option value="3+ Playthroughs">🔄 3+ Playthroughs (Múltiplas Rotas)</option>
+                            </select>
+                        </div>
+
+                        <!-- TROFÉUS PERDÍVEIS (MISSABLES) -->
+                        <div class="form-group">
+                            <label class="form-label" for="platinaMissables">Troféus Perdíveis (Missables)</label>
+                            <select id="platinaMissables" class="form-select">
+                                <option value="0 Perdíveis (Sem Estresse)">✓ 0 Perdíveis (Sem Estresse)</option>
+                                <option value="Poucos Perdíveis (1 a 3)" selected>⚠️ Poucos Perdíveis (1 a 3)</option>
+                                <option value="Vários Perdíveis (4+)">⚠️ Vários Perdíveis (4+ Requer Guia)</option>
+                            </select>
                         </div>
 
                         <!-- CONTROLE DE TROFÉUS (PROGRESSO EM QUANTIDADE EXATA DE CONQUISTAS) -->
@@ -2494,6 +3093,11 @@
                 </button>
             </div>
 
+            <!-- 4.1 MEDIDOR DE DIFICULDADE DE PLATINA & GUIA DO CAÇADOR (HARDCORE METER) -->
+            <div id="platinaDifficultyMeterCard" class="platina-difficulty-meter-card" style="display: none;">
+                <!-- Preenchido dinamicamente via JavaScript -->
+            </div>
+
             <!-- Barra de Filtros e Busca Rápida de Troféus -->
             <div id="trophyFilterBar" style="display: none; margin-bottom: 20px; background: var(--glass-bg); padding: 14px 18px; border-radius: 14px; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;" id="trophyTypeChips">
@@ -2502,6 +3106,8 @@
                     <button class="diff-chip" id="chipTrophyGold" onclick="filtrarTrofeusPorTipo('gold')" style="border-color: var(--accent-gold); color: var(--accent-gold);">🥇 Ouro (<span id="countTrophyGold">0</span>)</button>
                     <button class="diff-chip" id="chipTrophySilver" onclick="filtrarTrofeusPorTipo('silver')" style="border-color: var(--accent-silver); color: var(--accent-silver);">🥈 Prata (<span id="countTrophySilver">0</span>)</button>
                     <button class="diff-chip" id="chipTrophyBronze" onclick="filtrarTrofeusPorTipo('bronze')" style="border-color: var(--accent-bronze); color: var(--accent-bronze);">🥉 Bronze (<span id="countTrophyBronze">0</span>)</button>
+                    <button class="diff-chip" id="chipTrophyDicas" onclick="filtrarTrofeusPorTipo('dicas')" style="border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(255, 215, 0, 0.08);">💡 Com Dica de Ouro (<span id="countTrophyDicas">0</span>)</button>
+                    <button class="diff-chip" id="chipTrophyMissable" onclick="filtrarTrofeusPorTipo('missable')" style="border-color: #ef4444; color: #fca5a5; background: rgba(239, 68, 68, 0.08);">⚠️ Perdíveis (<span id="countTrophyMissable">0</span>)</button>
                 </div>
                 <div style="flex: 1; max-width: 320px; min-width: 200px;">
                     <input type="text" id="trophySearchFilter" class="form-input" style="padding: 7px 12px; font-size: 0.82rem;" placeholder="🔍 Filtrar troféu por nome ou objetivo..." oninput="filtrarTrofeusPorTexto()">
@@ -3257,6 +3863,8 @@
                 if (jogo.difficultyCategory === 'dificil') badgeDiffClass = 'diff-badge-dificil';
                 if (jogo.difficultyCategory === 'lendaria') badgeDiffClass = 'diff-badge-lendaria';
 
+                const dadosHard = typeof obterDadosHardcoreJogo === 'function' ? obterDadosHardcoreJogo(jogo.title, jogo.steamAppID) : null;
+
                 return `
                     <div class="podium-card ${cardClass}">
                         <div class="podium-rank-badge ${badgeClass}">${rankText}</div>
@@ -3269,10 +3877,16 @@
                                 <span>🏆 <strong>${jogo.totalPlatinums}</strong> ${jogo.totalPlatinums === 1 ? 'platina' : 'platinas'}</span>
                                 <span>⏱️ ${jogo.estimatedHours}</span>
                             </div>
-                            <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                                 <span class="diff-badge ${badgeDiffClass}">${jogo.difficultyLabel}</span>
                                 <span style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700;">${jogo.completionRate} conclusão</span>
                             </div>
+                            ${dadosHard ? `
+                                <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <span>🔄 ${dadosHard.playthroughs}</span>
+                                    <span style="color: ${dadosHard.missables.includes('0') ? 'var(--success-color)' : '#fca5a5'};">${dadosHard.missables}</span>
+                                </div>
+                            ` : ''}
                             <p style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-bottom: 14px; line-height: 1.4;">
                                 "${jogo.notes}"
                             </p>
@@ -3281,8 +3895,8 @@
                                     <span>🏆</span> Platinei Também!
                                 </button>
                                 ${jogo.steamAppID ? `
-                                    <button class="btn-applause" style="background: rgba(0, 240, 255, 0.1); border-color: rgba(0, 240, 255, 0.3); color: var(--accent-cyan);" onclick="explorarTrofeusDoJogoDireto('${jogo.steamAppID}', '${jogo.title}')">
-                                        🔍 Troféus
+                                    <button class="btn-card-trophies" onclick="explorarTrofeusDoJogoDireto('${jogo.steamAppID}', '${jogo.title}')" title="Ver lista de troféus">
+                                        <span>🏆</span> Troféus
                                     </button>
                                 ` : ''}
                             </div>
@@ -3298,6 +3912,9 @@
                 if (jogo.difficultyCategory === 'dificil') badgeDiffClass = 'diff-badge-dificil';
                 if (jogo.difficultyCategory === 'lendaria') badgeDiffClass = 'diff-badge-lendaria';
 
+                const dadosHardTabela = typeof obterDadosHardcoreJogo === 'function' ? obterDadosHardcoreJogo(jogo.title, jogo.steamAppID) : null;
+                const playthroughsResumo = dadosHardTabela ? ` • 🔄 ${dadosHardTabela.playthroughs.split(' ')[0]} ${dadosHardTabela.playthroughs.split(' ')[1] || 'Playthroughs'}` : '';
+
                 return `
                     <tr>
                         <td class="rank-pos">#${jogo.rank}</td>
@@ -3306,7 +3923,7 @@
                                 <img src="${jogo.cover}" alt="cover" class="rank-game-cover" onerror="tratarErroCapaPlatina(this, '${jogo.title}')">
                                 <div>
                                     <div class="rank-game-name">${jogo.title}</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted);">${jogo.platform}</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted);">${jogo.platform}${playthroughsResumo}</div>
                                 </div>
                             </div>
                         </td>
@@ -3614,37 +4231,45 @@
                             <span class="meta-pill">⏱️ ${item.hours || 0}h</span>
                             <span class="diff-badge ${badgeDiffClass}">${item.difficulty || 'Moderada'}</span>
                             <span class="meta-pill">🎯 ${item.trophiesCount || 'Troféus'}</span>
+                            ${item.playthroughs ? `<span class="meta-pill" title="Playthroughs necessários">🔄 ${item.playthroughs}</span>` : ''}
+                            ${item.missables && !item.missables.includes('0') ? `<span class="meta-pill" style="border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;" title="Troféus Perdíveis">⚠️ ${item.missables}</span>` : ''}
                         </div>
 
                         ${item.notes ? `<div class="platina-comment">"${item.notes}"</div>` : ''}
 
                         <div class="platina-footer">
-                            <button class="btn-applause ${hasApplauded ? 'active' : ''}" 
-                                    data-applause-btn="${item.id}" 
-                                    onclick="darAplausos('${item.id}')"
-                                    title="${hasApplauded ? 'Você parabenizou! Clique para remover' : 'Parabenizar conquista'}">
-                                <span>👏</span> Parabéns! (<strong id="applause_${item.id}" data-applause-count="${item.id}">${item.applause || 0}</strong>)
-                            </button>
+                            <div class="platina-footer-primary">
+                                <button class="btn-applause ${hasApplauded ? 'active' : ''}" 
+                                        data-applause-btn="${item.id}" 
+                                        onclick="darAplausos('${item.id}')"
+                                        title="${hasApplauded ? 'Você parabenizou! Clique para remover' : 'Parabenizar conquista'}">
+                                    <span class="applause-icon">👏</span>
+                                    <span class="applause-label">Parabéns</span>
+                                    <span class="applause-badge" id="applause_${item.id}" data-applause-count="${item.id}">${item.applause || 0}</span>
+                                </button>
 
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                                 ${item.steamAppID ? `
-                                    <button class="btn-applause" style="background: rgba(0, 240, 255, 0.1); border-color: rgba(0, 240, 255, 0.3); color: var(--accent-cyan);" onclick="explorarTrofeusDoJogoDireto('${item.steamAppID}', '${item.title.replace(/'/g, "\\'")}')">
-                                        🔍 Troféus
-                                    </button>
-                                ` : ''}
-
-                                ${canEdit ? `
-                                    <button class="btn-edit-mine" onclick="iniciarEdicaoPlatina('${item.id}')" title="Editar informações da platina">
-                                        ✏️ Editar
-                                    </button>
-                                ` : ''}
-
-                                ${canDelete ? `
-                                    <button class="btn-delete-mine" onclick="excluirPlatina('${item.id}')" title="${isAdmin && !isOwner ? 'Moderar/Excluir (Admin)' : 'Excluir platina'}">
-                                        🗑️ ${isAdmin && !isOwner ? '<span style="font-size:0.75rem; color:#ffd700; font-weight:bold;">Admin</span>' : ''}
+                                    <button class="btn-card-trophies" onclick="explorarTrofeusDoJogoDireto('${item.steamAppID}', '${item.title.replace(/'/g, "\\'")}')" title="Explorar lista de troféus e guias da comunidade">
+                                        <span>🏆</span> Troféus
                                     </button>
                                 ` : ''}
                             </div>
+
+                            ${(canEdit || canDelete) ? `
+                                <div class="platina-footer-manage">
+                                    ${canEdit ? `
+                                        <button class="btn-card-manage btn-card-edit" onclick="iniciarEdicaoPlatina('${item.id}')" title="Editar informações da platina">
+                                            <span>✏️</span> Editar
+                                        </button>
+                                    ` : ''}
+
+                                    ${canDelete ? `
+                                        <button class="btn-card-manage btn-card-delete" onclick="excluirPlatina('${item.id}')" title="${isAdmin && !isOwner ? 'Moderar/Excluir (Admin)' : 'Excluir platina'}">
+                                            <span>🗑️</span> ${isAdmin && !isOwner ? 'Moderar' : 'Excluir'}
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -3805,11 +4430,16 @@
             const totalInput = document.getElementById('platinaTotalTrophies');
             const unlockedInput = document.getElementById('platinaUnlockedTrophies');
 
-            if (titleInput) titleInput.value = itemNome;
+            if (titleInput) travarTituloComoVerificado(itemNome);
             if (platformSelect && item.platform) platformSelect.value = item.platform;
             if (coverInput) coverInput.value = item.cover || item.cover_url || '';
             if (hoursInput) hoursInput.value = item.hours || item.horas || 0;
             if (notesInput) notesInput.value = item.notes || item.relato || '';
+
+            const playthroughsSelect = document.getElementById('platinaPlaythroughs');
+            const missablesSelect = document.getElementById('platinaMissables');
+            if (playthroughsSelect && item.playthroughs) playthroughsSelect.value = item.playthroughs;
+            if (missablesSelect && item.missables) missablesSelect.value = item.missables;
 
             // Troféus e Dificuldade
             const totalOficial = item.totalTrophies || (typeof obterTotalOficialJogo === 'function' ? obterTotalOficialJogo(itemNome, item.steamAppID) : null) || 40;
@@ -3883,6 +4513,7 @@
             if (btnCancel) btnCancel.style.display = 'none';
 
             document.getElementById('platinaRegisterForm')?.reset();
+            destravarTituloManual();
             const previewBox = document.getElementById('gamePreviewBox');
             if (previewBox) previewBox.style.display = 'none';
 
@@ -3890,6 +4521,10 @@
             const inputUnlocked = document.getElementById('platinaUnlockedTrophies');
             if (inputTotal) inputTotal.value = 50;
             if (inputUnlocked) inputUnlocked.value = 50;
+            const playthroughsSelect = document.getElementById('platinaPlaythroughs');
+            const missablesSelect = document.getElementById('platinaMissables');
+            if (playthroughsSelect) playthroughsSelect.value = '2 Playthroughs necessários';
+            if (missablesSelect) missablesSelect.value = 'Poucos Perdíveis (1 a 3)';
             if (typeof aplicarDificuldadeOficialFormulario === 'function') {
                 aplicarDificuldadeOficialFormulario('', null);
             }
@@ -4263,10 +4898,51 @@
             }
         }
 
+        /* ══════════════════════════════════════════════════════════════════════════
+           BLOQUEIO E DESBLOQUEIO INTELIGENTE DO TÍTULO DO JOGO (ANTI-MODIFICAÇÃO)
+        ══════════════════════════════════════════════════════════════════════════ */
+        function travarTituloComoVerificado(titulo) {
+            const inputTitle = document.getElementById('platinaTitle');
+            const badge = document.getElementById('platinaTitleStatusBadge');
+            const btnDestravar = document.getElementById('btnDestravarTitulo');
+            const hint = document.getElementById('platinaTitleVerifiedHint');
+
+            if (inputTitle) {
+                inputTitle.value = titulo;
+                inputTitle.readOnly = true;
+                inputTitle.classList.add('input-locked');
+            }
+            if (badge) badge.style.display = 'inline-block';
+            if (btnDestravar) btnDestravar.style.display = 'inline-flex';
+            if (hint) hint.style.display = 'block';
+        }
+        window.travarTituloComoVerificado = travarTituloComoVerificado;
+
+        function destravarTituloManual(silencioso = false) {
+            const inputTitle = document.getElementById('platinaTitle');
+            const badge = document.getElementById('platinaTitleStatusBadge');
+            const btnDestravar = document.getElementById('btnDestravarTitulo');
+            const hint = document.getElementById('platinaTitleVerifiedHint');
+
+            if (inputTitle) {
+                inputTitle.readOnly = false;
+                inputTitle.classList.remove('input-locked');
+                if (!silencioso) inputTitle.focus();
+            }
+            if (badge) badge.style.display = 'none';
+            if (btnDestravar) btnDestravar.style.display = 'none';
+            if (hint) hint.style.display = 'none';
+
+            if (!silencioso) {
+                mostrarToast('Título liberado para digitação ou alteração manual.', '🔓');
+            }
+        }
+        window.destravarTituloManual = destravarTituloManual;
+
         function preencherCamposDoJogo(game) {
             dropdownSuggestions.style.display = 'none';
             inputSearchApi.value = game.external;
-            document.getElementById('platinaTitle').value = game.external;
+            travarTituloComoVerificado(game.external);
 
             let cover = game.thumb;
             if (game.steamAppID) {
@@ -4318,7 +4994,7 @@
         function puxarParaCadastroDireto(titulo, capa, dificuldade) {
             alternarAba('cadastrar');
             const capaOficial = resolverCapaOficialJogo(titulo, capa);
-            document.getElementById('platinaTitle').value = titulo;
+            travarTituloComoVerificado(titulo);
             document.getElementById('platinaCoverUrl').value = capaOficial;
             document.getElementById('gameSearchApiInput').value = titulo;
 
@@ -4388,6 +5064,9 @@
             const editingId = document.getElementById('editingPlatinaId')?.value;
             const currentUser = obterUsuarioAtual();
 
+            const playthroughs = document.getElementById('platinaPlaythroughs')?.value || '1 Playthrough';
+            const missables = document.getElementById('platinaMissables')?.value || '0 Perdíveis (Sem Estresse)';
+
             let feed = obterFeedSalvo();
             let original = null;
             if (editingId) {
@@ -4408,6 +5087,8 @@
                 difficulty,
                 difficultyCategory: diffCat,
                 hours,
+                playthroughs,
+                missables,
                 trophiesCount,
                 notes,
                 user: original?.user || original?.usuario || currentUser,
@@ -5148,6 +5829,45 @@
                     badgeBox.style.display = 'flex';
                 }
             }
+
+            // Sincronização inteligente dos campos Playthroughs e Missables com o catálogo oficial
+            if (typeof obterDadosHardcoreJogo === 'function' && titulo) {
+                const dadosHard = obterDadosHardcoreJogo(titulo, steamAppID);
+                if (dadosHard) {
+                    const playSelect = document.getElementById('platinaPlaythroughs');
+                    const missSelect = document.getElementById('platinaMissables');
+
+                    if (playSelect && dadosHard.playthroughs) {
+                        const pHard = dadosHard.playthroughs.toLowerCase();
+                        for (let i = 0; i < playSelect.options.length; i++) {
+                            const val = playSelect.options[i].value.toLowerCase();
+                            if ((pHard.includes('1') && val.includes('1')) ||
+                                (pHard.includes('2') && val.includes('2')) ||
+                                ((pHard.includes('3') || pHard.includes('múltiplas') || pHard.includes('runs')) && val.includes('3+'))) {
+                                playSelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (missSelect && dadosHard.missables) {
+                        const mHard = dadosHard.missables.toLowerCase();
+                        for (let i = 0; i < missSelect.options.length; i++) {
+                            const val = missSelect.options[i].value.toLowerCase();
+                            if ((mHard.includes('0') || mHard.includes('livre') || mHard.includes('nenhum')) && val.includes('0')) {
+                                missSelect.selectedIndex = i;
+                                break;
+                            } else if ((mHard.includes('1 a 3') || mHard.includes('poucos') || mHard.includes('3 perdíveis')) && val.includes('poucos')) {
+                                missSelect.selectedIndex = i;
+                                break;
+                            } else if ((mHard.includes('vários') || mHard.includes('dezenas') || mHard.includes('4+') || mHard.includes('múltiplos')) && val.includes('vários')) {
+                                missSelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /* ══════════════════════════════════════════════════════════════════════════
@@ -5612,6 +6332,901 @@
             }
         }
 
+        /* ══════════════════════════════════════════════════════════════════════════
+           4.1 GUIA HARDCORE & MEDIDOR DE DIFICULDADE DE PLATINA (COMUNITÁRIO)
+        ══════════════════════════════════════════════════════════════════════════ */
+        const GUIA_HARDCORE_JOGOS = {
+            'elden ring': {
+                dificuldadeBase: 8.5,
+                rotulo: '8.5/10 - Difícil 💀',
+                categoria: 'dificil',
+                tempoEstimado: '~80 - 100 horas',
+                tempoSub: 'Dedicação intensa aos 42 troféus e exploração das Terras Intermédias',
+                playthroughs: '2 Playthroughs necessários',
+                playthroughsSub: 'Ou 1 Playthrough utilizando backup de save antes do chefe final',
+                missables: '⚠️ 3 Perdíveis Críticos',
+                missablesSub: 'Lança de Gransax em Leyndell e rotas de finais alternativos',
+                dicaHardcore: 'Pegue a Lança de Gransax fincada no dragão de pedra de Leyndell antes de Farum Azula, senão a capital vira cinzas e a arma fica inacessível!'
+            },
+            'sekiro: shadows die twice': {
+                dificuldadeBase: 9.5,
+                rotulo: '9.5/10 - Insana / Lendária 👑',
+                categoria: 'lendaria',
+                tempoEstimado: '~70 - 90 horas',
+                tempoSub: 'Exige maestria absoluta nos parries e memorização de padrões',
+                playthroughs: '4 Playthroughs necessários',
+                playthroughsSub: 'Exige ver os 4 finais diferentes e todos os chefes (ou backup de save)',
+                missables: '⚠️ 4 Perdíveis de Finais',
+                missablesSub: 'A escolha da rota Shura bloqueia o Palácio da Fonte e múltiplos chefes',
+                dicaHardcore: 'Domine o Contra-Ataque Mikiri contra estocadas e use o Guarda-chuva de Ferro Magnetizado para aparar ataques sem sofrer dano de postura.'
+            },
+            'sekiro': {
+                dificuldadeBase: 9.5,
+                rotulo: '9.5/10 - Insana / Lendária 👑',
+                categoria: 'lendaria',
+                tempoEstimado: '~70 - 90 horas',
+                tempoSub: 'Exige maestria absoluta nos parries e reflexos rápidos',
+                playthroughs: '4 Playthroughs necessários',
+                playthroughsSub: 'Exige ver os 4 finais diferentes e todos os chefes',
+                missables: '⚠️ 4 Perdíveis de Finais',
+                missablesSub: 'Rota Shura impede acesso ao terço final da campanha',
+                dicaHardcore: 'Derrote todos os chefes decapitados com Confete Divino e use o apito dos dedos nas bestas do Palácio.'
+            },
+            'black myth: wukong': {
+                dificuldadeBase: 8.0,
+                rotulo: '8.0/10 - Difícil 💀',
+                categoria: 'dificil',
+                tempoEstimado: '~65 - 85 horas',
+                tempoSub: '81 Conquistas oficiais com exploração profunda da mitologia chinesa',
+                playthroughs: '2 Playthroughs necessários (NG+)',
+                playthroughsSub: 'Certas armaduras celestiais e curiosidades só podem ser forjadas no Novo Jogo+',
+                missables: '⚠️ 4 Perdíveis de Monstros e Curiosidades',
+                missablesSub: 'Espíritos e missões secundárias dos Capítulos 1 a 4 antes do chefe de área',
+                dicaHardcore: 'Descubra as 4 áreas secretas dos Capítulos 1 a 4 e visite o Templo da Grande Pagoda antes de finalizar o Cap 6 para desafiar Erlang Shen!'
+            },
+            'black myth wukong': {
+                dificuldadeBase: 8.0,
+                rotulo: '8.0/10 - Difícil 💀',
+                categoria: 'dificil',
+                tempoEstimado: '~65 - 85 horas',
+                tempoSub: '81 Conquistas oficiais no total',
+                playthroughs: '2 Playthroughs necessários (NG+)',
+                playthroughsSub: 'Forja completa de armas exclusivas no NG+',
+                missables: '⚠️ 4 Perdíveis de Monstros e Curiosidades',
+                missablesSub: 'Inimigos que desaparecem após derrotar os Reis Demônios',
+                dicaHardcore: 'Não deixe chefes secundários para trás antes de acender o queimador de incenso final de cada capítulo.'
+            },
+            "baldur's gate 3": {
+                dificuldadeBase: 10.0,
+                rotulo: '10/10 - Lendária / Insana 👑',
+                categoria: 'lendaria',
+                tempoEstimado: '~150 - 200+ horas',
+                tempoSub: 'Campanhas gigantescas e extrema exigência tática no Modo Honra',
+                playthroughs: '2 Playthroughs necessários',
+                playthroughsSub: 'Requer zerar na dificuldade Honra (morte permanente sem carregar saves)',
+                missables: '⚠️ Dezenas de Perdíveis',
+                missablesSub: 'Companheiros e missões dependem de diálogos e rolagens de dados irreversíveis',
+                dicaHardcore: 'No Modo Honra, mantenha sempre um companheiro em modo Invisibilidade longe do alcance do combate no acampamento para reviver o grupo se houver desastre!'
+            },
+            'god of war (2018)': {
+                dificuldadeBase: 5.5,
+                rotulo: '5.5/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~40 - 50 horas',
+                tempoSub: '37 Conquistas com livre exploração de Midgard no pós-jogo',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Nenhum requisito exige reiniciar a campanha',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Tudo pode ser revisitado e completado com tranquilidade',
+                dicaHardcore: 'Deixe as 8 Valquírias e a Rainha Sigrun para enfrentar depois que tiver a Armadura de Névoa de Niflheim e o Machado Leviatã maximizados.'
+            },
+            'god of war': {
+                dificuldadeBase: 5.5,
+                rotulo: '5.5/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~40 - 50 horas',
+                tempoSub: 'Livre exploração em todos os reinos',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Pós-jogo totalmente desbloqueado',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Nenhum troféu pode ser perdido',
+                dicaHardcore: 'Use o Talismã dos Reinos para congelar o tempo e atacar Sigrun em aberturas curtas de ataque.'
+            },
+            'god of war ragnarok': {
+                dificuldadeBase: 5.0,
+                rotulo: '5.0/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~50 - 65 horas',
+                tempoSub: 'Exploração completa dos 9 Reinos nórdicos',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Sem trava de dificuldade ou troféus missables',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Sem perigo de perder conteúdos da história',
+                dicaHardcore: 'Após a história, vá até a taverna em Svartalfheim para iniciar a missão do funeral de Brok e desbloquear os créditos secretos!'
+            },
+            'god of war ragnarök': {
+                dificuldadeBase: 5.0,
+                rotulo: '5.0/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~50 - 65 horas',
+                tempoSub: 'Pós-jogo 100% aberto e sem perdas',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Pode ser platinado em qualquer dificuldade',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Explore no seu próprio ritmo',
+                dicaHardcore: 'Use as Lâminas do Caos com runas de atordoamento pesado e flechas sônicas da Freya para quebrar os escudos de som dos Berserkers.'
+            },
+            "marvel's spider-man 2": {
+                dificuldadeBase: 3.0,
+                rotulo: '3.0/10 - Tranquila 🌿',
+                categoria: 'facil',
+                tempoEstimado: '~25 - 30 horas',
+                tempoSub: 'Campanha divertida e dinâmica com Peter e Miles',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Todos os distritos podem ser limpos após a conclusão da história',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Nenhum troféu missable; experiência acessível para todos os jogadores',
+                dicaHardcore: 'Use o túnel de vento que corta o Rio Hudson para cruzar de Manhattan a Astoria sem bater as asas de teia nem tocar no chão.'
+            },
+            'spider-man 2': {
+                dificuldadeBase: 3.0,
+                rotulo: '3.0/10 - Tranquila 🌿',
+                categoria: 'facil',
+                tempoEstimado: '~25 - 30 horas',
+                tempoSub: 'Platina rápida e satisfatória',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Sem restrições de dificuldade',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Sem troféus perdíveis',
+                dicaHardcore: 'Guarde as fichas de herói e peças de tecnologia limpando os distritos 100% para comprar todos os trajes sem atrasos.'
+            },
+            'stray': {
+                dificuldadeBase: 4.0,
+                rotulo: '4.0/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~8 - 12 horas',
+                tempoSub: 'Aventura curta e envolvente na pele de um gatinho cyberpunk',
+                playthroughs: '2 Playthroughs necessários',
+                playthroughsSub: '1 Playthrough calmo para colecionáveis + 1 Speedrun de menos de 2h',
+                missables: '⚠️ 3 Perdíveis (Speedrun e Furtividade)',
+                missablesSub: 'Terminar em menos de 2h e perseguição dos Zurks sem sofrer dano',
+                dicaHardcore: 'No troféu de Speedrun (menos de 2h), pausar o jogo congela o cronômetro oficial da run. Se errar uma rota, reinicie o checkpoint imediatamente!'
+            },
+            'bloodborne': {
+                dificuldadeBase: 8.5,
+                rotulo: '8.5/10 - Difícil 💀',
+                categoria: 'dificil',
+                tempoEstimado: '~50 - 70 horas',
+                tempoSub: 'Cálices de Pthumeru profundos e chefes impiedosos de Yharnam',
+                playthroughs: '3 Playthroughs (ou 1 com backup de save)',
+                playthroughsSub: 'Requer 3 finais diferentes do Sonho do Caçador',
+                missables: '⚠️ 3 Perdíveis Críticos',
+                missablesSub: 'Consumir 3 Terços de Cordão Umbilical antes de lutar com Gehrman',
+                dicaHardcore: 'Consuma 3 Terços de Cordão Umbilical durante a campanha (Iosefka e Arianna) para enfrentar a Presença da Lua e liberar o final supremo!'
+            },
+            'ghost of tsushima': {
+                dificuldadeBase: 4.5,
+                rotulo: '4.5/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~50 - 60 horas',
+                tempoSub: '77 Conquistas em um dos mundos mais belos já criados',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Mundo aberto totalmente acessível após o fim da campanha',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Nenhum conto ou colecionável fica inacessível',
+                dicaHardcore: 'Equipe o Traje do Viajante o quanto antes; ele vibra o controle na direção de artefatos e dissipa a névoa do mapa com o dobro de velocidade.'
+            },
+            'cyberpunk 2077': {
+                dificuldadeBase: 5.5,
+                rotulo: '5.5/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~70 - 90 horas',
+                tempoSub: 'Exploração massiva de Night City e seus distritos perigosos',
+                playthroughs: '1 Playthrough (com saves estratégicos)',
+                playthroughsSub: 'Ponto de não retorno no elevador do Nocturne Op55N1 permite ver todos os finais',
+                missables: '⚠️ 2 Perdíveis (Salvar Takemura e Diabo)',
+                missablesSub: 'No troféu O Diabo, você é obrigado a salvar Takemura no prédio em colapso',
+                dicaHardcore: 'Durante a missão Search and Destroy, quando o prédio for invadido, salte pelo buraco e suba as escadas para salvar Takemura; o jogo não dá objetivo claro para isso!'
+            },
+            'resident evil 4': {
+                dificuldadeBase: 8.5,
+                rotulo: '8.5/10 - Difícil 💀',
+                categoria: 'dificil',
+                tempoEstimado: '~40 - 55 horas',
+                tempoSub: 'Requer Rank S+ no Profissional (menos de 5h30 e max 15 saves)',
+                playthroughs: '4+ Playthroughs necessários',
+                playthroughsSub: 'Várias jogadas para liberar acessórios infinitos e armas especiais',
+                missables: '⚠️ Vários Perdíveis por Capítulo',
+                missablesSub: 'Castelões Mecânicos e tesouros de vilarejo/castelo/ilha',
+                dicaHardcore: 'Junte 30 espinélios nas primeiras missões do Mercador para comprar o Ticket de Melhoria Exclusiva no Cap 7 e ter a Chicago Sweeper com munição infinita!'
+            },
+            'silent hill 2': {
+                dificuldadeBase: 5.5,
+                rotulo: '5.5/10 - Moderada 🟡',
+                categoria: 'moderada',
+                tempoEstimado: '~30 - 40 horas',
+                tempoSub: '44 Conquistas imersivas de terror psicológico',
+                playthroughs: '3 Playthroughs necessários',
+                playthroughsSub: 'Diferentes finais com requisitos psicológicos específicos de James',
+                missables: '⚠️ Múltiplos Perdíveis de Finais',
+                missablesSub: 'Exame de itens no inventário e comportamento do jogador alteram o desfecho',
+                dicaHardcore: 'Para o final Na Água, mantenha James com HP vermelho e examine a faca de Angela. Para Adeus, cure-se na hora e examine a carta de Mary.'
+            },
+            'hades': {
+                dificuldadeBase: 7.5,
+                rotulo: '7.5/10 - Difícil 💀',
+                categoria: 'dificil',
+                tempoEstimado: '~60 - 80 horas',
+                tempoSub: 'Roguelike supremo com dezenas de fugas do submundo',
+                playthroughs: 'Dezenas de Runs (Roguelike)',
+                playthroughsSub: 'Atingir o epílogo oficial requer cerca de 60 a 90 tentativas bem-sucedidas',
+                missables: '✓ 0 Perdíveis (Progressão Contínua)',
+                missablesSub: 'Roguelike contínuo; nenhuma oportunidade é perdida permanentemente',
+                dicaHardcore: 'No desafio de Calor 16, selecione medidas extremas apenas nos primeiros chefes e evite penalidades de tempo apertadas.'
+            },
+            'astro bot': {
+                dificuldadeBase: 3.0,
+                rotulo: '3.0/10 - Tranquila 🌿',
+                categoria: 'facil',
+                tempoEstimado: '~15 - 20 horas',
+                tempoSub: '44 Troféus com muita nostalgia e diversão no PlayStation 5',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Explore todas as galáxias e fases do mapa estelar',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Todos os bots e peças de quebra-cabeça podem ser revisitados com radar',
+                dicaHardcore: 'Após completar cada fase, o pássaro detector de bots fica disponível por 200 moedas para indicar qualquer item restante!'
+            }
+        };
+
+        function obterDadosHardcoreJogo(titulo, steamAppID) {
+            const tLower = (titulo || '').toLowerCase().trim();
+            const norm = tLower.replace(/[^a-z0-9]/g, '');
+
+            let infoBase = null;
+            if (GUIA_HARDCORE_JOGOS[tLower]) {
+                infoBase = GUIA_HARDCORE_JOGOS[tLower];
+            } else {
+                for (const k in GUIA_HARDCORE_JOGOS) {
+                    const kNorm = k.replace(/[^a-z0-9]/g, '');
+                    if (norm === kNorm || (norm.length > 3 && (norm.includes(kNorm) || kNorm.includes(norm)))) {
+                        infoBase = GUIA_HARDCORE_JOGOS[k];
+                        break;
+                    }
+                }
+            }
+
+            // Fallback pela curadoria oficial geral de DIFICULDADE_OFICIAL_JOGOS
+            if (!infoBase) {
+                const curada = typeof DIFICULDADE_OFICIAL_JOGOS !== 'undefined' ? (DIFICULDADE_OFICIAL_JOGOS[steamAppID] || DIFICULDADE_OFICIAL_JOGOS[tLower]) : null;
+                if (curada) {
+                    let dNota = 5.0;
+                    let cat = curada.category || 'moderada';
+                    if (cat === 'lendaria') dNota = 9.5;
+                    else if (cat === 'dificil') dNota = 8.0;
+                    else if (cat === 'facil') dNota = 3.0;
+
+                    infoBase = {
+                        dificuldadeBase: dNota,
+                        rotulo: curada.label || `${dNota}/10 - ${cat.toUpperCase()}`,
+                        categoria: cat,
+                        tempoEstimado: cat === 'lendaria' ? '~120 - 160h' : (cat === 'dificil' ? '~70 - 90h' : (cat === 'facil' ? '~20 - 30h' : '~40 - 60h')),
+                        tempoSub: 'Estimativa baseada na curadoria oficial da comunidade',
+                        playthroughs: cat === 'lendaria' ? '3+ Playthroughs necessários' : (cat === 'dificil' ? '2 Playthroughs necessários' : '1 Playthrough (Platina Direta)'),
+                        playthroughsSub: 'Rotas de campanha e objetivos exigidos para o 100%',
+                        missables: cat === 'facil' ? '✓ 0 Perdíveis (Livre)' : (cat === 'lendaria' ? '⚠️ Múltiplos Perdíveis' : '⚠️ Atenção a Troféus Perdíveis'),
+                        missablesSub: curada.motivo || 'Verifique os requisitos antes de avançar missões principais',
+                        dicaHardcore: curada.motivo || 'Curadoria Oficial do Overcritic garantindo integridade de XP e conquistas.'
+                    };
+                } else {
+                    infoBase = {
+                        dificuldadeBase: 5.0,
+                        rotulo: '5.0/10 - Moderada 🟡',
+                        categoria: 'moderada',
+                        tempoEstimado: '~40 - 55 horas',
+                        tempoSub: 'Estimativa padrão da comunidade para o 100% de conquistas',
+                        playthroughs: '1 a 2 Playthroughs',
+                        playthroughsSub: 'Explore a campanha com atenção aos colecionáveis',
+                        missables: '✓ Poucos ou Nenhum Perdível',
+                        missablesSub: 'Conquistas geralmente acessíveis durante ou pós-campanha',
+                        dicaHardcore: 'Aproveite a campanha e consulte as Dicas de Ouro dos membros abaixo para conquistar os troféus mais difíceis sem dor de cabeça!'
+                    };
+                }
+            }
+
+            // Lê votos da comunidade armazenados no LocalStorage
+            let votosStorage = {};
+            try {
+                votosStorage = JSON.parse(localStorage.getItem('overcritic_platina_diff_votes') || '{}');
+            } catch(e) {}
+
+            const dadosVotos = votosStorage[norm] || votosStorage[tLower] || { votes: [], userVote: null };
+            const userVote = dadosVotos.userVote || null;
+            const listaVotos = Array.isArray(dadosVotos.votes) ? dadosVotos.votes : [];
+
+            let notaFinal = infoBase.dificuldadeBase;
+            let totalVotos = listaVotos.length;
+
+            if (totalVotos > 0) {
+                const soma = listaVotos.reduce((acc, v) => acc + v, 0);
+                // Média ponderada com 3x o peso da nota de curadoria base
+                notaFinal = Number(((infoBase.dificuldadeBase * 3 + soma) / (3 + totalVotos)).toFixed(1));
+            }
+
+            let classeBarra = 'diff-4-6';
+            let emojiDiff = '🟡';
+            if (notaFinal <= 3.5) { classeBarra = 'diff-1-3'; emojiDiff = '🟢'; }
+            else if (notaFinal >= 8.8) { classeBarra = 'diff-9-10'; emojiDiff = '👑'; }
+            else if (notaFinal >= 6.8) { classeBarra = 'diff-7-8'; emojiDiff = '💀'; }
+
+            return {
+                ...infoBase,
+                notaFinal,
+                notaFormatada: notaFinal.toFixed(1),
+                porcentagemBarra: Math.min(100, Math.max(10, Math.round(notaFinal * 10))),
+                classeBarra,
+                emojiDiff,
+                totalVotos,
+                userVote,
+                tagCuradoria: totalVotos > 0 ? `Comunidade (${totalVotos} votos)` : 'Curadoria Oficial Verificada'
+            };
+        }
+
+        function votarDificuldadePlatina(tituloJogoCodificado, nota) {
+            const tituloJogo = decodeURIComponent(tituloJogoCodificado);
+            const tLower = tituloJogo.toLowerCase().trim();
+            const norm = tLower.replace(/[^a-z0-9]/g, '');
+
+            let votosStorage = {};
+            try {
+                votosStorage = JSON.parse(localStorage.getItem('overcritic_platina_diff_votes') || '{}');
+            } catch(e) {}
+
+            const registro = votosStorage[norm] || { votes: [], userVote: null };
+            
+            // Remove voto anterior do usuário se já votou
+            if (registro.userVote) {
+                const idx = registro.votes.indexOf(registro.userVote);
+                if (idx !== -1) registro.votes.splice(idx, 1);
+            }
+
+            registro.userVote = Number(nota);
+            registro.votes.push(Number(nota));
+            votosStorage[norm] = registro;
+            votosStorage[tLower] = registro;
+
+            try {
+                localStorage.setItem('overcritic_platina_diff_votes', JSON.stringify(votosStorage));
+            } catch(e) {}
+
+            if (window.OvercriticAudio?.play) {
+                window.OvercriticAudio.play('trophy');
+            }
+
+            mostrarToast(`Voto registrado! Sua nota (${nota}/10) atualizou o Medidor de Platina de "${tituloJogo}".`, '⚡');
+
+            if (jogoAtualConsultado) {
+                renderizarMedidorDificuldadePlatina(jogoAtualConsultado);
+            }
+        }
+        window.votarDificuldadePlatina = votarDificuldadePlatina;
+
+        function renderizarMedidorDificuldadePlatina(dadosJogo) {
+            const container = document.getElementById('platinaDifficultyMeterCard');
+            if (!container || !dadosJogo || !dadosJogo.title) return;
+
+            const dados = obterDadosHardcoreJogo(dadosJogo.title, dadosJogo.steamAppID);
+
+            const botoesVotoHtml = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => {
+                const isActive = dados.userVote === n ? 'active' : '';
+                return `
+                    <button type="button" class="meter-vote-num-btn ${isActive}" 
+                            onclick="votarDificuldadePlatina('${encodeURIComponent(dadosJogo.title)}', ${n})"
+                            title="Classificar como ${n}/10">
+                        ${n}
+                    </button>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="meter-top-header">
+                    <div class="meter-title-wrap">
+                        <span style="font-size: 1.35rem; display: inline-flex; align-items: center;">⚡</span>
+                        <h3>Medidor de Dificuldade de Platina & Guia Hardcore</h3>
+                        <span class="meter-verified-tag">${dados.tagCuradoria}</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                        <span>👥 Avaliação da Comunidade:</span>
+                        <strong style="color: var(--text-main); font-size: 0.95rem;">${dados.notaFormatada} / 10</strong>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">(${dados.totalVotos} ${dados.totalVotos === 1 ? 'voto gamer' : 'votos gamers'})</span>
+                    </div>
+                </div>
+
+                <div class="meter-bento-grid">
+                    <!-- Bento 1: Dificuldade 1 a 10 -->
+                    <div class="meter-bento-item">
+                        <div class="meter-bento-label"><span>🎯</span> Dificuldade da Platina</div>
+                        <div class="meter-bento-val">
+                            <span style="color: var(--accent-cyan); font-size: 1.45rem;">${dados.notaFormatada}</span>
+                            <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">/ 10</span>
+                            <span style="font-size: 0.75rem; margin-left: auto;">${dados.emojiDiff} ${dados.rotulo}</span>
+                        </div>
+                        <div class="meter-bar-track">
+                            <div class="meter-bar-fill ${dados.classeBarra}" style="width: ${dados.porcentagemBarra}%;"></div>
+                        </div>
+                        <div class="meter-bento-sub">Termômetro em tempo real ponderado entre Curadoria e Comunidade</div>
+                    </div>
+
+                    <!-- Bento 2: Tempo Estimado -->
+                    <div class="meter-bento-item">
+                        <div class="meter-bento-label"><span>⏱️</span> Tempo Estimado</div>
+                        <div class="meter-bento-val" style="color: var(--accent-gold);">
+                            ${dados.tempoEstimado}
+                        </div>
+                        <div class="meter-bento-sub">${dados.tempoSub}</div>
+                    </div>
+
+                    <!-- Bento 3: Playthroughs Necessários -->
+                    <div class="meter-bento-item">
+                        <div class="meter-bento-label"><span>🔄</span> Playthroughs Necessários</div>
+                        <div class="meter-bento-val" style="font-size: 1.05rem;">
+                            ${dados.playthroughs}
+                        </div>
+                        <div class="meter-bento-sub">${dados.playthroughsSub}</div>
+                    </div>
+
+                    <!-- Bento 4: Troféus Perdíveis (Missables) -->
+                    <div class="meter-bento-item">
+                        <div class="meter-bento-label"><span>⚠️</span> Troféus Perdíveis (Missables)</div>
+                        <div class="meter-bento-val" style="font-size: 1.05rem; color: ${dados.missables.includes('0') ? 'var(--success-color)' : '#fca5a5'};">
+                            ${dados.missables}
+                        </div>
+                        <div class="meter-bento-sub">${dados.missablesSub}</div>
+                    </div>
+                </div>
+
+                <!-- Destaque / Dica Hardcore -->
+                <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.22); border-radius: 12px; padding: 11px 16px; font-size: 0.82rem; color: var(--text-main); display: flex; align-items: flex-start; gap: 10px; line-height: 1.45;">
+                    <span style="font-size: 1.25rem; flex-shrink: 0; line-height: 1;">🧭</span>
+                    <div>
+                        <strong style="color: var(--accent-cyan); font-weight: 800;">Estratégia do Caçador Hardcore:</strong>
+                        <span style="color: var(--text-muted); margin-left: 4px;">${dados.dicaHardcore}</span>
+                    </div>
+                </div>
+
+                <!-- Faixa Interativa de Votação Comunitária -->
+                <div class="meter-vote-strip">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.1rem;">🗳️</span>
+                        <span><strong>Qual nota você dá para a dificuldade desta Platina?</strong> Ajude os caçadores votando de 1 a 10:</span>
+                    </div>
+                    <div class="meter-stars-selector">
+                        ${botoesVotoHtml}
+                    </div>
+                </div>
+            `;
+
+            container.style.display = 'flex';
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           4.2 "DICA DE OURO" NOS TROFÉUS (MOTOR COLABORATIVO DA COMUNIDADE)
+        ══════════════════════════════════════════════════════════════════════════ */
+        const DICAS_DE_OURO_BASE = [
+            {
+                game: 'Elden Ring',
+                trophyMatch: 'Malenia',
+                author: 'ValkyrieHunter',
+                tag: 'boss',
+                tagLabel: '⚔️ Chefe Difícil',
+                likes: 54,
+                text: 'Use a Lágrima Imitadora +10 com armas de Sangramento ou Congelamento. Para a Dança das Aves aquáticas, corra para trás na 1ª rajada e role para frente nas outras duas.'
+            },
+            {
+                game: 'Elden Ring',
+                trophyMatch: 'Armamentos Lendários',
+                author: 'TrophyKing',
+                tag: 'missable',
+                tagLabel: '⚠️ Perdível',
+                likes: 92,
+                text: '⚠️ MISSABLE: Pegue a Lança de Gransax fincada no dragão de pedra em Leyndell ANTES de derrotar Maliketh em Farum Azula! Se a capital virar cinzas, ela fica inacessível até o NG+.'
+            },
+            {
+                game: 'Elden Ring',
+                trophyMatch: 'Lorde',
+                author: 'EldenLord99',
+                tag: 'missable',
+                tagLabel: '⚠️ Perdível',
+                likes: 71,
+                text: '⚠️ Faça backup do seu save na nuvem ou pendrive logo após derrotar a Fera Prateada e antes de tocar na estátua de Marika. Assim você desbloqueia os 3 finais no mesmo playthrough!'
+            },
+            {
+                game: 'God of War',
+                trophyMatch: 'Juízo Final',
+                author: 'KratosSpartan',
+                tag: 'boss',
+                tagLabel: '⚔️ Chefe Difícil',
+                likes: 63,
+                text: 'Use o Talismã dos Reinos para desacelerar o tempo quando a Sigrun voar para soltar a luz cegante. Guarde a Fúria Espartana apenas para cancelar o atordoamento ou regenerar HP crítico.'
+            },
+            {
+                game: 'God of War',
+                trophyMatch: 'Cegado',
+                author: 'MidgardExplorer',
+                tag: 'puzzle',
+                tagLabel: '🧩 Colecionável',
+                likes: 41,
+                text: 'São 51 Corvos Verdes de Odin. Aumente o volume dos efeitos sonoros nas opções; o grasnado metálico deles ecoa claramente quando você está a menos de 20 metros de distância!'
+            },
+            {
+                game: 'God of War Ragnarök',
+                trophyMatch: 'Funeral',
+                author: 'SindriFriend',
+                tag: 'gold',
+                tagLabel: '💡 Dica de Ouro',
+                likes: 98,
+                text: 'Após concluir a história, vá até a taverna em Svartalfheim e converse com Lúnda. Ela iniciará a missão do funeral de Brok, liberando os créditos finais secretos.'
+            },
+            {
+                game: 'God of War Ragnarök',
+                trophyMatch: 'Verdadeiro Rei',
+                author: 'ValkyrieSlayer',
+                tag: 'boss',
+                tagLabel: '⚔️ Chefe Difícil',
+                likes: 48,
+                text: 'Use as Lâminas do Caos com Chama Explosiva para quebrar o escudo de gelo dele na hora e mantenha as flechas sônicas da Freya ativas o tempo todo para quebrar barreiras mágicas.'
+            },
+            {
+                game: "Marvel's Spider-Man 2",
+                trophyMatch: 'Traje',
+                author: 'PeterParkerBR',
+                tag: 'gold',
+                tagLabel: '💡 Dica de Ouro',
+                likes: 39,
+                text: 'Compre todos os trajes disponíveis. A dica de ouro é focar em limpar os distritos 100% para juntar fichas de herói e peças raras antes de gastar em melhorias secundárias da teia.'
+            },
+            {
+                game: "Marvel's Spider-Man 2",
+                trophyMatch: 'Voe',
+                author: 'MilesWeb',
+                tag: 'fast',
+                tagLabel: '⚡ Dica Rápida',
+                likes: 67,
+                text: 'Voe do Distrito Financeiro até Astoria usando asas de teia sem tocar no chão. Basta pegar o túnel de vento central que corta o rio; ele te carrega direto e sem esforço!'
+            },
+            {
+                game: 'Stray',
+                trophyMatch: 'Velocidade',
+                author: 'CatRunner',
+                tag: 'missable',
+                tagLabel: '⚠️ Perdível',
+                likes: 85,
+                text: '⚠️ MISSABLE: Zere em menos de 2 horas. As cutscenes e diálogos contam no tempo, então pule todos os diálogos spamando o botão de ação. Se errar, reinicie o checkpoint para zerar o tempo da sala!'
+            },
+            {
+                game: 'Stray',
+                trophyMatch: 'Pegar',
+                author: 'FelinePro',
+                tag: 'missable',
+                tagLabel: '⚠️ Perdível',
+                likes: 72,
+                text: 'Complete a primeira perseguição dos Zurks sem levar nenhum dano. Corra em zigue-zague contínuo; se um Zurk grudar no pelo, pause e recarregue o último checkpoint imediatamente!'
+            },
+            {
+                game: 'Black Myth: Wukong',
+                trophyMatch: 'Glorioso',
+                author: 'SunWukongBR',
+                tag: 'boss',
+                tagLabel: '⚔️ Chefe Difícil',
+                likes: 77,
+                text: 'Derrote os chefes secretos dos Capítulos 1, 2, 3 e 4. Em seguida, visite o Templo da Grande Pagoda antes de derrotar o chefe final do Capítulo 6 para liberar a arena de Erlang Shen!'
+            },
+            {
+                game: 'Resident Evil 4',
+                trophyMatch: 'Profissional',
+                author: 'LeonKennedy',
+                tag: 'missable',
+                tagLabel: '⚠️ Perdível',
+                likes: 95,
+                text: '⚠️ Conclua o Profissional com Rank S+ (menos de 5h30 e max 15 saves). Use a Armadura de Ashley para imunidade e troque espinélios pela munição infinita da Chicago Sweeper no Cap 7!'
+            },
+            {
+                game: 'Silent Hill 2',
+                trophyMatch: 'Água',
+                author: 'JamesSunderland',
+                tag: 'missable',
+                tagLabel: '⚠️ Perdível',
+                likes: 58,
+                text: '⚠️ MISSABLE: Para o final Na Água, mantenha James com a vida vermelha por muito tempo, evite curar imediatamente e inspecione a faca de Angela no menu com frequência durante a jornada.'
+            },
+            {
+                game: 'The Last of Us',
+                trophyMatch: 'Destranque',
+                author: 'FireflyJoel',
+                tag: 'missable',
+                tagLabel: '⚠️ Perdível',
+                likes: 64,
+                text: '⚠️ MISSABLE: Abra todos os 13 cofres. Ao entrar em cada área, verifique gavetas e bilhetes antes de avançar pelas portas de madeira ou pular beiradas sem retorno!'
+            }
+        ];
+
+        window.OvercriticDicasTrofeus = {
+            STORAGE_KEY: 'overcritic_trophy_gold_tips',
+            LIKES_KEY: 'overcritic_trophy_tips_liked',
+
+            gerarChave(tituloJogo, nomeTrofeu) {
+                const j = (tituloJogo || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                const t = (nomeTrofeu || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                return `${j}_${t}`;
+            },
+
+            obterDicasComunitarias() {
+                try {
+                    return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}');
+                } catch(e) {
+                    return {};
+                }
+            },
+
+            obterLikesUsuario() {
+                try {
+                    return JSON.parse(localStorage.getItem(this.LIKES_KEY) || '[]');
+                } catch(e) {
+                    return [];
+                }
+            },
+
+            isMissable(tituloJogo, trofeu) {
+                if (!trofeu) return false;
+                const tLower = (tituloJogo || '').toLowerCase().trim();
+
+                // 1. REGRA SOBERANA DE INTEGRIDADE: Se o jogo é oficialmente catalogado com 0 Perdíveis, NENHUM troféu pode ser perdível!
+                if (typeof obterDadosHardcoreJogo === 'function') {
+                    const dadosHard = obterDadosHardcoreJogo(tLower, null);
+                    if (dadosHard && (dadosHard.missables.includes('0') || dadosHard.missables.toLowerCase().includes('0 perdíveis'))) {
+                        return false;
+                    }
+                }
+
+                // Lista de salvaguarda de títulos famosos 100% livres de troféus perdíveis
+                const jogosSemPerdiveis = [
+                    'god of war', 'god of war (2018)', 'god of war ragnarok', 'god of war ragnarök',
+                    "marvel's spider-man", "marvel's spider-man remastered", "marvel's spider-man: miles morales", 
+                    "marvel's spider-man 2", "spider-man 2", "astro bot", "ghost of tsushima", 
+                    "horizon zero dawn", "horizon forbidden west", "infamous second son", "ratchet & clank: rift apart"
+                ];
+                if (jogosSemPerdiveis.some(j => tLower === j || tLower.includes(j))) {
+                    return false;
+                }
+
+                const nomeTrofeu = (trofeu.name || '').toLowerCase();
+                const descTrofeu = (trofeu.desc || '').toLowerCase();
+
+                // 2. Verifica se este troféu possui dica oficial curada na base com a tag 'missable'
+                const temBaseMissable = DICAS_DE_OURO_BASE.some(b => {
+                    const matchJogo = tLower.includes(b.game.toLowerCase()) || b.game.toLowerCase().includes(tLower);
+                    const matchTrofeu = nomeTrofeu.includes(b.trophyMatch.toLowerCase());
+                    return matchJogo && matchTrofeu && b.tag === 'missable';
+                });
+                if (temBaseMissable) return true;
+
+                // 3. Verifica se a comunidade marcou este troféu com a tag 'missable'
+                const chave = this.gerarChave(tituloJogo, trofeu.name);
+                const comunitarias = this.obterDicasComunitarias();
+                if (Array.isArray(comunitarias[chave]) && comunitarias[chave].some(d => d.tag === 'missable')) {
+                    return true;
+                }
+
+                // 4. Detecção estrita por Regex de palavra inteira (elimina falsos positivos como 'preocupANTES DErrote')
+                const regexMissable = /\b(missable|perdível|perdíveis)\b/i;
+                return regexMissable.test(nomeTrofeu) || regexMissable.test(descTrofeu);
+            },
+
+            temDicas(tituloJogo, nomeTrofeu, descTrofeu) {
+                const lista = this.obterDicas(tituloJogo, { name: nomeTrofeu, desc: descTrofeu });
+                return lista.length > 0;
+            },
+
+            obterDicas(tituloJogo, trofeu) {
+                if (!trofeu) return [];
+                const nomeTrofeu = trofeu.name || '';
+                const chave = this.gerarChave(tituloJogo, nomeTrofeu);
+                const comunitarias = this.obterDicasComunitarias();
+                const likesUser = this.obterLikesUsuario();
+
+                const resultado = [];
+
+                // 1. Dicas adicionadas pela comunidade no LocalStorage
+                if (Array.isArray(comunitarias[chave])) {
+                    comunitarias[chave].forEach(d => {
+                        resultado.push({
+                            ...d,
+                            isLiked: likesUser.includes(d.id)
+                        });
+                    });
+                }
+
+                // 2. Dicas da Base Curada de Ouro Oficial
+                const tLower = (tituloJogo || '').toLowerCase();
+                const nLower = nomeTrofeu.toLowerCase();
+
+                DICAS_DE_OURO_BASE.forEach((base, idx) => {
+                    const matchJogo = tLower.includes(base.game.toLowerCase()) || base.game.toLowerCase().includes(tLower);
+                    const matchTrofeu = nLower.includes(base.trophyMatch.toLowerCase());
+
+                    if (matchJogo && matchTrofeu) {
+                        const baseId = `base_${idx}`;
+                        const isLiked = likesUser.includes(baseId);
+                        resultado.push({
+                            id: baseId,
+                            author: base.author,
+                            tag: base.tag,
+                            tagLabel: base.tagLabel,
+                            likes: base.likes + (isLiked ? 1 : 0),
+                            text: base.text,
+                            date: 'Curadoria da Comunidade',
+                            isLiked: isLiked,
+                            isBase: true
+                        });
+                    }
+                });
+
+                return resultado;
+            },
+
+            salvarNovaDica(tituloJogo, nomeTrofeu, formElement) {
+                const textarea = formElement.querySelector('textarea');
+                const selectTag = formElement.querySelector('select');
+                const texto = (textarea?.value || '').trim();
+                const tag = selectTag?.value || 'gold';
+
+                if (!texto || texto.length < 10) {
+                    mostrarToast('Escreva uma dica com pelo menos 10 caracteres para ajudar a comunidade!', '⚠️');
+                    return;
+                }
+
+                let tagLabel = '💡 Dica de Ouro';
+                if (tag === 'missable') tagLabel = '⚠️ Perdível';
+                else if (tag === 'boss') tagLabel = '⚔️ Chefe Difícil';
+                else if (tag === 'puzzle') tagLabel = '🧩 Colecionável';
+                else if (tag === 'fast') tagLabel = '⚡ Dica Rápida';
+
+                const chave = this.gerarChave(tituloJogo, nomeTrofeu);
+                const comunitarias = this.obterDicasComunitarias();
+                if (!Array.isArray(comunitarias[chave])) {
+                    comunitarias[chave] = [];
+                }
+
+                const autor = obterUsuarioAtual();
+                const novaDica = {
+                    id: 'tip_' + Date.now(),
+                    author: autor && autor.toLowerCase() !== 'visitante' ? autor : 'Caçador Gamer',
+                    tag: tag,
+                    tagLabel: tagLabel,
+                    likes: 1,
+                    text: texto,
+                    date: 'Hoje às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                comunitarias[chave].unshift(novaDica);
+
+                try {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(comunitarias));
+                } catch(e) {}
+
+                if (window.OvercriticAudio?.play) {
+                    window.OvercriticAudio.play('trophy');
+                }
+
+                mostrarToast('Sua Dica de Ouro foi publicada com sucesso!', '✨');
+                textarea.value = '';
+                formElement.style.display = 'none';
+
+                aplicarFiltrosERenderizarCards();
+            },
+
+            toggleLikeDica(tipId, btnElement) {
+                let likesUser = this.obterLikesUsuario();
+                const isLiked = likesUser.includes(tipId);
+
+                if (isLiked) {
+                    likesUser = likesUser.filter(id => id !== tipId);
+                } else {
+                    likesUser.push(tipId);
+                }
+
+                try {
+                    localStorage.setItem(this.LIKES_KEY, JSON.stringify(likesUser));
+                } catch(e) {}
+
+                if (window.OvercriticAudio?.play) {
+                    window.OvercriticAudio.play('button_click');
+                }
+
+                aplicarFiltrosERenderizarCards();
+            },
+
+            toggleComposer(formId) {
+                const el = document.getElementById(formId);
+                if (!el) return;
+                const isAberto = el.style.display === 'flex';
+                el.style.display = isAberto ? 'none' : 'flex';
+                if (!isAberto) {
+                    el.querySelector('textarea')?.focus();
+                }
+            },
+
+            renderizarBoxTrofeu(tituloJogo, trofeu, index) {
+                const dicas = this.obterDicas(tituloJogo, trofeu);
+                const formId = `composer_tip_${index}`;
+                const escapedGame = (tituloJogo || '').replace(/'/g, "\\'");
+                const escapedTrophy = (trofeu.name || '').replace(/'/g, "\\'");
+
+                let dicasHtml = '';
+                if (dicas.length > 0) {
+                    dicasHtml = dicas.map(d => {
+                        let tagClass = 'gold';
+                        if (d.tag === 'missable') tagClass = 'missable';
+                        else if (d.tag === 'boss') tagClass = 'boss';
+
+                        const likedClass = d.isLiked ? 'liked' : '';
+                        const likeIcon = d.isLiked ? '⭐ Útil!' : '👍 Dica Útil';
+
+                        return `
+                            <div class="trophy-golden-tip-box">
+                                <div class="tip-header">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="tip-badge">💡 DICA DE OURO</span>
+                                        <span class="tip-tag-pill ${tagClass}">${d.tagLabel || '💡 Dica'}</span>
+                                    </div>
+                                    <span class="tip-author">Por <strong>${d.author}</strong> • ${d.date}</span>
+                                </div>
+                                <div class="tip-content-text">${d.text}</div>
+                                <div class="tip-actions-bar">
+                                    <button type="button" class="tip-btn-like ${likedClass}" onclick="window.OvercriticDicasTrofeus.toggleLikeDica('${d.id}', this)" title="Marcar como dica útil">
+                                        <span>${likeIcon}</span> (<strong class="tip-like-count">${d.likes}</strong>)
+                                    </button>
+                                    <button type="button" class="tip-btn-add" onclick="window.OvercriticDicasTrofeus.toggleComposer('${formId}')">
+                                        + Deixar Mais uma Dica
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    dicasHtml = `
+                        <div style="margin-top: 8px;">
+                            <button type="button" class="tip-btn-add" onclick="window.OvercriticDicasTrofeus.toggleComposer('${formId}')" style="background: rgba(255, 215, 0, 0.05); border-color: rgba(255, 215, 0, 0.3); color: var(--accent-gold);">
+                                💡 + Deixar a Primeira Dica de Ouro neste Troféu
+                            </button>
+                        </div>
+                    `;
+                }
+
+                // Mini-formulário para novos envios
+                const formComposerHtml = `
+                    <form id="${formId}" class="tip-composer-form" onsubmit="event.preventDefault(); window.OvercriticDicasTrofeus.salvarNovaDica('${escapedGame}', '${escapedTrophy}', this);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: var(--accent-gold); font-size: 0.78rem;">💡 Compartilhe sua Dica de Ouro:</strong>
+                            <select class="form-select" style="padding: 3px 8px; font-size: 0.72rem; width: auto; background: rgba(0,0,0,0.5);">
+                                <option value="gold">💡 Dica de Ouro Geral</option>
+                                <option value="missable">⚠️ Perdível (Missable)</option>
+                                <option value="boss">⚔️ Chefe Difícil</option>
+                                <option value="puzzle">🧩 Puzzle / Colecionável</option>
+                                <option value="fast">⚡ Glitch / Dica Rápida</option>
+                            </select>
+                        </div>
+                        <textarea placeholder="Explique brevemente como conquistar este troféu sem dor de cabeça (ex: armas recomendadas, momentos de não retorno, localização exata)..." maxlength="320" required></textarea>
+                        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                            <button type="button" class="tip-btn-add" onclick="window.OvercriticDicasTrofeus.toggleComposer('${formId}')">Cancelar</button>
+                            <button type="submit" class="tip-btn-like" style="background: var(--accent-gold); color: #07090f; font-weight: 800;">Publicar Dica</button>
+                        </div>
+                    </form>
+                `;
+
+                return dicasHtml + formComposerHtml;
+            }
+        };
+
         function renderizarTrofeusNaTela(dadosJogo) {
             const fonteTexto = dadosJogo.fonte ? ` • ${dadosJogo.fonte}` : '';
             let total = dadosJogo.total || (dadosJogo.achievements ? dadosJogo.achievements.length : 0);
@@ -5630,18 +7245,29 @@
             filtroTipoTrofeuAtual = 'todos';
             filtroTextoTrofeuAtual = '';
 
-            // Atualiza contadores dos chips de troféus
+            // 4.1 RENDERIZA MEDIDOR DE DIFICULDADE DE PLATINA HARDCORE
+            renderizarMedidorDificuldadePlatina(dadosJogo);
+
+            // Atualiza contadores dos chips de troféus (incluindo Dicas de Ouro e Missables)
             const countTodos = document.getElementById('countTrophyTodos');
             const countPlatina = document.getElementById('countTrophyPlatina');
             const countGold = document.getElementById('countTrophyGold');
             const countSilver = document.getElementById('countTrophySilver');
             const countBronze = document.getElementById('countTrophyBronze');
+            const countDicas = document.getElementById('countTrophyDicas');
+            const countMissable = document.getElementById('countTrophyMissable');
 
             if (countTodos) countTodos.textContent = listaTrofeusAtual.length;
             if (countPlatina) countPlatina.textContent = listaTrofeusAtual.filter(t => t.type === 'platina').length;
             if (countGold) countGold.textContent = listaTrofeusAtual.filter(t => t.type === 'gold').length;
             if (countSilver) countSilver.textContent = listaTrofeusAtual.filter(t => t.type === 'silver').length;
             if (countBronze) countBronze.textContent = listaTrofeusAtual.filter(t => t.type === 'bronze').length;
+
+            const totalComDicas = listaTrofeusAtual.filter(t => window.OvercriticDicasTrofeus.temDicas(dadosJogo.title, t.name, t.desc)).length;
+            const totalMissables = listaTrofeusAtual.filter(t => window.OvercriticDicasTrofeus.isMissable(dadosJogo.title, t)).length;
+
+            if (countDicas) countDicas.textContent = totalComDicas;
+            if (countMissable) countMissable.textContent = totalMissables;
 
             // Ativa chip 'todos'
             document.querySelectorAll('#trophyTypeChips .diff-chip').forEach(c => c.classList.remove('active'));
@@ -5666,6 +7292,8 @@
             if (tipo === 'gold') document.getElementById('chipTrophyGold')?.classList.add('active');
             if (tipo === 'silver') document.getElementById('chipTrophySilver')?.classList.add('active');
             if (tipo === 'bronze') document.getElementById('chipTrophyBronze')?.classList.add('active');
+            if (tipo === 'dicas') document.getElementById('chipTrophyDicas')?.classList.add('active');
+            if (tipo === 'missable') document.getElementById('chipTrophyMissable')?.classList.add('active');
             aplicarFiltrosERenderizarCards();
         }
 
@@ -5686,9 +7314,14 @@
             }
 
             let filtrados = listaTrofeusAtual;
+            const tituloJogoAtual = jogoAtualConsultado ? (jogoAtualConsultado.title || '') : '';
 
-            // Filtro por tipo
-            if (filtroTipoTrofeuAtual !== 'todos') {
+            // Filtro por tipo (incluindo Dicas de Ouro e Missables)
+            if (filtroTipoTrofeuAtual === 'dicas') {
+                filtrados = filtrados.filter(t => window.OvercriticDicasTrofeus.temDicas(tituloJogoAtual, t.name, t.desc));
+            } else if (filtroTipoTrofeuAtual === 'missable') {
+                filtrados = filtrados.filter(t => window.OvercriticDicasTrofeus.isMissable(tituloJogoAtual, t));
+            } else if (filtroTipoTrofeuAtual !== 'todos') {
                 filtrados = filtrados.filter(t => t.type === filtroTipoTrofeuAtual);
             }
 
@@ -5711,22 +7344,25 @@
                 return;
             }
 
-            const cardsHtml = filtrados.map(t => {
+            const cardsHtml = filtrados.map((t, index) => {
                 let badgeClass = 'trophy-bronze';
                 let badgeIcon = '🥉 BRONZE';
                 if (t.type === 'platina') { badgeClass = 'trophy-platina'; badgeIcon = '🏆 PLATINA'; }
                 else if (t.type === 'gold') { badgeClass = 'trophy-gold'; badgeIcon = '🥇 OURO'; }
                 else if (t.type === 'silver') { badgeClass = 'trophy-silver'; badgeIcon = '🥈 PRATA'; }
 
+                const dicasHtml = window.OvercriticDicasTrofeus.renderizarBoxTrofeu(tituloJogoAtual, t, index);
+
                 return `
                     <div class="trophy-item-card">
                         <img src="${t.icon}" alt="Ícone" class="trophy-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3112/3112946.png'">
-                        <div class="trophy-details">
+                        <div class="trophy-details" style="flex: 1;">
                             <div class="trophy-title-row">
                                 <span class="trophy-type-badge ${badgeClass}">${badgeIcon}</span>
                                 <span class="trophy-name">${t.name}</span>
                             </div>
                             <div class="trophy-desc"><strong>Como conquistar:</strong> ${t.desc}</div>
+                            ${dicasHtml}
                         </div>
                         <div class="trophy-unlock-rate">
                             <div class="unlock-percent">${t.percent}</div>
@@ -5739,7 +7375,7 @@
             const bannerTotal = `
                 <div style="text-align: center; padding: 18px; color: var(--accent-cyan); font-size: 0.88rem; border-top: 1px solid var(--glass-border); margin-top: 16px; background: rgba(0, 240, 255, 0.04); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <span>✨</span>
-                    <span><strong>Catálogo Oficial 100% Carregado:</strong> Exibindo <strong>${filtrados.length}</strong> de <strong>${listaTrofeusAtual.length}</strong> conquistas oficiais deste título com objetivos autênticos.</span>
+                    <span><strong>Catálogo Oficial 100% Carregado:</strong> Exibindo <strong>${filtrados.length}</strong> de <strong>${listaTrofeusAtual.length}</strong> conquistas oficiais deste título com objetivos autênticos e Dicas de Ouro da comunidade.</span>
                 </div>
             `;
 
@@ -5790,7 +7426,7 @@
             alternarAba('cadastrar');
 
             document.getElementById('gameSearchApiInput').value = jogoAtualConsultado.title;
-            document.getElementById('platinaTitle').value = jogoAtualConsultado.title;
+            travarTituloComoVerificado(jogoAtualConsultado.title);
             document.getElementById('platinaCoverUrl').value = jogoAtualConsultado.cover;
             jogoSelecionadoSteamAppID = jogoAtualConsultado.steamAppID;
 
@@ -5840,6 +7476,7 @@
             try {
                 configurarSugestoesExploradorTrofeus();
                 aplicarDificuldadeOficialFormulario('', null);
+                destravarTituloManual(true);
                 atualizarProgressoTrofeus();
                 atualizarDisplayUsuario();
                 atualizarEstatisticasGlobais();
