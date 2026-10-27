@@ -306,60 +306,67 @@
     ];
 
     // ══════════════════════════════════════════════════════════════════════════
-    // 2. MARVEL'S SPIDER-MAN REMASTERED (STEAM / PS4) - 51 CONQUISTAS OFICIAIS
+    // 2. MARVEL'S SPIDER-MAN REMASTERED (PS5 & PS4) - TODOS OS 51 TROFÉUS OFICIAIS DA PSN
     // ══════════════════════════════════════════════════════════════════════════
     const TROFEUS_SPIDERMAN_1 = [
-        { name: 'Maior de Todos', desc: 'Desbloqueie todas as 51 conquistas de Marvel\'s Spider-Man Remastered e salve Manhattan.', icon: COVER_SPIDERMAN_1, percent: '14.2%', type: 'platina' },
-        { name: 'Superior', desc: 'Complete 100% de todos os distritos da ilha de Manhattan.', icon: COVER_SPIDERMAN_1, percent: '18.6%', type: 'gold' },
-        { name: 'Fim de Jogo', desc: 'Derrote o Doutor Octopus no topo da Oscorp e conclua a história principal.', icon: COVER_SPIDERMAN_1, percent: '46.8%', type: 'gold' },
-        { name: 'Com Grandes Poderes...', desc: 'Visite e preste condolências no túmulo de Ben Parker.', icon: COVER_SPIDERMAN_1, percent: '54.1%', type: 'silver' },
-        { name: 'I Love Manhattan', desc: 'Encontre e recolha todas as mochilas antigas de Peter espalhadas pela cidade.', icon: COVER_SPIDERMAN_1, percent: '42.5%', type: 'silver' },
-        { name: 'Mestre dos Mestres', desc: 'Derrote o Treinador (Taskmaster) após superar seus desafios em Manhattan.', icon: COVER_SPIDERMAN_1, percent: '28.7%', type: 'silver' },
-        { name: 'Doutorado', desc: 'Conclua todas as pesquisas científicas nas estações da Oscorp.', icon: COVER_SPIDERMAN_1, percent: '31.9%', type: 'silver' },
-        { name: 'Ronda Completa', desc: 'Conclua todas as ocorrências de crimes de todas as facções em todos os distritos.', icon: COVER_SPIDERMAN_1, percent: '26.3%', type: 'silver' },
-        { name: 'Guarda-Roupa Completo', desc: 'Adquira todos os trajes do Homem-Aranha disponíveis no jogo base.', icon: COVER_SPIDERMAN_1, percent: '27.4%', type: 'silver' },
-        { name: 'Fã de Ciência', desc: 'Crie 15 melhorias de dispositivos no laboratório de Otto Octavius.', icon: COVER_SPIDERMAN_1, percent: '43.8%', type: 'silver' },
-        { name: 'Demolição Total', desc: 'Derrube todas as bases da Sable International e armazéns do Rei do Crime.', icon: COVER_SPIDERMAN_1, percent: '33.5%', type: 'silver' },
-        { name: 'Vingadores, Avante!', desc: 'Escale até o ponto mais alto da Torre dos Vingadores.', icon: COVER_SPIDERMAN_1, percent: '73.2%', type: 'bronze' },
-        { name: 'Aracnofobia', desc: 'Neutralize 75 inimigos furtivamente pendurado no teto ou vigas.', icon: COVER_SPIDERMAN_1, percent: '65.9%', type: 'bronze' },
-        { name: 'Herói do Povo', desc: 'Cumprimente 10 cidadãos de Manhattan nas ruas com ' + 'acenar ou tocar as mãos.', icon: COVER_SPIDERMAN_1, percent: '76.4%', type: 'bronze' },
-        { name: 'Pombos de Nova York', desc: 'Ajude o Howard capturando todos os seus pombos fugitivos.', icon: COVER_SPIDERMAN_1, percent: '52.1%', type: 'bronze' },
-        { name: 'Terno e Gravata', desc: 'Crie e equipe o seu primeiro traje alternativo.', icon: COVER_SPIDERMAN_1, percent: '92.8%', type: 'bronze' },
-        { name: 'Mestre dos Laboratórios', desc: 'Solucione todos os quebra-cabeças de espectrógrafo e circuitos elétricos.', icon: COVER_SPIDERMAN_1, percent: '36.2%', type: 'bronze' },
-        { name: 'Visita Turística', desc: 'Fotografe todos os monumentos turísticos no mapa através da câmera.', icon: COVER_SPIDERMAN_1, percent: '49.8%', type: 'bronze' },
-        { name: 'Choque de Realidade', desc: 'Derrote Herman Schultz (Shocker) no interior do cofre do banco.', icon: COVER_SPIDERMAN_1, percent: '82.9%', type: 'bronze' },
-        { name: 'Conexão Policial', desc: 'Sintonize todas as torres de rádio da polícia para desobstruir o mapa.', icon: COVER_SPIDERMAN_1, percent: '78.3%', type: 'bronze' },
-        { name: 'Gata Ladra', desc: 'Encontre todos os vestígios e desvende o esconderijo secreto da Black Cat.', icon: COVER_SPIDERMAN_1, percent: '57.2%', type: 'bronze' },
-        { name: 'Primeiro Passo', desc: 'Conclua a missão de abertura e capture Wilson Fisk (Rei do Crime).', icon: COVER_SPIDERMAN_1, percent: '96.5%', type: 'bronze' },
-        { name: 'Frio e Calculista', desc: 'Conclua a missão secundária e derrote Tombstone em sua oficina.', icon: COVER_SPIDERMAN_1, percent: '51.4%', type: 'bronze' },
-        { name: 'Rei dos Trilhos', desc: 'Faça 5 viagens rápidas no metrô de Manhattan.', icon: COVER_SPIDERMAN_1, percent: '72.3%', type: 'bronze' },
-        { name: 'Acrobata Nato', desc: 'Execute 4 acrobacias diferentes antes de aterrissar.', icon: COVER_SPIDERMAN_1, percent: '69.1%', type: 'bronze' },
-        { name: 'No Ponto Cego', desc: 'Derrube 50 inimigos utilizando a Teia de Impacto.', icon: COVER_SPIDERMAN_1, percent: '58.3%', type: 'bronze' },
-        { name: 'Luzes Apagadas', desc: 'Derrote Electro e Abutre na batalha aérea de alta altitude.', icon: COVER_SPIDERMAN_1, percent: '63.9%', type: 'silver' },
-        { name: 'Pancadaria Bruta', desc: 'Derrote Rhino e Escorpião nas docas de Nova York.', icon: COVER_SPIDERMAN_1, percent: '62.7%', type: 'silver' },
-        { name: 'Fim do Cerco', desc: 'Conclua o Ato 2 da história após o motim do RAFT.', icon: COVER_SPIDERMAN_1, percent: '64.5%', type: 'bronze' },
-        { name: 'Um Novo Começo', desc: 'Conclua o Ato 1 da história contra os Demônios.', icon: COVER_SPIDERMAN_1, percent: '74.8%', type: 'bronze' },
-        { name: 'Incrível', desc: 'Alcance o nível 50 de jogador.', icon: COVER_SPIDERMAN_1, percent: '44.6%', type: 'bronze' },
-        { name: 'Espírito Esportivo', desc: 'Corra pelo campo no Big Apple Stadium.', icon: COVER_SPIDERMAN_1, percent: '48.9%', type: 'bronze' },
-        { name: 'Especialista em Combate', desc: 'Atinja uma sequência de combo de 100 golpes.', icon: COVER_SPIDERMAN_1, percent: '39.7%', type: 'bronze' },
-        { name: 'Chuva de Teias', desc: 'Cole 10 pares de inimigos usando Minas de Teia.', icon: COVER_SPIDERMAN_1, percent: '46.2%', type: 'bronze' },
-        { name: 'Sob Controle', desc: 'Impeça 10 assaltos a mão armada em andamento.', icon: COVER_SPIDERMAN_1, percent: '68.0%', type: 'bronze' },
-        { name: 'Segurança Privada', desc: 'Elimine um acampamento inteiro da Sable sem disparar alarmes.', icon: COVER_SPIDERMAN_1, percent: '30.1%', type: 'bronze' },
-        { name: 'Amigo da Galera', desc: 'Conclua todas as missões de estudantes e cidadãos.', icon: COVER_SPIDERMAN_1, percent: '41.0%', type: 'bronze' },
-        { name: 'Armas no Chão', desc: 'Arranque armas das mãos de 50 inimigos com a teia.', icon: COVER_SPIDERMAN_1, percent: '59.2%', type: 'bronze' },
-        { name: 'Defesa Perfeita', desc: 'Realize 25 esquivas perfeitas contra disparos de fuzil.', icon: COVER_SPIDERMAN_1, percent: '62.1%', type: 'bronze' },
-        { name: 'Carona Grátis', desc: 'Viaje em cima de um vagão de metrô por 2 minutos.', icon: COVER_SPIDERMAN_1, percent: '53.7%', type: 'bronze' },
-        { name: 'Rede de Alta Velocidade', desc: 'Interrompa um comboio em alta velocidade sem bater o carro.', icon: COVER_SPIDERMAN_1, percent: '67.4%', type: 'bronze' },
-        { name: 'Na Mosca', desc: 'Acerte 10 inimigos no ar arremessando objetos do cenário.', icon: COVER_SPIDERMAN_1, percent: '49.9%', type: 'bronze' },
-        { name: 'Passeio Noturno', desc: 'Plane sobre Manhattan durante a tempestade noturna.', icon: COVER_SPIDERMAN_1, percent: '71.5%', type: 'bronze' },
-        { name: 'Amor de Mãe', desc: 'Visite o abrigo F.E.A.S.T. e converse com May.', icon: COVER_SPIDERMAN_1, percent: '88.9%', type: 'bronze' },
-        { name: 'Mochileiro Fiel', desc: 'Colete suas primeiras 5 mochilas de recordação.', icon: COVER_SPIDERMAN_1, percent: '93.2%', type: 'bronze' },
-        { name: 'Caçador de Vilões', desc: 'Derrote 50 capangas armados em esconderijos.', icon: COVER_SPIDERMAN_1, percent: '75.3%', type: 'bronze' },
-        { name: 'Teias Afiadas', desc: 'Compre a primeira habilidade na árvore de combate.', icon: COVER_SPIDERMAN_1, percent: '97.1%', type: 'bronze' },
-        { name: 'Salto da Fé', desc: 'Pule de um arranha-céu e abra a teia a menos de 5 metros do chão.', icon: COVER_SPIDERMAN_1, percent: '79.6%', type: 'bronze' },
-        { name: 'Sinal de Fumaça', desc: 'Conclua um desafio de bomba do Treinador em tempo recorde.', icon: COVER_SPIDERMAN_1, percent: '55.3%', type: 'bronze' },
-        { name: 'Fotógrafo Premiado', desc: 'Tire uma selfie no ponto mais alto da cidade.', icon: COVER_SPIDERMAN_1, percent: '81.2%', type: 'bronze' },
-        { name: 'Defensor de Nova York', desc: 'Patrulhe a cidade e garanta a paz para os cidadãos.', icon: COVER_SPIDERMAN_1, percent: '86.4%', type: 'bronze' }
+        // 1 PLATINA
+        { name: 'Be Greater', desc: 'Obtenha todos os Troféus de Marvel\'s Spider-Man.', icon: 'https://i.psnprofiles.com/trophies/8143/1.png', percent: '14.2%', type: 'platina' },
+        
+        // 2 OURO
+        { name: 'Spider-Man Superior', desc: 'Desbloqueie todas as Habilidades.', icon: 'https://i.psnprofiles.com/trophies/8143/2.png', percent: '21.5%', type: 'gold' },
+        { name: 'Eu Amo Manhattan', desc: 'Conclua 100% em todos os distritos.', icon: 'https://i.psnprofiles.com/trophies/8143/3.png', percent: '18.6%', type: 'gold' },
+        
+        // 10 PRATA
+        { name: 'Mestre dos Mestres', desc: 'Derrote o Treinador (Taskmaster) após superar seus desafios.', icon: 'https://i.psnprofiles.com/trophies/8143/4.png', percent: '28.7%', type: 'silver' },
+        { name: 'Mochileiro', desc: 'Obtenha todas as Mochilas de Peter Parker espalhadas pela cidade.', icon: 'https://i.psnprofiles.com/trophies/8143/5.png', percent: '42.5%', type: 'silver' },
+        { name: 'Gato e Sapato', desc: 'Localize a Black Cat encontrando todos os seus pontos de vigilância.', icon: 'https://i.psnprofiles.com/trophies/8143/6.png', percent: '57.2%', type: 'silver' },
+        { name: 'Santuário Interior', desc: 'Elimine cada Galpão dos Demônios em Manhattan.', icon: 'https://i.psnprofiles.com/trophies/8143/7.png', percent: '33.5%', type: 'silver' },
+        { name: 'Os Homens do Rei', desc: 'Elimine cada Esconderijo do Fisk em Manhattan.', icon: 'https://i.psnprofiles.com/trophies/8143/8.png', percent: '38.0%', type: 'silver' },
+        { name: 'Táticas Mercenárias', desc: 'Elimine cada Posto Avançado da Sable International.', icon: 'https://i.psnprofiles.com/trophies/8143/9.png', percent: '30.1%', type: 'silver' },
+        { name: 'De Volta ao Xilindró', desc: 'Elimine cada Acampamento de Prisioneiros fugitivos.', icon: 'https://i.psnprofiles.com/trophies/8143/10.png', percent: '32.4%', type: 'silver' },
+        { name: 'Vigilância do Bairro', desc: 'Conclua todos os Crimes de Facção em um distrito.', icon: 'https://i.psnprofiles.com/trophies/8143/11.png', percent: '41.0%', type: 'silver' },
+        { name: 'Um Traje para Cada Ocasião', desc: 'Adquira todos os Trajes disponíveis no jogo base.', icon: 'https://i.psnprofiles.com/trophies/8143/12.png', percent: '27.4%', type: 'silver' },
+        { name: 'Lição Cumprida', desc: 'Conclua todas as missões dos Estudantes Corrompidos.', icon: 'https://i.psnprofiles.com/trophies/8143/13.png', percent: '39.2%', type: 'silver' },
+
+        // 38 BRONZE
+        { name: 'Cobertura Espetacular', desc: 'Ative todas as Torres de Vigilância da polícia para revelar o mapa.', icon: 'https://i.psnprofiles.com/trophies/8143/14.png', percent: '78.3%', type: 'bronze' },
+        { name: 'Pavio Curto', desc: 'Atinja o nível Espetacular ou superior em um Desafio de Bomba do Treinador.', icon: 'https://i.psnprofiles.com/trophies/8143/15.png', percent: '55.3%', type: 'bronze' },
+        { name: 'Punhos Furiosos', desc: 'Atinja o nível Espetacular ou superior em um Desafio de Combate do Treinador.', icon: 'https://i.psnprofiles.com/trophies/8143/16.png', percent: '48.9%', type: 'bronze' },
+        { name: 'Ninja', desc: 'Atinja o nível Espetacular ou superior em um Desafio de Furtividade do Treinador.', icon: 'https://i.psnprofiles.com/trophies/8143/17.png', percent: '46.1%', type: 'bronze' },
+        { name: 'Antiespião', desc: 'Atinja o nível Espetacular ou superior em um Desafio de Drone do Treinador.', icon: 'https://i.psnprofiles.com/trophies/8143/18.png', percent: '43.7%', type: 'bronze' },
+        { name: 'Caça-Desafios', desc: 'Conclua cada Desafio do Treinador na cidade pelo menos uma vez.', icon: 'https://i.psnprofiles.com/trophies/8143/19.png', percent: '51.8%', type: 'bronze' },
+        { name: 'Pesquisador', desc: 'Conclua todas as Estações de Pesquisa da Oscorp.', icon: 'https://i.psnprofiles.com/trophies/8143/20.png', percent: '31.9%', type: 'bronze' },
+        { name: 'Ascensão dos Demônios', desc: 'Conclua o Ato 1 da história contra os Demônios.', icon: 'https://i.psnprofiles.com/trophies/8143/21.png', percent: '74.8%', type: 'bronze' },
+        { name: 'Os Seis Reunidos', desc: 'Conclua o Ato 2 da história após o motim do RAFT.', icon: 'https://i.psnprofiles.com/trophies/8143/22.png', percent: '64.5%', type: 'bronze' },
+        { name: 'Fim de Jogo', desc: 'Derrote o Doutor Octopus no topo da Oscorp e conclua o Ato 3.', icon: 'https://i.psnprofiles.com/trophies/8143/23.png', percent: '46.8%', type: 'bronze' },
+        { name: 'Ciência é TOP!', desc: 'Crie 15 melhorias de dispositivos no laboratório de Otto Octavius.', icon: 'https://i.psnprofiles.com/trophies/8143/24.png', percent: '43.8%', type: 'bronze' },
+        { name: 'Derrubando o Kingpin', desc: 'Conclua a missão de abertura e capture Wilson Fisk (Rei do Crime).', icon: 'https://i.psnprofiles.com/trophies/8143/25.png', percent: '96.5%', type: 'bronze' },
+        { name: 'Pensamento Positivo', desc: 'Derrote Martin Li (Senhor Negativo).', icon: 'https://i.psnprofiles.com/trophies/8143/26.png', percent: '52.4%', type: 'bronze' },
+        { name: 'Baixa a Bola', desc: 'Derrote Electro e Abutre na batalha aérea de alta altitude.', icon: 'https://i.psnprofiles.com/trophies/8143/27.png', percent: '63.9%', type: 'bronze' },
+        { name: 'Ferrão e Pancadão', desc: 'Derrote Rhino e Escorpião nas docas de Nova York.', icon: 'https://i.psnprofiles.com/trophies/8143/28.png', percent: '62.7%', type: 'bronze' },
+        { name: 'Tombstone Tombado', desc: 'Conclua a missão secundária e derrote Tombstone em sua oficina.', icon: 'https://i.psnprofiles.com/trophies/8143/29.png', percent: '51.4%', type: 'bronze' },
+        { name: 'Choque no Sistema', desc: 'Derrote Herman Schultz (Shocker) no interior do cofre do banco.', icon: 'https://i.psnprofiles.com/trophies/8143/30.png', percent: '82.9%', type: 'bronze' },
+        { name: 'Alado', desc: 'Atravesse os terraços da cidade deslizando por condutas de ventilação.', icon: 'https://i.psnprofiles.com/trophies/8143/31.png', percent: '71.5%', type: 'bronze' },
+        { name: 'Rei do Balanço', desc: 'Conclua um Marco de Travessia de nível 1.', icon: 'https://i.psnprofiles.com/trophies/8143/32.png', percent: '84.2%', type: 'bronze' },
+        { name: 'E Não Volte!', desc: 'Conclua um Marco de Combate de nível 1.', icon: 'https://i.psnprofiles.com/trophies/8143/33.png', percent: '88.0%', type: 'bronze' },
+        { name: 'Pegue o Pombo', desc: 'Ajude Howard capturando todos os seus pombos fugitivos.', icon: 'https://i.psnprofiles.com/trophies/8143/34.png', percent: '52.1%', type: 'bronze' },
+        { name: 'Correr pro Abraço', desc: 'Faça 10 pares de inimigos colidirem usando Minas a Laser.', icon: 'https://i.psnprofiles.com/trophies/8143/35.png', percent: '46.2%', type: 'bronze' },
+        { name: 'Spider-Man Amigo da Vizinhança', desc: 'Conclua todas as missões secundárias de Manhattan.', icon: 'https://i.psnprofiles.com/trophies/8143/36.png', percent: '37.5%', type: 'bronze' },
+        { name: 'O Método Científico', desc: 'Crie e equipe o seu primeiro aprimoramento de traje ou dispositivo.', icon: 'https://i.psnprofiles.com/trophies/8143/37.png', percent: '92.8%', type: 'bronze' },
+        { name: 'Spider-Man Sociável', desc: 'Cumprimente 10 cidadãos de Manhattan nas ruas apertando o botão de interação.', icon: 'https://i.psnprofiles.com/trophies/8143/38.png', percent: '76.4%', type: 'bronze' },
+        { name: 'Turista', desc: 'Fotografe todos os monumentos e locais marcantes no mapa com a câmera.', icon: 'https://i.psnprofiles.com/trophies/8143/39.png', percent: '49.8%', type: 'bronze' },
+        { name: 'Com Grandes Poderes...', desc: 'Visite e preste condolências no túmulo de Ben Parker no cemitério do Harlem.', icon: 'https://i.psnprofiles.com/trophies/8143/40.png', percent: '54.1%', type: 'bronze' },
+        { name: 'Herói Altivo', desc: 'Escale e empoleire-se no ponto mais alto da Torre dos Vingadores.', icon: 'https://i.psnprofiles.com/trophies/8143/41.png', percent: '73.2%', type: 'bronze' },
+        { name: 'Aracnofobia', desc: 'Neutralize 75 inimigos furtivamente pendurado no teto ou vigas.', icon: 'https://i.psnprofiles.com/trophies/8143/42.png', percent: '65.9%', type: 'bronze' },
+        { name: 'Rei dos Trilhos', desc: 'Faça 5 viagens rápidas no metrô de Manhattan.', icon: 'https://i.psnprofiles.com/trophies/8143/43.png', percent: '72.3%', type: 'bronze' },
+        { name: 'Acrobata Nato', desc: 'Execute 4 acrobacias diferentes no ar antes de aterrissar.', icon: 'https://i.psnprofiles.com/trophies/8143/44.png', percent: '69.1%', type: 'bronze' },
+        { name: 'No Ponto Cego', desc: 'Derrube 50 inimigos utilizando a Teia de Impacto.', icon: 'https://i.psnprofiles.com/trophies/8143/45.png', percent: '58.3%', type: 'bronze' },
+        { name: 'Incrível', desc: 'Alcance o nível 50 de jogador.', icon: 'https://i.psnprofiles.com/trophies/8143/46.png', percent: '44.6%', type: 'bronze' },
+        { name: 'Espírito Esportivo', desc: 'Corra pelas bases no campo de beisebol do Big Apple Stadium.', icon: 'https://i.psnprofiles.com/trophies/8143/47.png', percent: '48.9%', type: 'bronze' },
+        { name: 'Especialista em Combate', desc: 'Atinja uma sequência de combo de 100 golpes.', icon: 'https://i.psnprofiles.com/trophies/8143/48.png', percent: '39.7%', type: 'bronze' },
+        { name: 'Segurança Privada', desc: 'Elimine um acampamento inteiro da Sable sem acionar alarmes.', icon: 'https://i.psnprofiles.com/trophies/8143/49.png', percent: '30.1%', type: 'bronze' },
+        { name: 'Defesa Perfeita', desc: 'Realize 25 esquivas perfeitas contra disparos de fuzil e golpes.', icon: 'https://i.psnprofiles.com/trophies/8143/50.png', percent: '62.1%', type: 'bronze' },
+        { name: 'Salto da Fé', desc: 'Pule de um arranha-céu e abra a teia a menos de 5 metros do chão.', icon: 'https://i.psnprofiles.com/trophies/8143/51.png', percent: '79.6%', type: 'bronze' }
     ];
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -812,24 +819,50 @@
         'sm2': 'spiderman_2',
         'sm 2': 'spiderman_2',
         'sm': '1817070',
+        'sm1': '1817070',
+        'sm 1': '1817070',
         'spider man 2': 'spiderman_2',
         'spiderman 2': 'spiderman_2',
         'spider-man 2': 'spiderman_2',
+        'spider men 2': 'spiderman_2',
+        'spidermen 2': 'spiderman_2',
         'marvels spider-man 2': 'spiderman_2',
         'marvel spider-man 2': 'spiderman_2',
         'marvels spider man 2': 'spiderman_2',
         'homem aranha 2': 'spiderman_2',
         'homem-aranha 2': 'spiderman_2',
-        'spider man': 'spiderman_2',
-        'spiderman': 'spiderman_2',
-        'spider-man': 'spiderman_2',
-        'spider': 'spiderman_2',
+        'spider man': '1817070',
+        'spiderman': '1817070',
+        'spider-man': '1817070',
+        'spider men': '1817070',
+        'spidermen': '1817070',
+        'spider-men': '1817070',
+        'spider': '1817070',
         'spider man remastered': '1817070',
         'spiderman remastered': '1817070',
+        'spider-man remastered': '1817070',
+        'spider men remastered': '1817070',
+        'spidermen remastered': '1817070',
+        'spider-men remastered': '1817070',
+        'spider man remaster': '1817070',
+        'spiderman remaster': '1817070',
+        'spider-man remaster': '1817070',
+        'spider men remaster': '1817070',
+        'spidermen remaster': '1817070',
+        'spider remaster': '1817070',
+        'spider remastered': '1817070',
         'marvels spider-man remastered': '1817070',
         'marvel spider-man remastered': '1817070',
         'marvels spider man remastered': '1817070',
+        'marvels spiderman remastered': '1817070',
+        'marvel spider man remaster': '1817070',
+        'marvels spider-man': '1817070',
+        'marvel spider-man': '1817070',
         'spider man 1': '1817070',
+        'spiderman 1': '1817070',
+        'spider-man 1': '1817070',
+        'remaster': '1817070',
+        'remastered': '1817070',
         'er': '1245620',
         'elden ring': '1245620',
         'elden': '1245620',
@@ -1022,9 +1055,14 @@
         }
 
         // 4. Busca por substring para títulos conhecidos
-        if (qLower.includes('spider') && qLower.includes('2')) return CATALOGO_MESTRE['spiderman_2'];
-        if (qLower.includes('spider') && qLower.includes('remastered')) return CATALOGO_MESTRE['1817070'];
-        if (qLower.includes('spider') || qLower.includes('aranha')) return CATALOGO_MESTRE['spiderman_2'];
+        const hasSpider = qLower.includes('spider') || qLower.includes('aranha') || qLower.includes('spiderm');
+        const hasRemaster = qLower.includes('remaster');
+        const hasTwo = qLower.includes('2') || qLower.includes('ii');
+
+        if (hasSpider && hasTwo) return CATALOGO_MESTRE['spiderman_2'];
+        if ((hasSpider || qLower.includes('marvel')) && hasRemaster) return CATALOGO_MESTRE['1817070'];
+        if (hasRemaster && (qLower === 'remaster' || qLower === 'remastered')) return CATALOGO_MESTRE['1817070'];
+        if (hasSpider) return CATALOGO_MESTRE['1817070'];
 
         for (const k in CATALOGO_MESTRE) {
             const item = CATALOGO_MESTRE[k];

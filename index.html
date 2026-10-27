@@ -4208,18 +4208,23 @@
             }
         }
 
-        // Detecção de Autenticação ao entrar no site (seja por link de e-mail ou sessão ativa)
+        // Detecção de Autenticação ao entrar no site (seja por Google OAuth, link de e-mail ou sessão ativa)
         if (window.sbClient) {
             window.sbClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_IN' && session) {
-                    const name = session.user.user_metadata?.username || session.user.email.split('@')[0];
+                    const name = session.user.user_metadata?.username || session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email.split('@')[0];
                     localStorage.setItem('overcritic_currentUser', name);
                     localStorage.setItem('overcritic_user', name);
                     localStorage.setItem('overcritic_user_email', session.user.email);
+                    localStorage.setItem('overcritic_user_id', session.user.id);
+
+                    const avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
+                    if (avatar) {
+                        localStorage.setItem('overcritic_user_avatar', avatar);
+                    }
                     atualizarEstadoAuthHeader();
 
-                    // Se acabou de validar o e-mail através do link da confirmação
-                    if (window.location.hash.includes('access_token') || window.location.hash.includes('type=signup')) {
+                    if (window.location.hash.includes('access_token') || window.location.hash.includes('type=signup') || window.location.search.includes('code=')) {
                         exibirToast(`🎉 <b>Conta autenticada com sucesso!</b> Bem-vindo(a) ao OVERCRITIC, <b>${name}</b>!`);
                         window.history.replaceState(null, '', window.location.pathname);
                     }
@@ -4229,13 +4234,16 @@
             });
         }
 
-        // Verifica erros de confirmação de e-mail no hash (ex: link expirado)
-        if (window.location.hash.includes('error_description') || window.location.hash.includes('otp_expired')) {
-            const params = new URLSearchParams(window.location.hash.substring(1));
-            const erroMsg = params.get('error_description') || 'Link de confirmação expirado ou inválido.';
+        // Verifica erros de confirmação ou OAuth (tanto no hash quanto na query string)
+        const urlParamsErro = new URLSearchParams(window.location.search);
+        const hashParamsErro = new URLSearchParams(window.location.hash.substring(1));
+        const erroMsgDesc = urlParamsErro.get('error_description') || hashParamsErro.get('error_description');
+
+        if (erroMsgDesc || window.location.hash.includes('otp_expired') || urlParamsErro.get('error')) {
             setTimeout(() => {
-                exibirToast(`⚠️ <b>Link expirado:</b> ${erroMsg} <a href="conta_login.html?tab=login&expired=1" style="color:var(--accent-cyan); text-decoration:underline; font-weight:700; margin-left:8px;">Reenviar novo link</a>`);
-            }, 1000);
+                exibirToast(`⚠️ <b>Aviso de Autenticação:</b> ${erroMsgDesc || 'Falha ao autenticar.'} <a href="conta_login.html?tab=login" style="color:var(--accent-cyan); text-decoration:underline; font-weight:700; margin-left:8px;">Tentar novamente</a>`);
+            }, 800);
+            window.history.replaceState(null, '', window.location.pathname);
         }
 
         // ══════════════════════════════════════

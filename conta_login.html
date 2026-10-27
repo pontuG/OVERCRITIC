@@ -30,6 +30,8 @@
                     'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
                 ];
                 keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.removeItem('overcritic_psn_sync_account');
+                localStorage.removeItem('overcritic_gamer_platforms');
                 localStorage.setItem(RESET_KEY, 'concluido');
             }
         })();
@@ -501,6 +503,7 @@
         .profile-actions {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
         .btn-home {
             flex: 1;
@@ -540,17 +543,77 @@
             transform: translateY(-2px);
         }
 
+        .tab-btn.tab-hidden,
+        .tab-btn[hidden],
+        .tab-btn[style*="display: none"],
+        .tab-btn[style*="display:none"],
+        .tab-hidden {
+            display: none !important;
+        }
+
         @media (max-width: 768px) {
             .main-wrapper { 
                 margin-left: 0 !important; 
                 padding: 16px 14px calc(80px + env(safe-area-inset-bottom, 0px)) 14px !important; 
             }
             .auth-container { 
-                padding: 24px 16px !important; 
+                padding: 20px 14px !important; 
                 max-width: 100% !important;
             }
             .stats-cards-row { 
                 grid-template-columns: repeat(2, 1fr) !important; 
+            }
+
+            /* Abas de autenticação no celular */
+            .auth-tabs {
+                display: flex !important;
+                gap: 6px !important;
+                padding: 4px !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .auth-tabs .tab-btn {
+                flex: 1 1 auto !important;
+                padding: 8px 12px !important;
+                font-size: 0.78rem !important;
+                white-space: nowrap !important;
+            }
+            .auth-tabs .tab-btn.tab-hidden,
+            .auth-tabs .tab-btn[style*="display: none"],
+            .auth-tabs .tab-btn[style*="display:none"] {
+                display: none !important;
+            }
+
+            /* Ações do perfil no celular (Garante botão Desconectar 100% acessível e sem corte) */
+            .profile-actions {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+            .profile-actions .btn-home,
+            .profile-actions .btn-logout {
+                width: 100% !important;
+                min-width: 0 !important;
+                padding: 12px 8px !important;
+                font-size: 0.82rem !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                white-space: normal !important;
+                line-height: 1.25 !important;
+                box-sizing: border-box !important;
+            }
+            .profile-actions .btn-logout {
+                grid-column: 1 / -1 !important;
+                background: rgba(239, 68, 68, 0.16) !important;
+                border: 1px solid rgba(239, 68, 68, 0.6) !important;
+                color: #ff6b6b !important;
+                font-weight: 800 !important;
+                padding: 13px !important;
+                box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25) !important;
+                margin-top: 4px !important;
             }
         }
         @media (max-width: 480px) {
@@ -558,8 +621,126 @@
                 grid-template-columns: repeat(2, 1fr) !important; 
             }
             .auth-container { 
-                padding: 20px 12px !important; 
+                padding: 18px 10px !important; 
             }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           GAMER PLATFORM SSO SUITE (ESTILO EPIC GAMES / CONSOLES)
+        ═══════════════════════════════════════════════════════════ */
+        .gamer-sso-wrapper {
+            margin-top: 26px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sso-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 16px 0 8px 0;
+        }
+
+        .sso-divider::before,
+        .sso-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sso-divider span {
+            padding: 0 14px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #f1f5f9;
+            letter-spacing: 0.5px;
+            text-transform: none;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           BOTÃO OFICIAL "CONTINUAR COM O GOOGLE" (PADRÃO GOOGLE PILL)
+        ═══════════════════════════════════════════════════════════ */
+        .btn-google-pill {
+            width: 100%;
+            background: #ffffff;
+            color: #1f1f1f;
+            border: 1px solid #dadce0;
+            border-radius: 9999px;
+            padding: 13px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: var(--font-family);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+            user-select: none;
+        }
+
+        .btn-google-pill:hover {
+            background: #f8fafc;
+            border-color: #c7cbd1;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-google-pill:active {
+            transform: translateY(0);
+            background: #f1f5f9;
+        }
+
+        body.light-mode .btn-google-pill {
+            background: #ffffff;
+            color: #0f172a;
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .auth-divider-text {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0 18px 0;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .auth-divider-text::before,
+        .auth-divider-text::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        body.light-mode .auth-divider-text::before,
+        body.light-mode .auth-divider-text::after {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        .auth-divider-text span {
+            padding: 0 14px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Cartão de Coleções no Perfil */
+        .user-collections-quick-card {
+            background: rgba(13, 17, 27, 0.7);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-top: 16px;
+            margin-bottom: 20px;
+        }
+
+        .user-collections-quick-card a:hover {
+            transform: translateY(-2px);
+            border-color: currentColor !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
     </style>
     <link rel="stylesheet" href="css/responsive-global.css">
@@ -614,18 +795,33 @@
                     try {
                         var u = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim();
                         var uid = (localStorage.getItem('overcritic_user_id') || '').trim();
-                        var em = (localStorage.getItem('overcritic_user_email') || '').trim();
-                        var isLogged = (u && !['visitante', 'anônimo', 'anonimo', 'null', 'undefined'].includes(u.toLowerCase())) || uid || (em && em.indexOf('@') !== -1);
+                        var isLogged = u && !['visitante', 'anônimo', 'anonimo', 'null', 'undefined', ''].includes(u.toLowerCase()) && uid;
                         var tl = document.getElementById('tabLogin');
                         var tr = document.getElementById('tabRegister');
                         var tp = document.getElementById('tabProfile');
                         if (isLogged) {
-                            if (tl) tl.style.display = 'none';
-                            if (tr) tr.style.display = 'none';
+                            if (tl) {
+                                tl.style.display = 'none';
+                                tl.classList.add('tab-hidden');
+                                tl.classList.remove('active');
+                            }
+                            if (tr) {
+                                tr.style.display = 'none';
+                                tr.classList.add('tab-hidden');
+                                tr.classList.remove('active');
+                            }
                             if (tp) tp.classList.add('active');
-                            if (tl) tl.classList.remove('active');
                         } else {
-                            if (tl) tl.classList.add('active');
+                            if (tl) {
+                                tl.style.removeProperty('display');
+                                tl.classList.remove('tab-hidden');
+                                tl.classList.add('active');
+                            }
+                            if (tr) {
+                                tr.style.removeProperty('display');
+                                tr.classList.remove('tab-hidden');
+                                tr.classList.remove('active');
+                            }
                             if (tp) tp.classList.remove('active');
                         }
                     } catch(e) {}
@@ -704,6 +900,33 @@
                     <!-- 🏆 ESTANTE VIRTUAL DE TROFÉUS & MURAL DE INSÍGNIAS -->
                     <div id="profMuralInsigniasContainer" style="margin-top: 14px; margin-bottom: 20px;"></div>
 
+                    <!-- CARTÃO DE ATALHOS RÁPIDOS & COLEÇÕES DO USUÁRIO -->
+                    <div class="user-collections-quick-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <h4 style="margin: 0; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                                <span>🎮</span> Minhas Coleções & Diários
+                            </h4>
+                            <span style="font-size: 0.74rem; color: var(--accent-cyan); font-weight: 700;">Overcritic Cloud Sync</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+                            <a href="adicionar_platinas.html" style="text-decoration: none; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 12px; text-align: center; color: #f59e0b; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <span style="font-size: 1.4rem;">🏆</span>
+                                <span style="font-size: 0.82rem; font-weight: 700;">Mural de Platinas</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">Diário de Conquistas</span>
+                            </a>
+                            <a href="adicionar_jogos.html" style="text-decoration: none; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 12px; padding: 12px; text-align: center; color: var(--accent-cyan); transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <span style="font-size: 1.4rem;">🎮</span>
+                                <span style="font-size: 0.82rem; font-weight: 700;">Críticas de Jogos</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">Suas Análises</span>
+                            </a>
+                            <a href="adicionar_midias.html" style="text-decoration: none; background: rgba(157, 78, 221, 0.08); border: 1px solid rgba(157, 78, 221, 0.3); border-radius: 12px; padding: 12px; text-align: center; color: var(--accent-purple); transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <span style="font-size: 1.4rem;">🎬</span>
+                                <span style="font-size: 0.82rem; font-weight: 700;">Filmes & Mídias</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">Acervo Cine/Série</span>
+                            </a>
+                        </div>
+                    </div>
+
                     <div class="profile-actions" style="margin-bottom: 14px;">
                         <a href="index.html" class="btn-home">🏠 Ir para o Hub</a>
                         <button type="button" class="btn-home" onclick="abrirModalEditarUsername()" style="border-color: rgba(0, 240, 255, 0.4); color: var(--accent-cyan);" title="Alterar seu nome de usuário único">✏️ Alterar Usuário</button>
@@ -748,6 +971,23 @@
                     </div>
                 </div>
 
+                <!-- ══════ LOGIN COM O GOOGLE (ESTILO PILL OFICIAL) ══════ -->
+                <div class="google-continue-wrapper" style="margin-top: 5px; margin-bottom: 5px;">
+                    <button type="button" class="btn-google-pill" onclick="iniciarLoginGoogle()" id="btnGoogleContinue" title="Continuar com sua Conta Google">
+                        <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink: 0;">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.33 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 10.04 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+                        </svg>
+                        <span>Continuar com o Google</span>
+                    </button>
+
+                    <div class="auth-divider-text">
+                        <span>ou entre com e-mail e senha</span>
+                    </div>
+                </div>
+
                 <!-- Formulário de Login -->
                 <form id="formLogin" name="loginForm" method="post" action="javascript:void(0);" autocomplete="on" onsubmit="realizarLogin(event)">
                     <div class="form-group">
@@ -769,6 +1009,13 @@
                         <span><a href="javascript:void(0)" onclick="alternarTab('forgot')" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Redefinir senha</a></span>
                     </div>
                 </form>
+
+                <!-- Nota de Conexão Oficial e Diário -->
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div style="padding: 12px 14px; background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 12px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; text-align: center;">
+                        🏆 <b>Mural de Platinas:</b> Suas platinas e troféus são registrados no diário oficial através do catálogo global de jogos em <b>Minhas Platinas</b>.
+                    </div>
+                </div>
             </div>
 
             <!-- ══════ ABA 3: CRIAR CONTA (CADASTRO) ══════ -->
@@ -931,14 +1178,14 @@
         let usuarioAtualSessao = null;
 
         function isUsuarioLogado() {
-            if (usuarioAtualSessao) return true;
+            if (usuarioAtualSessao && usuarioAtualSessao.id) return true;
             const localUser = (localStorage.getItem('overcritic_currentUser') || localStorage.getItem('overcritic_user') || '').trim();
-            if (localUser && !['visitante', 'anônimo', 'anonimo', 'null', 'undefined', ''].includes(localUser.toLowerCase())) {
-                return true;
+            if (!localUser || ['visitante', 'anônimo', 'anonimo', 'null', 'undefined', ''].includes(localUser.toLowerCase())) {
+                return false;
             }
             const localUid = (localStorage.getItem('overcritic_user_id') || '').trim();
             const localEmail = (localStorage.getItem('overcritic_user_email') || '').trim();
-            if (localUid || (localEmail && localEmail.includes('@'))) {
+            if (localUid || localEmail) {
                 return true;
             }
             return false;
@@ -952,8 +1199,28 @@
 
             const logado = isUsuarioLogado();
 
-            if (tabLogin) tabLogin.style.display = logado ? 'none' : '';
-            if (tabRegister) tabRegister.style.display = logado ? 'none' : '';
+            if (tabLogin) {
+                tabLogin.style.removeProperty('display');
+                tabLogin.classList.remove('tab-hidden');
+                if (logado) {
+                    tabLogin.style.display = 'none';
+                    tabLogin.classList.add('tab-hidden');
+                    tabLogin.classList.remove('active');
+                } else {
+                    tabLogin.style.display = '';
+                }
+            }
+            if (tabRegister) {
+                tabRegister.style.removeProperty('display');
+                tabRegister.classList.remove('tab-hidden');
+                if (logado) {
+                    tabRegister.style.display = 'none';
+                    tabRegister.classList.add('tab-hidden');
+                    tabRegister.classList.remove('active');
+                } else {
+                    tabRegister.style.display = '';
+                }
+            }
             if (tabProfile) tabProfile.style.display = '';
             if (tabRanking) tabRanking.style.display = '';
         }
@@ -961,12 +1228,13 @@
         // Alternância entre as Abas
         function alternarTab(modo) {
             esconderAlerta();
-            atualizarVisibilidadeAbas();
 
-            // Se o usuário já estiver logado, não deve ter acesso às abas de login e cadastro
+            // Se o usuário já estiver logado de verdade e tentar login ou cadastro, direciona para o perfil
             if (isUsuarioLogado() && (modo === 'login' || modo === 'register')) {
                 modo = 'profile';
             }
+
+            atualizarVisibilidadeAbas();
 
             const tabProfile = document.getElementById('tabProfile');
             const tabLogin = document.getElementById('tabLogin');
@@ -994,18 +1262,22 @@
             }
 
             if (modo === 'profile') {
-                tabProfile.classList.add('active');
-                contentProfile.style.display = 'block';
-                badge.innerText = 'CENTRAL DO USUÁRIO';
-                title.innerText = 'Meu Perfil Gamer';
-                subtitle.innerText = 'Acompanhe seu status, estatísticas e críticas sincronizadas.';
+                if (tabProfile) tabProfile.classList.add('active');
+                if (contentProfile) contentProfile.style.display = 'block';
+                if (badge) badge.innerText = 'CENTRAL DO USUÁRIO';
+                if (title) title.innerText = 'Meu Perfil Gamer';
+                if (subtitle) subtitle.innerText = 'Acompanhe seu status, estatísticas e críticas sincronizadas.';
                 renderizarVisualPerfil();
             } else if (modo === 'login') {
-                tabLogin.classList.add('active');
-                contentLogin.style.display = 'block';
-                badge.innerText = 'ACESSO AO SISTEMA';
-                title.innerText = 'Entrar na Conta';
-                subtitle.innerText = 'Acesse com seu e-mail e senha para salvar suas críticas na nuvem.';
+                if (tabLogin) {
+                    tabLogin.style.display = '';
+                    tabLogin.classList.remove('tab-hidden');
+                    tabLogin.classList.add('active');
+                }
+                if (contentLogin) contentLogin.style.display = 'block';
+                if (badge) badge.innerText = 'ACESSO AO SISTEMA';
+                if (title) title.innerText = 'Entrar na Conta';
+                if (subtitle) subtitle.innerText = 'Acesse com seu e-mail e senha para salvar suas críticas na nuvem.';
                 renderizarVisualLogin();
             } else if (modo === 'ranking') {
                 if (tabRanking) tabRanking.classList.add('active');
@@ -2376,6 +2648,52 @@
                 alternarTab('login');
             }, 600);
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           AUTENTICAÇÃO COM A CONTA GOOGLE (SUPABASE OAUTH 2.0)
+        ═══════════════════════════════════════════════════════════ */
+        async function iniciarLoginGoogle() {
+            esconderAlerta();
+            if (!window.sbClient) {
+                mostrarAlerta('⚠️ Cliente Supabase indisponível no momento.', 'warning');
+                return;
+            }
+
+            mostrarAlerta('⏳ Conectando à sua Conta Google...', 'warning');
+
+            // Determina a URL de retorno válida
+            let redirectUrl = window.location.href.split('#')[0].split('?')[0];
+            if (redirectUrl.startsWith('file://')) {
+                redirectUrl = 'http://localhost:3000/conta_login.html';
+            }
+
+            try {
+                const { data, error } = await window.sbClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: redirectUrl,
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent'
+                        }
+                    }
+                });
+                if (error) throw error;
+            } catch(err) {
+                console.warn('Erro OAuth Google:', err);
+                mostrarAlerta(`
+                    <div style="font-size: 1.05rem; margin-bottom: 6px;">🔐 <b>Como ativar o "Continuar com o Google":</b></div>
+                    Para que a janela do Google apareça com suas contas (igual à do <i>ViaLiz</i>):<br>
+                    <div style="margin: 8px 0; font-size: 0.83rem; line-height: 1.6; background: rgba(0, 240, 255, 0.05); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0, 240, 255, 0.2);">
+                        1. No <a href="https://supabase.com/dashboard/project/lvvihjivyniqsmihnkof/auth/providers" target="_blank" style="color: var(--accent-cyan); font-weight: 700;">Painel do Supabase</a> &gt; <b>Authentication &gt; Providers</b>, ative o <b>Google</b>.<br>
+                        2. No <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--accent-cyan); font-weight: 700;">Google Cloud Console</a>, crie um <b>Client ID</b> e cole no Supabase.<br>
+                        3. Execute em um servidor web local (ex: Live Server ou <code>http://localhost</code>), pois a Google bloqueia o protocolo <code>file://</code> por segurança.
+                    </div>
+                    <div style="font-size: 0.78rem; color: #94a3b8;">Você também pode entrar instantaneamente digitando seu <b>E-mail e Senha</b> abaixo!</div>
+                `, 'warning');
+            }
+        }
+        window.iniciarLoginGoogle = iniciarLoginGoogle;
 
         // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {

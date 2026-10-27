@@ -29,6 +29,8 @@
                     'overcritic_feed', 'overcritic_quick_feed', 'overcritic_avaliacoes_rapidas', 'overcritic_deleted_records', 'overcritic_user_stats'
                 ];
                 keysParaZerar.forEach(function(k) { localStorage.setItem(k, '[]'); });
+                localStorage.removeItem('overcritic_psn_sync_account');
+                localStorage.removeItem('overcritic_gamer_platforms');
                 localStorage.setItem(RESET_KEY, 'concluido');
             }
         })();
@@ -1574,35 +1576,41 @@
         }
 
         .suggestion-item img {
-            width: 44px;
-            height: 28px;
+            width: 54px;
+            height: 32px;
             object-fit: cover;
-            border-radius: 4px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .suggestion-title {
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.25;
         }
 
         .suggestion-item-info {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
             overflow: hidden;
             flex: 1;
+            min-width: 0;
         }
 
         .suggestion-item-meta {
-            font-size: 0.72rem;
+            font-size: 0.74rem;
             color: var(--text-muted);
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-wrap: wrap;
         }
 
         .suggestion-tag-sigla {
@@ -1617,6 +1625,14 @@
         .suggestion-badge-trophy {
             color: var(--accent-gold);
             font-weight: 700;
+            white-space: nowrap;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
         }
 
         /* Banner de Prévia */
@@ -2500,6 +2516,214 @@
             color: #ff6b6b;
         }
 
+        /* ══════ PLAYSTATION NETWORK (PSN) SYNC SUITE ══════ */
+        .psn-sync-banner-card {
+            background: linear-gradient(135deg, rgba(0, 67, 156, 0.28) 0%, rgba(0, 114, 206, 0.12) 50%, rgba(13, 17, 23, 0.95) 100%);
+            border: 1px solid rgba(0, 114, 206, 0.45);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 8px 30px rgba(0, 67, 156, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .psn-sync-banner-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -20%;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(0, 114, 206, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .psn-sync-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            min-width: 280px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .psn-badge-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #003791, #0070d1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 0 16px rgba(0, 112, 209, 0.5);
+            flex-shrink: 0;
+        }
+
+        .psn-sync-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .psn-sync-info p {
+            margin: 0;
+            font-size: 0.82rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .btn-psn-action {
+            background: linear-gradient(135deg, #00439c 0%, #0072ce 100%);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 14px rgba(0, 114, 206, 0.35);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-psn-action:hover {
+            background: linear-gradient(135deg, #0056c7 0%, #0088f5 100%);
+            box-shadow: 0 0 20px rgba(0, 114, 206, 0.65);
+            transform: translateY(-2px);
+        }
+
+        .btn-psn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 9px 15px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-psn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        /* Modal PSN */
+        .psn-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 7, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .psn-modal-card {
+            background: linear-gradient(165deg, #0e1526 0%, #080c16 100%);
+            border: 1px solid rgba(0, 114, 206, 0.45);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 114, 206, 0.25);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 530px;
+            overflow: hidden;
+            animation: psnModalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes psnModalIn {
+            from { opacity: 0; transform: scale(0.92) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .psn-modal-header {
+            background: linear-gradient(135deg, #002b66 0%, #004da3 100%);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .psn-modal-header h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .psn-modal-body {
+            padding: 22px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .psn-modal-footer {
+            padding: 14px 24px;
+            background: rgba(0, 0, 0, 0.35);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Badge de troféu desbloqueado no PS5 */
+        .psn-trophy-unlocked-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.18), rgba(0, 150, 136, 0.18));
+            border: 1px solid rgba(0, 200, 83, 0.45);
+            color: #4ade80;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 6px;
+            margin-left: 8px;
+            vertical-align: middle;
+            box-shadow: 0 0 10px rgba(0, 200, 83, 0.15);
+        }
+
+        .psn-trophy-unlocked-tag.psn-platina-tag {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.22), rgba(168, 85, 247, 0.22));
+            border-color: rgba(0, 240, 255, 0.55);
+            color: #67e8f9;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+        }
+
+        .psn-check-icon {
+            font-size: 0.75rem;
+            font-weight: 900;
+        }
+
         /* ══════ BARRA MOBILE ══════ */
         .mobile-bottom-nav {
             display: none;
@@ -2596,15 +2820,258 @@
                 padding: 66px 12px 35px 12px !important;
                 width: 100% !important;
                 max-width: 100% !important;
+                box-sizing: border-box !important;
             }
             .hero-title {
-                font-size: 1.5rem !important;
+                font-size: 1.4rem !important;
             }
             .feed-grid {
                 grid-template-columns: 1fr !important;
             }
             .mobile-bottom-nav {
                 display: none !important;
+            }
+
+            /* ── RESPONSIVIDADE DO FORMULÁRIO DE REGISTRO DE PLATINAS (ISSUE 3) ── */
+            .register-container {
+                padding: 18px 12px !important;
+                border-radius: 18px !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .form-title {
+                font-size: 1.2rem !important;
+                line-height: 1.3 !important;
+            }
+
+            .form-subtitle {
+                font-size: 0.8rem !important;
+                margin-bottom: 18px !important;
+                line-height: 1.4 !important;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr !important;
+                gap: 14px !important;
+                width: 100% !important;
+            }
+
+            .form-group {
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .search-api-row {
+                flex-direction: column !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .search-api-row input {
+                width: 100% !important;
+                flex: none !important;
+            }
+
+            .search-api-row .btn-api-search {
+                width: 100% !important;
+                padding: 12px 16px !important;
+                height: auto !important;
+                justify-content: center !important;
+                text-align: center !important;
+                font-size: 0.82rem !important;
+                white-space: normal !important;
+            }
+
+            .trophy-control-card {
+                padding: 14px 12px !important;
+                border-radius: 14px !important;
+                gap: 12px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .trophy-card-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+
+            .trophy-card-title h4 {
+                font-size: 0.88rem !important;
+                line-height: 1.3 !important;
+            }
+
+            .btn-shortcut-platina {
+                width: 100% !important;
+                padding: 10px 14px !important;
+                font-size: 0.8rem !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+
+            .trophy-inputs-row {
+                flex-direction: row !important;
+                gap: 8px !important;
+                width: 100% !important;
+                align-items: center !important;
+            }
+
+            .trophy-num-box {
+                min-width: 0 !important;
+                flex: 1 !important;
+            }
+
+            .trophy-num-box label {
+                font-size: 0.68rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .trophy-num-input {
+                font-size: 1.1rem !important;
+                padding: 8px 30px 8px 10px !important;
+            }
+
+            .trophy-divisor {
+                font-size: 0.8rem !important;
+                padding: 0 2px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .trophy-banner-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 4px !important;
+            }
+
+            .trophy-banner-count {
+                font-size: 0.78rem !important;
+            }
+
+            .trophy-pct-badge {
+                font-size: 0.72rem !important;
+                align-self: flex-start !important;
+            }
+
+            .diff-curated-badge {
+                padding: 10px 12px !important;
+                font-size: 0.76rem !important;
+            }
+
+            .btn-submit-platina {
+                padding: 14px 20px !important;
+                font-size: 0.95rem !important;
+                margin-top: 8px !important;
+            }
+
+            /* ── RESPONSIVIDADE DO EXPLORADOR DE TROFÉUS (ISSUE 4) ── */
+            .explorer-header {
+                padding: 16px 12px !important;
+                border-radius: 16px !important;
+                gap: 12px !important;
+                margin-bottom: 16px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .explorer-search-bar {
+                flex-direction: column !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+
+            .explorer-search-bar > div {
+                width: 100% !important;
+                flex: none !important;
+                position: relative !important;
+            }
+
+            .explorer-search-bar .btn-api-search {
+                width: 100% !important;
+                padding: 12px 18px !important;
+                height: auto !important;
+                justify-content: center !important;
+                text-align: center !important;
+                font-size: 0.85rem !important;
+            }
+
+            .suggestions-box {
+                position: absolute !important;
+                top: calc(100% + 6px) !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                max-height: 270px !important;
+                background: #0b111e !important;
+                border: 1px solid rgba(0, 240, 255, 0.45) !important;
+                border-radius: 14px !important;
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 15px rgba(0, 240, 255, 0.2) !important;
+                z-index: 9999 !important;
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+            }
+
+            body.light-mode .suggestions-box {
+                background: #ffffff !important;
+                border-color: rgba(197, 27, 41, 0.35) !important;
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .suggestion-item {
+                padding: 10px 12px !important;
+                gap: 10px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .suggestion-item img {
+                width: 54px !important;
+                height: 32px !important;
+                border-radius: 6px !important;
+                object-fit: cover !important;
+                flex-shrink: 0 !important;
+            }
+
+            .suggestion-item-info {
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 3px !important;
+            }
+
+            .suggestion-title {
+                font-size: 0.86rem !important;
+                font-weight: 700 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                width: 100% !important;
+                display: block !important;
+            }
+
+            .suggestion-item-meta {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                flex-wrap: wrap !important;
+                font-size: 0.72rem !important;
+            }
+
+            .suggestion-badge-trophy {
+                white-space: nowrap !important;
+                font-size: 0.7rem !important;
+                padding: 1px 6px !important;
+                background: rgba(255, 215, 0, 0.12) !important;
+                border-radius: 6px !important;
+                display: inline-flex !important;
+                align-items: center !important;
             }
         }
     </style>
@@ -3079,6 +3546,22 @@
                 </div>
             </div>
 
+            <!-- BANNER INFORMATIVO: CATÁLOGO OFICIAL DE TROFÉUS E PLATINAS -->
+            <div id="psnSyncBannerCard" class="psn-sync-banner-card" style="background: linear-gradient(135deg, rgba(13, 22, 40, 0.85) 0%, rgba(20, 32, 58, 0.85) 100%); border: 1px solid rgba(0, 240, 255, 0.22);">
+                <div class="psn-sync-content">
+                    <div class="psn-badge-logo" style="font-size: 2rem; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">🏆</div>
+                    <div class="psn-sync-info">
+                        <h4 id="psnBannerTitle" style="color: #f0f4fc; font-weight: 800;">Catálogo e Diário Oficial de Platinas</h4>
+                        <p id="psnBannerSubtitle" style="color: #94a3b8; font-size: 0.84rem; line-height: 1.5;">Consulte a lista completa de troféus e conquistas de qualquer jogo. Ao platinar, registre sua conquista com suas horas, dificuldade e review pessoal no mural da comunidade.</p>
+                    </div>
+                </div>
+                <div id="psnBannerActions" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <button class="btn-psn-action" onclick="alternarAba('cadastrar')" style="background: linear-gradient(135deg, #00f0ff, #0088cc); color: #05101a; font-weight: 800; border: none; padding: 10px 18px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <span>✍️</span> Registrar Minha Platina
+                    </button>
+                </div>
+            </div>
+
             <!-- Header do Jogo em Consulta -->
             <div id="apiGameHeader" style="display: none; margin-bottom: 20px; background: var(--glass-bg); border: 1px solid var(--accent-gold); border-radius: 16px; padding: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; align-items: center; gap: 16px;">
@@ -3130,6 +3613,7 @@
         </section>
 
     </main>
+
 
     <!-- TOAST NOTIFICATION -->
     <div class="toast-notify" id="toastNotify">
@@ -4571,26 +5055,49 @@
             'sm2': "Marvel's Spider-Man 2",
             'sm 2': "Marvel's Spider-Man 2",
             'sm': "Marvel's Spider-Man Remastered",
+            'sm1': "Marvel's Spider-Man Remastered",
+            'sm 1': "Marvel's Spider-Man Remastered",
             'spiderman': "Marvel's Spider-Man Remastered",
             'spider-man': "Marvel's Spider-Man Remastered",
             'spider man': "Marvel's Spider-Man Remastered",
+            'spider men': "Marvel's Spider-Man Remastered",
+            'spidermen': "Marvel's Spider-Man Remastered",
+            'spider-men': "Marvel's Spider-Man Remastered",
             'spider': "Marvel's Spider-Man 2",
             'spider man 2': "Marvel's Spider-Man 2",
             'spiderman 2': "Marvel's Spider-Man 2",
             'spider-man 2': "Marvel's Spider-Man 2",
+            'spider men 2': "Marvel's Spider-Man 2",
+            'spidermen 2': "Marvel's Spider-Man 2",
             'marvels spider-man 2': "Marvel's Spider-Man 2",
             'marvel spider man 2': "Marvel's Spider-Man 2",
             'marvel spider-man 2': "Marvel's Spider-Man 2",
-            'homem aranha': "Marvel's Spider-Man 2",
+            'homem aranha': "Marvel's Spider-Man Remastered",
             'homem aranha 2': "Marvel's Spider-Man 2",
             'homem-aranha 2': "Marvel's Spider-Man 2",
             'spider man remastered': "Marvel's Spider-Man Remastered",
             'spiderman remastered': "Marvel's Spider-Man Remastered",
             'spider-man remastered': "Marvel's Spider-Man Remastered",
+            'spider men remastered': "Marvel's Spider-Man Remastered",
+            'spidermen remastered': "Marvel's Spider-Man Remastered",
+            'spider-men remastered': "Marvel's Spider-Man Remastered",
+            'spider man remaster': "Marvel's Spider-Man Remastered",
+            'spiderman remaster': "Marvel's Spider-Man Remastered",
+            'spider-man remaster': "Marvel's Spider-Man Remastered",
+            'spider men remaster': "Marvel's Spider-Man Remastered",
+            'spidermen remaster': "Marvel's Spider-Man Remastered",
+            'spider remaster': "Marvel's Spider-Man Remastered",
+            'spider remastered': "Marvel's Spider-Man Remastered",
             'marvels spider-man remastered': "Marvel's Spider-Man Remastered",
             'marvel spider-man remastered': "Marvel's Spider-Man Remastered",
             'marvels spider man remastered': "Marvel's Spider-Man Remastered",
+            'marvels spiderman remastered': "Marvel's Spider-Man Remastered",
+            'marvel spider man remaster': "Marvel's Spider-Man Remastered",
             'spider man 1': "Marvel's Spider-Man Remastered",
+            'spiderman 1': "Marvel's Spider-Man Remastered",
+            'spider-man 1': "Marvel's Spider-Man Remastered",
+            'remaster': "Marvel's Spider-Man Remastered",
+            'remastered': "Marvel's Spider-Man Remastered",
 
             // Elden Ring & Soulsborne / FromSoftware
             'er': 'Elden Ring',
@@ -5260,9 +5767,9 @@
                 cover: 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg',
                 total: 51,
                 achievements: [
-                    { name: 'Maior de Todos', desc: 'Colete todos os troféus de Marvel\'s Spider-Man Remastered e salve Manhattan.', icon: 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg', percent: '14.2%', type: 'platina' },
-                    { name: 'Superior', desc: 'Complete 100% de todos os distritos da ilha de Manhattan.', icon: 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg', percent: '18.6%', type: 'gold' },
-                    { name: 'Fim de Jogo', desc: 'Derrote o Doutor Octopus no topo da Oscorp e conclua a história principal.', icon: 'https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg', percent: '46.8%', type: 'gold' }
+                    { name: 'Be Greater', desc: 'Obtenha todos os Troféus de Marvel\'s Spider-Man.', icon: 'https://i.psnprofiles.com/trophies/8143/1.png', percent: '14.2%', type: 'platina' },
+                    { name: 'Spider-Man Superior', desc: 'Desbloqueie todas as Habilidades.', icon: 'https://i.psnprofiles.com/trophies/8143/2.png', percent: '21.5%', type: 'gold' },
+                    { name: 'Eu Amo Manhattan', desc: 'Conclua 100% em todos os distritos.', icon: 'https://i.psnprofiles.com/trophies/8143/3.png', percent: '18.6%', type: 'gold' }
                 ]
             },
             'astro_bot_ps5': { // Astro Bot
@@ -5490,8 +5997,8 @@
             '1091500': 57, 'cyberpunk 2077': 57,
             '2322010': 36, 'god of war ragnarok': 36, 'god of war ragnarök': 36,
             '1593500': 37, 'god of war (2018)': 37, 'god of war': 37,
-            '1817070': 42, "marvel's spider-man 2": 42, 'spider-man 2': 42,
-            '1817190': 51, "marvel's spider-man remastered": 51, 'spider-man': 51,
+            '1817070': 51, "marvel's spider-man remastered": 51, 'spider-man remastered': 51,
+            'spiderman_2': 42, "marvel's spider-man 2": 42, 'spider-man 2': 42,
             'astro_bot_ps5': 44, 'astro bot': 44,
             '2215430': 77, 'ghost of tsushima': 77,
             '814380': 34, 'sekiro: shadows die twice': 34, 'sekiro': 34,
@@ -5675,11 +6182,12 @@
             // FÁCIL / TRANQUILA (1-3/10) • +150 XP
             'astro_bot_ps5': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Resgate de todos os 300 Bots VIPs com pura diversão e sem troféus frustrantes.' },
             'astro bot': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Resgate de todos os 300 Bots VIPs com pura diversão e sem troféus frustrantes.' },
-            '1817070': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: 100% dos distritos de Nova York, ninhos de simbiontes e sem troféus de dificuldade.' },
+            '1817070': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de distritos de Manhattan, mochilas de Peter Parker, desafios do Treinador e sem troféus de dificuldade.' },
             "marvel's spider-man 2": { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: 100% dos distritos de Nova York, ninhos de simbiontes e sem troféus de dificuldade.' },
             'spider-man 2': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: 100% dos distritos de Nova York, ninhos de simbiontes e sem troféus de dificuldade.' },
+            'spiderman_2': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: 100% dos distritos de Nova York, ninhos de simbiontes e sem troféus de dificuldade.' },
             '1817190': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de bases de Fisk e Demônios, todas as roupas e mochilas de Peter Parker.' },
-            "marvel's spider-man remastered": { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de bases de Fisk e Demônios, todas as roupas e mochilas de Peter Parker.' },
+            "marvel's spider-man remastered": { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de distritos de Manhattan, mochilas de Peter Parker, desafios do Treinador e sem troféus de dificuldade.' },
             'spider-man': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Limpeza de bases de Fisk e Demônios, todas as roupas e mochilas de Peter Parker.' },
             '1332010': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Aventura aconchegante do gatinho, memórias do B-12 e speedrun relaxante de 2 horas.' },
             'stray': { value: '3/10 - Tranquila 🌿', label: '3/10 - Tranquila 🌿', category: 'facil', xp: 150, motivo: 'Curadoria Oficial: Aventura aconchegante do gatinho, memórias do B-12 e speedrun relaxante de 2 horas.' },
@@ -6052,6 +6560,7 @@
 
             // 1. Resolução imediata de Sigla Gamer (0ms)
             const siglaResolvida = ALIASES_JOGOS[qLower] || null;
+            const qNormSpider = qLower.replace(/spider[\s-]?men/g, 'spider-man').replace(/spidermen/g, 'spider-man');
 
             // 2. Busca prioritária nos bancos curados com 100% dos troféus oficiais
             if (window.OvercriticTrofeusDB && window.OvercriticTrofeusDB.CATALOGO_MESTRE) {
@@ -6060,7 +6569,10 @@
                     const item = mestre[k];
                     const tLower = item.title.toLowerCase();
                     const bateuSigla = siglaResolvida && tLower.includes(siglaResolvida.toLowerCase());
-                    const bateuTexto = tLower.includes(qLower) || (qLower === 'spider' && tLower.includes('spider'));
+                    const bateuTexto = tLower.includes(qLower) || 
+                                       tLower.includes(qNormSpider) || 
+                                       (qNormSpider.includes('spider') && tLower.includes('spider')) ||
+                                       ((qLower === 'remaster' || qLower === 'remastered') && tLower.includes('remaster'));
 
                     if (bateuSigla || bateuTexto) {
                         if (!sugestoes.some(s => s.title.toLowerCase() === item.title.toLowerCase())) {
@@ -6070,7 +6582,8 @@
                                 total: item.total,
                                 fonte: item.fonte || 'Catálogo Oficial Verificado',
                                 isCurated: true,
-                                viaSigla: bateuSigla
+                                viaSigla: bateuSigla,
+                                steamAppID: item.steamAppID || k
                             });
                         }
                     }
@@ -6082,7 +6595,7 @@
                 const item = TROFEUS_CURADOS[k];
                 const tLower = item.title.toLowerCase();
                 const bateuSigla = siglaResolvida && tLower.includes(siglaResolvida.toLowerCase());
-                const bateuTexto = tLower.includes(qLower);
+                const bateuTexto = tLower.includes(qLower) || tLower.includes(qNormSpider);
 
                 if (bateuSigla || bateuTexto) {
                     if (!sugestoes.some(s => s.title.toLowerCase() === item.title.toLowerCase())) {
@@ -6092,7 +6605,8 @@
                             total: item.total,
                             fonte: 'Catálogo Verificado',
                             isCurated: true,
-                            viaSigla: Boolean(bateuSigla)
+                            viaSigla: Boolean(bateuSigla),
+                            steamAppID: item.steamAppID || k
                         });
                     }
                 }
@@ -6131,9 +6645,13 @@
                 return;
             }
 
-            dropdown.innerHTML = sugestoes.slice(0, 7).map(item => `
-                <div class="suggestion-item" onclick="selecionarSugestaoExplorador('${encodeURIComponent(item.title)}')">
-                    <img src="${item.cover}" alt="${item.title}" onerror="this.src='https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg'">
+            // Renderiza com nós DOM e addEventListener para evitar quebra de strings com apóstrofos (ex: Marvel's)
+            dropdown.innerHTML = '';
+            sugestoes.slice(0, 7).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `
+                    <img src="${item.cover}" alt="${item.title.replace(/"/g, '&quot;')}" onerror="this.src='https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg'">
                     <div class="suggestion-item-info">
                         <span class="suggestion-title">${item.viaSigla ? '<span class="suggestion-tag-sigla">Sigla Detectada</span> ' : ''}${item.title}</span>
                         <div class="suggestion-item-meta">
@@ -6141,29 +6659,32 @@
                             <span>• ${item.fonte}</span>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+                div.addEventListener('click', () => {
+                    selecionarSugestaoExplorador(item.title, item.steamAppID);
+                });
+                dropdown.appendChild(div);
+            });
 
             dropdown.style.display = 'block';
         }
 
-        function selecionarSugestaoExplorador(tituloCodificado) {
-            const titulo = decodeURIComponent(tituloCodificado);
+        function selecionarSugestaoExplorador(titulo, steamAppID) {
             const input = document.getElementById('apiLiveSearchInput');
             const dropdown = document.getElementById('apiLiveSuggestionsDropdown');
 
             if (input) input.value = titulo;
             if (dropdown) dropdown.style.display = 'none';
 
-            buscarTrofeusJogoAoVivo();
+            buscarTrofeusJogoAoVivo(steamAppID);
         }
 
-        async function buscarTrofeusJogoAoVivo() {
+        async function buscarTrofeusJogoAoVivo(appIdParam) {
             const dropdown = document.getElementById('apiLiveSuggestionsDropdown');
             if (dropdown) dropdown.style.display = 'none';
 
             const rawInput = (document.getElementById('apiLiveSearchInput')?.value || '').trim();
-            if (!rawInput) return showToast.warning('Digite o nome de um jogo para consultar os troféus!');
+            if (!rawInput && !appIdParam) return showToast.warning('Digite o nome de um jogo para consultar os troféus!');
 
             // Resolução de siglas para a busca final (ex: 'sm2' -> 'Marvel\'s Spider-Man 2')
             const query = ALIASES_JOGOS[rawInput.toLowerCase()] || rawInput;
@@ -6185,7 +6706,7 @@
 
             try {
                 // 1. Busca imediata no banco oficial curado (alta fidelidade e lista 100% completa)
-                const matchLocal = encontrarJogoNoBanco(query, null);
+                const matchLocal = encontrarJogoNoBanco(query, appIdParam);
                 if (matchLocal) {
                     let achievementsFinal = matchLocal.achievements || [];
                     // GARANTIA DE INTEGRIDADE: Se a lista for menor que o total declarado, expande mantendo todos os originais!
@@ -6197,7 +6718,7 @@
                     jogoAtualConsultado = {
                         title: matchLocal.title,
                         cover: matchLocal.cover,
-                        steamAppID: matchLocal.steamAppID || Object.keys(TROFEUS_CURADOS).find(k => TROFEUS_CURADOS[k] === matchLocal) || null,
+                        steamAppID: appIdParam || matchLocal.steamAppID || Object.keys(TROFEUS_CURADOS).find(k => TROFEUS_CURADOS[k] === matchLocal) || null,
                         total: matchLocal.total || achievementsFinal.length,
                         achievements: achievementsFinal
                     };
@@ -6468,6 +6989,42 @@
                 missablesSub: 'Nenhum troféu missable; experiência acessível para todos os jogadores',
                 dicaHardcore: 'Use o túnel de vento que corta o Rio Hudson para cruzar de Manhattan a Astoria sem bater as asas de teia nem tocar no chão.'
             },
+            "marvel's spider-man remastered": {
+                dificuldadeBase: 3.5,
+                rotulo: '3.5/10 - Tranquila 🌿',
+                categoria: 'facil',
+                tempoEstimado: '~30 - 35 horas',
+                tempoSub: 'Campanha espetacular de Peter Parker por Manhattan',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Todos os distritos, mochilas e crimes podem ser concluídos no pós-jogo',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Nenhuma conquista perdida; aproveite a história livremente',
+                dicaHardcore: 'Deixe para farmar os crimes de facção em cada distrito enquanto coleta as mochilas e conclui os laboratórios da Oscorp para otimizar suas viagens.'
+            },
+            'spider-man remastered': {
+                dificuldadeBase: 3.5,
+                rotulo: '3.5/10 - Tranquila 🌿',
+                categoria: 'facil',
+                tempoEstimado: '~30 - 35 horas',
+                tempoSub: '51 Conquistas Oficiais no PC e PlayStation',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Pode ser platinado em qualquer dificuldade sem penalidades',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Zero conquistas perdíveis',
+                dicaHardcore: 'Realize as acrobacias aéreas e esquivas perfeitas durante as missões principais para já adiantar os troféus cumulativos de combate.'
+            },
+            '1817070': {
+                dificuldadeBase: 3.5,
+                rotulo: '3.5/10 - Tranquila 🌿',
+                categoria: 'facil',
+                tempoEstimado: '~30 - 35 horas',
+                tempoSub: '51 Conquistas Oficiais no PC e PlayStation',
+                playthroughs: '1 Playthrough (Platina Direta)',
+                playthroughsSub: 'Pode ser platinado em qualquer dificuldade sem penalidades',
+                missables: '✓ 0 Perdíveis (Livre)',
+                missablesSub: 'Zero conquistas perdíveis',
+                dicaHardcore: 'Visite o túmulo do Tio Ben no cemitério do Harlem e a Torre dos Vingadores para desbloquear dois troféus secretos rápidos.'
+            },
             'spider-man 2': {
                 dificuldadeBase: 3.0,
                 rotulo: '3.0/10 - Tranquila 🌿',
@@ -6720,7 +7277,7 @@
                 const isActive = dados.userVote === n ? 'active' : '';
                 return `
                     <button type="button" class="meter-vote-num-btn ${isActive}" 
-                            onclick="votarDificuldadePlatina('${encodeURIComponent(dadosJogo.title)}', ${n})"
+                            onclick="votarDificuldadePlatina('${encodeURIComponent(dadosJogo.title).replace(/'/g, '%27')}', ${n})"
                             title="Classificar como ${n}/10">
                         ${n}
                     </button>
@@ -6892,6 +7449,33 @@
                 tagLabel: '⚡ Dica Rápida',
                 likes: 67,
                 text: 'Voe do Distrito Financeiro até Astoria usando asas de teia sem tocar no chão. Basta pegar o túnel de vento central que corta o rio; ele te carrega direto e sem esforço!'
+            },
+            {
+                game: "Marvel's Spider-Man Remastered",
+                trophyMatch: 'Com Grandes Poderes',
+                author: 'SpideyFan',
+                tag: 'gold',
+                tagLabel: '💡 Dica de Ouro',
+                likes: 85,
+                text: 'Visite o túmulo do Ben Parker no cemitério na ponta norte do Harlem. Pressione triângulo diante da lápide para prestar suas condolências e desbloquear a conquista na hora!'
+            },
+            {
+                game: "Marvel's Spider-Man Remastered",
+                trophyMatch: 'Eu Amo Manhattan',
+                author: 'WebSlinger99',
+                tag: 'gold',
+                tagLabel: '💡 Dica de Ouro',
+                likes: 62,
+                text: 'Para concluir 100% dos distritos, complete os crimes de facção conforme eles surgirem durante a história. Se faltar algum no final, faça viagens rápidas de metrô para forçar o respawn imediato de crimes na região.'
+            },
+            {
+                game: "Marvel's Spider-Man Remastered",
+                trophyMatch: 'Spider-Man Superior',
+                author: 'WebSlinger99',
+                tag: 'gold',
+                tagLabel: '💡 Dica de Ouro',
+                likes: 58,
+                text: 'Desbloqueie todas as habilidades das três árvores (Inovador, Defensor e Teias). Ao alcançar o nível 50 de jogador você terá todos os pontos necessários para preencher a grade completa.'
             },
             {
                 game: 'Stray',
@@ -7239,7 +7823,18 @@
                 total = lista.length;
             }
 
-            document.getElementById('apiGameHeaderStats').textContent = `Total Oficial: ${total} Troféus / Conquistas Registradas${fonteTexto}`;
+            const headerStatsEl = document.getElementById('apiGameHeaderStats');
+            if (headerStatsEl) {
+                let statusPessoal = '';
+                try {
+                    const minhas = JSON.parse(localStorage.getItem('overcritic_minhas_platinas') || '[]');
+                    const platina = minhas.find(p => (p.title || p.titulo || '').toLowerCase() === (dadosJogo.title || '').toLowerCase());
+                    if (platina && Number(platina.progress !== undefined ? platina.progress : 100) === 100) {
+                        statusPessoal = ` <span style="display: block; margin-top: 5px; color: #fbbf24; font-size: 0.84rem; font-weight: 800;">🏆 Platina Registrada na sua Coleção Overcritic (${platina.hours || 0}h jogadas • Dificuldade: ${platina.difficulty || 'Moderada'})</span>`;
+                    }
+                } catch(e) {}
+                headerStatsEl.innerHTML = `Total Oficial: ${total} Troféus / Conquistas Registradas${fonteTexto}${statusPessoal}`;
+            }
 
             listaTrofeusAtual = lista;
             filtroTipoTrofeuAtual = 'todos';
@@ -7344,6 +7939,12 @@
                 return;
             }
 
+            let platinaDoUsuario = null;
+            try {
+                const minhas = JSON.parse(localStorage.getItem('overcritic_minhas_platinas') || '[]');
+                platinaDoUsuario = minhas.find(p => (p.title || p.titulo || '').toLowerCase() === (tituloJogoAtual || '').toLowerCase());
+            } catch(e) {}
+
             const cardsHtml = filtrados.map((t, index) => {
                 let badgeClass = 'trophy-bronze';
                 let badgeIcon = '🥉 BRONZE';
@@ -7351,15 +7952,23 @@
                 else if (t.type === 'gold') { badgeClass = 'trophy-gold'; badgeIcon = '🥇 OURO'; }
                 else if (t.type === 'silver') { badgeClass = 'trophy-silver'; badgeIcon = '🥈 PRATA'; }
 
+                let psnUnlockedBadge = '';
+                if (platinaDoUsuario && Number(platinaDoUsuario.progress !== undefined ? platinaDoUsuario.progress : 100) === 100) {
+                    if (t.type === 'platina') {
+                        psnUnlockedBadge = `<span class="psn-trophy-unlocked-tag psn-platina-tag"><span class="psn-check-icon">🏆</span> Platina Registrada na sua Coleção</span>`;
+                    }
+                }
+
                 const dicasHtml = window.OvercriticDicasTrofeus.renderizarBoxTrofeu(tituloJogoAtual, t, index);
 
                 return `
                     <div class="trophy-item-card">
                         <img src="${t.icon}" alt="Ícone" class="trophy-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3112/3112946.png'">
                         <div class="trophy-details" style="flex: 1;">
-                            <div class="trophy-title-row">
+                            <div class="trophy-title-row" style="flex-wrap: wrap; gap: 6px; align-items: center;">
                                 <span class="trophy-type-badge ${badgeClass}">${badgeIcon}</span>
                                 <span class="trophy-name">${t.name}</span>
+                                ${psnUnlockedBadge}
                             </div>
                             <div class="trophy-desc"><strong>Como conquistar:</strong> ${t.desc}</div>
                             ${dicasHtml}
@@ -7449,7 +8058,37 @@
             previewSub.textContent = `Carregado do Explorador • ${total} Conquistas Oficiais`;
             previewBox.style.display = 'flex';
 
+            const selectPlat = document.getElementById('platinaPlatform');
+            if (selectPlat && (!selectPlat.value || selectPlat.value === '')) {
+                selectPlat.value = 'PlayStation 5';
+            }
+
             mostrarToast(`"${jogoAtualConsultado.title}" preenchido com ${total} troféus oficiais!`, '✨');
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           4.3 CATÁLOGO E DIÁRIO OFICIAL DE PLATINAS (PADRÃO OVERCRITIC CLOUD)
+        ══════════════════════════════════════════════════════════════════════════ */
+        function obterContaPSNSalva() {
+            return null;
+        }
+
+        function salvarContaPSN(conta) {}
+
+        function abrirModalPSNSync() {
+            alternarAba('cadastrar');
+        }
+
+        function fecharModalPSNSync() {}
+
+        function fecharModalPSNSyncSeClicarFora(e) {}
+
+        function confirmarSincronizacaoPSN() {}
+
+        function desconectarContaPSN() {}
+
+        function atualizarInterfacePSN() {
+            // Mantido para integridade da inicialização da página
         }
 
         /* ═══════════════════════════════════
@@ -7483,6 +8122,7 @@
                 renderizarTopMaisPlatinados();
                 renderizarFeedComunidade();
                 renderizarMinhasPlatinas();
+                atualizarInterfacePSN();
 
                 // Detecta aba indicada na URL ou abre em Minha Coleção Pessoal imediatamente
                 const params = new URLSearchParams(window.location.search);

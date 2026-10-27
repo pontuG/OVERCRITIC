@@ -2672,7 +2672,7 @@
             }
 
             dropdown.innerHTML = sugestoes.map((s, idx) => `
-                <div class="title-sugg-item" onclick="selecionarSugestaoTitulo('${encodeURIComponent(s.title)}')">
+                <div class="title-sugg-item" onclick="selecionarSugestaoTitulo('${encodeURIComponent(s.title).replace(/'/g, '%27')}')">
                     <img src="${s.poster}" class="title-sugg-img" alt="${s.title}" onerror="this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=80'">
                     <div class="title-sugg-info">
                         <div class="title-sugg-name">
