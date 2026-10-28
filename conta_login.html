@@ -36,6 +36,8 @@
             }
         })();
     </script>
+    <!-- Google Identity Services (One Tap & Sign In) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Supabase SDK e Conexão -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js?v=26.10.11"></script>
@@ -2710,6 +2712,83 @@
         }
 
         /* ═══════════════════════════════════════════════════════════
+           GOOGLE ONE TAP & GOOGLE IDENTITY SERVICES (GIS)
+        ═══════════════════════════════════════════════════════════ */
+        const GOOGLE_CLIENT_ID = '587045334017-l10u5vmqt161te7g8gpiiveueaekqsvi.apps.googleusercontent.com';
+
+        async function inicializarGoogleOneTap() {
+            if (isUsuarioLogado()) return;
+
+            // Aguarda o script GIS do Google carregar
+            let tentativas = 0;
+            while (!window.google?.accounts?.id && tentativas < 25) {
+                await new Promise(r => setTimeout(r, 120));
+                tentativas++;
+            }
+            if (!window.google?.accounts?.id || !window.sbClient) return;
+
+            try {
+                // Gera nonce criptográfico para segurança
+                let rawNonce = '';
+                let hashedNonce = '';
+                if (window.crypto && window.crypto.subtle) {
+                    rawNonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+                    const encoder = new TextEncoder();
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(rawNonce));
+                    hashedNonce = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+
+                window.google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    nonce: hashedNonce || undefined,
+                    use_fedcm_for_prompt: true,
+                    auto_select: false,
+                    callback: async (response) => {
+                        if (!response || !response.credential) return;
+                        mostrarAlerta('⏳ Conectando à sua Conta Google...', 'warning');
+                        try {
+                            const authPayload = {
+                                provider: 'google',
+                                token: response.credential
+                            };
+                            if (rawNonce) authPayload.nonce = rawNonce;
+
+                            let { data, error } = await window.sbClient.auth.signInWithIdToken(authPayload);
+                            // Fallback caso a validação de nonce esteja desligada no Supabase
+                            if (error && rawNonce) {
+                                const resFallback = await window.sbClient.auth.signInWithIdToken({
+                                    provider: 'google',
+                                    token: response.credential
+                                });
+                                data = resFallback.data;
+                                error = resFallback.error;
+                            }
+                            if (error) throw error;
+                            if (data && data.session && data.session.user) {
+                                aplicarSessaoUsuario(data.session.user, data.session);
+                                const username = localStorage.getItem('overcritic_currentUser') || 'Gamer';
+                                mostrarAlerta(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${username}!`, 'success');
+                                alternarTab('profile');
+                            }
+                        } catch(err) {
+                            console.warn('Erro ao processar Google One Tap:', err);
+                            iniciarLoginGoogle();
+                        }
+                    }
+                });
+
+                // Dispara o prompt suave do One Tap
+                window.google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        console.log('Google One Tap aguardando em segundo plano');
+                    }
+                });
+            } catch (e) {
+                console.warn('Google One Tap init:', e);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
            AUTENTICAÇÃO COM A CONTA GOOGLE (SUPABASE OAUTH 2.0)
         ═══════════════════════════════════════════════════════════ */
         async function iniciarLoginGoogle() {
@@ -2717,6 +2796,11 @@
             if (!window.sbClient) {
                 mostrarAlerta('⚠️ Cliente Supabase indisponível no momento.', 'warning');
                 return;
+            }
+
+            // Tenta abrir o One Tap se estiver no navegador
+            if (window.google?.accounts?.id && !isUsuarioLogado()) {
+                window.google.accounts.id.prompt();
             }
 
             mostrarAlerta('⏳ Conectando à sua Conta Google...', 'warning');
@@ -2744,12 +2828,7 @@
                 mostrarAlerta(`
                     <div style="font-size: 1.05rem; margin-bottom: 6px;">🔐 <b>Como ativar o "Continuar com o Google":</b></div>
                     Para que a janela do Google apareça com suas contas (igual à do <i>ViaLiz</i>):<br>
-                    <div style="margin: 8px 0; font-size: 0.83rem; line-height: 1.6; background: rgba(0, 240, 255, 0.05); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0, 240, 255, 0.2);">
-                        1. No <a href="https://supabase.com/dashboard/project/lvvihjivyniqsmihnkof/auth/providers" target="_blank" style="color: var(--accent-cyan); font-weight: 700;">Painel do Supabase</a> &gt; <b>Authentication &gt; Providers</b>, ative o <b>Google</b>.<br>
-                        2. No <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--accent-cyan); font-weight: 700;">Google Cloud Console</a>, crie um <b>Client ID</b> e cole no Supabase.<br>
-                        3. Execute em um servidor web local (ex: Live Server ou <code>http://localhost</code>), pois a Google bloqueia o protocolo <code>file://</code> por segurança.
-                    </div>
-                    <div style="font-size: 0.78rem; color: #94a3b8;">Você também pode entrar instantaneamente digitando seu <b>E-mail e Senha</b> abaixo!</div>
+                    <div style="margin-top: 6px; font-size: 0.85rem; color: #cbd5e1;">${err.message || 'Verifique as credenciais no Google Cloud e Supabase.'}</div>
                 `, 'warning');
             }
         }
@@ -2758,6 +2837,7 @@
         // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             checarSessaoAtiva();
+            inicializarGoogleOneTap();
 
             // Sincronização em tempo real do Backlog com a aba do perfil
             window.addEventListener('overcritic_backlog_updated', (e) => {

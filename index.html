@@ -33,6 +33,8 @@
             }
         })();
     </script>
+    <!-- Google Identity Services (One Tap & Sign In) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Conexão com Supabase e Backend C# -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabaseClient.js?v=26.10.11"></script>
@@ -4245,6 +4247,74 @@
             }, 800);
             window.history.replaceState(null, '', window.location.pathname);
         }
+
+        // Google One Tap no Feed Principal do Overcritic (Login sem recarregar ou sair da página)
+        (async function inicializarGoogleOneTapIndex() {
+            const userAtual = (localStorage.getItem('overcritic_user') || localStorage.getItem('overcritic_currentUser') || '').toLowerCase();
+            if (userAtual && !['visitante', 'anônimo', 'anonimo', 'null', 'undefined', ''].includes(userAtual)) {
+                return;
+            }
+
+            let tentativas = 0;
+            while (!window.google?.accounts?.id && tentativas < 25) {
+                await new Promise(r => setTimeout(r, 120));
+                tentativas++;
+            }
+            if (!window.google?.accounts?.id || !window.sbClient) return;
+
+            try {
+                let rawNonce = '';
+                let hashedNonce = '';
+                if (window.crypto && window.crypto.subtle) {
+                    rawNonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+                    const encoder = new TextEncoder();
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(rawNonce));
+                    hashedNonce = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+
+                window.google.accounts.id.initialize({
+                    client_id: '587045334017-l10u5vmqt161te7g8gpiiveueaekqsvi.apps.googleusercontent.com',
+                    nonce: hashedNonce || undefined,
+                    use_fedcm_for_prompt: true,
+                    auto_select: false,
+                    callback: async (response) => {
+                        if (!response || !response.credential) return;
+                        exibirToast('⏳ Conectando à sua Conta Google...');
+                        try {
+                            const payload = { provider: 'google', token: response.credential };
+                            if (rawNonce) payload.nonce = rawNonce;
+                            let { data, error } = await window.sbClient.auth.signInWithIdToken(payload);
+                            if (error && rawNonce) {
+                                const fb = await window.sbClient.auth.signInWithIdToken({ provider: 'google', token: response.credential });
+                                data = fb.data;
+                                error = fb.error;
+                            }
+                            if (error) throw error;
+                            if (data?.session?.user) {
+                                const u = data.session.user;
+                                const metaName = u.user_metadata?.full_name || u.user_metadata?.name || u.user_metadata?.username;
+                                const username = metaName || (u.email ? u.email.split('@')[0] : 'Gamer');
+                                const metaAvatar = u.user_metadata?.avatar_url || u.user_metadata?.picture;
+                                if (metaAvatar) localStorage.setItem('overcritic_user_avatar', metaAvatar);
+                                localStorage.setItem('overcritic_currentUser', username);
+                                localStorage.setItem('overcritic_user', username);
+                                if (u.email) localStorage.setItem('overcritic_user_email', u.email);
+                                if (u.id) localStorage.setItem('overcritic_user_id', u.id);
+                                if (window.atualizarAvataresVisiveisNaPagina) window.atualizarAvataresVisiveisNaPagina();
+                                exibirToast(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${username}!`);
+                                setTimeout(() => window.location.reload(), 1000);
+                            }
+                        } catch(err) {
+                            console.warn('Erro One Tap Index:', err);
+                        }
+                    }
+                });
+
+                window.google.accounts.id.prompt();
+            } catch(e) {
+                console.warn('Google One Tap Index Init Error:', e);
+            }
+        })();
 
         // ══════════════════════════════════════
         // ENGINE DO FEED SOCIAL DA COMUNIDADE
