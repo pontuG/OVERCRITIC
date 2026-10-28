@@ -583,7 +583,11 @@
        CONTROLE GLOBAL DE SCROLL / TRAVAMENTO DE FUNDO DOS MODAIS
     ════════════════════════════════════════════════════════ */
     let _ogModaisAbertosCount = 0;
+    let _ogScrollPosicao = 0;
     function bloquearScrollFundo() {
+        if (_ogModaisAbertosCount === 0) {
+            _ogScrollPosicao = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+        }
         _ogModaisAbertosCount++;
         document.documentElement.classList.add('og-modal-scroll-lock');
         document.body.classList.add('og-modal-scroll-lock');
@@ -594,11 +598,19 @@
         } else {
             _ogModaisAbertosCount = Math.max(0, _ogModaisAbertosCount - 1);
         }
-        const anyModalActive = document.querySelector('.og-modal-overlay.active, .og-mural-overlay.active, .og-gamer-card-modal.active');
+        const anyModalActive = document.querySelector('.og-modal-overlay.active, .og-mural-overlay.active, .og-gamer-card-modal.active, .news-reader-overlay.active');
         if (_ogModaisAbertosCount <= 0 || !anyModalActive) {
             _ogModaisAbertosCount = 0;
             document.documentElement.classList.remove('og-modal-scroll-lock');
             document.body.classList.remove('og-modal-scroll-lock');
+            if (typeof _ogScrollPosicao === 'number' && !isNaN(_ogScrollPosicao)) {
+                requestAnimationFrame(() => {
+                    window.scrollTo({ top: _ogScrollPosicao, behavior: 'instant' });
+                });
+                setTimeout(() => {
+                    window.scrollTo({ top: _ogScrollPosicao, behavior: 'instant' });
+                }, 30);
+            }
         }
     }
     window.bloquearScrollFundo = bloquearScrollFundo;
@@ -616,7 +628,6 @@
             html.og-modal-scroll-lock,
             body.og-modal-scroll-lock {
                 overflow: hidden !important;
-                height: 100% !important;
             }
             /* Badge de Nível no Perfil e Header */
             .og-level-badge {

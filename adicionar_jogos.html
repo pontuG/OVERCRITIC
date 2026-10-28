@@ -4253,7 +4253,24 @@
                 }
             });
 
-            // 2. Consulta API de Jogos PC (CheapShark) usando o termo expandido ou a query
+            // 2. Consulta RAWG Video Games API (Base oficial global: PC, PlayStation, Xbox, Switch)
+            if (window.OvercriticApi && typeof window.OvercriticApi.buscarJogosRawg === 'function') {
+                try {
+                    const buscaTermo = termoExpandido || query;
+                    const rawgList = await window.OvercriticApi.buscarJogosRawg(buscaTermo, 5);
+                    rawgList.forEach(r => {
+                        const chave = r.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        if (!titulosVistos.has(chave)) {
+                            titulosVistos.add(chave);
+                            itensSugestao.push(r);
+                        }
+                    });
+                } catch (rErr) {
+                    console.warn('[RAWG Autocomplete] Erro:', rErr);
+                }
+            }
+
+            // 3. Consulta API de Jogos PC (CheapShark) usando o termo expandido ou a query (Fallback)
             try {
                 const buscaTermo = termoExpandido || query;
                 const searchUrl = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(buscaTermo)}&limit=12`;
@@ -4345,7 +4362,11 @@
                             <span style="font-size: 0.68rem; color: #ffd700; font-weight: 800; display: flex; align-items: center; gap: 4px;">
                                 👑 <span>Franquia Consagrada (${item.franquia})</span>
                             </span>
-                        ` : (item.isConsoleGame ? `
+                        ` : (item.isRawg ? `
+                            <span style="font-size: 0.68rem; color: var(--accent-cyan); font-weight: 800; display: flex; align-items: center; gap: 4px;">
+                                🎮 <span>${item.badgeText || 'Catálogo Oficial RAWG'}</span>
+                            </span>
+                        ` : item.isConsoleGame ? `
                             <span style="font-size: 0.68rem; color: var(--accent-cyan); font-weight: 800; display: flex; align-items: center; gap: 4px;">
                                 🎮 <span>Console / Base Global</span>
                             </span>
@@ -4492,6 +4513,21 @@
             btn.disabled = true;
 
             const termoFinalBusca = termoExpandido || rawQuery;
+
+            // 1.5. Consulta RAWG Video Games API (Base oficial global: Capa HD, notas e gêneros)
+            if (window.OvercriticApi && typeof window.OvercriticApi.buscarJogosRawg === 'function') {
+                try {
+                    const rawgList = await window.OvercriticApi.buscarJogosRawg(termoFinalBusca, 3);
+                    if (rawgList && rawgList.length > 0 && rawgList[0].meta) {
+                        preencherCamposDiretoDoCatalogo(rawgList[0].meta);
+                        btn.innerText = 'AUTO-PREENCHER';
+                        btn.disabled = false;
+                        return;
+                    }
+                } catch (rErr) {
+                    console.warn('[RAWG AutoPreencher] Erro, recorrendo a fallbacks:', rErr);
+                }
+            }
 
             try {
                 let gameTitle = termoFinalBusca;
@@ -5829,10 +5865,16 @@
             const capaParam = urlParams.get('capa');
             const generoParam = urlParams.get('genero');
             const plataformaParam = urlParams.get('plataforma');
+            const mediaParam = urlParams.get('media');
 
             if (tituloParam) {
                 const inputBusca = document.getElementById('apiSearchInput');
                 if (inputBusca) inputBusca.value = tituloParam;
+
+                if (mediaParam) {
+                    const mediaInput = document.getElementById('internetRating');
+                    if (mediaInput) mediaInput.value = mediaParam;
+                }
 
                 if (plataformaParam) {
                     const platformInput = document.getElementById('gamePlatform');

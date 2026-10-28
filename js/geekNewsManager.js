@@ -6,21 +6,28 @@
  */
 
 (function (window) {
-    const NEWS_CACHE_KEY = 'overcritic_geek_news_v4';
+    const NEWS_CACHE_KEY = 'overcritic_geek_news_v7';
     const NEWS_CACHE_TIME_KEY = 'overcritic_geek_news_time';
     const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos de cache inteligente
+    let _newsLastScrollY = 0;
 
     // Limpa versões obsoletas do cache na inicialização
     try {
+        sessionStorage.removeItem('overcritic_geek_news_v6');
+        sessionStorage.removeItem('overcritic_geek_news_v5');
+        sessionStorage.removeItem('overcritic_geek_news_v4');
         sessionStorage.removeItem('overcritic_geek_news_v3');
         sessionStorage.removeItem('overcritic_geek_news_v2');
         sessionStorage.removeItem('overcritic_geek_news');
     } catch (e) {}
 
-    // Feeds Oficiais em Português e Global com fallback
+    // Feeds Oficiais em Tempo Real com suporte a CORS (IGN Brasil e Eurogamer PT)
     const RSS_ENDPOINTS = [
-        'https://api.rss2json.com/v1/api.json?rss_url=https://br.ign.com/feed.xml',
-        'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.feedburner.com/ign/all'
+        'https://getbioflow.com/api/tools/feed?url=https%3A%2F%2Fbr.ign.com%2Ffeed.xml',
+        'https://getbioflow.com/api/tools/feed?url=https%3A%2F%2Fwww.eurogamer.pt%2Ffeed',
+        'https://feed2json.org/convert?url=https://br.ign.com/feed.xml',
+        'https://feed2json.org/convert?url=https://www.eurogamer.pt/feed',
+        'https://api.rss2json.com/v1/api.json?rss_url=https://br.ign.com/feed.xml'
     ];
 
     // Fallback editorial atualizado do mundo geek com textos completos e links de fontes oficiais
@@ -496,6 +503,7 @@
      */
     function abrirModalNoticia(noticia) {
         if (!noticia) return;
+        _newsLastScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
         const overlay = obterOuCriarModalDOM();
 
         const safeTitle = (noticia.title || '').replace(/"/g, '&quot;');
@@ -541,6 +549,9 @@
                         <span class="news-modal-author-badge">✍️ ${safeAuthor}</span>
                         <span>•</span>
                         <span>📅 ${safeData}</span>
+                        <a href="${safeLink}" target="_blank" rel="noopener noreferrer" style="margin-left:auto; color:var(--accent-cyan); font-weight:700; text-decoration:none; font-size:0.84rem; display:inline-flex; align-items:center; gap:4px; border:1px solid rgba(0,240,255,0.3); padding:3px 10px; border-radius:6px; background:rgba(0,240,255,0.08);" title="Abrir reportagem completa no site oficial">
+                            Acessar Notícia ↗
+                        </a>
                     </div>
                     <div class="news-modal-content">
                         ${paragrafosHtml}
@@ -587,6 +598,16 @@
         } else {
             document.documentElement.classList.remove('og-modal-scroll-lock');
             document.body.classList.remove('og-modal-scroll-lock');
+        }
+
+        // Restaura com precisão a linha das notícias onde o usuário estava navegando
+        if (typeof _newsLastScrollY === 'number' && !isNaN(_newsLastScrollY)) {
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: _newsLastScrollY, behavior: 'instant' });
+            });
+            setTimeout(() => {
+                window.scrollTo({ top: _newsLastScrollY, behavior: 'instant' });
+            }, 30);
         }
     }
 
@@ -702,21 +723,123 @@
      * Extrai a melhor imagem disponível para a notícia
      */
     function extrairImagemNoticia(item) {
+        if (item.imageUrl && typeof item.imageUrl === 'string' && !item.imageUrl.includes('default') && !item.imageUrl.endsWith('.svg')) {
+            return item.imageUrl;
+        }
+        if (item.image && typeof item.image === 'string' && !item.image.includes('default') && !item.image.endsWith('.svg')) {
+            return item.image;
+        }
         if (item.thumbnail && !item.thumbnail.includes('default') && !item.thumbnail.endsWith('.svg')) {
             return item.thumbnail;
         }
         if (item.enclosure && item.enclosure.link) {
             return item.enclosure.link;
         }
-        if (item.description) {
-            const match = item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
+        const html = item.content_html || item.description || item.summary || item.content || '';
+        if (html) {
+            const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
             if (match && match[1]) return match[1];
         }
-        const cat = classificarCategoria(item);
-        if (cat === 'Cinema & TV') {
+
+        // Catálogo temático autêntico de artes e banners de alta definição por franquia/termo
+        const t = `${item.title || ''} ${item.summary || ''} ${item.description || ''}`.toLowerCase();
+
+        // 1. Franquias & Games Específicos (Artes Oficiais Steam CDN / Publishers)
+        if (t.includes('elden ring') || t.includes('shadow of the erdtree') || t.includes('fromsoftware') || t.includes('souls')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg';
+        }
+        if (t.includes('warcraft') || t.includes('world of warcraft') || t.includes('blizzard')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2344520/header.jpg';
+        }
+        if (t.includes('phantom blade') || t.includes('jackie chan')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2422070/header.jpg';
+        }
+        if (t.includes('resident evil') || t.includes('capcom') || t.includes('takeuchi')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg';
+        }
+        if (t.includes('gta') || t.includes('grand theft auto') || t.includes('rockstar') || t.includes('vice city')) {
+            return 'https://upload.wikimedia.org/wikipedia/en/4/46/Grand_Theft_Auto_VI.png';
+        }
+        if (t.includes('cyberpunk') || t.includes('witcher') || t.includes('cd projekt')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg';
+        }
+        if (t.includes('sword of the sea')) {
+            return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80';
+        }
+        if (t.includes('minecraft') || t.includes('mojang')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1672970/header.jpg';
+        }
+        if (t.includes('backrooms') || t.includes('kane parsons') || t.includes('valve') || t.includes('half-life') || t.includes('portal')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/220/header.jpg';
+        }
+        if (t.includes('sakurai') || t.includes('smash bros') || t.includes('shadow of the colossus')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg';
+        }
+        if (t.includes('tekken') || t.includes('bandai namco') || t.includes('mortal kombat') || t.includes('street fighter') || t.includes('fatal fury') || t.includes('evo')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1778820/header.jpg';
+        }
+        if (t.includes('black myth') || t.includes('wukong')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg';
+        }
+        if (t.includes('baldurs gate') || t.includes('baldur') || t.includes('larian')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg';
+        }
+        if (t.includes('monster hunter')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2246340/header.jpg';
+        }
+        if (t.includes('astro bot')) {
+            return 'https://upload.wikimedia.org/wikipedia/en/a/a9/Astro_Bot_cover_art.jpg';
+        }
+        if (t.includes('clair obscur') || t.includes('expedition 33')) {
+            return 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1903340/header.jpg';
+        }
+        if (t.includes('spider-man') || t.includes('homem-aranha') || t.includes('marvel') || t.includes('mcu') || t.includes('demolidor') || t.includes('daredevil')) {
             return 'https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg';
         }
-        return 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
+        if (t.includes('one piece') || t.includes('luffy') || t.includes('eiichiro')) {
+            return 'https://image.tmdb.org/t/p/w500/fcXdJUSZiDiNtOgunavotahTU2i.jpg';
+        }
+        if (t.includes('transformers')) {
+            return 'https://image.tmdb.org/t/p/w500/6Ta9Y6qYg6v4mP4bI66wU1ZqCsz.jpg';
+        }
+
+        // 2. Hardware, Plataformas & Dispositivos
+        if (t.includes('dualsense') || t.includes('playstation') || t.includes('ps5') || t.includes('sony') || t.includes('comando')) {
+            return 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80';
+        }
+        if (t.includes('nintendo') || t.includes('switch') || t.includes('zelda') || t.includes('mario')) {
+            return 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=800&q=80';
+        }
+        if (t.includes('xbox') || t.includes('game pass') || t.includes('microsoft')) {
+            return 'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?auto=format&fit=crop&w=800&q=80';
+        }
+        if (t.includes('smart tv') || t.includes('televisão') || t.includes('qled') || t.includes('hisense') || t.includes('monitor')) {
+            return 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80';
+        }
+        if (t.includes('galaxy fit') || t.includes('smartwatch') || t.includes('samsung') || t.includes('wearable')) {
+            return 'https://images.unsplash.com/photo-1510017803434-a899398421b3?auto=format&fit=crop&w=800&q=80';
+        }
+        if (t.includes('black friday') || t.includes('desconto') || t.includes('menor preço') || t.includes('oferta') || t.includes('promoção')) {
+            return 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80';
+        }
+
+        // 3. Fallbacks elegantes por categoria (sem repetição monótona)
+        const cat = classificarCategoria(item);
+        if (cat === 'Cinema & TV') {
+            return 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80';
+        }
+        if (cat === 'Lançamentos') {
+            return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
+        }
+
+        const fallbacksGames = [
+            'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
+            'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
+            'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg',
+            'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80'
+        ];
+        const hash = (item.title || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        return fallbacksGames[Math.abs(hash) % fallbacksGames.length];
     }
 
     /**
@@ -762,7 +885,8 @@
                     if (data && data.items && data.items.length > 0) {
                         const normalizadas = data.items.map(item => {
                             const cat = classificarCategoria(item);
-                            const dataObj = normalizarDataNoticia(item.pubDate);
+                            const rawDate = item.publishedAt || item.date_published || item.pubDate || item.published || item.date;
+                            const dataObj = normalizarDataNoticia(rawDate);
                             const dataCompleta = dataObj ? dataObj.toLocaleString('pt-BR', {
                                 day: '2-digit',
                                 month: 'long',
@@ -770,18 +894,21 @@
                                 hour: '2-digit',
                                 minute: '2-digit'
                             }) : '';
+                            const feedTitle = (data.feed && data.feed.title) ? data.feed.title : (data.title ? data.title : 'Radar Geek & Gamer');
+                            const rawAuthor = (typeof item.author === 'object' && item.author ? item.author.name : item.author) || feedTitle;
+                            const rawLink = item.link || item.url || item.external_url || '';
 
                             return {
                                 title: item.title,
-                                pubDate: item.pubDate,
+                                pubDate: rawDate,
                                 timestamp: dataObj ? dataObj.getTime() : 0,
                                 dataCompleta: dataCompleta,
-                                tempoFormatado: formatarTempoNoticia(item.pubDate),
-                                link: item.link,
-                                author: item.author || 'IGN Brasil / Geek News',
+                                tempoFormatado: formatarTempoNoticia(rawDate),
+                                link: rawLink,
+                                author: rawAuthor,
                                 thumbnail: extrairImagemNoticia(item),
                                 category: cat,
-                                description: limparDescricao(item.description || item.content),
+                                description: limparDescricao(item.summary || item.description || item.content_html || item.content),
                                 badge: cat === 'Cinema & TV' ? '🎬 CINEMA & SÉRIES' : (cat === 'Lançamentos' ? '🚀 LANÇAMENTO' : '🎮 GAMES')
                             };
                         });
@@ -851,22 +978,27 @@
                 const catClass = noticia.category === 'Cinema & TV' ? 'badge-cinema' : (noticia.category === 'Lançamentos' ? 'badge-launch' : 'badge-game');
 
                 return `
-                    <article class="news-card" onclick="window.OvercriticGeekNews.abrirModalNoticiaByIndex(${idx})" title="Clique para ler a matéria completa">
+                    <article class="news-card" onclick="if (!event.target.closest('a, button')) window.OvercriticGeekNews.abrirModalNoticiaByIndex(${idx});" title="Clique para ler a prévia ou acesse a fonte oficial diretamente">
                         <div class="news-thumb-wrapper">
-                            <img src="${noticia.thumbnail}" alt="${safeTitle}" class="news-thumb-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80';">
+                            <img src="${noticia.thumbnail}" alt="${safeTitle}" class="news-thumb-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80';">
                             <span class="news-badge ${catClass}">${noticia.badge}</span>
                             <span class="news-time-chip" title="${noticia.dataCompleta ? 'Publicado em: ' + noticia.dataCompleta : noticia.tempoFormatado}">${noticia.tempoFormatado}</span>
                         </div>
                         <div class="news-body">
                             <h3 class="news-title">
-                                <a href="javascript:void(0)" onclick="event.stopPropagation(); window.OvercriticGeekNews.abrirModalNoticiaByIndex(${idx});" title="${safeTitle}">${noticia.title}</a>
+                                <a href="${noticia.link}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation(); return true;" title="Abrir notícia original: ${safeTitle}">${noticia.title} <span style="font-size:0.82em; opacity:0.8;">↗</span></a>
                             </h3>
-                            <p class="news-desc">${noticia.description}</p>
-                            <div class="news-footer">
+                            <p class="news-desc">${noticia.description || 'Confira os detalhes completos desta reportagem no canal oficial da produtora e veículos especializados parceiros.'}</p>
+                            <div class="news-footer" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                                 <span class="news-author">✍️ ${noticia.author || 'Overcritic Geek'}</span>
-                                <button type="button" class="news-read-btn" onclick="event.stopPropagation(); window.OvercriticGeekNews.abrirModalNoticiaByIndex(${idx});">
-                                    Ler Matéria ➔
-                                </button>
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <a href="${noticia.link}" target="_blank" rel="noopener noreferrer" class="news-direct-btn" onclick="event.stopPropagation(); return true;" title="Abrir link original no site oficial" style="padding: 5px 10px; font-size: 0.75rem; border-radius: 8px; background: rgba(0, 240, 255, 0.12); color: var(--accent-cyan); border: 1px solid rgba(0, 240, 255, 0.35); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">
+                                        Fonte ↗
+                                    </a>
+                                    <button type="button" class="news-read-btn" onclick="event.stopPropagation(); window.OvercriticGeekNews.abrirModalNoticiaByIndex(${idx});" title="Ler matéria completa no leitor Overcritic">
+                                        Ler 📖
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </article>
@@ -895,8 +1027,8 @@
 
         _noticiasTickerCarregadas = noticias;
 
-        const manchetesHtml = noticias.slice(0, 8).map((n, idx) => {
-            return `<a href="javascript:void(0)" onclick="window.OvercriticGeekNews.abrirModalNoticiaTicker(${idx});" class="ticker-item"><span class="ticker-dot">⚡</span> <strong>${n.category.toUpperCase()}:</strong> ${n.title} <span class="ticker-time">(${n.tempoFormatado})</span></a>`;
+        const manchetesHtml = noticias.slice(0, 8).map((n) => {
+            return `<a href="${n.link}" target="_blank" rel="noopener noreferrer" class="ticker-item" title="Abrir notícia no portal: ${n.title.replace(/"/g, '&quot;')}"><span class="ticker-dot">⚡</span> <strong>${n.category.toUpperCase()}:</strong> ${n.title} <span class="ticker-time">(${n.tempoFormatado})</span> ↗</a>`;
         }).join('<span class="ticker-sep">•</span>');
 
         container.innerHTML = `
