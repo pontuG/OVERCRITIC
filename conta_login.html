@@ -2070,13 +2070,66 @@
         // AUTENTICAÇÃO COM O SUPABASE AUTH
         // ══════════════════════════════════════
 
+        function aplicarSessaoUsuario(user, session) {
+            if (!user) return;
+            usuarioAtualSessao = user;
+            const metaName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.username;
+            const username = metaName || (user.email ? user.email.split('@')[0] : 'Gamer');
+            const metaAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+            if (metaAvatar) {
+                localStorage.setItem('overcritic_user_avatar', metaAvatar);
+            }
+            localStorage.setItem('overcritic_currentUser', username);
+            localStorage.setItem('overcritic_user', username);
+            if (user.email) localStorage.setItem('overcritic_user_email', user.email);
+            if (user.id) localStorage.setItem('overcritic_user_id', user.id);
+
+            salvarContaNoDiretorio(username, user.email, metaAvatar || '🎮');
+            if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
+                window.OvercriticGamification.registrarNovoJogadorNoRanking({
+                    username: username,
+                    avatar: metaAvatar || '🎮',
+                    email: user.email
+                });
+            }
+
+            const isAdmin = window.isAdminUser ? window.isAdminUser(user) : false;
+            localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
+
+            if (window.atualizarAvataresVisiveisNaPagina) {
+                window.atualizarAvataresVisiveisNaPagina();
+            }
+
+            atualizarVisibilidadeAbas();
+        }
+
         async function checarSessaoAtiva() {
-            // Verifica parâmetro de URL (ex: conta_login.html?tab=perfil)
+            // Verifica parâmetros de URL e hash
             const urlParams = new URLSearchParams(window.location.search);
             const tabParam = urlParams.get('tab');
-            const hash = window.location.hash;
+            const hash = window.location.hash || '';
+            const hashClean = hash.startsWith('#') ? hash.substring(1) : hash;
+            const hashParams = new URLSearchParams(hashClean);
 
-            // Detecta se o usuário veio de um link expirado do Gmail/Supabase
+            // 1. Detecta erro retornado pelo Supabase ou Google OAuth
+            const erroOAuth = urlParams.get('error') || hashParams.get('error');
+            const erroDesc = urlParams.get('error_description') || hashParams.get('error_description');
+            if (erroOAuth || erroDesc) {
+                alternarTab('login');
+                let msg = erroDesc || 'A conexão com a Conta Google não pôde ser completada.';
+                if (msg.includes('exchange external code')) {
+                    msg = `<b>Erro na troca de credenciais com o Google:</b> O Google rejeitou a confirmação do token.<br>
+                           <div style="margin-top: 6px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.5;">
+                           • No Google Cloud Console, certifique-se de que o Client Secret é o mesmo do Supabase.<br>
+                           • Se o app estiver em "Status de Teste", certifique-se de adicionar seu e-mail aos <b>Usuários de Teste</b> ou publicar em Produção.
+                           </div>`;
+                }
+                mostrarAlerta(`⚠️ <b>Aviso de Autenticação:</b><div style="margin-top: 6px; font-size: 0.88rem; line-height: 1.5;">${msg}</div>`, 'warning');
+                try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
+                return;
+            }
+
+            // 2. Detecta se o usuário veio de um link expirado do Gmail/Supabase
             if (hash.includes('otp_expired') || hash.includes('invalid') || urlParams.get('expired') === '1') {
                 alternarTab('login');
                 mostrarAlerta(`
@@ -2092,7 +2145,7 @@
                 return;
             }
 
-            // Detecta se o usuário veio de um link de redefinição de senha do Supabase
+            // 3. Detecta se o usuário veio de um link de redefinição de senha do Supabase
             if (hash.includes('type=recovery') || tabParam === 'recovery' || tabParam === 'reset') {
                 alternarTab('recovery');
                 mostrarAlerta('🔑 <b>Identidade verificada com sucesso!</b> Digite sua nova senha de acesso abaixo.', 'warning');
@@ -2117,40 +2170,47 @@
                 return;
             }
 
+            // 4. Se retornou de fluxo PKCE com ?code=
+            const codeParam = urlParams.get('code');
+            if (codeParam && typeof window.sbClient.auth.exchangeCodeForSession === 'function') {
+                mostrarAlerta('⏳ Conectando à sua Conta Google...', 'warning');
+                try {
+                    const { data: codeData, error: codeErr } = await window.sbClient.auth.exchangeCodeForSession(codeParam);
+                    if (!codeErr && codeData?.session?.user) {
+                        aplicarSessaoUsuario(codeData.session.user, codeData.session);
+                        mostrarAlerta(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${localStorage.getItem('overcritic_currentUser')}!`, 'success');
+                        try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
+                        alternarTab('profile');
+                        return;
+                    }
+                } catch(e) {
+                    console.warn('Tentativa de troca de código PKCE:', e);
+                }
+            }
+
+            // 5. Se retornou com access_token no hash (fluxo implicit)
+            if (hash.includes('access_token')) {
+                mostrarAlerta('⏳ Conectando à sua Conta Google...', 'warning');
+                for (let i = 0; i < 6; i++) {
+                    const { data: { session: s } } = await window.sbClient.auth.getSession();
+                    if (s && s.user) {
+                        aplicarSessaoUsuario(s.user, s);
+                        mostrarAlerta(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${localStorage.getItem('overcritic_currentUser')}!`, 'success');
+                        try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
+                        alternarTab('profile');
+                        return;
+                    }
+                    await new Promise(r => setTimeout(r, 200));
+                }
+            }
+
+            // 6. Verificação padrão de sessão
             try {
                 const { data: { session }, error } = await window.sbClient.auth.getSession();
                 if (session && session.user) {
-                    usuarioAtualSessao = session.user;
-                    const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
-                    localStorage.setItem('overcritic_currentUser', username);
-                    localStorage.setItem('overcritic_user', username);
-                    localStorage.setItem('overcritic_user_email', session.user.email);
-                    localStorage.setItem('overcritic_user_id', session.user.id);
-
-                    const metaAvatar = session.user.user_metadata?.avatar_url;
-                    if (metaAvatar) {
-                        localStorage.setItem('overcritic_user_avatar', metaAvatar);
-                    }
-                    if (window.atualizarAvataresVisiveisNaPagina) {
-                        window.atualizarAvataresVisiveisNaPagina();
-                    }
-
-                    const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
-                    localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
-
-                    // Registra / atualiza no diretório de contas e no ranking da comunidade
-                    salvarContaNoDiretorio(username, session.user.email, metaAvatar || '🎮');
-                    if (window.OvercriticGamification && typeof window.OvercriticGamification.registrarNovoJogadorNoRanking === 'function') {
-                        window.OvercriticGamification.registrarNovoJogadorNoRanking({
-                            username: username,
-                            avatar: metaAvatar || '🎮',
-                            email: session.user.email
-                        });
-                    }
-
-                    atualizarVisibilidadeAbas();
+                    aplicarSessaoUsuario(session.user, session);
                     if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
-                    else alternarTab('profile'); // Padrão quando logado: ir direto ao Perfil! (Login e Cadastro bloqueados)
+                    else alternarTab('profile');
                 } else {
                     if (!isUsuarioLogado()) {
                         usuarioAtualSessao = null;
@@ -2163,7 +2223,7 @@
                         if (tabParam === 'perfil' || tabParam === 'profile') alternarTab('profile');
                         else if (tabParam === 'ranking' || tabParam === 'leaderboard') alternarTab('ranking');
                         else if (tabParam === 'register' || tabParam === 'cadastro') alternarTab('register');
-                        else alternarTab('login'); // Padrão quando deslogado: ir ao Login!
+                        else alternarTab('login');
                     }
                 }
             } catch (err) {
@@ -2716,26 +2776,12 @@
                     if (event === 'PASSWORD_RECOVERY') {
                         alternarTab('recovery');
                         mostrarAlerta('🔑 <b>Identidade verificada pelo link!</b> Digite sua nova senha de acesso abaixo para concluir.', 'warning');
-                    } else if (event === 'SIGNED_IN' && session) {
-                        usuarioAtualSessao = session.user;
-                        const metaName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.username;
-                        const username = metaName || session.user.email.split('@')[0];
-                        const metaAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
-                        if (metaAvatar) {
-                            localStorage.setItem('overcritic_user_avatar', metaAvatar);
+                    } else if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user) {
+                        aplicarSessaoUsuario(session.user, session);
+                        if (event === 'SIGNED_IN') {
+                            const username = localStorage.getItem('overcritic_currentUser') || 'Gamer';
+                            mostrarAlerta(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${username}!`, 'success');
                         }
-                        localStorage.setItem('overcritic_currentUser', username);
-                        localStorage.setItem('overcritic_user', username);
-                        localStorage.setItem('overcritic_user_email', session.user.email);
-                        localStorage.setItem('overcritic_user_id', session.user.id);
-
-                        salvarContaNoDiretorio(username, session.user.email, metaAvatar || '🎮');
-
-                        const isAdmin = window.isAdminUser ? window.isAdminUser(session.user) : false;
-                        localStorage.setItem('overcritic_is_admin', isAdmin ? 'true' : 'false');
-
-                        atualizarVisibilidadeAbas();
-                        mostrarAlerta(`🎉 <b>Autenticação confirmada!</b> Bem-vindo(a), ${username}!`, 'success');
                         alternarTab('profile');
                     } else if (event === 'SIGNED_OUT') {
                         usuarioAtualSessao = null;

@@ -9,7 +9,7 @@
     window.sbClient = (window.supabase && typeof window.supabase.createClient === 'function')
         ? window.supabase.createClient(_cfg.u, _cfg.k, {
             auth: {
-                flowType: 'implicit',
+                flowType: 'pkce',
                 autoRefreshToken: true,
                 persistSession: true,
                 detectSessionInUrl: true
@@ -17,21 +17,23 @@
         })
         : null;
 
-    // Sincroniza dinamicamente as credenciais com o Backend C# no Render
+    // Sincroniza dinamicamente as credenciais com o Backend C# no Render caso mudem
     const _apiBase = (localStorage.getItem('overcritic_api_url') || 'https://overcritic.onrender.com/api').replace(/\/+$/, '');
     fetch(`${_apiBase}/config`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (data && data.url && data.anonKey && window.supabase && typeof window.supabase.createClient === 'function') {
-                window.sbClient = window.supabase.createClient(data.url, data.anonKey, {
-                    auth: {
-                        flowType: 'implicit',
-                        autoRefreshToken: true,
-                        persistSession: true,
-                        detectSessionInUrl: true
-                    }
-                });
-                console.log('⚡ [Overcritic] Credenciais de autenticação validadas via Backend C#!');
+                if (data.url !== _cfg.u || data.anonKey !== _cfg.k) {
+                    window.sbClient = window.supabase.createClient(data.url, data.anonKey, {
+                        auth: {
+                            flowType: 'pkce',
+                            autoRefreshToken: true,
+                            persistSession: true,
+                            detectSessionInUrl: true
+                        }
+                    });
+                    console.log('⚡ [Overcritic] Credenciais de autenticação sincronizadas via Backend C#!');
+                }
             }
         })
         .catch(() => {});
