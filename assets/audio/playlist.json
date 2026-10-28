@@ -1,0 +1,132 @@
+{
+  "versao": "1.0.0",
+  "descricao": "Catálogo Oficial de Músicas da Overcritic Radio (Opção 1 - Hospedagem Própria & Streaming Confiável)",
+  "estacoes": [
+    {
+      "id": "synthwave",
+      "nome": "Cyberpunk 88.4 FM",
+      "badge": "🌆 SYNTHWAVE",
+      "frequencia": "88.4 FM",
+      "cor": "#00f0ff",
+      "descricao": "Arpeggios analógicos, neon noturno e sintetizadores retrô",
+      "faixas": [
+        {
+          "titulo": "RetroFuture Clean",
+          "artista": "Kevin MacLeod",
+          "estilo": "Synthwave Retrô Anos 80",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/synthwave/retrofuture_clean.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/RetroFuture%20Clean.mp3"
+        },
+        {
+          "titulo": "Chill Wave",
+          "artista": "Kevin MacLeod",
+          "estilo": "Sintetizadores Espaciais Suaves",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/synthwave/chill_wave.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Chill%20Wave.mp3"
+        },
+        {
+          "titulo": "Equatorial Complex",
+          "artista": "Kevin MacLeod",
+          "estilo": "Cyberpunk Noturno & Atmosférico",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/synthwave/equatorial_complex.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Equatorial%20Complex.mp3"
+        },
+        {
+          "titulo": "Digital Lemonade",
+          "artista": "Kevin MacLeod",
+          "estilo": "Synth Pop Eletrônico Vibrante",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/synthwave/digital_lemonade.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Digital%20Lemonade.mp3"
+        }
+      ]
+    },
+    {
+      "id": "lofi",
+      "nome": "Chill Lo-Fi 92.1 FM",
+      "badge": "☕ LO-FI STUDY",
+      "frequencia": "92.1 FM",
+      "cor": "#ffd166",
+      "descricao": "Teclas de Rhodes quentes, batidas relaxantes e textura de vinil",
+      "faixas": [
+        {
+          "titulo": "Hypnothis",
+          "artista": "Kevin MacLeod",
+          "estilo": "Lo-Fi Beats & Chill Relaxante",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/lofi/hypnothis.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Hypnothis.mp3"
+        },
+        {
+          "titulo": "Airport Lounge",
+          "artista": "Kevin MacLeod",
+          "estilo": "Rhodes Jazz & Lounge Suave",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/lofi/airport_lounge.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Airport%20Lounge.mp3"
+        },
+        {
+          "titulo": "Overcast",
+          "artista": "Kevin MacLeod",
+          "estilo": "Piano Acústico & Serenidade",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/lofi/overcast.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Overcast.mp3"
+        },
+        {
+          "titulo": "Carefree",
+          "artista": "Kevin MacLeod",
+          "estilo": "Acústico Alegre & Descontraído",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/lofi/carefree.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3"
+        }
+      ]
+    },
+    {
+      "id": "arcade",
+      "nome": "Arcade 104.5 FM",
+      "badge": "👾 8-BIT NOSTALGIA",
+      "frequencia": "104.5 FM",
+      "cor": "#c77dff",
+      "descricao": "Harmonias de Chiptune nostálgicas e trilhas sonoras 16-bit",
+      "faixas": [
+        {
+          "titulo": "Pixelland",
+          "artista": "Kevin MacLeod",
+          "estilo": "Chiptune Clássico & Nostalgia 8-Bit",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/arcade/pixelland.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Pixelland.mp3"
+        },
+        {
+          "titulo": "Exit the Premises",
+          "artista": "Kevin MacLeod",
+          "estilo": "Arcade Retro Dance Acelerado",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/arcade/exit_the_premises.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Exit%20the%20Premises.mp3"
+        },
+        {
+          "titulo": "8bit Dungeon Boss",
+          "artista": "Kevin MacLeod",
+          "estilo": "Batalha de RPG 8-Bit Retrô",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/arcade/8bit_dungeon_boss.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/8bit%20Dungeon%20Boss.mp3"
+        },
+        {
+          "titulo": "Takeover of the 8-bit Synths",
+          "artista": "Kevin MacLeod",
+          "estilo": "Sintetizadores Chiptune Eletrizantes",
+          "licenca": "Creative Commons Attribution 4.0 International",
+          "arquivoLocal": "assets/audio/arcade/takeover_8bit_synths.mp3",
+          "urlRemota": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Takeover%20of%20the%208-bit%20Synths.mp3"
+        }
+      ]
+    }
+  ]
+}

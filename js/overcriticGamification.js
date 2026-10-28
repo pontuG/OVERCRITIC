@@ -3506,7 +3506,13 @@
         if (!cardEl) return;
         _holoTiltState.cardEl = cardEl;
 
-        const maxAngle = 18; // Ângulo máximo de inclinação em graus
+        // Se o Modo Bateria / Desempenho estiver ativo, aborta a física 3D para garantir 60 FPS
+        if (window.OvercriticBatterySaver && window.OvercriticBatterySaver.isEnabled()) {
+            pararGamerCardHoloTilt();
+            return;
+        }
+
+        const maxAngle = 20; // Ângulo máximo de inclinação em graus (efeito 3D evidente)
 
         function updateRect() {
             if (_holoTiltState.cardEl) {
@@ -3515,7 +3521,13 @@
         }
 
         function renderFrame() {
-            // Lerp para suavização cinemática
+            // Se o modo bateria foi ligado durante a exibição, suspende imediatamente
+            if (window.OvercriticBatterySaver && window.OvercriticBatterySaver.isEnabled()) {
+                pararGamerCardHoloTilt();
+                return;
+            }
+
+            // Lerp para suavização cinemática de alta precisão
             const lerpFactor = _holoTiltState.isHovered ? 0.16 : 0.08;
             _holoTiltState.currentX += (_holoTiltState.targetX - _holoTiltState.currentX) * lerpFactor;
             _holoTiltState.currentY += (_holoTiltState.targetY - _holoTiltState.currentY) * lerpFactor;
@@ -3536,8 +3548,8 @@
             // Distância normalizada do centro
             const dist = Math.min(1, Math.hypot(cX, cY));
 
-            const holoOpacity = _holoTiltState.isHovered ? (0.45 + dist * 0.45) : (dist * 0.65);
-            const glareOpacity = _holoTiltState.isHovered ? (0.35 + dist * 0.45) : (dist * 0.55);
+            const holoOpacity = _holoTiltState.isHovered ? (0.50 + dist * 0.45) : (dist * 0.65);
+            const glareOpacity = _holoTiltState.isHovered ? (0.40 + dist * 0.50) : (dist * 0.55);
 
             cardEl.style.setProperty('--og-tilt-x', `${rotX.toFixed(2)}deg`);
             cardEl.style.setProperty('--og-tilt-y', `${rotY.toFixed(2)}deg`);
@@ -3548,9 +3560,9 @@
             cardEl.style.setProperty('--og-glare-opacity', `${glareOpacity.toFixed(2)}`);
 
             // Sombra reativa à luz dinâmica
-            const shadowX = (-cX * 24).toFixed(1);
-            const shadowY = (30 + -cY * 20).toFixed(1);
-            cardEl.style.boxShadow = `0 ${shadowY}px 70px rgba(0, 0, 0, 0.85), ${shadowX}px 10px 45px rgba(0, 240, 255, 0.28)`;
+            const shadowX = (-cX * 26).toFixed(1);
+            const shadowY = (30 + -cY * 22).toFixed(1);
+            cardEl.style.boxShadow = `0 ${shadowY}px 70px rgba(0, 0, 0, 0.85), ${shadowX}px 10px 45px rgba(0, 240, 255, 0.32)`;
 
             if (_holoTiltState.isHovered || dist > 0.005) {
                 _holoTiltState.rafId = requestAnimationFrame(renderFrame);
@@ -3561,6 +3573,7 @@
         }
 
         function startLoop() {
+            if (window.OvercriticBatterySaver && window.OvercriticBatterySaver.isEnabled()) return;
             if (!_holoTiltState.rafId) {
                 cardEl.classList.add('is-tilting');
                 cardEl.classList.remove('is-resetting');
@@ -3570,6 +3583,16 @@
 
         if (!cardEl.__holoConfigured) {
             cardEl.__holoConfigured = true;
+
+            // Escuta mudanças no Modo Bateria / Desempenho
+            window.addEventListener('overcritic:batterySaverChange', (e) => {
+                if (e.detail && e.detail.ativo) {
+                    pararGamerCardHoloTilt();
+                } else {
+                    updateRect();
+                    startLoop();
+                }
+            });
 
             cardEl.addEventListener('mouseenter', () => {
                 _holoTiltState.isHovered = true;
@@ -3599,6 +3622,16 @@
                 cardEl.classList.add('is-resetting');
                 startLoop();
             });
+
+            // Tratamento de toque e solicitação de giroscópio no iOS
+            cardEl.addEventListener('touchstart', () => {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    if (!cardEl.__gyroRequested) {
+                        cardEl.__gyroRequested = true;
+                        DeviceOrientationEvent.requestPermission().catch(() => {});
+                    }
+                }
+            }, { passive: true });
 
             cardEl.addEventListener('touchmove', (e) => {
                 if (e.touches && e.touches.length > 0) {
@@ -3630,6 +3663,7 @@
                 window.addEventListener('deviceorientation', (e) => {
                     const overlay = document.getElementById('ogGamerCardOverlay');
                     if (!overlay || !overlay.classList.contains('active')) return;
+                    if (window.OvercriticBatterySaver && window.OvercriticBatterySaver.isEnabled()) return;
                     if (e.gamma === null && e.beta === null) return;
 
                     const gamma = e.gamma || 0; // -90 a 90

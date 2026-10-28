@@ -9,15 +9,32 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.11",
+    version: "26.10.12",
     year: "2026",
     month: "10",
-    build: 11,
-    releaseDate: "22/10/2026",
+    build: 12,
+    releaseDate: "28/10/2026",
     status: "Versão Estável",
-    codename: "Ecossistema Hardcore de Platinas, Medidor 1-10, Dica de Ouro nos Troféus & Redesign Gamer",
+    codename: "Áudio Lo-Fi Synthwave, Gamer Card 3D Holográfico & Modo Desempenho 60 FPS",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.12",
+            date: "28/10/2026",
+            title: "Áudio Lo-Fi Synthwave, Gamer Card 3D Holográfico & Modo Desempenho 60 FPS",
+            highlights: [
+                "6.1 Overcritic Lo-Fi / Synthwave Radio (Opção 1 - Músicas Reais): minitocador discreto e flutuante no rodapé com 3 estações (Cyberpunk 88.4 FM, Chill Lo-Fi 92.1 FM e Arcade 104.5 FM) e reprodução de arquivos reais (.mp3) com qualidade de estúdio",
+                "Estrutura Local em assets/audio/ e playlist.json: diretório dedicado com faixas locais (.mp3) e arquivo de playlist configurável para novas adições e conexão fácil com o Supabase Storage",
+                "Cascata Inteligente de Áudio: prioriza arquivos locais no repositório, faz streaming contínuo de URLs de estúdio e aciona o sintetizador procedural Web Audio como contingência em caso de queda de rede",
+                "Volume 100% Maleável & Contínuo: controle deslizante analógico ultra-suave com arrasto elástico e ajuste de ganho em tempo real sem saltos ou travamentos",
+                "Reprodução Contínua Automática: avanço automático para a próxima faixa ao final de cada música e equalizador holográfico sincronizado",
+                "6.2 Gamer Card 3D com Efeito Tilt (Parallax Holográfico): cartão colecionável com profundidade física estereoscópica (translateZ nos avatares, ranks e conquistas), reflexo furta-cor prismático (color-dodge) e luz especular reativa ao mouse e giroscópio do celular",
+                "Compatibilidade com Giroscópio Mobile e iOS: física cinematográfica com interpolação Lerp para resposta suave sem tremulação e suporte à API DeviceOrientation nos smartphones",
+                "6.3 Modo Bateria / Desempenho 60 FPS: botão dedicado na sidebar (🔋 / ⚡) que desativa filtros de Gaussian blur (backdrop-filter), loops de partículas em canvas e física 3D para celulares de entrada rodarem a 60 FPS cravados",
+                "Notificações Toast Inteligentes e Persistência: memória de preferência no localStorage e detecção automática de bateria fraca pelo navegador",
+                "Service Worker Atualizado (v26.10.12): cache automático de todos os novos recursos visuais e sonoros para acesso offline total"
+            ]
+        },
         {
             version: "26.10.11",
             date: "22/10/2026",
