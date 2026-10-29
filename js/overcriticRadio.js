@@ -389,7 +389,36 @@
             @media (max-width: 768px) {
                 .og-radio-widget {
                     bottom: 78px;
-                    left: 14px;
+                    left: auto;
+                    right: 14px;
+                }
+                /* No mobile, a pílula minimizada vira apenas um ícone circular compacto */
+                .og-radio-widget.og-radio-minimized .og-radio-pill {
+                    width: 46px;
+                    height: 46px;
+                    border-radius: 50%;
+                    padding: 0;
+                    justify-content: center;
+                    gap: 0;
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 14px rgba(0, 240, 255, 0.2);
+                }
+                .og-radio-widget.og-radio-minimized .og-radio-pill-text {
+                    display: none !important;
+                }
+                .og-radio-widget.og-radio-minimized .og-radio-pill-action {
+                    display: none !important;
+                }
+                .og-radio-widget.og-radio-minimized .og-radio-pill-icon {
+                    font-size: 1.3rem;
+                }
+                /* Painel expandido do rádio no mobile ocupa toda a largura disponível */
+                .og-radio-widget .og-radio-panel {
+                    width: calc(100vw - 28px);
+                    max-width: 340px;
+                }
+                /* Widget arrastável no mobile: remove transições de posição durante drag */
+                .og-radio-widget.og-radio-dragging {
+                    transition: none !important;
                 }
             }
 
@@ -1122,9 +1151,10 @@
         const faixa = estacao.faixas[_estado.faixaIndex] || estacao.faixas[0];
 
         widget.classList.toggle('is-playing', _estado.tocando);
+        widget.classList.toggle('og-radio-minimized', _estado.minimizado);
 
         if (_estado.minimizado) {
-            // Pílula compacta
+            // Pílula compacta (no mobile vira só o ícone circular via CSS)
             widget.innerHTML = `
                 <div class="og-radio-pill" onclick="window.OvercriticRadio.toggleMinimizar()" title="Abrir Overcritic Radio">
                     <span class="og-radio-pill-icon">📻</span>
@@ -1137,6 +1167,8 @@
                     </button>
                 </div>
             `;
+            // Habilita arraste no mobile quando minimizado
+            configurarDragMobile(widget);
         } else {
             // Player expandido
             const tabsHtml = ESTACOES.map((est, idx) => `
@@ -1201,6 +1233,86 @@
             }
             atualizarSliderVisual(_estado.volume, _estado.mudo);
         }
+    }
+
+    /* ═════════════════════════════════════════════════════════════════
+       9. ARRASTE MÓVEL DO WIDGET NO CELULAR (DRAG TO MOVE)
+       ═════════════════════════════════════════════════════════════════ */
+    let _dragState = { ativo: false, startX: 0, startY: 0, widgetStartRight: 0, widgetStartBottom: 0, moved: false };
+
+    function configurarDragMobile(widget) {
+        // Só habilita drag em telas mobile
+        if (window.innerWidth > 768) return;
+
+        const pill = widget.querySelector('.og-radio-pill');
+        if (!pill) return;
+
+        pill.addEventListener('touchstart', function(e) {
+            const touch = e.touches[0];
+            const rect = widget.getBoundingClientRect();
+            _dragState.ativo = true;
+            _dragState.moved = false;
+            _dragState.startX = touch.clientX;
+            _dragState.startY = touch.clientY;
+            _dragState.widgetStartRight = window.innerWidth - rect.right;
+            _dragState.widgetStartBottom = window.innerHeight - rect.bottom;
+            widget.classList.add('og-radio-dragging');
+        }, { passive: true });
+
+        pill.addEventListener('touchmove', function(e) {
+            if (!_dragState.ativo) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - _dragState.startX;
+            const dy = touch.clientY - _dragState.startY;
+
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                _dragState.moved = true;
+            }
+
+            const newRight = Math.max(4, Math.min(window.innerWidth - 56, _dragState.widgetStartRight - dx));
+            const newBottom = Math.max(4, Math.min(window.innerHeight - 56, _dragState.widgetStartBottom - dy));
+
+            widget.style.right = newRight + 'px';
+            widget.style.bottom = newBottom + 'px';
+            widget.style.left = 'auto';
+        }, { passive: true });
+
+        pill.addEventListener('touchend', function(e) {
+            widget.classList.remove('og-radio-dragging');
+            if (_dragState.moved) {
+                // Se arrastou, não abre o player — cancela o onclick
+                e.preventDefault();
+                e.stopPropagation();
+                // Salva posição no localStorage
+                try {
+                    localStorage.setItem('og_radio_pos', JSON.stringify({
+                        right: widget.style.right,
+                        bottom: widget.style.bottom
+                    }));
+                } catch(err) {}
+            }
+            _dragState.ativo = false;
+        }, { passive: false });
+
+        // Substitui o onclick da pill para não disparar ao arrastar
+        pill.removeAttribute('onclick');
+        pill.addEventListener('click', function(e) {
+            if (!_dragState.moved) {
+                window.OvercriticRadio.toggleMinimizar();
+            }
+            _dragState.moved = false;
+        });
+
+        // Restaura posição salva, se houver
+        try {
+            const posicaoSalva = localStorage.getItem('og_radio_pos');
+            if (posicaoSalva) {
+                const pos = JSON.parse(posicaoSalva);
+                if (pos.right) widget.style.right = pos.right;
+                if (pos.bottom) widget.style.bottom = pos.bottom;
+                widget.style.left = 'auto';
+            }
+        } catch(err) {}
     }
 
     // Inicialização quando o DOM estiver pronto

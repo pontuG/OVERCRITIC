@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Overcritic - Controle Central de Versões do Sistema
  * 
  * PADRÃO DE IDENTIFICAÇÃO DE VERSÃO (CalVer):
@@ -9,15 +9,29 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.12",
+    version: "26.10.13",
     year: "2026",
     month: "10",
-    build: 12,
-    releaseDate: "28/10/2026",
+    build: 13,
+    releaseDate: "29/10/2026",
     status: "Versão Estável",
-    codename: "Áudio Lo-Fi Synthwave, Gamer Card 3D Holográfico & Modo Desempenho 60 FPS",
+    codename: "Rádio Mobile Flutuante e Arrastável, Otimização de Preview de Capas & Refinamento PWA",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.13",
+            date: "29/10/2026",
+            title: "Rádio Mobile Flutuante & Arrastável, Blindagem de Capas sem Imagem Quebrada & Cache PWA",
+            highlights: [
+                "Player de Rádio Mobile Compacto & Flutuante (FAB 📻): em telas de celular (≤ 768px), o tocador minimizado agora é um ícone circular minimalista de 46px, eliminando a sobreposição de textos e botões na tela",
+                "Arraste Livre no Celular (Drag-to-Move): o botão da rádio agora pode ser arrastado livremente com o dedo para qualquer canto da tela, com persistência da posição no LocalStorage para visitas futuras",
+                "Expansão Instantânea ao Toque: toque rápido no ícone da rádio abre o painel completo de estações (Cyberpunk, Lo-Fi e Arcade), controle contínuo de volume e troca de faixas",
+                "Blindagem de Pré-visualização de Capas de Jogos: correção definitiva que elimina qualquer exibição de ícone de imagem quebrada ou texto alt 'Capa Oficial do Jogo' antes de carregar ou em caso de falha de conexão",
+                "Restauração Automática do Placeholder Gamer: tratamento no evento de erro de carregamento (img.onerror) que limpa o preview corrompido e restaura o painel nativo com ícone de controle",
+                "CSS de Segurança Universal: regras estritas que forçam display: none imediato em tags de imagem de capa sem atributo src ou com src vazio",
+                "PWA Service Worker Atualizado (v26.10.13): invalidação e renovação de cache (overcritic-pwa-v26.10.13) para entrega imediata dos novos scripts e correções em todos os dispositivos"
+            ]
+        },
         {
             version: "26.10.12",
             date: "28/10/2026",

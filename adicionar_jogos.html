@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -45,10 +45,10 @@
     <script src="js/overcriticGamification.js?v=26.10.10"></script>
     <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
     <script src="js/notifications.js?v=26.10.10"></script>
-    <script src="js/version.js?v=26.10.10"></script>
+    <script src="js/version.js?v=26.10.13"></script>
     <script src="js/avatarManager.js?v=26.10.10"></script>
     <script src="js/batterySaver.js?v=26.10.12"></script>
-    <script src="js/overcriticRadio.js?v=26.10.12" defer></script>
+    <script src="js/overcriticRadio.js?v=26.10.13" defer></script>
     <script src="js/pwaManager.js?v=26.10.10" defer></script>
     <style>
         :root {
@@ -945,6 +945,12 @@
             background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 0%, rgba(6, 9, 16, 0.75) 100%);
             pointer-events: none;
             z-index: 2;
+        }
+
+        /* Esconde imagem quebrada (src vazio ou erro de carregamento) */
+        .cover-preview[src=''],
+        .cover-preview:not([src]) {
+            display: none !important;
         }
 
         /* Imagem principal nítida e responsiva */
@@ -4188,7 +4194,16 @@
                 });
                 imgPreview.addEventListener('error', function() {
                     const imgBg = document.getElementById('coverPreviewBg');
+                    const placeholder = document.getElementById('coverPlaceholder');
+                    const badge = document.getElementById('coverBadgeTag');
+                    const wrapper = document.getElementById('gameCoverPreviewWrapper');
                     if (imgBg) imgBg.style.opacity = '0';
+                    // Esconde a imagem quebrada e restaura o placeholder
+                    this.style.display = 'none';
+                    this.src = '';
+                    if (placeholder) placeholder.style.display = 'flex';
+                    if (badge) badge.style.display = 'none';
+                    if (wrapper) wrapper.classList.remove('has-cover');
                 });
             }
         });
