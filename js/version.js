@@ -9,15 +9,28 @@
  *   - 3  : Número de vezes que o site foi subido/atualizado (Deploy/Build #3)
  */
 const OVERCRITIC_APP = {
-    version: "26.10.13",
+    version: "26.10.14",
     year: "2026",
     month: "10",
-    build: 13,
+    build: 14,
     releaseDate: "29/10/2026",
     status: "Versão Estável",
-    codename: "Rádio Mobile Flutuante e Arrastável, Otimização de Preview de Capas & Refinamento PWA",
+    codename: "Arraste Mobile Fluido a 120 FPS com Scroll Lock, Blindagem Absoluta de Capas & Player Bottom-Sheet",
     author: "pontuG (Admin)",
     changelog: [
+        {
+            version: "26.10.14",
+            date: "29/10/2026",
+            title: "Arraste Mobile a 120 FPS com Scroll Lock, Blindagem de Capas & Player Bottom-Sheet",
+            highlights: [
+                "Scroll Lock Total Durante o Arraste (touch-action: none + passive: false): a tela de fundo não se mexe mais enquanto você arrasta o ícone do rádio com o dedo",
+                "Arraste Ultra-Suave a 120 FPS com requestAnimationFrame: física direta com limites rígidos de tela, sem travamentos, sem atraso e sem engasgos de reflow",
+                "Player Bottom-Sheet no Celular: quando o tocador é aberto no mobile, ele se expande centralizado na base da tela com ergonomia total para os polegares, sem cobrir o meio da tela de forma desalinhada",
+                "Blindagem Absoluta da Capa do Jogo no Mobile: remoção definitiva do display: block forçado do CSS responsivo, impedindo qualquer aparição do ícone de imagem quebrada ou texto alt antes da busca",
+                "Placeholder Gamer com Controle 🎮 Visível: ícone de videogame nítido no centro do card de cadastro quando nenhum título foi buscado ainda",
+                "Renovação Imediata do Cache PWA (v26.10.14): propagação instantânea para todos os celulares e navegadores"
+            ]
+        },
         {
             version: "26.10.13",
             date: "29/10/2026",

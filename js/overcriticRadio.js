@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Overcritic Lo-Fi & Synthwave Radio (6.1 - Opção 1: Hospedagem Própria & Áudio Real)
  * Minitocador discreto e flutuante no rodapé para imersão auditiva durante leitura e navegação.
  * 
@@ -377,30 +377,40 @@
         const style = document.createElement('style');
         style.id = 'overcritic-radio-styles';
         style.textContent = `
-            /* Container Flutuante da Rádio no Rodapé Esquerdo */
+            /* Container Flutuante da Rádio no Rodapé */
             .og-radio-widget {
                 position: fixed;
                 bottom: 22px;
                 left: 88px;
                 z-index: 99998;
                 font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+                transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+                touch-action: none;
+                -webkit-touch-callout: none;
+                user-select: none;
+                -webkit-user-select: none;
             }
             @media (max-width: 768px) {
                 .og-radio-widget {
                     bottom: 78px;
                     left: auto;
                     right: 14px;
+                    touch-action: none !important;
                 }
-                /* No mobile, a pílula minimizada vira apenas um ícone circular compacto */
+                /* No mobile, a pílula minimizada vira apenas um ícone circular compacto de 48px */
                 .og-radio-widget.og-radio-minimized .og-radio-pill {
-                    width: 46px;
-                    height: 46px;
-                    border-radius: 50%;
-                    padding: 0;
-                    justify-content: center;
-                    gap: 0;
-                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 14px rgba(0, 240, 255, 0.2);
+                    width: 48px !important;
+                    height: 48px !important;
+                    border-radius: 50% !important;
+                    padding: 0 !important;
+                    justify-content: center !important;
+                    gap: 0 !important;
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 240, 255, 0.4) !important;
+                    touch-action: none !important;
+                    cursor: grab;
+                }
+                .og-radio-widget.og-radio-minimized.og-radio-dragging .og-radio-pill {
+                    cursor: grabbing !important;
                 }
                 .og-radio-widget.og-radio-minimized .og-radio-pill-text {
                     display: none !important;
@@ -409,16 +419,30 @@
                     display: none !important;
                 }
                 .og-radio-widget.og-radio-minimized .og-radio-pill-icon {
-                    font-size: 1.3rem;
+                    font-size: 1.35rem !important;
+                    pointer-events: none !important;
                 }
-                /* Painel expandido do rádio no mobile ocupa toda a largura disponível */
-                .og-radio-widget .og-radio-panel {
-                    width: calc(100vw - 28px);
-                    max-width: 340px;
+                /* No mobile, quando expandido, o player fica elegantemente centralizado no rodapé */
+                .og-radio-widget:not(.og-radio-minimized) {
+                    left: 50% !important;
+                    top: auto !important;
+                    bottom: 16px !important;
+                    right: auto !important;
+                    transform: translateX(-50%) !important;
+                    width: calc(100vw - 24px) !important;
+                    max-width: 350px !important;
+                    z-index: 999999 !important;
                 }
-                /* Widget arrastável no mobile: remove transições de posição durante drag */
+                .og-radio-widget:not(.og-radio-minimized) .og-radio-panel {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 240, 255, 0.35) !important;
+                }
+                /* Durante o arrasto: remove transições para resposta tátil instantânea a 60-120fps */
                 .og-radio-widget.og-radio-dragging {
                     transition: none !important;
+                    opacity: 0.92;
+                    transform: scale(1.08) !important;
                 }
             }
 
@@ -1170,7 +1194,13 @@
             // Habilita arraste no mobile quando minimizado
             configurarDragMobile(widget);
         } else {
-            // Player expandido
+            // Player expandido: limpa estilos manuais de arrasto no mobile para centralizar com perfeição
+            if (window.innerWidth <= 768) {
+                widget.style.left = '';
+                widget.style.top = '';
+                widget.style.right = '';
+                widget.style.bottom = '';
+            }
             const tabsHtml = ESTACOES.map((est, idx) => `
                 <button type="button" class="og-radio-tab ${idx === _estado.estacaoIndex ? 'active' : ''}" onclick="window.OvercriticRadio.selecionarEstacao(${idx})">
                     ${est.badge.split(' ')[0]} ${est.nome.split(' ')[0]}
@@ -1235,66 +1265,104 @@
         }
     }
 
-    /* ═════════════════════════════════════════════════════════════════
-       9. ARRASTE MÓVEL DO WIDGET NO CELULAR (DRAG TO MOVE)
+        /* ═════════════════════════════════════════════════════════════════
+       9. ARRASTE MÓVEL ULTRA-FLUIDO DO WIDGET NO CELULAR (DRAG TO MOVE)
        ═════════════════════════════════════════════════════════════════ */
-    let _dragState = { ativo: false, startX: 0, startY: 0, widgetStartRight: 0, widgetStartBottom: 0, moved: false };
+    let _dragState = {
+        ativo: false,
+        startX: 0,
+        startY: 0,
+        offsetX: 0,
+        offsetY: 0,
+        moved: false,
+        rafId: null
+    };
 
     function configurarDragMobile(widget) {
-        // Só habilita drag em telas mobile
         if (window.innerWidth > 768) return;
 
         const pill = widget.querySelector('.og-radio-pill');
         if (!pill) return;
 
-        pill.addEventListener('touchstart', function(e) {
+        pill.style.touchAction = 'none';
+        widget.style.touchAction = 'none';
+
+        function onTouchStart(e) {
+            if (!_estado.minimizado) return;
             const touch = e.touches[0];
             const rect = widget.getBoundingClientRect();
+
             _dragState.ativo = true;
             _dragState.moved = false;
             _dragState.startX = touch.clientX;
             _dragState.startY = touch.clientY;
-            _dragState.widgetStartRight = window.innerWidth - rect.right;
-            _dragState.widgetStartBottom = window.innerHeight - rect.bottom;
-            widget.classList.add('og-radio-dragging');
-        }, { passive: true });
+            _dragState.offsetX = touch.clientX - rect.left;
+            _dragState.offsetY = touch.clientY - rect.top;
 
-        pill.addEventListener('touchmove', function(e) {
-            if (!_dragState.ativo) return;
+            widget.classList.add('og-radio-dragging');
+        }
+
+        function onTouchMove(e) {
+            if (!_dragState.ativo || !_estado.minimizado) return;
+
+            // BLOQUEIA TOTALMENTE O SCROLL DA PÁGINA DO FUNDO!
+            e.preventDefault();
+            e.stopPropagation();
+
             const touch = e.touches[0];
             const dx = touch.clientX - _dragState.startX;
             const dy = touch.clientY - _dragState.startY;
 
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            if (Math.hypot(dx, dy) > 5) {
                 _dragState.moved = true;
             }
 
-            const newRight = Math.max(4, Math.min(window.innerWidth - 56, _dragState.widgetStartRight - dx));
-            const newBottom = Math.max(4, Math.min(window.innerHeight - 56, _dragState.widgetStartBottom - dy));
+            const wWidth = window.innerWidth;
+            const wHeight = window.innerHeight;
+            const size = 48; // Diâmetro do botão 48px
 
-            widget.style.right = newRight + 'px';
-            widget.style.bottom = newBottom + 'px';
-            widget.style.left = 'auto';
-        }, { passive: true });
+            let targetLeft = touch.clientX - _dragState.offsetX;
+            let targetTop = touch.clientY - _dragState.offsetY;
 
-        pill.addEventListener('touchend', function(e) {
+            // Limites visíveis da viewport (8px de margem)
+            targetLeft = Math.max(8, Math.min(wWidth - size - 8, targetLeft));
+            targetTop = Math.max(8, Math.min(wHeight - size - 8, targetTop));
+
+            if (_dragState.rafId) cancelAnimationFrame(_dragState.rafId);
+            _dragState.rafId = requestAnimationFrame(() => {
+                widget.style.left = targetLeft + 'px';
+                widget.style.top = targetTop + 'px';
+                widget.style.right = 'auto';
+                widget.style.bottom = 'auto';
+            });
+        }
+
+        function onTouchEnd(e) {
+            if (!_dragState.ativo) return;
             widget.classList.remove('og-radio-dragging');
+
             if (_dragState.moved) {
-                // Se arrastou, não abre o player — cancela o onclick
                 e.preventDefault();
                 e.stopPropagation();
-                // Salva posição no localStorage
+
+                // Persiste posição no LocalStorage
                 try {
-                    localStorage.setItem('og_radio_pos', JSON.stringify({
-                        right: widget.style.right,
-                        bottom: widget.style.bottom
+                    localStorage.setItem('og_radio_pos_v4', JSON.stringify({
+                        left: widget.style.left,
+                        top: widget.style.top
                     }));
                 } catch(err) {}
             }
-            _dragState.ativo = false;
-        }, { passive: false });
 
-        // Substitui o onclick da pill para não disparar ao arrastar
+            _dragState.ativo = false;
+        }
+
+        pill.addEventListener('touchstart', onTouchStart, { passive: true });
+        // PASSIVE: FALSE É OBRIGATÓRIO PARA e.preventDefault() BLOQUEAR O SCROLL DA PÁGINA
+        pill.addEventListener('touchmove', onTouchMove, { passive: false });
+        pill.addEventListener('touchend', onTouchEnd, { passive: false });
+        pill.addEventListener('touchcancel', onTouchEnd, { passive: false });
+
         pill.removeAttribute('onclick');
         pill.addEventListener('click', function(e) {
             if (!_dragState.moved) {
@@ -1303,16 +1371,21 @@
             _dragState.moved = false;
         });
 
-        // Restaura posição salva, se houver
-        try {
-            const posicaoSalva = localStorage.getItem('og_radio_pos');
-            if (posicaoSalva) {
-                const pos = JSON.parse(posicaoSalva);
-                if (pos.right) widget.style.right = pos.right;
-                if (pos.bottom) widget.style.bottom = pos.bottom;
-                widget.style.left = 'auto';
-            }
-        } catch(err) {}
+        // Restaura posição salva no mobile se estiver minimizado
+        if (_estado.minimizado) {
+            try {
+                const posicaoSalva = localStorage.getItem('og_radio_pos_v4');
+                if (posicaoSalva) {
+                    const pos = JSON.parse(posicaoSalva);
+                    if (pos.left && pos.top) {
+                        widget.style.left = pos.left;
+                        widget.style.top = pos.top;
+                        widget.style.right = 'auto';
+                        widget.style.bottom = 'auto';
+                    }
+                }
+            } catch(err) {}
+        }
     }
 
     // Inicialização quando o DOM estiver pronto

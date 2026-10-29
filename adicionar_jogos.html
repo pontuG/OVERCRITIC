@@ -45,10 +45,10 @@
     <script src="js/overcriticGamification.js?v=26.10.10"></script>
     <script src="js/overcriticSpotlight.js?v=26.10.10"></script>
     <script src="js/notifications.js?v=26.10.10"></script>
-    <script src="js/version.js?v=26.10.13"></script>
+    <script src="js/version.js?v=26.10.14"></script>
     <script src="js/avatarManager.js?v=26.10.10"></script>
     <script src="js/batterySaver.js?v=26.10.12"></script>
-    <script src="js/overcriticRadio.js?v=26.10.13" defer></script>
+    <script src="js/overcriticRadio.js?v=26.10.14" defer></script>
     <script src="js/pwaManager.js?v=26.10.10" defer></script>
     <style>
         :root {
@@ -3137,7 +3137,7 @@
                         <div class="cover-backdrop-overlay"></div>
 
                         <!-- Capa oficial nítida e responsiva -->
-                        <img id="coverPreview" class="cover-preview" src="" alt="Capa Oficial do Jogo" style="display: none;" referrerpolicy="no-referrer">
+                        <img id="coverPreview" class="cover-preview" src="" alt="" style="display: none;" referrerpolicy="no-referrer">
 
                         <!-- Tag flutuante de Capa Oficial -->
                         <div id="coverBadgeTag" class="cover-badge-tag" style="display: none;">
@@ -3148,7 +3148,7 @@
                         <!-- Placeholder amigável quando ainda não há capa -->
                         <div id="coverPlaceholder" class="cover-placeholder-box">
                             <div class="placeholder-icon-wrap">
-                                <i class="fas fa-gamepad"></i>
+                                <span style="font-size: 1.55rem; line-height: 1;">🎮</span>
                             </div>
                             <div class="placeholder-title">Visualização da Capa</div>
                             <div class="placeholder-subtitle">A capa oficial preencherá este espaço com nitidez ao buscar ou selecionar o jogo</div>
@@ -4147,6 +4147,7 @@
                 const cleanUrl = url.trim();
                 if (hiddenInput) hiddenInput.value = cleanUrl;
                 if (imgPreview) {
+                    imgPreview.alt = 'Capa Oficial do Jogo';
                     imgPreview.src = cleanUrl;
                     imgPreview.style.display = 'block';
                 }
@@ -4160,6 +4161,7 @@
             } else {
                 if (hiddenInput) hiddenInput.value = '';
                 if (imgPreview) {
+                    imgPreview.alt = '';
                     imgPreview.src = '';
                     imgPreview.style.display = 'none';
                 }
