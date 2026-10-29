@@ -534,16 +534,23 @@
 
         .badge-deal {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            bottom: 8px;
+            left: 8px;
+            top: auto;
+            max-width: calc(100% - 16px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             background: linear-gradient(135deg, #00f0ff, #7000ff);
             color: #000;
-            font-size: 0.72rem;
+            font-size: 0.70rem;
             font-weight: 900;
-            padding: 4px 9px;
-            border-radius: 7px;
+            padding: 3px 8px;
+            border-radius: 6px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
             letter-spacing: 0.5px;
+            z-index: 2;
+            pointer-events: none;
         }
         body.light-mode .badge-deal {
             background: linear-gradient(135deg, #c51b29, #800f1c);
@@ -552,18 +559,23 @@
 
         .badge-score {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.75);
+            top: 8px;
+            right: 8px;
+            max-width: calc(100% - 16px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(6px);
             color: #ffd166;
-            font-size: 0.72rem;
+            font-size: 0.70rem;
             font-weight: 800;
-            padding: 4px 9px;
-            border-radius: 7px;
+            padding: 3px 8px;
+            border-radius: 6px;
             border: 1px solid rgba(255, 209, 102, 0.35);
+            z-index: 2;
+            pointer-events: none;
         }
-
         .game-card-body {
             padding: 16px;
             display: flex;
@@ -1545,7 +1557,21 @@
                 transform: none !important;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
             }
+            .badge-deal {
+                bottom: 6px !important;
+                left: 6px !important;
+                top: auto !important;
+                font-size: 0.64rem !important;
+                padding: 2px 6px !important;
+                max-width: calc(100% - 12px) !important;
+                border-radius: 5px !important;
+            }
             .badge-score {
+                top: 6px !important;
+                right: 6px !important;
+                font-size: 0.64rem !important;
+                padding: 2px 6px !important;
+                border-radius: 5px !important;
                 backdrop-filter: none !important;
                 background: rgba(10, 14, 24, 0.92) !important;
             }
